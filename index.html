@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習ホーム</title>
+    <style>
+        body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: #fab1a0; margin-bottom: 20px; }
+
+        /* 進捗グラフ用モニターエリア */
+        .dashboard-monitor {
+            background: #fff; border: 2px dashed #fab1a0; border-radius: 15px;
+            padding: 20px; margin-bottom: 25px; text-align: center;
+        }
+        .chart-placeholder {
+            width: 100%; max-width: 300px; height: 300px;
+            margin: 0 auto; background: #fafafa; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #eee; color: #b2bec3; font-size: 0.9rem;
+        }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-subject {
+            background: #fffdf0; /* 香粧品化学ページ風の薄い黄色 */
+            border: 2px solid #ffeaa7; /* 枠線を少し柔らかい黄色系に */
+            border-radius: 12px; /* 少し丸みを強く */
+            padding: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #5d4037; /* 文字色を濃い茶色系にすると馴染みます */
+            font-weight: bold;
+            transition: 0.3s;
+            min-height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* ほんの少し影を付けてボタンらしく */
+        }
+        .btn-subject:hover {
+            background: #fff9e0; /* ホバー時はもう少し黄色く */
+            border-color: #f7d794;
+        }
+
+        .footer-link { text-align: center; margin-top: 30px; }
+        .btn-form { background: #ffeaa7; padding: 10px 20px; border-radius: 20px; text-decoration: none; color: #d35400; font-weight: bold; }
+
+/* ボタンの高さ統一 */
+.btn-subject {
+    background: white;
+    border: 2px solid #fab1a0;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    text-decoration: none;
+    color: #2d3436;
+    font-weight: bold;
+    transition: 0.3s;
+    min-height: 60px; /* ここで高さを確保 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 未実装科目を無効化（グレーアウト） */
+.btn-disabled {
+    background: #f1f2f6;
+    border-color: #bdc3c7;
+    color: #95a5a6;
+    pointer-events: none; /* クリック不可にする */
+    cursor: not-allowed;
+}
+
+.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+        <h1>スキマ時間で最初の一歩<br>『学習ホーム』</h1>
+        <p class="subtitle">最短で基礎固め。<br>○×問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+        
+        <div class="dashboard-monitor">
+            <div id="radar-chart-container" class="chart-placeholder">
+                [ 開発中：進捗グラフを表示するエリア ]<br>
+                （各科目の習得度をここに表示します）
+            </div>
+        </div>
+        
+<div class="grid">
+    <a href="#" class="btn-subject btn-disabled">⚖️ 01.関係法規・制度</a>
+    <a href="#" class="btn-subject btn-disabled">🏢 02.運営管理</a>
+    <a href="#" class="btn-subject btn-disabled">🌍 03.公衆衛生・環境衛生</a>
+    <a href="#" class="btn-subject btn-disabled">😷 04.感染症</a>
+    <a href="#" class="btn-subject btn-disabled">🧪 05.衛生管理技術</a>
+    <a href="#" class="btn-subject btn-disabled">🦴 06.人体の構造及び機能</a>
+    <a href="#" class="btn-subject btn-disabled">🧏‍♀️ 07.皮膚科学</a>
+    
+    <a href="00.mine/06_cosmetic_chem.html" class="btn-subject">⚗️ 08.香粧品化学</a>
+    
+    <a href="#" class="btn-subject btn-disabled">👘 09.文化論</a>
+    <a href="#" class="btn-subject btn-disabled">✂️ 10.美容技術理論</a>
+</div>
+
+        <div class="footer-link">
+            <a href="https://forms.gle/7M8YPV54oL1CuH387" target="_blank" class="btn-form">✉️ 改善の意見・要望など 連絡先</a>
+        </div>
+    </div>
+</body>
+</html>
