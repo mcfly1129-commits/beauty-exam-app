@@ -6,88 +6,69 @@
     <title>学習ホーム</title>
     <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
-        .container { max-width: 600px; margin: 0 auto; }
-        h1 { text-align: center; color: #fab1a0; margin-bottom: 20px; }
+.container { max-width: 600px; margin: 0 auto; }
 
-        h1 {
-            font-size: 1.4rem;
-            text-align: center;
-            color: #fab1a0;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        /* 進捗グラフ用モニターエリア */
-        .dashboard-monitor {
-            background: #fff; border: 2px dashed #fab1a0; border-radius: 15px;
-            padding: 20px; margin-bottom: 25px; text-align: center;
-        }
-        .chart-placeholder {
-            width: 100%; max-width: 300px; height: 300px;
-            margin: 0 auto; background: #fafafa; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 1px solid #eee; color: #b2bec3; font-size: 0.9rem;
-        }
-
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn-subject {
-            background: #fffdf0; /* 香粧品化学ページ風の薄い黄色 */
-            border: 2px solid #ffeaa7; /* 枠線を少し柔らかい黄色系に */
-            border-radius: 12px; /* 少し丸みを強く */
-            padding: 15px;
-            text-align: center;
-            text-decoration: none;
-            color: #5d4037; /* 文字色を濃い茶色系にすると馴染みます */
-            font-weight: bold;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            min-height: 65px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* ほんの少し影を付けてボタンらしく */
-        }
-        .btn-subject:hover {
-            background: #fff9e0; /* ホバー時はもう少し黄色く */
-            border-color: #f7d794;
-        }
-
-        .footer-link { text-align: center; margin-top: 30px; }
-        .btn-form { background: #ffeaa7; padding: 10px 20px; border-radius: 20px; text-decoration: none; color: #d35400; font-weight: bold; }
-
-/* ボタンの高さ統一 */
-.btn-subject {
-    background: white;
-    border: 2px solid #fab1a0;
-    border-radius: 10px;
-    padding: 12px;
+h1 {
+    font-size: 1.4rem;
     text-align: center;
-    text-decoration: none;
-    color: #2d3436;
-    font-weight: bold;
-    transition: 0.3s;
-    min-height: 60px; /* ここで高さを確保 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: #fab1a0;
+    margin-top: 0;
+    margin-bottom: 15px;
 }
 
-/* 未実装科目を無効化（グレーアウト） */
+.subtitle {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+}
+
+/* --- 進捗グラフ用モニター --- */
+.dashboard-monitor {
+    background: #fff; border: 2px dashed #fab1a0; border-radius: 15px;
+    padding: 20px; margin-bottom: 25px; text-align: center;
+}
+.chart-placeholder {
+    width: 100%; max-width: 300px; height: 150px; /* 少し高さを抑えてスマホで見やすく */
+    margin: 0 auto; background: #fafafa; border-radius: 15px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #eee; color: #b2bec3; font-size: 0.8rem;
+}
+
+/* --- ボタン設定 --- */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn-subject {
+    background: white; border: 2px solid #fab1a0; border-radius: 12px;
+    padding: 10px; text-align: center; text-decoration: none;
+    color: #2d3436; font-weight: bold; font-size: 0.85rem;
+    min-height: 70px; display: flex; flex-direction: column; /* アイコンを上に、文字を下に */
+    align-items: center; justify-content: center;
+    transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-subject:hover { background: #fff5f5; border-color: #f7a094; }
+
+/* 有効なボタンへの個別の色指定 */
+.btn-subject:not(.btn-disabled) {
+    background: #fffdf0; border-color: #ffeaa7; color: #5d4037;
+}
+
+/* 未実装科目のグレーアウト */
 .btn-disabled {
-    background: #f1f2f6;
-    border-color: #bdc3c7;
-    color: #95a5a6;
-    pointer-events: none; /* クリック不可にする */
-    cursor: not-allowed;
+    background: #f1f2f6; border-color: #bdc3c7; color: #95a5a6;
+    pointer-events: none; cursor: not-allowed;
 }
 
-        .subtitle {
-            font-size: 0.9rem;
-            text-align: center;
-            color: #7f8c8d;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
+/* --- フォームボタン --- */
+.btn-form {
+    background-color: #ffeaa7; color: #d35400; border: none;
+    border-radius: 15px; padding: 15px 25px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+    width: 100%; max-width: 400px; display: block;
+    margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.btn-form:hover { background-color: #f7d794; transform: translateY(-2px); }
 
     </style>
 </head>
@@ -119,7 +100,7 @@
 </div>
 
         <div class="footer-link">
-            <a href="https://forms.gle/7M8YPV54oL1CuH387" target="_blank" class="btn-form">✉️ 改善の意見・要望など 連絡先</a>
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
         </div>
     </div>
 </body>
