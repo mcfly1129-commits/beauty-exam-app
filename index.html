@@ -6,61 +6,32 @@
     <title>学習ホーム</title>
     <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
-.container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; }
 
-h1 {
-    font-size: 1.4rem;
-    text-align: center;
-    color: #fab1a0;
-    margin-top: 0;
-    margin-bottom: 15px;
-}
+        h1 { font-size: 1.4rem; text-align: center; color: #fab1a0; margin-top: 0; margin-bottom: 15px; }
+        .subtitle { font-size: 0.9rem; text-align: center; color: #7f8c8d; margin-bottom: 20px; }
 
-.subtitle {
-    font-size: 0.9rem;
-    text-align: center;
-    color: #7f8c8d;
-    margin-bottom: 20px;
-}
+        /* --- 進捗グラフ用モニター --- */
+        .dashboard-monitor {
+            background: #fff; border: 2px dashed #fab1a0; border-radius: 15px;
+            padding: 20px; margin-bottom: 25px; text-align: center;
+        }
 
-/* --- 進捗グラフ用モニター --- */
-.dashboard-monitor {
-    background: #fff; border: 2px dashed #fab1a0; border-radius: 15px;
-    padding: 20px; margin-bottom: 25px; text-align: center;
-}
-.chart-placeholder {
-    width: 100%; max-width: 300px; height: 150px; /* 少し高さを抑えてスマホで見やすく */
-    margin: 0 auto; background: #fafafa; border-radius: 15px;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid #eee; color: #b2bec3; font-size: 0.8rem;
-}
+        /* --- ボタン設定 --- */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-subject {
+            background: white; border: 2px solid #fab1a0; border-radius: 12px;
+            padding: 10px; text-align: center; text-decoration: none;
+            color: #2d3436; font-weight: bold; font-size: 0.85rem;
+            min-height: 70px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .btn-subject:hover { background: #fff5f5; border-color: #f7a094; }
+        .btn-subject:not(.btn-disabled) { background: #fffdf0; border-color: #ffeaa7; color: #5d4037; }
+        .btn-disabled { background: #f1f2f6; border-color: #bdc3c7; color: #95a5a6; pointer-events: none; cursor: not-allowed; }
 
-/* --- ボタン設定 --- */
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-.btn-subject {
-    background: white; border: 2px solid #fab1a0; border-radius: 12px;
-    padding: 10px; text-align: center; text-decoration: none;
-    color: #2d3436; font-weight: bold; font-size: 0.85rem;
-    min-height: 70px; display: flex; flex-direction: column; /* アイコンを上に、文字を下に */
-    align-items: center; justify-content: center;
-    transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.btn-subject:hover { background: #fff5f5; border-color: #f7a094; }
-
-/* 有効なボタンへの個別の色指定 */
-.btn-subject:not(.btn-disabled) {
-    background: #fffdf0; border-color: #ffeaa7; color: #5d4037;
-}
-
-/* 未実装科目のグレーアウト */
-.btn-disabled {
-    background: #f1f2f6; border-color: #bdc3c7; color: #95a5a6;
-    pointer-events: none; cursor: not-allowed;
-}
-
-/* --- フォームボタン --- */
+        /* --- フォームボタン --- */
 .btn-form {
     background-color: #ffeaa7; color: #d35400; border: none;
     border-radius: 15px; padding: 15px 25px;
@@ -69,8 +40,6 @@ h1 {
     margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 font-size: 0.9rem; 
 }
-.btn-form:hover { background-color: #f7d794; transform: translateY(-2px); }
-
     </style>
 </head>
 <body>
@@ -78,31 +47,125 @@ font-size: 0.9rem;
         <h1>スキマ時間で最初の一歩<br>『学習ホーム』</h1>
         <p class="subtitle">最短で基礎固め。<br>○✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
         
-        <div class="dashboard-monitor">
-            <div id="radar-chart-container" class="chart-placeholder">
-                [ 開発中：進捗グラフを表示するエリア ]<br>
-                （各科目の習得度をここに表示します）
+    <div class="dashboard-monitor">
+        <h3 style="font-size: 0.9rem; margin-top: 0; color: #fab1a0;">学習進捗状況</h3>
+        <div class="progress-item" style="margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 2px;">
+                <span>全科目進捗</span>
+                <span id="progress-text">計算中...</span>
+            </div>
+
+            <div style="width: 100%; height: 12px; background: #eee; border-radius: 6px; overflow: hidden;">
+                <div id="progress-bar-all" style="width: 0%; height: 100%; background: #fab1a0; transition: width 0.5s;"></div>
             </div>
         </div>
-        
-<div class="grid">
-    <a href="#" class="btn-subject btn-disabled">01 ⚖️<br>関係法規・制度</a>
-    <a href="#" class="btn-subject btn-disabled">02 🏢<br>運営管理</a>
 
-    <a href="00.mine/01_public_hygiene.html" class="btn-subject">03 🌍<br>公衆衛生・環境衛生</a>
-    <a href="00.mine/02_infection.html" class="btn-subject">04 😷<br>感染症</a>
-    <a href="00.mine/03_hygiene_tech.html" class="btn-subject">05 🧪<br>衛生管理技術</a>
-    <a href="00.mine/04_anatomy.html" class="btn-subject">06 🦴<br>人体の構造及び機能</a>
-    <a href="00.mine/05_dermatology.html" class="btn-subject">07 🧏‍♀️<br>皮膚科学</a>
-    <a href="00.mine/06_cosmetic_chem.html" class="btn-subject">08 ⚗️<br>香粧品化学</a>
-    
-    <a href="#" class="btn-subject btn-disabled">09 👘<br>文化論</a>
-    <a href="#" class="btn-subject btn-disabled">10 ✂️<br>美容技術理論</a>
+    <!-- ★重要：ここを「合算表示用コンテナ」に差し替えます -->
+    <div id="subject-list-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px dotted #fab1a0; margin-top: 10px; padding-top: 10px;">
+        <!-- ここに JavaScript が 01〜10 の科目を自動的に生成して並べます -->
+    </div>
+
+    <p style="font-size: 0.7rem; color: #7f8c8d; margin-top: 5px;">現在、実装済み6科目のみ表示中！</p>
+</div>
+        
+    <div class="grid">
+        <a href="#" class="btn-subject btn-disabled">01 ⚖️<br>関係法規・制度</a>
+        <a href="#" class="btn-subject btn-disabled">02 🏢<br>運営管理</a>
+        <a href="00.mine/01_public_hygiene.html" class="btn-subject">03 🌍<br>公衆衛生・環境衛生</a>
+        <a href="00.mine/02_infection.html" class="btn-subject">04 😷<br>感染症</a>
+        <a href="00.mine/03_hygiene_tech.html" class="btn-subject">05 🧪<br>衛生管理技術</a>
+        <a href="00.mine/04_anatomy.html" class="btn-subject">06 🦴<br>人体の構造及び機能</a>
+        <a href="00.mine/05_dermatology.html" class="btn-subject">07 🧏‍♀️<br>皮膚科学</a>
+        <a href="00.mine/06_cosmetic_chem.html" class="btn-subject">08 ⚗️<br>香粧品化学</a>
+        <a href="#" class="btn-subject btn-disabled">09 👘<br>文化論</a>
+        <a href="#" class="btn-subject btn-disabled">10 ✂️<br>美容技術理論</a>
+    </div>
+
+    <div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
+        <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 修正履歴・開発日誌</h3>
+        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">最新の修正内容などは、以下のドキュメントで公開しています。</p>
+        <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 修正履歴・開発日誌を確認する</a>
+    </div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
 </div>
 
-        <div class="footer-link">
-        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
-        </div>
-    </div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    // 科目ごとの範囲キー設定 [1, 2]
+const subjects = [
+    { 
+        id: '01', name: '関係法規・制度', total: 0,  // ここを修正！
+        keys: ['kankehoki_unit_ver01_2026', 'kankehoki_past_2026', 'kankehoki_extra_2026'] 
+    },
+    { 
+        id: '02', name: '運営管理', total: 0,  // ここを修正！
+        keys: ['unekanri_unit_ver01_2026', 'unekanri_past_2026', 'unekanri_extra_2026'] 
+    },
+    { 
+        id: '03', name: '公衆衛生・環境衛生', total: 190,  // ここを修正！
+        keys: ['koshuese_unit_ver01_2026', 'koshuese_past_2026', 'koshuese_extra_2026'] 
+    },
+    { 
+        id: '04', name: '感染症', total: 184,  // ここを修正！
+        keys: ['kansensho_unit_ver01_2026', 'kansensho_past_2026', 'kansensho_extra_2026'] 
+    },
+    { 
+        id: '05', name: '衛生管理技術', total: 148,  // ここを修正！
+        keys: ['esekanrigijutu_unit_ver01_2026', 'esekanrigijutu_past_2026', 'esekanrigijutu_extra_2026'] 
+    },
+    { 
+        id: '06', name: '人体の構造及び機能', total: 0,  // ここを修正！
+        keys: ['jintai_unit_ver01_2026', 'jintai_past_2026', 'jintai_extra_2026'] 
+    },
+    { 
+        id: '07', name: '皮膚科学', total: 0,  // ここを修正！
+        keys: ['hifukagaku_unit_ver01_2026', 'hifukagaku_past_2026', 'hifukagaku_extra_2026'] 
+    },
+    { 
+        id: '08', name: '香粧品化学', total: 318,  // ここを修正！
+        keys: ['koshohin_unit_ver01_2026', 'koshohin_past_2026', 'koshohin_extra_2026', 'koshohin_ingredients_2026'] 
+    },
+    { 
+        id: '09', name: '文化論', total: 0,  // ここを修正！
+        keys: ['bunkaron_unit_ver01_2026', 'bunkaron_past_2026', 'bunkaron_extra_2026'] 
+    },
+    { 
+        id: '10', name: '美容技術理論', total: 0,  // ここを修正！
+        keys: ['gijuturiron_unit_ver01_2026', 'gijuturiron_past_2026', 'gijuturiron_extra_2026'] 
+    }
+];
+
+    let totalSolved = 0;
+    let totalQuestions = 0;
+    const container = document.getElementById('subject-list-container');
+
+    subjects.forEach(sub => {
+        // その科目の全範囲の正解数を合計
+        let subSolved = 0;
+        sub.keys.forEach(key => {
+            subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
+        });
+
+        totalSolved += subSolved;
+        totalQuestions += sub.total;
+
+        // 科目別のパネルを作成
+        const item = document.createElement('div');
+        item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7;';
+        item.innerHTML = `
+            <div style="color: #7f8c8d; font-size: 0.6rem;">${sub.id} ${sub.name}</div>
+            <div style="font-weight: bold;"><span style="color: #e67e22;">${subSolved}</span> / ${sub.total}問</div>
+        `;
+        container.appendChild(item);
+    });
+
+    // 全体進捗の反映
+    const percentage = (totalQuestions > 0) ? Math.floor((totalSolved / totalQuestions) * 100) : 0;
+    document.getElementById('progress-bar-all').style.width = percentage + '%';
+    document.getElementById('progress-text').innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
+});
+</script>
 </body>
 </html>
