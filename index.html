@@ -92,9 +92,9 @@ font-size: 0.9rem;
 </div>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
-    // 科目ごとの範囲キー設定 [1, 2]
-const subjects = [
+window.addEventListener('pageshow', (event) => {
+    // 科目ごとの範囲キー設定
+    const subjects = [
     { 
         id: '01', name: '関係法規・制度', total: 0,  // ここを修正！
         keys: ['kankehoki_unit_ver01_2026', 'kankehoki_past_2026', 'kankehoki_extra_2026'] 
@@ -141,30 +141,39 @@ const subjects = [
     let totalQuestions = 0;
     const container = document.getElementById('subject-list-container');
 
-    subjects.forEach(sub => {
-        // その科目の全範囲の正解数を合計
-        let subSolved = 0;
-        sub.keys.forEach(key => {
-            subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
+    // ★重要：戻るボタンで表示された際に、古いリストが残らないよう一旦クリアする
+    if (container) {
+        container.innerHTML = '';
+
+        subjects.forEach(sub => {
+            // その科目の全範囲（keys）の正解数を合算
+            let subSolved = 0;
+            sub.keys.forEach(key => {
+                // localStorageから 'solved_' + 各範囲キー で値を取得
+                subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
+            });
+
+            totalSolved += subSolved;
+            totalQuestions += sub.total;
+
+            // 科目別パネルの生成
+            const item = document.createElement('div');
+            item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7;';
+            item.innerHTML = `
+                <div style="color: #7f8c8d; font-size: 0.6rem;">${sub.id} ${sub.name}</div>
+                <div style="font-weight: bold;"><span style="color: #e67e22;">${subSolved}</span> / ${sub.total}問</div>
+            `;
+            container.appendChild(item);
         });
 
-        totalSolved += subSolved;
-        totalQuestions += sub.total;
-
-        // 科目別のパネルを作成
-        const item = document.createElement('div');
-        item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7;';
-        item.innerHTML = `
-            <div style="color: #7f8c8d; font-size: 0.6rem;">${sub.id} ${sub.name}</div>
-            <div style="font-weight: bold;"><span style="color: #e67e22;">${subSolved}</span> / ${sub.total}問</div>
-        `;
-        container.appendChild(item);
-    });
-
-    // 全体進捗の反映
-    const percentage = (totalQuestions > 0) ? Math.floor((totalSolved / totalQuestions) * 100) : 0;
-    document.getElementById('progress-bar-all').style.width = percentage + '%';
-    document.getElementById('progress-text').innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
+        // 全体進捗の反映（プログレスバーとテキスト）
+        const percentage = (totalQuestions > 0) ? Math.floor((totalSolved / totalQuestions) * 100) : 0;
+        const progressBar = document.getElementById('progress-bar-all');
+        const progressText = document.getElementById('progress-text');
+        
+        if (progressBar) progressBar.style.width = percentage + '%';
+        if (progressText) progressText.innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
+    }
 });
 </script>
 </body>
