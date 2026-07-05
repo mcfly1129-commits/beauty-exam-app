@@ -32,14 +32,32 @@
         .btn-disabled { background: #f1f2f6; border-color: #bdc3c7; color: #95a5a6; pointer-events: none; cursor: not-allowed; }
 
         /* --- フォームボタン --- */
-.btn-form {
-    background-color: #ffeaa7; color: #d35400; border: none;
-    border-radius: 15px; padding: 15px 25px;
-    font-weight: bold; cursor: pointer; transition: 0.3s;
-    width: 100%; max-width: 400px; display: block;
-    margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-font-size: 0.9rem; 
-}
+        .btn-form {
+            background-color: #ffeaa7; color: #d35400; border: none;
+            border-radius: 15px; padding: 15px 25px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            width: 100%; max-width: 400px; display: block;
+            margin: 20px auto; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 0.9rem; 
+        }
+
+        /* --- ★ここから追加：履歴ポップアップ（モーダル）用のスタイル --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5);
+            z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 16px;
+            width: 90%; max-width: 400px; max-height: 75vh;
+            overflow-y: auto; box-sizing: border-box;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            text-align: left;
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; color: #ff7675; text-align: center; margin-bottom: 12px; }
+        .modal-summary { font-size: 0.85rem; text-align: center; background: #fefaf0; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #fab1a0; line-height: 1.5; }
+        .modal-close-btn { width: 100%; margin-top: 15px; padding: 10px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .modal-close-btn:hover { background: #ff7675; }
     </style>
 </head>
 <body>
@@ -60,10 +78,8 @@ font-size: 0.9rem;
             </div>
         </div>
 
-    <!-- ★重要：ここを「合算表示用コンテナ」に差し替えます -->
     <div id="subject-list-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px dotted #fab1a0; margin-top: 10px; padding-top: 10px;">
-        <!-- ここに JavaScript が 01〜10 の科目を自動的に生成して並べます -->
-    </div>
+        </div>
 
     <p style="font-size: 0.7rem; color: #7f8c8d; margin-top: 5px;">現在、実装済み6科目のみ表示中！</p>
 </div>
@@ -83,7 +99,7 @@ font-size: 0.9rem;
 
     <div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
         <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 修正履歴・開発日誌</h3>
-        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">最新の修正内容などは、以下のドキュメントで公開しています。</p>
+        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">最新の修正内容内容は、以下のドキュメントで公開しています。</p>
         <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 修正履歴・開発日誌を確認する</a>
     </div>
 
@@ -91,48 +107,57 @@ font-size: 0.9rem;
 
 </div>
 
+<div id="history-modal" class="modal-overlay" onclick="closeHomeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-subject-title" class="modal-title">科目別 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-summary"></div>
+        <div id="modal-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <button class="modal-close-btn" onclick="closeHomeHistoryModal()">閉じる</button>
+    </div>
+</div>
+
 <script>
 window.addEventListener('pageshow', (event) => {
-    // 科目ごとの範囲キー設定
+    // 科目ごとの範囲キー設定 (元のデータを完全維持)
     const subjects = [
     { 
-        id: '01', name: '関係法規・制度', total: 0,  // ここを修正！
+        id: '01', name: '関係法規・制度', total: 0, 
         keys: ['kankehoki_unit_ver01_2026', 'kankehoki_past_2026', 'kankehoki_extra_2026'] 
     },
     { 
-        id: '02', name: '運営管理', total: 0,  // ここを修正！
+        id: '02', name: '運営管理', total: 0, 
         keys: ['unekanri_unit_ver01_2026', 'unekanri_past_2026', 'unekanri_extra_2026'] 
     },
     { 
-        id: '03', name: '公衆衛生・環境衛生', total: 190,  // ここを修正！
+        id: '03', name: '公衆衛生・環境衛生', total: 190, 
         keys: ['koshuese_unit_ver01_2026', 'koshuese_past_2026', 'koshuese_extra_2026'] 
     },
     { 
-        id: '04', name: '感染症', total: 184,  // ここを修正！
+        id: '04', name: '感染症', total: 184, 
         keys: ['kansensho_unit_ver01_2026', 'kansensho_past_2026', 'kansensho_extra_2026'] 
     },
     { 
-        id: '05', name: '衛生管理技術', total: 148,  // ここを修正！
+        id: '05', name: '衛生管理技術', total: 148, 
         keys: ['esekanrigijutu_unit_ver01_2026', 'esekanrigijutu_past_2026', 'esekanrigijutu_extra_2026'] 
     },
     { 
-        id: '06', name: '人体の構造及び機能', total: 0,  // ここを修正！
+        id: '06', name: '人体の構造及び機能', total: 0, 
         keys: ['jintai_unit_ver01_2026', 'jintai_past_2026', 'jintai_extra_2026'] 
     },
     { 
-        id: '07', name: '皮膚科学', total: 0,  // ここを修正！
+        id: '07', name: '皮膚科学', total: 0, 
         keys: ['hifukagaku_unit_ver01_2026', 'hifukagaku_past_2026', 'hifukagaku_extra_2026'] 
     },
     { 
-        id: '08', name: '香粧品化学', total: 318,  // ここを修正！
+        id: '08', name: '香粧品化学', total: 318, 
         keys: ['koshohin_unit_ver01_2026', 'koshohin_past_2026', 'koshohin_extra_2026', 'koshohin_ingredients_2026'] 
     },
     { 
-        id: '09', name: '文化論', total: 0,  // ここを修正！
+        id: '09', name: '文化論', total: 0, 
         keys: ['bunkaron_unit_ver01_2026', 'bunkaron_past_2026', 'bunkaron_extra_2026'] 
     },
     { 
-        id: '10', name: '美容技術理論', total: 0,  // ここを修正！
+        id: '10', name: '美容技術理論', total: 0, 
         keys: ['gijuturiron_unit_ver01_2026', 'gijuturiron_past_2026', 'gijuturiron_extra_2026'] 
     }
 ];
@@ -141,7 +166,6 @@ window.addEventListener('pageshow', (event) => {
     let totalQuestions = 0;
     const container = document.getElementById('subject-list-container');
 
-    // ★重要：戻るボタンで表示された際に、古いリストが残らないよう一旦クリアする
     if (container) {
         container.innerHTML = '';
 
@@ -156,13 +180,17 @@ window.addEventListener('pageshow', (event) => {
             totalSolved += subSolved;
             totalQuestions += sub.total;
 
-            // 科目別パネルの生成
+            // 科目別パネルの生成 (元のコンパクトなレイアウト・見え方を完全維持し、クリック可能にする記述のみ追加)
             const item = document.createElement('div');
-            item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7;';
+            item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7; cursor: pointer;';
             item.innerHTML = `
                 <div style="color: #7f8c8d; font-size: 0.6rem;">${sub.id} ${sub.name}</div>
                 <div style="font-weight: bold;"><span style="color: #e67e22;">${subSolved}</span> / ${sub.total}問</div>
             `;
+            
+            // ★追加：進捗カードがクリックされたら履歴ポップアップを開く
+            item.onclick = () => openHomeHistoryModal(sub);
+            
             container.appendChild(item);
         });
 
@@ -175,6 +203,63 @@ window.addEventListener('pageshow', (event) => {
         if (progressText) progressText.innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
     }
 });
+
+// --- ★追加：学習ホーム側で科目の全範囲の履歴データを合算してポップアップ表示する関数 ---
+function openHomeHistoryModal(subject) {
+    const titleEl = document.getElementById('modal-subject-title');
+    const summaryEl = document.getElementById('modal-score-summary');
+    const listEl = document.getElementById('modal-history-list');
+    
+    titleEl.innerText =`【${subject.id}】${subject.name} \n総合学習履歴`;
+    listEl.innerHTML = '';
+    
+    let totalAnswerCount = 0;
+    let totalCorrectCount = 0;
+
+    // 科目に紐づく全てのデータキー（単元、過去問など）の統計を合算
+    subject.keys.forEach(key => {
+        // 各対策アプリが保存している「beauty_app_question_stats_【キー名】」を取得
+        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+        
+        Object.keys(stats).forEach(qId => {
+            const qStat = stats[qId];
+            totalAnswerCount += qStat.total || 0;
+            totalCorrectCount += qStat.correct_count || 0;
+        });
+    });
+
+    const rate = totalAnswerCount > 0 ? Math.floor((totalCorrectCount / totalAnswerCount) * 100) : 0;
+    summaryEl.innerHTML = `これまでの総演習状況<br><b style="font-size:1.1rem; color:#e67e22;">${totalCorrectCount}問</b> 正解 / のべ回答回数 ${totalAnswerCount}回<br>正解率: <b>${rate}%</b>`;
+    
+    // 各データ範囲（キー）ごとの着手状況（問題数）をリスト化して表示
+    subject.keys.forEach(key => {
+        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+        const answeredInKey = Object.keys(stats).length;
+        
+        // 分かりやすい日本語の判別ラベルに変換
+        let typeLabel = "その他範囲";
+        if(key.includes("_unit_")) typeLabel = "単元別の問題";
+        if(key.includes("_past_")) typeLabel = "過去問";
+        if(key.includes("_extra_")) typeLabel = "追加問題";
+        if(key.includes("_ingredients_")) typeLabel = "重要成分";
+
+        const row = document.createElement('div');
+        row.style.cssText = 'padding: 8px; background: #f1f2f6; border-radius: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e4e7eb;';
+        row.innerHTML = `
+            <span style="font-weight: bold; color: #2d3436;">${typeLabel}</span>
+            <span style="color: #7f8c8d; background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #dcdde1;">着手済: ${answeredInKey}問</span>
+        `;
+        listEl.appendChild(row);
+    });
+
+    // モーダル（ポップアップ）を画面中央にFlex表示
+    document.getElementById('history-modal').style.display = 'flex';
+}
+
+// モーダルを閉じる関数
+function closeHomeHistoryModal() {
+    document.getElementById('history-modal').style.display = 'none';
+}
 </script>
 </body>
 </html>
