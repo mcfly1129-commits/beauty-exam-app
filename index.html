@@ -98,7 +98,7 @@
     </div>
 
     <div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
-        <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴など</h3>
+        <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴・開発状況など</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">本アプリの最新の修容内容などは、<br>以下のドキュメントで公開しています。</p>
         <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
     </div>
@@ -229,7 +229,7 @@ function openHomeHistoryModal(subject) {
     });
 
     const rate = totalAnswerCount > 0 ? Math.floor((totalCorrectCount / totalAnswerCount) * 100) : 0;
-    summaryEl.innerHTML = `これまでの総演習状況<br><b style="font-size:1.1rem; color:#e67e22;">${totalCorrectCount}問</b> 正解 / のべ回答回数 ${totalAnswerCount}回<br>総合正答率: <b>${rate}%</b>`;
+    summaryEl.innerHTML = `この科目の総学習状況<br><b style="font-size:1.1rem; color:#e67e22;">${totalCorrectCount}問</b> 正解 / のべ回答回数 ${totalAnswerCount}回<br>総合正答率: <b>${rate}%</b>`;
     
     // 各データ範囲（キー）ごとの着手状況（問題数）をリスト化して表示
     subject.keys.forEach(key => {
@@ -247,7 +247,7 @@ function openHomeHistoryModal(subject) {
         row.style.cssText = 'padding: 8px; background: #f1f2f6; border-radius: 8px; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e4e7eb;';
         row.innerHTML = `
             <span style="font-weight: bold; color: #2d3436;">${typeLabel}</span>
-            <span style="color: #7f8c8d; background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #dcdde1;">経験済: ${answeredInKey}問</span>
+            <span style="color: #7f8c8d; background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #dcdde1;">経験済み: ${answeredInKey}問</span>
         `;
         listEl.appendChild(row);
     });
