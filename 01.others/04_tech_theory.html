@@ -1,13 +1,1164 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>美容技術理論</title>
-</head>
-<body>
-    <h1>美容技術理論</h1>
-    <p>準備中です。</p>
-    <a href="../index.html">学習ホーム<br>（総合ダッシュボード）へ戻る</a>
-</body>
-</html>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "gijuturiron_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "gijuturiron_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No01.公衆衛生の概要": [
+    { id: "koshuese_original_No05_11", text: "ネズミの繁殖周期は比較的緩やかであり、一般的に生後半年から1年が経過してから最初の出産を行い、1回に1〜2匹の子を産んで増える。", source: "No05-11", answer: false, exp: "誤り。ネズミは非常に繁殖力が強く、生後数ヶ月で成熟し、年に複数回の出産が可能であるという特徴がある。" }
+　　　　　　]
+        }
+    },
+    "gijuturiron_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "gijuturiron_past_2025_01", text: "頭部の生え際と正中線の交わった点をトップポイントという。", source: "52回 問題44", answer: false, exp: "誤り。前頭部の生え際と正中線の交わった点は、フロントポイントという。トップポイントは頭部の頂点で正中線上の点である。" },
+    { id: "gijuturiron_past_2025_02", text: "シザーズにおける美容技術の操作では、支点となる鋏要（ねじ）に近い側ではなく、遠い側を用いることで力の調整がしやすく繊細な作業が可能となる。", source: "52回 問題45", answer: true, exp: "正しい。鋏要から遠い側（刃先側）を用いることで、細かな力のコントロールが容易になり、繊細なカットが可能になる。" },
+    { id: "gijuturiron_past_2025_03", text: "スキャルプマッサージの基本手技である揉撚法は、指の腹を頭皮に軽く滑らせる手技のことを指す。", source: "52回 問題46", answer: false, exp: "誤り。揉撚法は、指先全体で円を描くように揉んでいく手技であり、指の腹を軽く滑らせる手技は軽擦法である。" },
+    { id: "gijuturiron_past_2025_04", text: "デザイン理論における調和（ハーモニー）とは、2つ以上の要素が響きあい融合して、1つの「美」の単位をつくり出すことをいう。", source: "52回 問題47", answer: true, exp: "正しい。異なる要素が互いに干渉しあいながらも、まとまりのある美しさを生み出す状態を指す。" },
+    { id: "gijuturiron_past_2025_05", text: "ヘアカッティングにおいてパネルを右に集めて切った場合は、左よりも右のほうが長いカットラインになる。", source: "52回 問題48", answer: false, exp: "誤り。パネルを右に集めて切った場合は、右側が最短となり、左に向かって徐々に長くなるカットラインが形成される。" },
+    { id: "gijuturiron_past_2025_06", text: "ワンレングススタイルに対してセニングシザーズをレイヤー状に入れて毛量調整を行うと、形態にフラット感をあたえることができる。", source: "52回 問題49", answer: true, exp: "正しい。レイヤー状にセニングを入れることで、髪の重なりを均一に減らし、表面の質感を平坦に整えることができる。" },
+    { id: "gijuturiron_past_2025_07", text: "縮毛矯正の第1剤塗布工程では、根元部分から毛先まで均一に薬剤を塗布して軟化させる必要がある。", source: "52回 問題50", answer: false, exp: "誤り。縮毛矯正では、断毛や根元の折れを防ぐため、根元部分には第1剤を付けないように塗布しなければならない。" },
+    { id: "gijuturiron_past_2025_08", text: "ストランドカールのベースのうち、パラレログラムベースはステムをオーバーラップさせやすいため、コームアウトした際に仕上がりが割れにくい。", source: "52回 問題51", answer: true, exp: "正しい。平行四辺形の形状を活かしてステムを重ねることで、分け目が出にくく自然なつながりを表現できる。" },
+    { id: "gijuturiron_past_2025_09", text: "酸化染毛剤の中には、ヘナなどの植物の色素を有効成分として配合している種類が存在する。", source: "52回 問題52", answer: false, exp: "誤り。酸化染毛剤は酸化染料を有効成分とするものであり、植物の色素を有効成分としたものは酸化染毛剤には該当しない。" },
+    { id: "gijuturiron_past_2025_10", text: "ヒトの爪の構造において、ネイルプレートの爪の基部から爪先まで続く縦方向のカーブを「アーチ」と呼ぶ。", source: "52回 問題53", answer: true, exp: "正しい。爪の縦方向の曲線をアーチ、ネイルプレートの両サイドをつなぐ横方向の曲線をCカーブと呼ぶ。" },
+    { id: "gijuturiron_past_2025_11", text: "まつ毛の毛周期は、頭髪の毛周期（4〜6年）に比べて非常に長いのが特徴である。", source: "52回 問題54", answer: false, exp: "誤り。まつ毛の毛周期は3週間から4か月程度であり、頭髪の毛周期に比べて非常に短い。" },
+    { id: "gijuturiron_past_2025_12", text: "日本髪の基本的な部位の名称において、頭頂部で結い上げた髪を「髷（まげ）」、左右の側面部分を「鬢（びん）」という。", source: "52回 問題55", answer: true, exp: "正しい。日本髪は、前髪、鬢（左右）、髱（後方）、髷（中央上部）、根の各部位で構成される。" },
+    { id: "gijuturiron_past_2025_13", text: "顔面の名称において、鼻の下にある縦の溝をオトガイ唇溝という。", source: "51回 問題44", answer: false, exp: "誤り。鼻の下にある溝は人中（じんちゅう）である。オトガイ唇溝は、下唇とオトガイ（あご）の間の溝を指す。" },
+    { id: "gijuturiron_past_2025_14", text: "スキャルプトリートメントにおいて、ヘアトニックやスキャルプトリートメント剤を使用する方法は化学的な方法に該当する。", source: "51回 問題45", answer: true, exp: "正しい。薬剤の成分を利用して生理機能を保持・促進する方法は化学的な方法である。" },
+    { id: "gijuturiron_past_2025_15", text: "ヘアデザインにおいて、三つ編みを取り入れることで周期的なパターンをつくり、リズム感を演出することができる。", source: "51回 問題46", answer: true, exp: "正しい。デザインにおけるリズムとは、要素の周期的な繰り返しによって生じる動きや躍動感のことを指す。" },
+    { id: "gijuturiron_past_2025_16", text: "カッティングにおいて、パネルをアップステムでシェープしてカットした場合、最も長い毛髪の部分がボリュームの頂点になる。", source: "51回 問題47", answer: false, exp: "誤り。最も長い毛髪の部分がボリュームの頂点になるのは、ダウンステムでシェープした場合である。アップステムは上部が短くなるレイヤーカットになる。" },
+    { id: "gijuturiron_past_2025_17", text: "レザーによるノーマルテーパーカットは、毛先から1/3ほどを削いで先細りにする技法である。", source: "51回 問題48", answer: true, exp: "正しい。毛先を削いでテーパー（先細り）にする標準的な技法で、1/3程度を削るのが一般的である。" },
+    { id: "gijuturiron_past_2025_18", text: "パーマネントウェーブの施術前に行うシャンプーには、オイル分の強いシャンプー剤を用いるのが適している。", source: "51回 問題49", answer: false, exp: "誤り。オイル分の強いシャンプー剤は、毛髪表面をコーティングして薬剤の作用を妨げるため、パーマ施術前には適さない。" },
+    { id: "gijuturiron_past_2025_19", text: "ロッドに巻かれた毛髪には、その弾力によってロッドを逆方向に回転させて元に戻そうとする力が働く。", source: "51回 問題50", answer: true, exp: "正しい。毛髪の復元力（弾力）により、巻かれた方向とは逆にロッドを押し戻そうとする力が生じる。" },
+    { id: "gijuturiron_past_2025_20", text: "ピンカールのうち、毛先がループの一番内側におさめられる巻き方を、メイポールカールという。", source: "51回 問題51", answer: false, exp: "誤り。毛先をループの内側に巻き込むのはクロッキノールカールである。メイポールカールは根元から巻く方式で、毛先は外側に出る。" },
+    { id: "gijuturiron_past_2025_21", text: "酸化染毛剤を用いて髪全体を暗く染める場合は、既染部の色が明るい部分から薬剤を塗布するのが正しい手順である。", source: "51回 問題52", answer: true, exp: "正しい。明るい部分は暗く染まるのに時間を要するため、先に塗布して放置時間を長く確保する必要がある。" },
+    { id: "gijuturiron_past_2025_22", text: "爪のカット形状のうち、サイドがストレートで先端が丸くカットされた最も自然な形状をラウンドという。", source: "51回 問題53", answer: true, exp: "正しい。サイドの直線と先端の曲線を組み合わせた形状で、指の形に馴染む最も一般的な形である。" },
+    { id: "gijuturiron_past_2025_23", text: "まつ毛エクステンションの装着は、毛をより長く保つため、まつ毛の成長初期に行うのが最適である。", source: "51回 問題54", answer: false, exp: "誤り。まつ毛エクステンションは、成長初期は避け、成長期の終わりから退行期が始まる時期に装着するのが最適とされる。" },
+    { id: "gijuturiron_past_2025_24", text: "振袖の着付けにおいて、着物に締める伊達巻は、帯を安定させるため帯幅より広くなるように締める必要がある。", source: "51回 問題55", answer: false, exp: "誤り。着物に締める伊達巻は、帯の下から露出しないよう、帯幅よりも狭くなるように締めなければならない。" },
+],
+"第50-49回 (2024年)": [
+    { id: "gijuturiron_past_2024_01", text: "頭部の頂点で正中線上の点をゴールデンポイントという。", source: "50回 問題44", answer: false, exp: "誤り。頭部の頂点で正中線上の点はトップポイントである。ゴールデンポイントは、トップポイントをさらに後方に進んだ点である。" },
+    { id: "gijuturiron_past_2024_02", text: "ヘアドライヤーの構造において、ファンを動かすためのモーターにより風が起こされる。", source: "50回 問題45", answer: true, exp: "正しい。モーターによってファンが回転することで風が発生し、それが発熱器で熱せられて送風される仕組みとなっている。" },
+    { id: "gijuturiron_past_2024_03", text: "ハッキングは、毛髪を修復し保護するためのヘアトリートメント技術の基本手技に含まれる。", source: "50回 問題46", answer: false, exp: "誤り。ハッキングはスキャルプマッサージにおける打法（タポートマン）の1つであり、ヘアトリートメント技術には該当しない。" },
+    { id: "gijuturiron_past_2024_04", text: "ヘアデザインの原理において、水平線は見る人に安定感を与える効果がある。", source: "50回 問題47", answer: true, exp: "正しい。水平線は安定感を、垂直線は平衡や強力な支柱を、斜線は不安定感や運動感をそれぞれ暗示する。" },
+    { id: "gijuturiron_past_2024_05", text: "アウトサイドテーパーカットは、毛髪を削ぐ深さ（量）によって分類されるテーパーカットの技法である。", source: "50回 問題48", answer: false, exp: "誤り。深さによる分類はノーマル・ディープ・エンドテーパーである。アウトサイドテーパーは、テーパーする「面」による分類に該当する。" },
+    { id: "gijuturiron_past_2024_06", text: "パーマネントウェーブのテストカールにおいて、適正な状態のカールの直径は、使用したロッドの直径の約2.5倍である。", source: "50回 問題49", answer: true, exp: "正しい。ロッドの直径の約2.5倍のウェーブが形成されている状態が、パーマの適正なかかり具合の目安となる。" },
+    { id: "gijuturiron_past_2024_07", text: "クロッキノールカールは、毛先から根元に向かって巻く技法で、ウェーブの幅は根元になるほど狭くなるのが特徴である。", source: "50回 問題50", answer: false, exp: "誤り。クロッキノールカールは毛先が内側に収まる巻き方で、ウェーブの幅は毛先が狭く、根元になるほど広くなる。" },
+    { id: "gijuturiron_past_2024_08", text: "毛髪の赤みを消して、よりナチュラルなブラウン系の色に仕上げたい場合には、緑系のヘアカラーを用いるのが効果的である。", source: "50回 問題51", answer: true, exp: "正しい。赤の補色（反対色）である緑を用いることで、赤みを打ち消して自然な色味に整えることができる。" },
+    { id: "gijuturiron_past_2024_09", text: "アーティフィシャルネイルで使用するプライマーは、塗布したグルーの硬化を早めるための促進剤として用いられる。", source: "50回 問題52", answer: false, exp: "誤り。グルーの硬化を促進させるのはアクティベーターである。プライマーは、アーティフィシャルネイルを自爪に密着しやすくさせるためのものである。" },
+    { id: "gijuturiron_past_2024_10", text: "まつ毛エクステンションの施術において、エアブロアは装着したまつ毛やグルーを乾燥させる目的で使用される。", source: "50回 問題53", answer: true, exp: "正しい。グルーを素早く乾燥させ、揮発成分による刺激を和らげるためにエアブロア（送風機）を用いる。" },
+    { id: "gijuturiron_past_2024_11", text: "文金高島田の装飾品において、髷（まげ）の中央部分に垂直に挿す髪飾りを前挿しという。", source: "50回 問題54", answer: false, exp: "誤り。髷の中央に挿すものは「中挿し（なかざし）」である。前挿しは、前髪の付け根付近に飾るものを指す。" },
+    { id: "gijuturiron_past_2024_12", text: "丸帯は、幅が約30cm、丈が約4.2mあり、女性の帯の中で最も格調高い正礼装用の帯とされる。", source: "50回 問題55", answer: true, exp: "正しい。丸帯は広布の帯地を二つ折りにして仕立てたもので、厚手で豪華なため花嫁衣裳や礼装に用いられる。" },
+    { id: "gijuturiron_past_2024_13", text: "手掌の親指の付け根にある膨らんだ部分を小指球という。", source: "49回 問題44", answer: false, exp: "誤り。手掌の親指の付け根にある膨らんだ部分は母指球（ぼしきゅう）である。小指の付け根側は小指球と呼ぶ。" },
+    { id: "gijuturiron_past_2024_14", text: "コームの部位のうち、コームの目に入った毛髪を一線にそろえる働きをするのは歯元である。", source: "49回 問題45", answer: true, exp: "正しい。歯元（はもと）は毛髪を一線にそろえる役割を持ち、歯は垂直に立てて支える役割、歯先は頭皮に接して毛髪を引き起こす役割を持つ。" },
+    { id: "gijuturiron_past_2024_15", text: "ヘッドスパは頭皮環境の改善が目的なので、髪質改善のためのトリートメントは同時に行わない。", source: "49回 問題46", answer: false, exp: "誤り。ヘッドスパでは毛髪診断を行い、その結果に合わせたトリートメントを施して髪質改善に努めることも含まれる。" },
+    { id: "gijuturiron_past_2024_16", text: "ツェルナー錯視は、2本の平行な線分が鋭角に交差する別の線分の影響により、平行には見えなくなる角度・方向の錯視である。", source: "49回 問題47", answer: true, exp: "正しい。見かけの交差角が実際の交差角よりも広く見えてしまうことによって生じる幾何学的錯視の一種である。" },
+    { id: "gijuturiron_past_2024_17", text: "パネルの面を頭皮面に対して45度の角度で引くことをオンベースという。", source: "49回 問題48", answer: false, exp: "誤り。オンベースとは、パネルの面を頭皮に対して90度に引くことを指す。" },
+    { id: "gijuturiron_past_2024_18", text: "パーマネントウェーブにおいて直径10mmのロッドでフルウェーブを形成する場合、約9.4cmの毛髪の長さが必要である。", source: "49回 問題49", answer: true, exp: "正しい。フルウェーブを形成するにはロッドの直径の約3回分の毛髪の長さが必要であり、10mmロッドの場合は約9.4cm（10mm×3.14）となる。" },
+    { id: "gijuturiron_past_2024_19", text: "パーマネントウェーブのテストカールにおいて、適正なカールの直径は使用したロッドの直径の約3.5倍である。", source: "49回 問題50", answer: false, exp: "誤り。テストカールにおける適正なカールの直径は、使用したロッドの直径の約2.5倍である。" },
+    { id: "gijuturiron_past_2024_20", text: "ローラーカーリングにおいてダウンステムでボリュームを抑える場合は、ベースを厚めにするとローラーのおさまりがよい。", source: "49回 問題51", answer: true, exp: "正しい。ボリュームを抑えるダウンステム（45度以下）では、少し厚めのベースにすることでローラーが安定しておさまる。" },
+    { id: "gijuturiron_past_2024_21", text: "一時染毛料は毛髪の表面に色素を付着させる製品であり、シャンプーイングしても色落ちしない特徴がある。", source: "49回 問題52", answer: false, exp: "誤り。一時染毛料は、1度のシャンプーイングで簡単に色落ちする染毛料である。" },
+    { id: "gijuturiron_past_2024_22", text: "まつ毛エクステンションの施術中にグルーが目に入った場合は、流水で流し、直ちに眼科医の診察を受けるべきである。", source: "49回 問題53", answer: true, exp: "正しい。薬剤が目に入った場合は自己判断で処置せず、速やかに専門医（眼科医）を受診することが鉄則である。" },
+    { id: "gijuturiron_past_2024_23", text: "日本髪結髪用の櫛である鬼歯は、前髷（まえまげ）などを広げるために用いられる道具である。", source: "49回 問題54", answer: false, exp: "誤り。鬼歯は仕上げに表面の毛の流れを整えるために使う。前髷などを広げるのは「毛筋の抜き歯」の役割である。" },
+    { id: "gijuturiron_past_2024_24", text: "和装着付けにおいて、若い人の帯幅は全体のバランスを考慮して広めにするのが一般的である。", source: "49回 問題55", answer: true, exp: "正しい。帯幅は全体の調和を見て調整するが、一般的に若い人は広めに、年配の方は狭めに折ることが多い。" },
+],
+"第48-47回 (2023年)": [
+    { id: "gijuturiron_past_2023_01", text: "コームの部位のうち、『胴』は毛髪を引き起こし垂直に立てて両側から支え、そろえる働きをする。", source: "48回 問題44", answer: false, exp: "誤り。胴はコーム全体の支えとなり、バランスをとる働きをする。毛髪を引き起こし垂直に立てて支えるのは『歯』の役割である。" },
+    { id: "gijuturiron_past_2023_02", text: "シザーズの操作においては、薬指で操作する方の鋏身を安定させ、母指で操作する方の刃を動刃とするのが正しい。", source: "48回 問題45", answer: true, exp: "正しい。シザーズは、薬指を静刃側に固定し、母指を動かすことで動刃を操作してカットを行うのが基本である。" },
+    { id: "gijuturiron_past_2023_03", text: "スキャルプマッサージの基本手技である揉捏法（ペトリサージュ）とは、皮膚を押さえつけながら強く擦る手技を指す。", source: "48回 問題46", answer: false, exp: "誤り。皮膚を押さえつけながら強く擦る手技は強擦法（フリクション）である。揉捏法は、4指と母指を用いてもみほぐす手技である。" },
+    { id: "gijuturiron_past_2023_04", text: "主観的輪郭線とは、実際には輪郭線が存在しない場所に、あたかも輪郭線があるかのように見える現象のことをいう。", source: "48回 問題47", answer: true, exp: "正しい。脳が欠けた情報を補完して形を認識することによって生じる幾何学的錯視の一種である。" },
+    { id: "gijuturiron_past_2023_05", text: "刃物の材料において、ステンレス鋼は炭素鋼に比べてさびに弱く、もろいという欠点がある。", source: "48回 問題48", answer: false, exp: "誤り。ステンレス鋼は炭素鋼に比べてさびに強い。また、鉄に炭素を加えることで加工性を向上させることができる。" },
+    { id: "gijuturiron_past_2023_06", text: "レザーによるボスサイドテーパーカットは、パネルの外側と内側の両面をテーパーする技法である。", source: "48回 問題49", answer: true, exp: "正しい。パネルの両面から削ぐことで、毛先に自由な動きと軽さを生み出すことができる。" },
+    { id: "gijuturiron_past_2023_07", text: "パーマネントウェービングにおいて『つけ巻き』とは、毛髪をウェットの状態でワインディングした後に第1剤を塗布する方法である。", source: "48回 問題50", answer: false, exp: "誤り。つけ巻きは、あらかじめ毛髪に第1剤を塗布してから巻く方法である。ウェット状態で巻いた後に塗布するのは『水巻き』である。" },
+    { id: "gijuturiron_past_2023_08", text: "メイポールカールのピンを外すと、根元から巻かれているため、ウェーブの幅が根元ほど狭い仕上がりになる。", source: "48回 問題51", answer: true, exp: "正しい。メイポールカールは根元巻き方式のため、根元に最も強いカールが現れ、ウェーブ幅も根元が狭くなるのが特徴である。" },
+    { id: "gijuturiron_past_2023_09", text: "太くて硬く黒い毛髪をヘアカラーリングする場合、赤みが出やすいため、希望色より明度の低い染毛剤を選択するのが適している。", source: "48回 問題52", answer: false, exp: "誤り。このような毛髪は赤みが出やすく明るくなりにくいため、希望色より明度の『高い』染毛剤を選択するのが正しい。" },
+    { id: "gijuturiron_past_2023_10", text: "マニキュア技術の手順において、カウンセリングを終えた後は、ファイリング、カラーリング、バッフィングの順で進行する。", source: "48回 問題53", answer: false, exp: "誤り。マニキュア（ネイルケア＆カラー）の正しい手順は、まずカウンセリング後に爪の形と長さを整える「ファイリング」を行い、次に爪表面の凹凸を滑らかに磨く「バッフィング」を行い、最後にポリッシュを塗る「カラーリング」の順で進行します。カラーリングの後にバッフィングを行うと塗膜が剥がれてしまうため、本記述の順序は誤りです。" },
+    { id: "gijuturiron_past_2023_11", text: "まつ毛エクステンションのリペア（付け足し）は、個人差があるが通常6〜7週間を目安に行うのが一般的である。", source: "48回 問題54", answer: false, exp: "誤り。リペアの目安は、まつ毛の健康状態や持続力を考慮し、通常2〜3週間で行うのが一般的である。" },
+    { id: "gijuturiron_past_2023_12", text: "着物の各部の名称において、首の付け根から裾までの長さを『身丈（みたけ）』という。", source: "48回 問題55", answer: true, exp: "正しい。身丈は着物の全長を指し、女性の場合は着付の際に「お端折（おはしょり）」で長さを調整する。" },
+    { id: "gijuturiron_past_2023_13", text: "パーマネントウェーブでロッドを巻く際、お客さまの頭部は技術者の目の高さに合わせるのが正しい姿勢である。", source: "47回 問題44", answer: false, exp: "誤り。パーマネントウェーブ技術でロッドを巻くときは、お客さまの頭部が技術者の「心臓の高さ」となるように調節するのが正しい。" },
+    { id: "gijuturiron_past_2023_14", text: "良質なシザーズの条件として、動刃と静刃の間に正確な凸レンズ状のあきがつくられていることがあげられる。", source: "47回 問題45", answer: true, exp: "正しい。この適度なあき（ひねり）があることで、刃同士が適切な接点で交差し、毛髪を確実に切ることができる。" },
+    { id: "gijuturiron_past_2023_15", text: "ヘアアイロンのロッド表面にフッ素樹脂加工を施す目的は、ヘアローションなどが焦げ付くのを防ぐためである。", source: "47回 問題46", answer: true, exp: "正しい。フッ素樹脂加工により、薬剤の付着や焦げ付きを抑え、毛髪の滑りを良くして損傷を軽減させることができる。" },
+    { id: "gijuturiron_past_2023_16", text: "スキャルプトリートメントにおいて、ブラッシングやマッサージを行う方法は「化学的方法」に分類される。", source: "47回 問題47", answer: false, exp: "誤り。ブラッシングやマッサージによる方法は「物理的方法」に分類される。化学的方法は、ヘアトニック等の薬剤を用いる方法を指す。" },
+    { id: "gijuturiron_past_2023_17", text: "デザイン理論において、身体に対して頭が相対的に大きいと、全体的に大人っぽい成熟した印象を与える効果がある。", source: "47回 問題48", answer: false, exp: "誤り。身体に対して頭が相対的に大きいと、全体的に「子どもっぽい、未成熟な」印象を与える。" },
+    { id: "gijuturiron_past_2023_18", text: "シザーズによるスライドカットは、毛先を穂先のような状態にして、長さと毛量の調節を同時に行う技法である。", source: "47回 問題49", answer: true, exp: "正しい。シザーズを滑らせるように動かすことで、毛先に表情豊かな質感と軽さを生み出すことができる。" },
+    { id: "gijuturiron_past_2023_19", text: "パーマネントウェーブのテストカールにおける適正なカールの直径は、使用したロッドの直径の約1.5倍である。", source: "47回 問題50", answer: false, exp: "誤り。テストカールにおける適正なカールの直径は、使用したロッドの直径の「約2.5倍」である。" },
+    { id: "gijuturiron_past_2023_20", text: "ストランドカールのパラレログラムベースは、ステムをオーバーラップさせやすいため、仕上がりが割れにくい特徴を持つ。", source: "47回 問題51", answer: true, exp: "正しい。平行四辺形のベース形状によりステムが重なり合い、コームアウトした際に自然なつながりが得られる。" },
+    { id: "gijuturiron_past_2023_21", text: "酸化染毛剤の施術におけるカラーチェックは、効率を上げるため頭髪の特定の1か所を選んで行うべきである。", source: "47回 問題52", answer: false, exp: "誤り。カラーチェックは1か所ではなく、必ず「数か所」を調べて染まり具合を正確に判断しなければならない。" },
+    { id: "gijuturiron_past_2023_22", text: "アーティフィシャルネイルの「チップ」とは、弱い爪の補強や修復を主な目的として装着するテクニックである。", source: "47回 問題53", answer: false, exp: "誤り。チップは爪の先に装着し、人工的に「爪の長さを出す」ことを目的としたテクニックである。" },
+    { id: "gijuturiron_past_2023_23", text: "まつ毛エクステンションの施術後、グルーが硬化するまでの最低5〜6時間は、洗顔や入浴など高温・多湿の環境を避ける。", source: "47回 問題54", answer: true, exp: "正しい。グルーが完全に硬化する前に水分や熱を与えると、持続性が低下したりトラブルの原因となるため注意が必要である。" },
+    { id: "gijuturiron_past_2023_24", text: "日本髪の基本的な部位は、前髪、鬢（左右）、髱（後方）、髷（中央上部）、根の5つで構成されている。", source: "47回 問題55", answer: true, exp: "正しい。これらの部位の組み合わせとバランスによって、さまざまな日本髪の造形美が表現される。" },
+],
+"第46-45回 (2022年)": [
+    { id: "gijuturiron_past_2022_01", text: "頭部の基準となる点のうち、耳のつけ根の真上の部分をトップポイントという。", source: "46回 問題44", answer: false, exp: "誤り。耳のつけ根の真上の部分はイヤーポイントである。トップポイントは頭部の頂点で正中線上の点を指す。" },
+    { id: "gijuturiron_past_2022_02", text: "シザーズにおけるてこの原理では、母指孔などの力を加える部分を力点、ねじ（要）の部分を支点、毛髪を切る刃の部分を作用点と呼ぶ。", source: "46回 問題45", answer: true, exp: "正しい。シザーズはこれら3つの点の相互作用によって毛髪をカットする構造になっている。" },
+    { id: "gijuturiron_past_2022_03", text: "スキャルプマッサージの基本手技のうち、ストローキングは打法（タポートマン）の一種である。", source: "46回 問題46", answer: false, exp: "誤り。ストローキングは軽擦法（エフルラージュ）のことであり、手のひらや指の腹で軽く擦る手技を指す。" },
+    { id: "gijuturiron_past_2022_04", text: "ドンデイスが提唱した形の3つの基本形は、正方形、円、正三角形である。", source: "46回 問題47", answer: true, exp: "正しい。これらの基本形を組み合わせたり変形させたりすることで、さまざまなデザインが構成される。" },
+    { id: "gijuturiron_past_2022_05", text: "ヘアカッティングにおいて、パネルの面を頭皮に対して90度より上の角度で引いて保持することをダウンステムという。", source: "46回 問題48", answer: false, exp: "誤り。ダウンステムはパネルの面を頭皮に対して90度より「下」の角度で引くことである。90度より上はアップステムと呼ぶ。" },
+    { id: "gijuturiron_past_2022_06", text: "パーマネントウェーブ技術におけるアフターリンスの目的の1つは、施術中に脱脂された油分を補うことである。", source: "46回 問題49", answer: true, exp: "正しい。薬剤の影響で失われた油分をヘアトリートメント剤などで補い、毛髪を保護し質感を整える必要がある。" },
+    { id: "gijuturiron_past_2022_07", text: "ピンカールのうちメイポールカールは、ストランドの根元から巻きはじめ、根元に最も強いカールが現れる特徴を持つ。", source: "46回 問題50", answer: true, exp: "正しい。根元巻き方式を採用しているため、仕上がり時に根元部分の弾力が最も強くなる。" },
+    { id: "gijuturiron_past_2022_08", text: "色の三原色（第1次色）と、それらを混合して得られる第2次色・第3次色などの色相を、体系的に円環状に配置したものをカラーサークル（色相環）という。", source: "46回 問題51", answer: true, exp: "正しい。三原色（赤・黄・青）を混ぜてできるのは「緑・橙・紫（セコンダリーカラー）」の3色であり、これら計6色のさらに中間にある「赤橙・黄橙・黄緑・青緑・青紫・赤紫（インターミディエイトカラー）」の6色を足すことで、初めて一般的な「12色の色相環（カラーサークル）」が完成します。" },
+    { id: "gijuturiron_past_2022_09", text: "マニキュアのカラーリングにおいて、皮膚にはみ出したエナメルはコットンスティックにリムーバーを含ませて拭き取るのが適切である。", source: "46回 問題52", answer: true, exp: "正しい。細かい部分の修正には、オレンジスティックにコットンを巻き付けたコットンスティックを使用する。" },
+    { id: "gijuturiron_past_2022_10", text: "アイブロウメイクアップにおける眉山の位置は、黒目の中央と外側の延長線の間を基準に設定する。", source: "46回 問題53", answer: false, exp: "誤り。眉山の位置は、黒目の「外側」と目尻の延長線の間を基準とするのが基本である。" },
+    { id: "gijuturiron_past_2022_11", text: "まつ毛エクステンションの装着後の持続期間は、個人差があるが通常2～3週間程度が目安とされる。", source: "46回 問題54", answer: true, exp: "正しい。自毛の毛周期やグルーの接着強度により、数週間ごとにメンテナンス（リペア）を行うのが一般的である。" },
+    { id: "gijuturiron_past_2022_12", text: "和装の仕立てにおいて、男物の着物には脇の部分に通気のための身八つ口が作られている。", source: "46回 問題55", answer: false, exp: "誤り。身八つ口（みやつぐち）があるのは女物および子供物の着物であり、男物の着物には存在しない。" },
+    { id: "gijuturiron_past_2022_13", text: "ヘアドライヤーは、内部のモーターでファンを回転させて風を起こし、それをニクロム線などの発熱器で熱して送風する美容用具である。", source: "45回 問題44", answer: true, exp: "正しい。ヘアドライヤーの基本構造は、ファン、モーター、発熱器の組み合わせによって構成されている。" },
+    { id: "gijuturiron_past_2022_14", text: "ヘアカッティングに用いる本レザーの刃線の形態は、力の配分を均等にするため内曲線状につくられている。", source: "45回 問題45", answer: false, exp: "誤り。本レザーの刃線は直線状または外曲線状である。内曲線状では毛髪を切る力の配分が均等にならず、正しく操作できない。" },
+    { id: "gijuturiron_past_2022_15", text: "シャンプーイングにおいて、お湯の温度は45〜48℃に設定するのが毛髪と頭皮にとって最も適している。", source: "45回 問題46", answer: false, exp: "誤り。シャンプーイングにおけるお湯の適温は38〜40℃である。高すぎる温度は頭皮や毛髪に過度な刺激を与える可能性がある。" },
+    { id: "gijuturiron_past_2022_16", text: "幾何学的錯視の一種である大きさの対比現象により、ボリュームの大きいヘアスタイルに囲まれた顔は実際より小さく感じられる。", source: "45回 問題47", answer: true, exp: "正しい。周囲の要素の大きさが、中心にある対象物の大きさの判断に影響を与える対比現象の効果である。" },
+    { id: "gijuturiron_past_2022_17", text: "グラデーションカットをダウンステムでシェープしてカットした場合、最も長い毛髪の部分がボリュームの頂点（ウェイト）となる。", source: "45回 問題48", answer: true, exp: "正しい。グラデーションカット特有の形態であり、パネルを引き出す角度（ステム）によってシルエットが形成される。" },
+    { id: "gijuturiron_past_2022_18", text: "セニングカットとは、毛髪の上でシザーズをスライド（開閉しながら滑らす）させることで長さと毛量を調節する技法である。", source: "45回 問題49", answer: false, exp: "誤り。それはスライドカットの説明である。セニングカットは、セニングシザーズを用いてパネルを間引きするように毛量を減らす技法を指す。" },
+    { id: "gijuturiron_past_2022_19", text: "パーマネントウェービングにおいてフルウェーブを形成するためには、使用するロッドの直径に対して3回転分の毛髪の長さが必要である。", source: "45回 問題50", answer: true, exp: "正しい。フルウェーブにはロッド3回転分、ハーフウェーブには1.5回転分の長さが基準として求められる。" },
+    { id: "gijuturiron_past_2022_20", text: "カールのステムの「方向」は、仕上がり時のカールのボリュームを調節するために最も重要な要素である。", source: "45回 問題51", answer: false, exp: "誤り。ステムの「方向」は毛髪の流れを左右し、仕上がり時のボリュームに関係するのはステムの「角度」である。" },
+    { id: "gijuturiron_past_2022_21", text: "ピンカールの分類において、リフトカールはベースの周囲をスライスしてつくる「ストランドカール」の一種である。", source: "45回 問題52", answer: true, exp: "正しい。メイポールカールやリフトカールはストランドカール、スカルプチュアカールはシェーピングカールに分類される。" },
+    { id: "gijuturiron_past_2022_22", text: "赤みのある毛髪の色を消してナチュラルな色に仕上げたいときは、補色（反対色）であるオレンジ系のヘアカラーを用いるのがよい。", source: "45回 問題53", answer: false, exp: "誤り。赤の補色は緑系である。赤みを打ち消すには緑系の色素を持つカラーを用い、黄みを打ち消すには紫（青）系を用いるのが正しい。" },
+    { id: "gijuturiron_past_2022_23", text: "アイブロウメイクアップにおける眉山の位置は、黒目の外側と目尻の延長線の間を基準とするのが標準的なプロポーションである。", source: "45回 問題54", answer: true, exp: "正しい。この位置に眉山を設定することで、顔全体のバランスが整い、美しい眉のラインを表現できる。" },
+    { id: "gijuturiron_past_2022_24", text: "まつ毛エクステンションの装着をより長く持続させるためには、まつ毛の生え始めである「成長期初期」に装着するのが最適である。", source: "45回 問題55", answer: false, exp: "誤り。成長期初期のまつ毛への装着は避け、成長期の終わりから退行期が始まる時期に装着するのが最適とされる。" },
+],
+"第44-43回 (2021年)": [
+    { id: "gijuturiron_past_2021_01", text: "良質なシザーズの条件として、動刃と静刃の間に凸レンズ状のあきが正確につくられているものがよい。", source: "44回 問題44", answer: true, exp: "正しい。シザーズには適度な「ひねり」が必要であり、刃の間に正確な凸レンズ状のあきがあることで毛髪を確実に切ることができる。" },
+    { id: "gijuturiron_past_2021_02", text: "石けんを主剤としたシャンプー剤を使用した後は、アルカリ性に傾いた毛髪のpHを整えるためにアルカリ性のリンス剤を用いるのが適している。", source: "44回 問題45", answer: false, exp: "誤り。石けんシャンプー後は髪がアルカリ性に傾くため、pHを元に戻すには酸性のリンス剤（クエン酸など）を用いる必要がある。" },
+    { id: "gijuturiron_past_2021_03", text: "ロングのソバージュヘアは、細かいウェーブを付けた髪が直線的に広がり、強い印象を与えるのが特徴である。", source: "44回 問題46", answer: true, exp: "正しい。デザイン理論において、細かいウェーブと直線的な広がりは、野性的で強いイメージを演出する効果がある。" },
+    { id: "gijuturiron_past_2021_04", text: "グラデーションスタイルは、パネルをアップステムでシェープしてカットすることで形成される。", source: "44回 問題47", answer: false, exp: "誤り。グラデーションスタイルは「ダウンステム」でシェープしてカットしたものである。アップステムはレイヤースタイルに用いられる。" },
+    { id: "gijuturiron_past_2021_05", text: "レザーカットにおけるエンドテーパーカットは、毛先をテーパーする技法であり、生え際やパート際などの毛量が少ない部位に用いられる。", source: "44回 問題48", answer: true, exp: "正しい。毛先のわずかな部分を削いで先細りにする技法であり、デリケートな部分の質感調整に適している。" },
+    { id: "gijuturiron_past_2021_06", text: "ワインディングにおいて、毛の弾力でロッドが逆の回転で元に戻ろうとする力が、髪につやと美しいウェーブをあたえる働きをする。", source: "44回 問題49", answer: false, exp: "誤り。髪につやと美しいウェーブを持たせるのは「毛束を引く力（テンション）」である。逆回転しようとする力は、毛髪の復元力によるものである。" },
+    { id: "gijuturiron_past_2021_07", text: "リーゼントスタイルのワインディングでは、サイドのスライスを縦に取り、後方に強い方向性をつけるようにロッドを配列する。", source: "44回 問題50", answer: true, exp: "正しい。縦スライスを用いることで、毛流れを後ろ方向（バック）へ強く誘導する仕上がりとなる。" },
+    { id: "gijuturiron_past_2021_08", text: "ヘアウェーブの各部の名称において、凹んでいる部分をリッジ、凸状に盛り上がっている部分をトローという。", source: "44回 問題51", answer: false, exp: "誤り。凸状に盛り上がった部分は「リッジ（隆起線）」、凹んでいる部分は「トロー（谷）」である。" },
+    { id: "gijuturiron_past_2021_09", text: "染毛剤のパッチテストを行う際、テスト液は第1剤と第2剤を指定された割合で適切に混ぜ合わせて調製する。", source: "44回 問題52", answer: true, exp: "正しい。実際に使用する薬剤と同じ条件にするため、指定の混合比率でテスト液を作成し、皮膚の反応を確認する。" },
+    { id: "gijuturiron_past_2021_10", text: "爪のカット形状のうち、サイドがストレートで先端がアーモンドのように細くなった形状をラウンドという。", source: "44回 問題53", answer: false, exp: "誤り。それは「ポイント」の説明である。ラウンドは、サイドがストレートで先端が丸くカットされた最も自然な形状を指す。" },
+    { id: "gijuturiron_past_2021_11", text: "まつ毛エクステンションの施術において、過去にアレルギー等のトラブルがなかった物質であっても、体調や環境の変化によりかぶれることがある。", source: "44回 問題54", answer: true, exp: "正しい。接触皮膚炎は、累積的な刺激やアレルギー反応の獲得により、ある日突然発症するリスクがあるため注意が必要である。" },
+    { id: "gijuturiron_past_2021_12", text: "和装の各部の名称において、左右の肩幅と袖幅をすべて合わせた長さを袖付という。", source: "44回 問題55", answer: false, exp: "誤り。左右の肩幅と袖幅を合わせた全長は「裄（ゆき）」である。袖付は、袖を身頃に縫い合わせる部分を指す。" },
+    { id: "gijuturiron_past_2021_13", text: "ハンドドライヤーには、風が旋回して送り出されるタービネートタイプのものが多い。", source: "43回 問題44", answer: false, exp: "誤り。ハンドドライヤーは一般にブロータイプであり、風を直接毛髪に吹き付ける。タービネートタイプは主にスタンドドライヤーに用いられる。" },
+    { id: "gijuturiron_past_2021_14", text: "トリートメント剤は、加温して用いることにより、薬剤の毛髪への浸透を促進させることができる。", source: "43回 問題45", answer: true, exp: "正しい。加温することで毛髪へのなじみが良くなり、有効成分がより効率的に内部へ浸透する。" },
+    { id: "gijuturiron_past_2021_15", text: "ヘアカッティングにおいて、左サイドの前上がりラインを切る場合は、右肘を上げるとよい。", source: "43回 問題46", answer: false, exp: "誤り。左サイドの前上がりラインを切る場合は、右肘を「下げて」操作するのが正しい姿勢である。" },
+    { id: "gijuturiron_past_2021_16", text: "パーマネントウェーブにおいて、形成されるウェーブの大小は、主に使用するロッドの太さによって決まる。", source: "43回 問題47", answer: true, exp: "正しい。ロッドの直径がウェーブの大きさを決定する主要な要因であり、放置時間等だけで強弱を調整するのは避けるべきである。" },
+    { id: "gijuturiron_past_2021_17", text: "メイポールカールは、ストランドの毛先から巻きはじめ、カールを巻く際にベースをとらないシェーピングカールに分類される。", source: "43回 問題48", answer: false, exp: "誤り。メイポールカールはストランドの「根元」から巻く技法であり、ベースの周囲をスライスしてつくる「ストランドカール」に分類される。" },
+    { id: "gijuturiron_past_2021_18", text: "スキップウェーブにおいて、ウェーブ幅が3cmの場合、ループの直径は2cm、カールスペースは1cmとなる。", source: "43回 問題49", answer: true, exp: "正しい。ループの直径はウェーブ幅の2/3（2cm）、カールスペースはループ直径の1/2（1cm）という比率で構成される。" },
+    { id: "gijuturiron_past_2021_19", text: "ヘアカラー製品のうち、ヘアマニキュアなどの酸性染毛料は、永久染毛剤に分類される。", source: "43回 問題50", answer: false, exp: "誤り。ヘアマニキュアは「半永久染毛料」に分類される。永久染毛剤は、酸化染毛剤や脱色剤・脱染剤を指す。" },
+    { id: "gijuturiron_past_2021_20", text: "ネイルケアにおいて、自爪の長さや形を整えるために使用する板状のヤスリはエメリーボードである。", source: "43回 問題51", answer: true, exp: "正しい。エメリーボードは自爪をファイリングする際に用いる専用の道具である。" },
+    { id: "gijuturiron_past_2021_21", text: "まつ毛エクステンションの施術において、リペア（付け足し）は、個人差があるが通常6〜7週間を目安に行う。", source: "43回 問題52", answer: false, exp: "誤り。まつ毛の健康状態や持続力を考慮し、リペアはおおむね「2〜3週間」で行うのが一般的である。" },
+    { id: "gijuturiron_past_2021_22", text: "ウエディングドレスのプリンセスラインは、ウエストに切り替えがなく、縦の切り替え線を利用して裾を広げたシルエットである。", source: "43回 問題53", answer: true, exp: "正しい。上半身はフィットし、裾に向かってフレアーに広がるエレガントなラインが特徴である。" },
+    { id: "gijuturiron_past_2021_23", text: "ヘアデザインにおけるシンメトリーとは、左右の形が非対称でありながら、釣り合いがとれていて動きを感じさせる状態をいう。", source: "43回 問題54", answer: false, exp: "誤り。それはアシンメトリーの説明である。シンメトリーは左右対称であり、整然とした安定感や快感をあたえる状態を指す。" },
+    { id: "gijuturiron_past_2021_24", text: "炭素鋼は、コバルト鋼に比べて加工性がよく、刃を研ぎ直しやすいという利点がある。", source: "43回 問題55", answer: true, exp: "正しい。炭素鋼は鉄に炭素を加えたもので、美容刃物としての適度な硬さと加工のしやすさを併せ持っている。" },
+],
+"第42-41回 (2020年)": [
+    { id: "gijuturiron_past_2020_01", text: "コームの肩は、コームの目に入った毛髪を一線にそろえるはたらきをする。", source: "42回 問題44", answer: false, exp: "誤り。毛髪を一線にそろえるのは歯元のはたらきであり、肩はコーム全体の支えとなりバランスをとる胴の一部を指す。" },
+    { id: "gijuturiron_past_2020_02", text: "シャンプーイングは、汚れを取り除き、その後のカットやブローなどヘアデザインを容易にする土台をつくる目的で行われる。", source: "42回 問題45", answer: true, exp: "正しい。シャンプーイングはヘアデザインを容易にする土台づくりとしての役割を持つ。" },
+    { id: "gijuturiron_past_2020_03", text: "アップステムでシェープしてカットした場合、トップショートのロングエンドとなり、スタイルに立体感を与える。", source: "42回 問題46", answer: true, exp: "正しい。アップステムによるカットは、上部が短く下部が長いトップショートのロングエンドとなり、立体感が生まれる。" },
+    { id: "gijuturiron_past_2020_04", text: "ディープテーパーカットは、毛先から1/3ほどをテーパーするカット技法である。", source: "42回 問題47", answer: false, exp: "誤り。毛先から1/3を削るのはノーマルテーパーカットであり、ディープテーパーカットは根元近くから削る技法である。" },
+    { id: "gijuturiron_past_2020_05", text: "パーマネントウェーブ技術において、カラーリングや残存ウェーブがある部分には、トリートメント剤を塗布して第1剤の作用をセーブする。", source: "42回 問題48", answer: true, exp: "正しい。損傷や既染部に対してトリートメント剤を用いて薬剤の過剰な作用を抑える方法はトリートメント巻きと呼ばれる。" },
+    { id: "gijuturiron_past_2020_06", text: "ヘアウェービングにおいて、ループの直径（外径）はウェーブ幅の1/2となる。", source: "42回 問題49", answer: false, exp: "誤り。ウェーブ幅とループの関係は、ループの直径がウェーブ幅の2/3、カールスペースが1/3となるのが標準である。" },
+    { id: "gijuturiron_past_2020_07", text: "アルカリ性タイプの酸化染毛剤によるカラーリングでは、細毛や軟毛などは黄み系が出やすいので、希望色より明度の低い染毛剤を用いるとよい。", source: "42回 問題50", answer: true, exp: "正しい。髪質によって色の出方が異なるため、細毛等の場合は明度の低い薬剤を選択することで希望色に近づける。" },
+    { id: "gijuturiron_past_2020_08", text: "アートチップは、ナチュラルネイル（自爪）に直接ラインストーンやシールなどでアートを施すテクニックである。", source: "42回 問題51", answer: false, exp: "誤り。アートチップは、すでにあらかじめアートが施されている人工のチップを、両面テープなどで自爪に装着する技術である。" },
+    { id: "gijuturiron_past_2020_09", text: "まつ毛エクステンションのカウンセリングでは、安全な施術のために施術のリスクについても正しく説明する必要がある。", source: "42回 問題52", answer: true, exp: "正しい。説明責任を果たすため、メリットだけでなくデメリットやアレルギー等のリスクについても事前に伝える。" },
+    { id: "gijuturiron_past_2020_10", text: "ヘアドライヤーの温度を一定に保つためには、着脱式のアタッチメントを交換して調節する。", source: "42回 問題53", answer: false, exp: "誤り。ドライヤーの温度を一定に保つのは、本体に内蔵されているサーモスタットの機能である。" },
+    { id: "gijuturiron_past_2020_11", text: "線をさまざまな形に配置して、意図的に錯覚を生じさせるものを化学的錯視という。", source: "42回 問題54", answer: false, exp: "誤り。線を配置して起こる錯覚現象は、幾何学的錯視と呼ばれる。" },
+    { id: "gijuturiron_past_2020_12", text: "エステティックにおける肌質は、水分や皮脂のバランスによって分類することができる。", source: "42回 問題55", answer: true, exp: "正しい。水分と皮脂の分泌量やバランスにより、普通肌、乾燥肌、脂性肌、混合肌に分けられる。" },
+    { id: "gijuturiron_past_2020_13", text: "スキャルプマッサージの揉撚法は、指先が頭皮に触れる瞬間に力を入れてつまみ上げ、円を描くようにもんでいく手技である。", source: "41回 問題44", answer: true, exp: "正しい。揉撚法は筋肉組織を意識してもみほぐし、血液やリンパ液の循環を高める効果がある。" },
+    { id: "gijuturiron_past_2020_14", text: "グラデーションカットは、長さの異なる毛髪の層を重ね合わせ、ボリュームを調節して立体感をあたえるカット技法である。", source: "41回 問題45", answer: false, exp: "誤り。記述の内容はレイヤーカットの説明である。グラデーションカットは上部の層ほど毛髪が長くなるよう段差をつける技法である。" },
+    { id: "gijuturiron_past_2020_15", text: "セニングカットを行う際、横パネルに対しては直角にシザーズを入れないように注意する。", source: "41回 問題46", answer: true, exp: "正しい。横パネルに対して直角にシザーズを入れると、不自然な切り口やラインが目立ちやすくなるため避ける。" },
+    { id: "gijuturiron_past_2020_16", text: "ワインディングのフォワードスタイルは、サイドから見ると斜め前方向に顔を包みこむようにロッドを配列する。", source: "41回 問題47", answer: true, exp: "正しい。顔の方向に包み込む流れをつくるのがフォワード配列の特徴である。" },
+    { id: "gijuturiron_past_2020_17", text: "メイポールカールは、ステムの角度を垂直に立ち上げたスタンドアップカールの一種である。", source: "41回 問題48", answer: false, exp: "誤り。メイポールカールはステムの角度が0度に近いフラットカール（平巻き）に分類される。" },
+    { id: "gijuturiron_past_2020_18", text: "スカルプチュアカールは、ベースの底辺だけをスライスしながら巻くシェーピングカールの一種で、ピンをとるとリッジの高いウエーブになる。", source: "41回 問題49", answer: true, exp: "正しい。スカルプチュアカールは指で巻いてつくるシェーピングカールであり、ウエーブのリッジを強調するのに適している。" },
+    { id: "gijuturiron_past_2020_19", text: "色の彩度とは鮮やかさのことであり、彩度が低いといえば「くすんだ色」を指す。", source: "41回 問題50", answer: true, exp: "正しい。彩度が高いほど鮮やかで、低くなるにつれて無彩色に近づき、くすんだ印象になる。" },
+    { id: "gijuturiron_past_2020_20", text: "酸化染毛剤で全体を暗く染める場合は、染まりにくいネープ（襟足）の部分から塗布を始める。", source: "41回 問題51", answer: false, exp: "誤り。全体を暗く染める場合は、毛髪が最も明るいフロント部分から塗布を始めるのが原則である。" },
+    { id: "gijuturiron_past_2020_21", text: "まつ毛エクステンションで使用するグルーによるアレルギー反応は、施術後数分以内に必ず現れる。", source: "41回 問題52", answer: false, exp: "誤り。アレルギーには即時型のほか遅延型もあり、施術後しばらくしてから症状が現れることもある。" },
+    { id: "gijuturiron_past_2020_22", text: "留袖の着付けにおいて、衣紋の抜きの基本は、にぎりこぶし1個が入る程度あけるのが適当である。", source: "41回 問題53", answer: true, exp: "正しい。留袖のような礼装では衣紋をしっかり抜き、品格と美しさを表現する。" },
+    { id: "gijuturiron_past_2020_23", text: "シザーズを操作する際、薬指孔にある鉄身を安定させ、母指で操作する方の刃を静刃という。", source: "41回 問題54", answer: false, exp: "誤り。母指で操作して動かす方の刃は動刃（どうば）であり、薬指で固定される方が静刃（せいば）である。" },
+    { id: "gijuturiron_past_2020_24", text: "タービネートタイプのヘアドライヤーは、吸い込んだ風を循環・旋回させて送り出す仕組みで、ドライイングの効率を高める特徴がある。", source: "41回 問題55", answer: true, exp: "正しい。タービネートタイプは風の循環を利用しており、ブロータイプに比べて速乾性に優れている。" }
+]
+        }
+    },
+    "gijuturiron_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.公衆衛生の概要": [
+    { id: "koshuese_extra_kankyoese_No28", text: "洗濯、風呂、トイレなどに使われた生活排水は、下水道法などによって規制される「下水」に該当する。", source: "No.28", answer: true, exp: "正しい。人が利用を終えた生活排水や産業排水は下水と呼ばれ、下水処理場などで浄化処理された後に公共用水域へ放流される。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "gijuturiron_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: false,  // ここを修正！
+        dataKey: "gijuturiron_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "gijuturiron_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: false,  // ここを修正！
+        dataKey: "gijuturiron_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
