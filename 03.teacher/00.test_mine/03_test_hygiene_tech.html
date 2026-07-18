@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『衛生管理』<br>【衛生管理技術ver】</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_esekanrigijutu_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_esekanrigijutu_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No12.消毒法総論": [
+    { id: "test_esekanrigijutu_original_No12_01", text: "美容師法施行規則に定められた消毒方法と同等以上の効果があると自己判断できれば、オゾン消毒などの規定外の方法を用いてもよい。", source: "No12-01", answer: false, exp: "誤り。美容所で行う消毒方法は美容師法施行規則で具体的に定められており、勝手に「同等以上の効果がある」と判断して規定外の方法を用いることは認められていません。" },
+    { id: "test_esekanrigijutu_original_No12_02", text: "血液が付着していないはさみの消毒として、1cm2あたり75μW以上の紫外線を20分間以上照射する方法が美容師法施行規則に規定されている。", source: "No12-02", answer: false, exp: "誤り。紫外線消毒の規定強度は1cm2あたり85μW以上です。75μWでは基準を満たしません。" },
+    { id: "test_esekanrigijutu_original_No12_03", text: "血液が付着しているはさみの消毒方法として、0.1％以上の次亜塩素酸ナトリウム水溶液中に10分間浸す方法は適切である。", source: "No12-03", answer: true, exp: "正しい。血液が付着した器具（かみそり以外も含む）には、0.1％以上の高濃度の次亜塩素酸ナトリウムが規定されています。" },
+    { id: "test_esekanrigijutu_original_No12_04", text: "美容師法施行規則に定められた蒸気消毒は、70℃を超える湿熱に被消毒物を10分間以上触れさせる方法である。", source: "No12-04", answer: false, exp: "誤り。蒸気消毒の規定温度は80℃を超える湿熱です。70℃では基準を満たしません。" },
+    { id: "test_esekanrigijutu_original_No12_05", text: "微生物を殺さないまでも、さまざまな方法によってその発育や作用を止めて、目的物の腐敗を防ぐことを防腐という。", source: "No12-05", answer: true, exp: "正しい。防腐の定義は、微生物の増殖や作用を抑制して腐敗を防ぐことを指します。" },
+    { id: "test_esekanrigijutu_original_No12_06", text: "加熱殺菌には乾熱と湿熱があるが、一般に湿熱よりも乾熱のほうが低い温度で殺菌されやすく効果的である。", source: "No12-06", answer: false, exp: "誤り。湿熱（水分がある熱）の方が乾熱よりも低い温度・短い時間でタンパク質を凝固させるため、殺菌力が強いです。" },
+    { id: "test_esekanrigijutu_original_No12_07", text: "病原微生物を殺すか除去して、感染力をなくすことを「消毒」という。", source: "No12-07", answer: true, exp: "正しい。消毒とは生存する微生物を殺したり除去したりして、感染力を失わせる行為です。" },
+    { id: "test_esekanrigijutu_original_No12_08", text: "血液が付着していない器具の消毒であれば、沸騰後2分間以上煮沸する方法を用いることができる。", source: "No12-08", answer: true, exp: "正しい。煮沸消毒は血液付着の有無にかかわらず、全ての器具に適用可能な法定消毒法です。" },
+    { id: "test_esekanrigijutu_original_No12_09", text: "血液が付着している疑いのない器具に紫外線照射を行う場合、照射時間は10分間以上でよい。", source: "No12-09", answer: false, exp: "誤り。紫外線消毒の規定時間は20分間以上です。10分間では不十分です。" },
+    { id: "test_esekanrigijutu_original_No12_10", text: "細菌の一部が形成する芽胞（がほう）は熱に非常に強いため、100℃の沸騰水中で数分間加熱しても殺菌することはできない。", source: "No12-10", answer: true, exp: "正しい。芽胞は極めて強い抵抗力を持ち、100℃の煮沸では死滅しません。これを死滅させるには滅菌の処理が必要です。" },
+    { id: "test_esekanrigijutu_original_No12_11", text: "顔そりに用いた、血液が付着していないかみそりの消毒は、20分間以上1cm2当たり85μW以上の紫外線を照射することで完了する。", source: "No12-11", answer: false, exp: "誤り。かみそり（血液の有無を問わず）の消毒には、煮沸、エタノール浸漬、0.1％以上の次亜塩素酸ナトリウム浸漬のいずれかを行う必要があり、紫外線消毒は認められていません。" },
+    { id: "test_esekanrigijutu_original_No12_12", text: "沸騰後2分間以上煮沸する方法（煮沸消毒）は、血液が付着した器具の消毒に適用できる。", source: "No12-12", answer: true, exp: "正しい。煮沸消毒は血液が付着した器具、またはその疑いのあるものに認められている法定消毒法の一つです。" },
+    { id: "test_esekanrigijutu_original_No12_13", text: "両性界面活性剤による美容用具の消毒は、0.05％の水溶液に5分間浸せば十分である。", source: "No12-13", answer: false, exp: "誤り。両性界面活性剤による消毒は、0.1％以上の濃度で10分間以上浸す必要があります。" },
+    { id: "test_esekanrigijutu_original_No12_14", text: "化学的消毒法において、一般的に消毒薬使用液（希釈液）の温度が上昇すると殺菌効果は高まる。", source: "No12-14", answer: true, exp: "正しい。殺菌作用は一種の化学反応であるため、一般に温度の上昇に伴い反応速度が速くなり、殺菌効果も向上します。" },
+    { id: "test_esekanrigijutu_original_No12_15", text: "エタノール（76.9〜81.4％）水溶液中に10分間以上浸す方法は、器具の血液付着の有無にかかわらず法定消毒として認められる。", source: "No12-15", answer: true, exp: "正しい。エタノール浸漬法は、血液が付着した器具に対しても認められている数少ない消毒法の一つです。" },
+    { id: "test_esekanrigijutu_original_No12_16", text: "血液が付着した器具の消毒をエタノールで行う場合、エタノール水溶液中に10分間以上浸す必要がある。", source: "No12-16", answer: true, exp: "正しい。血液が付着した器具に対してエタノール消毒を行う場合は、10分間以上の浸漬が規定されています。" },
+    { id: "test_esekanrigijutu_original_No12_17", text: "煮沸消毒法は高温を用いるため、多くのプラスチック製器具の消毒には不適当である。", source: "No12-17", answer: true, exp: "正しい。約100℃の熱湯を使う煮沸消毒では、プラスチック製の器具は変形や変質を起こす恐れがあるため適していません。" },
+    { id: "test_esekanrigijutu_original_No12_18", text: "使用後の器具は、消毒の効果を高めるために洗浄するよりも前に、速やかに消毒液に浸して消毒を行うべきである。", source: "No12-18", answer: false, exp: "誤り。使用後の器具は、まず十分に洗浄して汚れ（有機物）を落としてから消毒を行うのが鉄則です。汚れが残っていると消毒効果が激減します。" },
+    { id: "test_esekanrigijutu_original_No12_19", text: "消毒用エタノール（76.9～81.4％）の希釈液は、蒸発や汚れの程度により、7日以内に取り替えなければならない。", source: "No12-19", answer: true, exp: "正しい。エタノールの場合は7日以内、次亜塩素酸ナトリウムや逆性石けんなどのその他の消毒薬については毎日取り替える必要があります。" },
+],
+"No13.消毒法各論": [
+    { id: "test_esekanrigijutu_original_No13_01", text: "希釈した逆性石けん液は、細菌の繁殖を防ぎ効果を維持するために、7日毎に取り替えるのが適切である。", source: "No13-01", answer: false, exp: "誤り。希釈した逆性石けん液は、時間が経つと効果が低下したり細菌が繁殖したりするため、毎日（または使用の都度）取り替える必要があります。" },
+    { id: "test_esekanrigijutu_original_No13_02", text: "両性界面活性剤による消毒は、血液や膿などの有機物が多量に付着している状態でも、その殺菌力が低下することはない。", source: "No13-02", answer: false, exp: "誤り。両性界面活性剤は血液や膿などの有機物が付着していると、殺菌力が著しく低下するため、消毒前にしっかり洗浄する必要があります。" },
+    { id: "test_esekanrigijutu_original_No13_03", text: "次亜塩素酸ナトリウムは、病原微生物に対する殺菌作用と同時に、漂白の作用も併せ持っている。", source: "No13-03", answer: true, exp: "正しい。次亜塩素酸ナトリウムは殺菌と同時に漂白の作用があるのが特徴です。" },
+    { id: "test_esekanrigijutu_original_No13_04", text: "紫外線消毒は、光が直接当たらない被消毒物の深部や陰の部分についても、確実に消毒を行うことができる。", source: "No13-04", answer: false, exp: "誤り。紫外線は表面しか消毒できず、影になる部分や深部には光が届かないため、消毒することができません。" },
+    { id: "test_esekanrigijutu_original_No13_05", text: "次亜塩素酸ナトリウムはウイルスに対して効果があるが、結核菌に対しては殺菌効果が期待できない。", source: "No13-05", answer: true, exp: "正しい。次亜塩素酸ナトリウムなどの塩素系消毒薬は、結核菌に対して強い抵抗力を持たれるため、殺菌効果は期待できません。※次亜塩素酸ナトリウムは、結核菌に対しては他の消毒薬（エタノール等）と比較して現場での有効性が低く、(高濃度であれば一定の殺菌力を持ちますが、)試験対策上は『次亜塩素酸ナトリウムは結核菌に対し効果が期待できない（第一選択ではない）』と整理しておきましょう。" },
+    { id: "test_esekanrigijutu_original_No13_06", text: "多くのウイルスは、逆性石けん（陽イオン界面活性剤）に対して強い抵抗力を持っている。", source: "No13-06", answer: true, exp: "正しい。逆性石けんは、大多数のウイルスや結核菌、芽胞に対して殺菌効果がありません。" },
+    { id: "test_esekanrigijutu_original_No13_07", text: "消毒用エタノールは、非常に抵抗力が強い細菌の芽胞に対しても殺菌効果を発揮する。", source: "No13-07", answer: false, exp: "誤り。エタノールは非常に抵抗力が強い芽胞には効果がありません。" },
+    { id: "test_esekanrigijutu_original_No13_08", text: "次亜塩素酸ナトリウムは、他の細菌と比較して、特に結核菌に対して強い殺菌力を発揮する消毒薬である。", source: "No13-08", answer: false, exp: "誤り。次亜塩素酸ナトリウムは結核菌に対する殺菌力は期待できません。結核菌にはエタノール、両性界面活性剤、紫外線などが有効です。※次亜塩素酸ナトリウムは、結核菌に対しては他の消毒薬（エタノール等）と比較して現場での有効性が低く、(高濃度であれば一定の殺菌力を持ちますが、)試験対策上は『次亜塩素酸ナトリウムは結核菌に対し効果が期待できない（第一選択ではない）』と整理しておきましょう。" },
+    { id: "test_esekanrigijutu_original_No13_09", text: "煮沸消毒は細菌の芽胞に対しては効果がないが、血液が付着した器具の消毒には適用することができる。", source: "No13-09", answer: true, exp: "正しい。煮沸消毒は芽胞を殺すことはできませんが、法定消毒法として血液付着器具（またはその疑いのあるもの）の消毒に認められています。" },
+    { id: "test_esekanrigijutu_original_No13_10", text: "消毒用エタノールは、結核菌をはじめ、多くの細菌やウイルスに対して殺菌効果を示す。", source: "No13-10", answer: true, exp: "正しい。エタノールは結核菌やウイルスを含む多くの微生物に有効ですが、芽胞を形成する細菌には効果がありません。" },
+    { id: "test_esekanrigijutu_original_No13_11", text: "次亜塩素酸ナトリウム水溶液は、濃度が非常に濃い場合であっても無色透明な液体である。", source: "No13-11", answer: false, exp: "誤り。次亜塩素酸ナトリウムは、わずかに黄色を帯びています。" },
+    { id: "test_esekanrigijutu_original_No13_12", text: "血液が付着していない、あるいはその疑いのない「はさみ」の消毒に、消毒用エタノールを用いることは適切である。", source: "No13-12", answer: true, exp: "正しい。はさみは消毒用エタノールによる消毒に適しています。" },
+    { id: "test_esekanrigijutu_original_No13_13", text: "逆性石けんは、普通の石けん（洗剤）がわずかに混ざるだけであれば、その消毒力が低下することはない。", source: "No13-13", answer: false, exp: "誤り。逆性石けんは普通の石けん成分が混ざると、互いの性質を打ち消し合って消毒力が著しく低下します。" },
+    { id: "test_esekanrigijutu_original_No13_14", text: "陶磁器は、沸騰した熱湯による煮沸消毒を行うことが可能である。", source: "No13-14", answer: true, exp: "正しい。陶磁器は煮沸による消毒が適している材質です。" },
+    { id: "test_esekanrigijutu_original_No13_15", text: "次亜塩素酸ナトリウムは、石けんと反応して殺菌力が消失してしまうため、普通の石けんと併用することは絶対にできない。", source: "No13-15", answer: false, exp: "誤り。次亜塩素酸ナトリウムは、逆性石けんのように石けんと反応して殺菌力がなくなることはありません。ただし、効果を確実にするため汚れを落としてから使うのが基本です。" },
+    { id: "test_esekanrigijutu_original_No13_16", text: "美容師法では、客1人ごとに「皮膚に接する器具」を取り替え、「皮膚に接する布片」を消毒することが義務付けられている。", source: "No13-16", answer: false, exp: "誤り。規定では、布片（タオル等）は客1人ごとに「取り替え」、器具（はさみ等）は客1人ごとに「消毒」することになっています。" },
+    { id: "test_esekanrigijutu_original_No13_17", text: "殺菌灯から照射される殺菌効果の強い紫外線の波長は、253.7nm前後である。", source: "No13-17", answer: true, exp: "正しい。殺菌灯から照射される紫外線の波長は253.7nm前後です。" },
+],
+"No14.消毒法実習": [
+    { id: "test_esekanrigijutu_original_No14_01", text: "メスシリンダーで液量を読み取るときは、目を液面の高さに合わせ、真横から液面の中央のくぼんだ低いほうを読み取る。", source: "No14-01", answer: true, exp: "正しい。液量を測定する際は、液面がへこんだ部分（メニスカス）の最下端を目盛りに合わせるのが基本です。" },
+    { id: "test_esekanrigijutu_original_No14_02", text: "5％次亜塩素酸ナトリウムを希釈して、0.1％水溶液1,000mLを調製する場合、必要な原液の量は20mLである。", source: "No14-02", answer: true, exp: "正しい。5％から0.1％へは50倍希釈が必要です。1,000mLを50で割ると必要な原液量は20mLとなります。" },
+    { id: "test_esekanrigijutu_original_No14_03", text: "消毒薬の希釈倍数（倍）を求める計算式は、「溶質量 ÷ 溶液量」である。", source: "No14-03", answer: false, exp: "誤り。希釈倍数は「溶液量 ÷ 溶質量」で求めます。" },
+    { id: "test_esekanrigijutu_original_No14_04", text: "消毒液100mLの中に、消毒薬の主剤を2mL含む消毒液の百万分率は2,000ppmである。", source: "No14-04", answer: false, exp: "誤り。100mL中に2mL含む場合、2％溶液となり、ppmに換算すると20,000ppmになります。" },
+    { id: "test_esekanrigijutu_original_No14_05", text: "0.1％逆性石けん水溶液1,000mLを調製するためには、10％逆性石けん水溶液10mLが必要である。", source: "No14-05", answer: true, exp: "正しい。10％から0.1％へは100倍希釈となるため、1,000mL作るには原液10mLを合計1,000mLになるように水で薄めます。" },
+    { id: "test_esekanrigijutu_original_No14_06", text: "5％次亜塩素酸ナトリウム製剤10mLを水490mLで希釈すると、0.05％次亜塩素酸ナトリウム水溶液になる。", source: "No14-06", answer: false, exp: "誤り。原液10mLに水490mLを加えると全体量は500mL（50倍希釈）となり、濃度は0.1％になります。" },
+    { id: "test_esekanrigijutu_original_No14_07", text: "5％グルコン酸クロルヘキシジン製剤1mLを水499mLで希釈した水溶液は、法定の0.05％以上に達しないため、不適合である。", source: "No14-07", answer: true, exp: "正しい。原液1mLを溶液500mLにすると500倍希釈となり、濃度は0.01％です。これは規定の0.05％を下回っています。" },
+    { id: "test_esekanrigijutu_original_No14_08", text: "5％次亜塩素酸ナトリウム製剤1mLを水999mLで希釈した水溶液は、法令の規定濃度（0.01％以上）に適合する。", source: "No14-08", answer: false, exp: "誤り。この方法では1,000倍希釈となり濃度は0.005％です。規定の0.01％に達しないため不適合です。" },
+    { id: "test_esekanrigijutu_original_No14_09", text: "美容師法により、皮膚に接する器具や布片の清潔保持および消毒は、すべての美容師に義務づけられている。", source: "No14-09", answer: true, exp: "正しい。美容師法第8条および第13条に基づき、器具・布片だけでなく施設全体の清潔保持が義務となっています。" },
+    { id: "test_esekanrigijutu_original_No14_10", text: "常に清潔に心がけていれば、作業場や洗い場、排水溝などを毎日清掃する必要はない。", source: "No14-10", answer: false, exp: "誤り。衛生管理要領により、施設や排水溝などは1日1回以上の清掃が義務づけられています。" },
+    { id: "test_esekanrigijutu_original_No14_11", text: "15％両性界面活性剤製剤10mLで調製できる0.1％水溶液の量は、2,000mLである。", source: "No14-11", answer: false, exp: "誤り。15％から0.1％へは150倍希釈が必要です。原液10mLで作れる量は、10mL × 150倍 ＝ 1,500mL です。" },
+],
+"No15.衛生管理の実踐例": [
+    { id: "test_esekanrigijutu_original_No15_01", text: "衛生管理要領において、作業所（作業場）と待合所については、お互いに混同しないよう「区別されていることが望ましい」とされている。", source: "No15-01", answer: false, exp: "誤り。作業所と待合所は単に望ましいのではなく、「明確に区分（区別）されていること」と定められています。" },
+    { id: "test_esekanrigijutu_original_No15_02", text: "作業に伴って出る毛髪や汚物などを入れる容器は、中身が飛散したり臭気が漏れたりしないよう、ふた付きのものを備える必要がある。", source: "No15-02", answer: true, exp: "正しい。汚物箱や毛髪箱などは、中身が飛散したり臭気が出たりしないよう、必ずふた付きである必要があります。" },
+    { id: "test_esekanrigijutu_original_No15_03", text: "施設内には、みだりに犬や猫等の動物を入れないこととされているが、盲導犬や聴導犬などの身体障害者補助犬についてはその限りではない。", source: "No15-03", answer: true, exp: "正しい。身体障害者補助犬は、法的に入店を拒んではならないとされており、規制の対象外です。" },
+    { id: "test_esekanrigijutu_original_No15_04", text: "管理美容師は、施設や設備の衛生全般について、毎月一回、定期的な点検管理を行うことが義務付けられている。", source: "No15-04", answer: false, exp: "誤り。衛生全般の点検管理は「毎月」ではなく、「毎日」行うべき事項です。" },
+    { id: "test_esekanrigijutu_original_No15_05", text: "作業に伴って生ずる毛髪等の廃棄物は、効率化のために数人の客の施術が終わるごとにまとめて清掃すればよい。", source: "No15-05", answer: false, exp: "誤り。毛髪等の廃棄物は「数人ごと」ではなく、客１人ごとに清掃することが求められます。" },
+    { id: "test_esekanrigijutu_original_No15_06", text: "美容師は、客1人ごとの作業前および作業後には必ず手指の洗浄を行い、必要に応じて消毒を行わなければならない。", source: "No15-06", answer: true, exp: "正しい。衛生管理要領において、手指の洗浄や消毒は「客1人ごと」に行うことが定められています。" }
+　　　　　　]
+        }
+    },
+    "test_esekanrigijutu_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_esekanrigijutu_past_2025_01", text: "病原微生物を殺すか除去して、感染力をなくすことを「消毒」という。", source: "52回 問題21", answer: true, exp: "正しい。消毒とは生存する微生物を殺したり除去したりして、感染力を失わせる行為です。すべての微生物をなくす滅菌とは区別されます。" },
+    { id: "test_esekanrigijutu_past_2025_02", text: "血液が付着している疑いのない「かみそり」の消毒は、消毒用エタノールを含ませた脱脂綿で拭く方法で行うことができる。", source: "52回 問題22", answer: false, exp: "誤り。かみそり（血液の有無を問わず）の消毒には、エタノール水溶液中に10分間以上浸す必要があります。拭くだけの清拭法は認められていません。" },
+    { id: "test_esekanrigijutu_past_2025_03", text: "薬液消毒（化学的消毒法）は、一般的に低温で行うよりも高温（常温以上）で行ったほうが作用時間は短くてすむ。", source: "52回 問題23", answer: true, exp: "正しい。温度が上昇すると、消毒薬の反応が活性化され、薬物が菌体内へ拡散・浸入する速度も上がるため、殺菌効果が増大します。" },
+    { id: "test_esekanrigijutu_past_2025_04", text: "消毒用エタノールは、結核菌には効力があるが、細菌の芽胞に対しては効力がない。", source: "52回 問題24", answer: true, exp: "正しい。エタノールは多くの細菌やウイルス、結核菌に有効ですが、極めて抵抗力の強い芽胞を死滅させることはできません。" },
+    { id: "test_esekanrigijutu_past_2025_05", text: "10%逆性石けん液10mLを水990mLで希釈して調製した水溶液の濃度は、0.1%である。", source: "52回 問題25", answer: true, exp: "正しい。原液10mLに対し、加える水990mLを合わせて全体を1,000mL（100倍希釈）にしているため、10%の100分の1である0.1%になります。" },
+    { id: "test_esekanrigijutu_past_2025_06", text: "血液が付着していない「くし」を紫外線で消毒する場合、照射時間は10分間以上行えば法定の基準を満たす。", source: "51回 問題21", answer: false, exp: "誤り。美容師法施行規則で定められた紫外線照射による消毒時間は、20分間以上です。10分間では基準を満たしません。" },
+    { id: "test_esekanrigijutu_past_2025_07", text: "次亜塩素酸ナトリウムは、細菌だけでなくノロウイルスに対しても不活化させる効力がある。", source: "51回 問題22", answer: true, exp: "正しい。次亜塩素酸ナトリウムなどの塩素系消毒薬は、アルコールが効きにくいノロウイルスに対しても有効な消毒薬です。" },
+    { id: "test_esekanrigijutu_past_2025_08", text: "紫外線の消毒効果は透過力が強いため、器具の表面に油膜や汚れがあってもその殺菌力は減弱しない。", source: "51回 問題23", answer: false, exp: "誤り。紫外線は透過力が非常に弱いため、油膜や汚れがあると影になってしまい、その下の菌に光が届かず消毒効果が著しく低下します。" },
+    { id: "test_esekanrigijutu_past_2025_09", text: "逆性石けんの消毒効果は、普通の石けん（洗剤）と併用することで、汚れ落としと殺菌が同時に行えるため向上する。", source: "51回 問題24", answer: false, exp: "誤り。逆性石けんは普通の石けんと混ぜると互いの効果を打ち消し合ってしまうため、消毒力が激減します。併用は避け、石けん成分をよく洗い流してから使用する必要があります。" },
+    { id: "test_esekanrigijutu_past_2025_10", text: "5%グルコン酸クロルヘキシジン10mLに水990mLを加えて調製した水溶液の濃度は、0.05%である。", source: "51回 問題25", answer: true, exp: "正しい。原液10mLに対し合計量を1,000mL（100倍希釈）にしているため、5%の100分の1である0.05%になります。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_esekanrigijutu_past_2024_01", text: "殺菌とは、微生物を殺して無菌な状態にすることをいう。", source: "50回 問題21", answer: false, exp: "誤り。無菌な状態にする（すべての微生物を殺滅・除去する）のは「滅菌」の定義です。殺菌は単に微生物を殺すことを指します。" },
+    { id: "test_esekanrigijutu_past_2024_02", text: "血液が付着している疑いのない「かみそり」は、消毒用エタノールを含ませた綿やガーゼで拭くことで、法定の消毒を完了できる。", source: "50回 問題22", answer: false, exp: "誤り。かみそり（血液の有無を問わず）の消毒は、エタノール液中に10分間以上浸す必要があります。拭く方法（清拭法）は認められていません。" },
+    { id: "test_esekanrigijutu_past_2024_03", text: "理学的消毒法において、水分の多いほうがタンパク質は熱変性を起こしやすいため、湿熱は乾熱より短い時間で消毒できる。", source: "50回 問題23", answer: true, exp: "正しい。水分があるほうが低い温度・短い時間でタンパク質が変性（凝固）しやすいため、湿熱のほうが殺菌効果が高くなります。" },
+    { id: "test_esekanrigijutu_past_2024_04", text: "消毒用エタノールは、逆性石けんやグルコン酸クロルヘキシジンなどの他の消毒薬と反応しないため、これらと併用することが可能である。", source: "50回 問題24", answer: true, exp: "正しい。エタノールは他の薬液と併用が可能であり、速乾性を持たせるために他の消毒薬に配合されることもあります。" },
+    { id: "test_esekanrigijutu_past_2024_05", text: "5％次亜塩素酸ナトリウム液を50倍に希釈して調製すると、0.1％水溶液になる。", source: "50回 問題25", answer: true, exp: "正しい。5％から0.1％への希釈は50倍希釈となります。原液2に対して水を98加える（全体で100にする）割合などが該当します。" },
+    { id: "test_esekanrigijutu_past_2024_06", text: "血液が付着していないヘアブラシの消毒法として、0.1％以上の逆性石けん水溶液中に10分間以上浸す方法は適切である。", source: "49回 問題21", answer: true, exp: "正しい。血液が付着していない（疑いもない）器具に対して、逆性石けんによる浸漬法は認められた法定消毒法です。" },
+    { id: "test_esekanrigijutu_past_2024_07", text: "薬液消毒における殺菌効果の3要素は、温度、湿度、濃度の3つである。", source: "49回 問題22", answer: false, exp: "誤り。殺菌効果の3要素は「温度・時間・濃度」です。湿度は含まれません。" },
+    { id: "test_esekanrigijutu_past_2024_08", text: "紫外線殺菌灯は、寿命（2,000〜3,000時間）を過ぎて殺菌力が著しく低下しても、青白く発光してさえいれば、美容所での法定消毒として使い続けることができる。", source: "49回 問題23", answer: false, exp: "誤り。紫外線灯は発光していても寿命が来ると殺菌力が低下するため、定期的に交換しなければなりません。見た目の発光だけで判断することはできません。" },
+    { id: "test_esekanrigijutu_past_2024_09", text: "次亜塩素酸ナトリウムは漂白作用を持つが、酸性の洗剤と混ぜると有害なガスが発生するため注意が必要である。", source: "49回 問題24", answer: true, exp: "正しい。次亜塩素酸ナトリウムは酸性と混ざると有害な塩素ガスが発生するため、併用は厳禁です。" },
+    { id: "test_esekanrigijutu_past_2024_10", text: "0.1％逆性石けん水溶液1,000mLを調製する場合、10％逆性石けん原液を20mL使用する。", source: "49回 問題25", answer: false, exp: "誤り。10％から0.1％を作るには100倍希釈が必要です。1,000mL調製するには、原液は10mL（1000÷100）必要となります。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_esekanrigijutu_past_2023_01", text: "美容師法では、皮ふに接する布片は客一人ごとに取りかえ、皮ふに接する器具は客一人ごとに消毒することが義務づけられている。", source: "48回 問題21", answer: true, exp: "正しい。美容師法施行規則に基づき、布片の交換と器具の消毒、および適切な消毒設備の設置が義務づけられています。" },
+    { id: "test_esekanrigijutu_past_2023_02", text: "血液が付着している疑いのない「かみそり」の消毒は、消毒用エタノールを含ませた脱脂綿で表面を拭く方法で法定の基準を満たすことができる。", source: "48回 問題22", answer: false, exp: "誤り。かみそりの消毒は血液付着の有無にかかわらず、エタノール水溶液中に10分間以上浸す必要があります。拭く方法は認められていません。" },
+    { id: "test_esekanrigijutu_past_2023_03", text: "紫外線消毒は、透明な油膜などの汚れが表面についている場合であっても、その殺菌効果が減弱することはない。", source: "48回 問題23", answer: false, exp: "誤り。紫外線は透過力が弱いため、表面に汚れや油膜があると遮蔽されてしまい、殺菌効果が著しく低下します。" },
+    { id: "test_esekanrigijutu_past_2023_04", text: "消毒用エタノールは揮発性が強く、引火性があるため、火気の近くで使用や保管をしないよう注意が必要である。", source: "48回 問題24", answer: true, exp: "正しい。エタノールは可燃性物質であり、引火しやすいため火気厳禁です。密栓して冷暗所に保管する必要があります。" },
+    { id: "test_esekanrigijutu_past_2023_05", text: "5％グルコン酸クロルヘキシジン10mLを水で希釈して1,000mLにした場合、その水溶液の濃度は0.05％となる。", source: "48回 問題25", answer: true, exp: "正しい。液量を10mLから1,000mLへ100倍に薄めているため、濃度は5％の100分の1である0.05％になります。" },
+    { id: "test_esekanrigijutu_past_2023_06", text: "紫外線消毒は、タオルやケープなどの重なり合う布片類を、奥まで均一に消毒するのに適した方法である。", source: "47回 問題21", answer: false, exp: "誤り。紫外線は物体の表面にしか作用せず、深部や陰の部分には届かないため、重なり合う布片類の消毒には適していません。" },
+    { id: "test_esekanrigijutu_past_2023_07", text: "タオル蒸し器内で行う蒸気消毒では、器内の圧力は大気圧と同じ1気圧の状態で維持される。", source: "47回 問題22", answer: true, exp: "正しい。理容所・美容所のタオル蒸し器は流通蒸気を利用しており、密閉されていないため大気圧と同じ圧力になります。" },
+    { id: "test_esekanrigijutu_past_2023_08", text: "逆性石けん（陽イオン界面活性剤）は、普通の石けん（洗剤）と混ぜて使用すると、互いの作用を打ち消し合い消毒力が低下する。", source: "47回 問題23", answer: true, exp: "正しい。逆性石けんは陰イオン界面活性剤である普通の石けんと混ぜると、殺菌効果が失われるため、併用は避けるべきです。" },
+    { id: "test_esekanrigijutu_past_2023_09", text: "10％逆性石けん原液を100倍に希釈して調製した水溶液の濃度は、0.1％である。", source: "47回 問題24", answer: true, exp: "正しい。10％を100倍に希釈すると0.1％になります。計算式は10％ ÷ 100 ＝ 0.1％です。" },
+    { id: "test_esekanrigijutu_past_2023_10", text: "血液が付着した「くし」の消毒には、1cm2当たり85μW以上の紫外線を20分間以上照射する方法を適用できる。", source: "47回 問題25", answer: false, exp: "誤り。血液が付着した器具の消毒に紫外線照射は認められていません。煮沸、エタノール浸漬、0.1％以上の次亜塩素酸ナトリウム浸漬のいずれかを行う必要があります。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_esekanrigijutu_past_2022_01", text: "あらゆる微生物を殺すか除去して、生きている微生物が存在しない状態にすることを「消毒」という。", source: "46回 問題21", answer: false, exp: "誤り。あらゆる微生物を完全に死滅・除去して存在しない状態にすることは「滅菌」といいます。消毒は、病原微生物を殺すか除去して感染力をなくすことを指します。" },
+    { id: "test_esekanrigijutu_past_2022_02", text: "血液が付着していないブラシの消毒方法として、0.1%以上の逆性石けん水溶液中に10分間以上浸す方法は適切である。", source: "46回 問題22", answer: true, exp: "正しい。血液が付着していない（疑いもない）器具の消毒として、0.1%以上の逆性石けん液に10分間以上浸す方法は法定消毒として認められています。" },
+    { id: "test_esekanrigijutu_past_2022_03", text: "消毒薬水溶液の温度は、低ければ低いほど微生物に対する殺菌効果が高くなる。", source: "46回 問題23", answer: false, exp: "誤り。一般に消毒薬は、温度が高くなるほど殺菌効果が増大します。低い温度では薬の反応が鈍くなり効果が弱まります。" },
+    { id: "test_esekanrigijutu_past_2022_04", text: "消毒用エタノールは、細菌の芽胞（がほう）に対しては殺菌効果を示さない。", source: "46回 問題24", answer: true, exp: "正しい。エタノールは多くの細菌やウイルスに有効ですが、極めて抵抗力の強い芽胞を死滅させることはできません。" },
+    { id: "test_esekanrigijutu_past_2022_05", text: "5%次亜塩素酸ナトリウム5mLを用いて0.1%水溶液をつくるには、水を加えて合計250mLの溶液にすればよい。", source: "46回 問題25", answer: true, exp: "正しい。5%から0.1%へは50倍希釈が必要です。原液5mLを50倍（5×50）にすると合計量は250mLになります。" },
+    { id: "test_esekanrigijutu_past_2022_06", text: "微生物を殺すことの総称を「殺菌」といい、生きている微生物が存在しない状態にすることを「消毒」という。", source: "45回 問題21", answer: false, exp: "誤り。生きている微生物が存在しない状態にすることは「滅菌」です。消毒は病原微生物を死滅・除去して感染力をなくすことを指します。" },
+    { id: "test_esekanrigijutu_past_2022_07", text: "紫外線灯は使用にともない出力が低下するため、十分な殺菌効果を維持するために定期的な交換が必要である。", source: "45回 問題22", answer: true, exp: "正しい。殺菌灯は青白く光っていても、寿命が来ると殺菌線（紫外線）の強度が著しく低下するため、定期的な交換が不可欠です。" },
+    { id: "test_esekanrigijutu_past_2022_08", text: "逆性石けんは、手指や器具の消毒に適しており、結核菌に対しても高い効力を発揮する。", source: "45回 問題23", answer: false, exp: "誤り。逆性石けんは普通の細菌には有効ですが、結核菌やほとんどのウイルスには殺菌効果がありません。" },
+    { id: "test_esekanrigijutu_past_2022_09", text: "5%次亜塩素酸ナトリウム2mLを希釈して合計1,000mLの水溶液を調製した場合、その濃度は0.01%となる。", source: "45回 問題24", answer: true, exp: "正しい。希釈倍率が500倍（1,000÷2）となるため、元の濃度5%を500で割ると0.01%となります。" },
+    { id: "test_esekanrigijutu_past_2022_10", text: "器具を効果的に消毒するためには、消毒液に浸したり加熱したりする前に、あらかじめ十分に洗浄して汚れを落としておく必要がある。", source: "45回 問題25", answer: true, exp: "正しい。汚れ（有機物）が付着したままだと、消毒薬の成分が消費されたり熱が伝わりにくくなったりして効果が著しく低下するため、事前洗浄は必須工程です。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_esekanrigijutu_past_2021_01", text: "薬液による消毒において、消毒薬には消毒しようとする対象物や微生物の種類に応じた適切な濃度がある。", source: "44回 問題21", answer: true, exp: "正しい。消毒薬は対象物や目的とする菌の種類に合わせて、法令等で定められた適切な濃度で使用する必要があります。" },
+    { id: "test_esekanrigijutu_past_2021_02", text: "美容所において、血液が付着した器具の消毒として、1cm2あたり85マイクロワット以上の紫外線を20分間以上照射する方法が認められている。", source: "44回 問題22", answer: false, exp: "誤り。血液が付着した器具の消毒に紫外線照射は認められていません。煮沸、エタノール浸漬、0.1％以上の次亜塩素酸ナトリウム浸漬のいずれかを行う必要があります。" },
+    { id: "test_esekanrigijutu_past_2021_03", text: "逆性石けんやグルコン酸クロルヘキシジンは、石けん分（洗剤）が混入すると殺菌効果が低下する。", source: "44回 問題23", answer: true, exp: "正しい。これらの消毒薬は石けんや中性洗剤（陰イオン界面活性剤）と反応して互いの効果を打ち消し合うため、併用は避けるべきです。" },
+    { id: "test_esekanrigijutu_past_2021_04", text: "次亜塩素酸ナトリウムは普通の石けんと反応して殺菌力が消失するため、石けんと併用することはできない。", source: "44回 問題24", answer: false, exp: "誤り。次亜塩素酸ナトリウムは逆性石けんなどとは異なり、石けんと併用することが可能です。ただし、汚れがあると効果が落ちるため事前洗浄は重要です。" },
+    { id: "test_esekanrigijutu_past_2021_05", text: "10％の逆性石けん液1mLを用いて0.1％水溶液を調製する場合、水99mLを加えて合計量を100mLにする。", source: "44回 問題25", answer: true, exp: "正しい。10％から0.1％へは100倍希釈が必要です。原液1mLを100倍の溶液にするには、水は99mL必要となります。" },
+    { id: "test_esekanrigijutu_past_2021_06", text: "美容師法施行規則に定められた方法以外であっても、それと同等以上の消毒効果があると判断できれば、オゾン消毒等を用いてもよい。", source: "43回 問題21", answer: false, exp: "誤り。美容所で行う消毒方法は美容師法施行規則で具体的に定められており、たとえ同等以上の効果があったとしても、規定外の方法を用いることは認められていません。" },
+    { id: "test_esekanrigijutu_past_2021_07", text: "血液が付着していないはさみの消毒として、1cm2あたり85マイクロワット以上の紫外線を20分間以上照射する方法は適切である。", source: "43回 問題22", answer: true, exp: "正しい。血液の付着していない（疑いもない）器具に対して、紫外線照射による消毒は法定の方法として認められています。" },
+    { id: "test_esekanrigijutu_past_2021_08", text: "希釈して調製した逆性石けん水溶液は、蒸発や汚れの程度により、7日以内に取り替えればよい。", source: "43回 問題23", answer: false, exp: "誤り。逆性石けんなどの希釈消毒液は毎日取り換える必要があります。7日以内という規定はエタノール（汚れがない場合）に限られます。" },
+    { id: "test_esekanrigijutu_past_2021_09", text: "両性界面活性剤による消毒は、多量の有機物（汚れや血液など）が存在すると殺菌力が著しく低下する。", source: "43回 問題24", answer: true, exp: "正しい。両性界面活性剤や逆性石けんは有機物の影響を受けやすいため、消毒前にしっかり洗浄して汚れを落とす必要があります。" },
+    { id: "test_esekanrigijutu_past_2021_10", text: "メスシリンダーで液量を量り取るときは、目を液面の高さに合わせ、真横から液面の盛り上がった高いほうの目盛りを読む。", source: "43回 問題25", answer: false, exp: "誤り。メスシリンダーで液量を読み取る際は、液面のへこんだ低いほう（メニスカスの最下端）を目盛りと合わせるのが正しい読み方です。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_esekanrigijutu_past_2020_01", text: "血液が付着しているはさみの消毒は、0.1%以上の次亜塩素酸ナトリウム水溶液中に10分間以上浸す方法で行うことができる。", source: "42回 問題21", answer: true, exp: "正しい。血液が付着した器具の消毒には、0.1%以上の高濃度次亜塩素酸ナトリウムによる10分間以上の浸漬が認められています。" },
+    { id: "test_esekanrigijutu_past_2020_02", text: "美容師法施行規則で定める理学的消毒法には、紫外線、煮沸、蒸気のほかに、放射線や電子線による方法も規定されている。", source: "42回 問題22", answer: false, exp: "誤り。美容師法施行規則で規定されている理学的消毒法は、紫外線照射、煮沸、蒸気の3種類のみであり、放射線や電子線による方法は規定されていません。" },
+    { id: "test_esekanrigijutu_past_2020_03", text: "紫外線による消毒は、光が直接当たらない被消毒物の陰の部分についても、確実に消毒を行うことができる。", source: "42回 問題23", answer: false, exp: "誤り。紫外線は光が当たった表面のみに効果があり、光が届かない深部や影の部分を消毒することはできません。" },
+    { id: "test_esekanrigijutu_past_2020_04", text: "次亜塩素酸ナトリウムは、病原微生物を殺す殺菌作用と同時に、被消毒物を漂白する作用も併せ持っている。", source: "42回 問題24", answer: true, exp: "正しい。次亜塩素酸ナトリウムは塩素系消毒薬であり、強力な殺菌力とともに漂白作用があるのが特徴です。" },
+    { id: "test_esekanrigijutu_past_2020_05", text: "5%次亜塩素酸ナトリウムを希釈して、0.1%水溶液1,000mLを調製する場合、必要な原液の量は20mLである。", source: "42回 問題25", answer: true, exp: "正しい。5%から0.1%にするには50倍希釈（1,000mL ÷ 50）が必要なため、原液の量は20mLとなります。" },
+    { id: "test_esekanrigijutu_past_2020_06", text: "微生物を殺さないまでも、さまざまな方法によってその発育や作用を止めて、目的物の腐敗を防ぐことを防腐という。", source: "41回 問題21", answer: true, exp: "正しい。防腐は微生物を死滅させるのではなく、その増殖や作用を抑制して腐敗を防止することを指します。" },
+    { id: "test_esekanrigijutu_past_2020_07", text: "加熱殺菌においては、湿熱（蒸気や煮沸）よりも、水分を含まない乾熱のほうが低い温度で殺菌されやすく効果的である。", source: "41回 問題22", answer: false, exp: "誤り。加熱殺菌では、水分を含む湿熱のほうがタンパク質を熱変性させやすいため、乾熱よりも低い温度・短い時間で高い殺菌効果を発揮します。" },
+    { id: "test_esekanrigijutu_past_2020_08", text: "血液が付着していない器具に対して紫外線消毒を行う場合、1cm2あたり85マイクロワット以上の紫外線を10分間照射すればよい。", source: "41回 問題23", answer: false, exp: "誤り。美容師法施行規則で定められた紫外線消毒の照射時間は、20分間以上です。10分間では基準を満たしません。" },
+    { id: "test_esekanrigijutu_past_2020_09", text: "沸騰後2分間以上煮沸する方法は、血液が付着している器具の消毒にも適用することができる。", source: "41回 問題24", answer: true, exp: "正しい。煮沸消毒は、血液付着の有無にかかわらず全ての器具に適用できる法定消毒法の一つです。" },
+    { id: "test_esekanrigijutu_past_2020_10", text: "両性界面活性剤は、多くの細菌に対して有効であるが、結核菌や大多数のウイルスに対しては殺菌効果がない。", source: "41回 問題25", answer: false, exp: "誤り。両性界面活性剤は結核菌に対して効果がありますが、大多数のウイルスに対しては効果がありません。ウイルスに効かないのは逆性石けんも同様です。" }
+]
+        }
+    },
+     "test_esekanrigijutu_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.消毒法総論": [
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No01", text: "皮膚に接する器具の消毒法において、80℃を超える湿熱に10分間以上触れさせる方法は、法定消毒法の一つである。", source: "No.01", answer: true, exp: "正しい。80℃を超える湿熱（蒸気消毒）に10分間以上触れさせる方法は、法律で定められた正しい規定である。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No02", text: "逆性石けんを用いた消毒は、0.1%以上の水溶液に5分間以上浸すことで法定消毒として認められる。", source: "No.02", answer: false, exp: "誤り。逆性石けん（陽イオン界面活性剤）による消毒は、0.1%以上の水溶液に10分間以上浸す必要がある。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No03", text: "紫外線照射による消毒は、1cm2あたり85μW以上の強度を20分間以上照射する必要がある。", source: "No.03", answer: true, exp: "正しい。紫外線消毒は、85μW/cm2以上の強度の紫外線を20分間以上照射することが定められている。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No04", text: "血液が付着した器具の消毒には、1cm2あたり85μW以上の紫外線を20分間以上照射する方法が適している。", source: "No.04", answer: false, exp: "誤り。血液が付着した器具（またはその疑いのあるもの）の消毒に、紫外線消毒は認められていない。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No05", text: "血液が付着した器具の消毒法として、0.1%以上の次亜塩素酸ナトリウム水溶液に10分間以上浸す方法が認められている。", source: "No.05", answer: true, exp: "正しい。血液が付着した器具には、0.1%以上の高濃度の次亜塩素酸ナトリウム水溶液を用いた浸漬消毒が有効である。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No06", text: "血液の付着がない器具に限り、逆性石けんを含ませたガーゼや綿で表面を拭う清拭法が認められている。", source: "No.06", answer: false, exp: "誤り。消毒薬を含ませた綿やガーゼで拭う方法（清拭法）が認められているのは、エタノールのみである。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No07", text: "次亜塩素酸ナトリウムを用いた消毒では、被消毒物を10分間以上浸液に浸す必要がある。", source: "No.07", answer: true, exp: "正しい。次亜塩素酸ナトリウムによる消毒は、規定の濃度の水溶液に10分間以上浸すことが定められている。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No08", text: "逆性石けん（陽イオン界面活性剤）は、結核菌に対しても高い殺菌効果を発揮する。", source: "No.08", answer: false, exp: "誤り。逆性石けんは結核菌に対して効果がない。結核菌には煮沸やエタノール、両性界面活性剤などが有効である。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_soron_No09", text: "消毒作業を効率化するため、消毒薬はあらかじめ大量に使用濃度に希釈して保存しておくことが推奨される。", source: "No.09", answer: false, exp: "誤り。希釈した消毒液は効果が低下しやすいため、あらかじめ大量に希釈保存せず、使用時に調製するのが原則である。" },
+],
+"B.消毒法各論": [
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No10", text: "紫外線はあらゆる種類の微生物に対して有効であるが、人の目や皮膚に対しても有害である。", source: "No.10", answer: true, exp: "正しい。紫外線は幅広い微生物に対して殺菌効果を発揮しますが、人体（目や皮膚）に直接当たると有害であるため、取り扱いには注意が必要です。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No11", text: "紫外線は透過力が高いため、タオルをたたんで重ねた状態でも内部まで十分に消毒することができる。", source: "No.11", answer: false, exp: "誤り。紫外線は物体の表面のみに作用し、影になる部分や内部には届きません。そのため、重ねたりたたんだりしたタオルや布片の消毒には不向きです。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No12", text: "煮沸消毒は、結核菌などの栄養型細菌を死滅させることはできるが、ウイルスを死滅させることはできない。", source: "No.12", answer: false, exp: "誤り。煮沸消毒（沸騰後2分間以上）は、栄養型細菌だけでなく、一般的なウイルスも死滅させることができます。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No13", text: "煮沸消毒を行う際、被消毒物件を完全に湯に浸した状態で、沸騰後2分間以上煮沸しなければならない。", source: "No.13", answer: true, exp: "正しい。法定消毒の規定として、沸騰水中で物件を完全に浸し、2分間以上加熱を続けることが定められています。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No14", text: "100℃近い沸騰水中では、芽胞を持たない通常の細菌（栄養型細菌）は速やかに死滅する。", source: "No.14", answer: true, exp: "正しい。湿熱を用いた消毒では、沸騰水中で栄養型の細菌を短時間で確実に死滅させることができます。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No15", text: "血液が付着したかみそりを消毒する場合、利用できる理学的消毒法（物理的消毒法）は一つも存在しない。", source: "No.15", answer: false, exp: "誤り。血液が付着した器具（かみそりを含む）であっても、沸騰後2分間以上煮沸する「煮沸消毒」という理学的消毒法を利用することが可能です。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No16", text: "次亜塩素酸ナトリウムは、光や熱によって分解されやすいため、密栓して冷暗所に保存する必要がある。", source: "No.16", answer: true, exp: "正しい。次亜塩素酸ナトリウムは化学的に不安定で、日光や熱で分解して効果が低下しやすいため、保管場所には注意が必要です。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No17", text: "グルコン酸クロルヘキシジンは、普通の石けん分が混在していても、その殺菌力が低下することはない。", source: "No.17", answer: false, exp: "誤り。グルコン酸クロルヘキシジンは、普通の石けん（洗剤）成分が混ざると互いの性質を打ち消し合い、殺菌力が著しく低下します。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No18", text: "グルコン酸クロルヘキシジンを用いて器具を消毒する場合、0.05%以上の水溶液に10分間以上浸す方法が規定されている。", source: "No.18", answer: true, exp: "正しい。これは法定消毒法の一つであり、血液が付着していない（またはその疑いのない）器具類の消毒に適用されます。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No19", text: "逆性石けんは特有の強い刺激臭があるため、手指の消毒に使用する際には、理容所・美容所内の十分な換気が必要である。", source: "No.19", answer: false, exp: "誤り。逆性石けんはほとんど無臭であり、毒性や刺激も弱いため、手指や器具、食器の消毒に広く用いられています。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No20", text: "塩素剤（次亜塩素酸ナトリウム等）は、殺菌作用のほかに漂白作用も併せ持っており、化学的に安定で分解しにくい性質がある。", source: "No.20", answer: false, exp: "誤り。塩素剤は不安定で分解しやすいため、密栓して冷暗所に保存するなどの注意が必要である。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No21", text: "すぐれた消毒法の条件として、方法が簡単で効果が確実であること、さらにそのための費用も多くかからないことが挙げられる。", source: "No.21", answer: true, exp: "正しい。理想的な消毒法は、確実かつ安価で、人や物に無害であり、悪臭がないといった条件を満たすものである。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No22", text: "理容・美容の業における消毒では、短時間で消毒できて効果が確実であれば、被消毒物件の材質を損なうものであっても「すぐれた消毒法」といえる。", source: "No.22", answer: false, exp: "誤り。すぐれた消毒法を選定する条件には、短時間で効果が確実であることに加え、被消毒物件の材質を損なわないこと、毒性が低いこと等も含まれる。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No23", text: "消毒薬を選択する際は、理容師法施行規則・美容師法施行規則に定められているものの中から、被消毒物件の材質や目的に適したものを選ぶ必要がある。", source: "No.23", answer: true, exp: "正しい。法令に定められた消毒薬の中から、器具の材質（金属、プラスチック等）や汚染の状況（血液の有無等）に応じた適切なものを選ばなければならない。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_kakuron_No24", text: "消毒を行う際の注意事項として、皮膚に接する器具や布片類のみを重点的に消毒し、その他の器具や施設内の清掃については二の次でよい。", source: "No.24", answer: false, exp: "誤り。皮膚に接する器具や布片類だけでなく、その他の器具類や室内の清潔についても常に維持することが重要である。" },
+],
+"C.消毒法の実習": [
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No25", text: "5%のグルコン酸クロルヘキシジン製剤を用いて0.05%水溶液を作るには、製剤10mLを水990mLで希釈すればよい。", source: "No.25", answer: true, exp: "正しい。5%の原液を0.05%にするには100倍希釈が必要です。原液10mLに水を加えて合計1000mL（水は990mL）にすると100倍希釈になります。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No26", text: "10%逆性石けん製剤を希釈して0.1%水溶液3Lを調製する場合、必要な原液の量は300mLである。", source: "No.26", answer: false, exp: "誤り。10%を0.1%にするには100倍希釈が必要です。3L（3000mL）作るには原液30mLが必要であり、水の量は2970mLとなります。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No27", text: "5%次亜塩素酸ナトリウム製剤を希釈して0.1%水溶液1Lを調製する場合、必要な原液の量は20mLである。", source: "No.27", answer: true, exp: "正しい。5%から0.1%へは50倍希釈です。1000mLを50で割ると、必要な原液量は20mLとなります。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No28", text: "10%逆性石けん製剤5mLを水995mLで希釈すると、0.1%逆性石けん水溶液ができる。", source: "No.28", answer: false, exp: "誤り。10%原液5mLを合計1000mL（水995mL）にすると200倍希釈となり、濃度は0.05%になります。0.1%（100倍希釈）にするには原液10mLが必要です。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No29", text: "5%グルコン酸クロルヘキシジン製剤10mLを水990mLで希釈すると、0.05%水溶液ができる。", source: "No.29", answer: true, exp: "正しい。5%原液を100倍希釈（10mLを合計1000mLにする）すると、0.05%の水溶液を調製できます。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No30", text: "0.1%次亜塩素酸ナトリウム水溶液1000mLを作製するためには、5%製剤10mLに水990mLを加える。", source: "No.30", answer: false, exp: "誤り。5%から0.1%へは50倍希釈が必要です。1000mL作るには原液20mLに水980mLを加える必要があります。10mLを1000mLにすると100倍希釈の0.05%になります。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No31", text: "血液が付着したかみそりを消毒する場合、エタノール（76.9〜81.4%）水溶液中に10分間以上浸す方法が認められている。", source: "No.31", answer: true, exp: "正しい。血液が付着した器具の消毒は、煮沸、エタノール（10分間以上浸漬）、または0.1%以上の次亜塩素酸ナトリウム（10分間以上浸漬）のいずれかで行わなければなりません。" },
+    { id: "test_esekanrigijutu_extra_shodokuho_no_jisshu_No32", text: "金属製品の消毒法として、次亜塩素酸ナトリウム（塩素水）を用いる方法は適している。", source: "No.32", answer: false, exp: "誤り。次亜塩素酸ナトリウムは金属を強く腐食させる性質があるため、金属製品の消毒には適しません。" },
+],
+"D.衛生管理要領": [
+    { id: "test_esekanrigijutu_extra_eseikanriyoryo_No33", text: "作業場内の温度・湿度は、天候や時間帯、来客数などによって適宜変えることが求められる。", source: "No.33", answer: true, exp: "正しい。店内で働いている従業員と外部から入店する客とでは体感が異なるため、状況に応じて適宜調整する必要がある。" },
+    { id: "test_esekanrigijutu_extra_eseikanriyoryo_No34", text: "刈り取った毛髪などの廃棄物は、作業の効率化を優先するため、ふたのない容器に集めて保管することが求められる。", source: "No.34", answer: false, exp: "誤り。毛髪等の廃棄物は、毛髪が周囲に舞い上がったり、においが漏れたりして客に不快感を与えないよう、ふた付きの専用容器に入れ、適正に処理しなければならない。" },
+    { id: "test_esekanrigijutu_extra_eseikanriyoryo_No35", text: "理容所・美容所で使用する薬品類は、各従業員が作業時に最も扱いやすいと感じる任意の場所に自由に保管すべきである。", source: "No.35", answer: false, exp: "誤り。薬品類は、誤用や事故を防ぐため、常に同じ所定の場所に安全に保管し、その取扱いに十分注意しなければならない。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_esekanrigijutu_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_esekanrigijutu_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_esekanrigijutu_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_esekanrigijutu_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
