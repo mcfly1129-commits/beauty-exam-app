@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『保健』<br>【人体の構造及び機能ver】</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_jintai_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_jintai_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No01-02.頭部、顔部、頸部の体表解剖学": [
+    { id: "test_jintai_original_No01-02_01", text: "「正中」とは、人体の左右両方を等しく半分に分ける中心の線または面のことを指す。", source: "No01/02-01", answer: true, exp: "正しい。正中（せいちゅう）とは、人体を左右対称に分ける中心の位置を指します。" },
+    { id: "test_jintai_original_No01-02_02", text: "正中に平行な線または面の方向を「水平面（横断面）」という。", source: "No01/02-02", answer: false, exp: "誤り。正中面に平行な面は「矢状面（しじょうめん）」といいます。水平面は地面に対して平行で、体を上下に分ける面のことです。" },
+    { id: "test_jintai_original_No01-02_03", text: "「人体は『頭頸部』『体幹』『体肢』に大きく分けられる。体幹は、胸部、腹部、背部、および会陰部の総称である。」", source: "No01/02-03", answer: true, exp: "正しい。解剖学的には、人体は頭頸部、体幹、四肢（体肢）の部位に大別されます。体幹は頭・頸・四肢を除いた躯幹部分を指す。体肢(四肢)とは、上肢と下肢の総称です。" },
+    { id: "test_jintai_original_No01-02_04", text: "「体肢（四肢）」とは、上腕と下腿の部位のみを指す名称である。", source: "No01/02-04", answer: false, exp: "誤り。体肢（四肢）は、上肢（肩・上腕・前腕・手）と下肢（臀部・大腿・下腿・足）のすべての部位の総称です。" },
+    { id: "test_jintai_original_No01-02_05", text: "直立した人体を左右対称に分ける「軸」となる線を正中線、その線で分けられた面を正中面という。", source: "No01/02-05", answer: true, exp: "正しい。正中を通る「線」を正中線、それによって分けられた「面」を正中面と呼びます。" },
+    { id: "test_jintai_original_No01-02_06", text: "「前額面（前頭面）」とは、直立した人体を前後に分ける面のことである。", source: "No01/02-06", answer: true, exp: "正しい。前額面は体を前後に、水平面は上下に、正中矢状面は左右に分ける面です。" },
+    { id: "test_jintai_original_No01-02_07", text: "顔面の部位のうち、「口角」は左右に一対ある。", source: "No01/02-07", answer: true, exp: "正しい。口の両端にある口角は左右に一対あります。人中や上唇などは正中線上に位置する単一の部位です。" },
+    { id: "test_jintai_original_No01-02_08", text: "上唇の正中線を上下に走る溝のことを「鼻唇溝（びしんこう）」という。", source: "No01/02-08", answer: false, exp: "誤り。上唇の正中を走る溝は「人中」です。鼻唇溝は、鼻の脇から口角にかけて斜めに下がる溝（ほうれい線）を指します。" },
+    { id: "test_jintai_original_No01-02_09", text: "顔面の部位のうち、「鼻唇溝」は左右に一対存在する。", source: "No01/02-09", answer: true, exp: "正しい。鼻唇溝は鼻の脇から左右の口角に向かって斜めに下がるため、一対存在します。" },
+    { id: "test_jintai_original_No01-02_10", text: "鼻の構成部位のうち、「鼻翼（びよく）」は顔面の正中線上に位置する部位である。", source: "No01/02-10", answer: false, exp: "誤り。鼻翼（小鼻）は左右に一つずつあります。鼻根、鼻背、鼻尖は正中線上にありますが、鼻翼は正中線上にはありません。" },
+    { id: "test_jintai_original_No01-02_11", text: "顔面の体表解剖において、図の矢印で示した部位（鼻の先端部分）の名称は、鼻根である。", source: "No01/02-11", answer: false, exp: "誤り。鼻の先端部分は「鼻尖」と呼びます。鼻根は、左右の目の間に位置する鼻の付け根の部分を指します。" },
+    { id: "test_jintai_original_No01-02_12-01", text: "「人中（にんちゅう）」とは、上唇の正中線を上下に走る溝のことである。", source: "No01/02-12-01", answer: true, exp: "正しい。人中は上唇の正中線上にある溝を指す名称です。" },
+    { id: "test_jintai_original_No01-02_12-02", text: "「赤唇縁（せきしんえん）」とは、オトガイ部を取り巻くように湾曲したアーチ状の溝のことである。", source: "No01/02-12-02", answer: false, exp: "誤り。オトガイ部を取り巻くアーチ状の溝は「オトガイ唇溝」である。『赤唇縁（せきしんえん）』とは、唇の赤い部分（赤唇）と周囲の皮膚との境界線を指す名称である。" },
+    { id: "test_jintai_original_No01-02_13", text: "マイボーム腺は皮脂腺の一つであり、油性物質を分泌して涙液膜の乾燥を防ぐ働きがある。", source: "No01/02-13", answer: true, exp: "正しい。マイボーム腺はまぶたにある皮脂腺で、油分を出すことで涙の蒸発を防ぎ、眼球の乾燥を抑えます。" },
+    { id: "test_jintai_original_No01-02_14", text: "顔面の部位のうち「オトガイ」とは、左右の内眼角（目頭）の間の部分を指す名称である。", source: "No01/02-14", answer: false, exp: "誤り。オトガイは「下顎の先端部分」を指す名称です。内眼角の間ではありません。" },
+    { id: "test_jintai_original_No01-02_15", text: "頭部の部位のうち、「頬骨部（きょうこつぶ）」は眼窩部と接している。", source: "No01/02-15", answer: true, exp: "正しい。頬骨は、目が収まるくぼみである眼窩の底や外側の壁を構成しているため、眼窩部と接しています。" },
+],
+"No03-04.骨格器系": [
+    { id: "test_jintai_original_No03-04_01", text: "関節包の内層である滑膜から分泌され、関節の動きを滑らかにする潤滑油の役割を果たす液体を滑液という。", source: "No03/04-01", answer: true, exp: "正しい。滑液は、関節の潤滑油としての役割のほかに、関節軟骨へ栄養を補給する役割も担っています。" },
+    { id: "test_jintai_original_No03-04_02", text: "骨髄のうち、脂肪組織に置き換わり造血機能を失ったものを『黄色骨髄』、造血機能を有するものを『赤色骨髄』という。", source: "No03/04-02", answer: true, exp: "正しい。黄色骨髄は脂肪を含んで黄色く見えます。赤色骨髄は血液細胞を盛んに作っているため赤く見えます。" },
+    { id: "test_jintai_original_No03-04_03", text: "球関節は関節頭が球状をしており、多方向に自由に動かせる最も可動域の広い関節である。", source: "No03/04-03", answer: true, exp: "正しい。肩関節や股関節などの球関節は、広い範囲で自由に運動することができます。" },
+    { id: "test_jintai_original_No03-04_04", text: "骨の構造において、緻密質の内側に海綿質があり、その海綿状のすき間には骨髄が入っている。", source: "No03/04-04", answer: true, exp: "正しい。硬い緻密質の内側には、網目状の構造を持つ海綿質が存在し、そのすき間に骨髄が詰まっています。" },
+    { id: "test_jintai_original_No03-04_05", text: "海綿質は骨の外郭をつくる周囲の部分で、非常に硬い組織である。", source: "No03/04-05", answer: false, exp: "誤り。骨の外郭をつくる硬い周囲の部分は「緻密質」です。海綿質は骨の内部にあるスポンジのような網目構造の部分を指します。" },
+    { id: "test_jintai_original_No03-04_06", text: "長骨の中央にある空洞を髄腔と呼び、その中には骨髄が入っている。", source: "No03/04-06", answer: true, exp: "正しい。髄腔は骨の中心部に位置しており、骨髄で満たされています。" },
+    { id: "test_jintai_original_No03-04_07", text: "骨の構造において、典型的な長骨は、主に骨膜、緻密質、海綿質、髄腔の4部から構成される。", source: "No03/04-07", answer: true, exp: "正しい。長骨は、表面を覆う骨膜、硬い緻密質、網目状の海綿質、中心部の髄腔の4つの構造から成り立っています。" },
+    { id: "test_jintai_original_No03-04_08", text: "骨髄には、血球成分である赤血球、白血球、血小板をつくる「造血作用」がある。", source: "No03/04-08", answer: true, exp: "正しい。特に赤色骨髄において、これら血液の細胞が活発につくられています。" },
+    { id: "test_jintai_original_No03-04_09", text: "海綿質には、血管の通路であるハヴァース管とよばれる管があり、骨の栄養が保たれている。", source: "No03/04-09", answer: false, exp: "誤り。ハヴァース管とよばれる血管の通路があるのは「緻密質」です。この管を介して骨の組織に栄養が供給されます。" },
+    { id: "test_jintai_original_No03-04_10", text: "骨と骨の連結部分は、関節軟骨によって袋状に包まれて保護されている。", source: "No03/04-10", answer: false, exp: "誤り。関節において1対の骨の周囲を包んでいる袋状の組織は「関節包」です。関節軟骨は骨の端の表面を覆っている組織です。" },
+    { id: "test_jintai_original_No03-04_11", text: "関節を構成する骨の表面のうち、突出した『凸面』を関節頭、受け皿となる『凹面』を関節窩という。", source: "No03/04-11", answer: true, exp: "正しい。凸面のほうを【関節頭（かんせつとう）】、凹面状のほうを【関節窩（かんせつか）】と呼びます。" },
+    { id: "test_jintai_original_No03-04_12", text: "耳介の後下方に位置し、指圧の対象となる頭蓋骨の突起を乳様突起という。", source: "No03/04-12", answer: true, exp: "正しい。乳様突起は耳の後ろにある盛り上がった部分で、指圧のポイントになります。眉弓は眉毛の部分の骨を指します。" },
+    { id: "test_jintai_original_No03-04_13", text: "顔面頭蓋を構成する骨の一つに、上顎骨（じょうがくこつ）がある。", source: "No03/04-13", answer: true, exp: "正しい。上顎骨は頭蓋骨の一部です。仙骨は脊柱、脛骨は下肢、鎖骨は胸郭（肩帯）に分類されます。" },
+    { id: "test_jintai_original_No03-04_14", text: "『縫合』は頭蓋骨に特有の連結様式であり、可動性のない結合組織による連結である。", source: "No03/04-14", answer: true, exp: "正しい。縫合は頭蓋骨の骨同士を結合する、可動性のほとんどない連結様式です。他の部位には見られない頭蓋特有の構造です。" },
+    { id: "test_jintai_original_No03-04_15", text: "新生児の頭頂部にある「泉門」と呼ばれる膜状の部位は、心臓の鼓動に合わせて波打つことがある。", source: "No03/04-15", answer: true, exp: "正しい。新生児は骨の連結がまだ未完成なため、泉門部分で脳の拍動を観察することができます。" },
+    { id: "test_jintai_original_No03-04_16", text: "大泉門は生後1年半〜2年頃、小泉門は生後3〜6か月頃に閉鎖する。", source: "No03/04-16", answer: true, exp: "正しい。生後1年半から2年までに閉鎖されるのは【大泉門】であり、【小泉門】は3か月から半年までに閉鎖されます。" },
+    { id: "test_jintai_original_No03-04_17", text: "成人の場合、骨格が体重に占める割合は一般的に約15％〜20％程度である。", source: "No03/04-17", answer: true, exp: "正しい。骨が体重の約40％を占めるということはなく、通常は2割に満たない程度の割合です。" },
+    { id: "test_jintai_original_No03-04_18", text: "胸郭は、円錐台形の鳥かご状の骨格で、呼吸運動に重要な役割を果たす。", source: "No03/04-18", answer: true, exp: "正しい。円錐台形の鳥かご状で呼吸運動に関わるのは【胸郭（きょうかく）】です。頭蓋は脳や感覚器を保護するための骨格です。" },
+    { id: "test_jintai_original_No03-04_19", text: "骨の構造において、骨に硬さを与えている無機質成分の大部分はリン酸カルシウムである。", source: "No03/04-19", answer: true, exp: "正しい。骨の無機質成分のほとんどはリン酸カルシウムでできています。これが不足すると骨の硬度が保てなくなります。" },
+],
+"No05-06.筋系": [
+    { id: "test_jintai_original_No05-06_01", text: "顔面筋（表情筋）は、自分の意志で動かすことができる随意筋であり、体性神経（運動神経）の支配を受ける。", source: "No05/06-01", answer: true, exp: "正しい。顔面筋は随意筋に分類され、運動神経の命令によって収縮し、表情を作ります。" },
+    { id: "test_jintai_original_No05-06_02", text: "顔面筋（表情筋）は、筋肉の一端が皮膚に付着しているため「皮筋（ひきん）」とも呼ばれる。", source: "No05/06-02", answer: true, exp: "正しい。筋肉が皮膚に付着しているため、収縮した際に皮膚が動き、多彩な表情を生み出すことができます。" },
+    { id: "test_jintai_original_No05-06_03", text: "胸鎖乳突筋（きょうさにゅうとつきん）は、首の斜め前を走る大きな筋肉であり、頸部を代表する筋肉である。", source: "No05/06-03", answer: true, exp: "正しい。胸鎖乳突筋は頸部（首）に位置する主要な筋肉です。" },
+    { id: "test_jintai_original_No05-06_04", text: "横隔膜は胸腔と腹腔を隔てるドーム状の筋肉であり、肺を動かす主要な呼吸筋としての役割を持つ。", source: "No05/06-04", answer: true, exp: "正しい。横隔膜は、外肋間筋や内肋間筋とともに呼吸運動を担う重要な筋肉です。" },
+    { id: "test_jintai_original_No05-06_05", text: "頬（ほほ）を構成する「頬筋（きょうきん）」は、背部に存在する代表的な筋肉である。", source: "No05/06-05", answer: false, exp: "誤り。頬筋は【顔面】にある筋肉です。背部にある代表的な筋肉には、広背筋や僧帽筋などがあります。" },
+    { id: "test_jintai_original_No05-06_06", text: "心臓を構成する「心筋」は、自分の意志によって動かすことが可能な随意筋である。", source: "No05/06-06", answer: false, exp: "誤り。心筋は自分の意志では動かせない「不随意筋」であり、自律神経によって制御されています。" },
+    { id: "test_jintai_original_No05-06_07", text: "眼輪筋、口輪筋、鼻筋は、いずれも顔のパーツを動かして表情を作る「表情筋（顔面筋）」に分類される。", source: "No05/06-07", answer: true, exp: "正しい。これらは顔の表面にあり表情を作る筋肉です。一方で咬筋などは咀嚼筋に分類されます。" },
+    { id: "test_jintai_original_No05-06_08", text: "眼輪筋（がんりんきん）は、目のまわりを円く取り巻いており、収縮することで目を開く働きをする。", source: "No05/06-08", answer: false, exp: "誤り。眼輪筋の役割は「目を閉じる」ことです。" },
+    { id: "test_jintai_original_No05-06_09", text: "上腕二頭筋は、肘を曲げる（屈曲させる）働きではなく、前腕を伸展させる働きを担っている。", source: "No05/06-09", answer: false, exp: "誤り。上腕二頭筋はいわゆる「力こぶ」を作る筋肉で、前腕を屈曲させる（肘を曲げる）役割を持ちます。伸展させるのは上腕三頭筋です。" },
+    { id: "test_jintai_original_No05-06_10", text: "咀嚼筋（そしゃくきん）は、表情筋よりも浅い層に位置し、一端が皮膚に付着する「皮筋」である。", source: "No05/06-10", answer: false, exp: "誤り。咀嚼筋は表情筋よりも【深部】にあり、皮膚ではなく骨に付着しています。皮筋と呼ばれるのは表情筋（顔面筋）です。" },
+    { id: "test_jintai_original_No05-06_11", text: "頭部の筋肉は、その性質から「表情筋」と「咀嚼筋」の2つのグループに分けられる。", source: "No05/06-11", answer: true, exp: "正しい。頭部の筋肉は、顔の表情を作る表情筋（顔面筋）と、食べ物を噛む動作を行う咀嚼筋に大きく分けられます。" },
+    { id: "test_jintai_original_No05-06_12", text: "咀嚼筋は表情筋よりも深部に位置する筋肉であり、咬筋や側頭筋がその代表である。", source: "No05/06-12", answer: true, exp: "正しい。咀嚼筋は表情筋よりも「深部」にある筋肉です。構成する4種類の筋肉（咬筋・側頭筋・内側翼突筋・外側翼突筋）のうち、咬筋と側頭筋は体表から触れることができる主要な筋肉です。" },
+],
+"No07-08.神経系": [
+    { id: "test_jintai_original_No07-08_01", text: "中枢神経系は、「脳」と「脊髄」の2つの主要な部分から構成されている。", source: "No07/08-01", answer: true, exp: "正しい。中枢神経系は、頭蓋腔にある脳と脊柱管内にある脊髄から成ります。脳神経は末梢神経系に分類されます。" },
+    { id: "test_jintai_original_No07-08_02", text: "末梢神経系は、脳から直接出る『脳神経』と、脊髄から出る『脊髄神経』の2つに分類される。", source: "No07/08-02", answer: true, exp: "正しい。脳から直接出るのは脳神経、脊髄から出るのは脊髄神経です。これらを合わせて末梢神経系と呼びます。" },
+    { id: "test_jintai_original_No07-08_03", text: "中枢神経系は、解剖学的に【脳神経】と【脊髄神経】の2つに分けられる。", source: "No07/08-03", answer: false, exp: "誤り。脳神経と脊髄神経に分けられるのは「末梢神経系」です。中枢神経系は「脳」と「脊髄」に分けられます。" },
+    { id: "test_jintai_original_No07-08_04", text: "末梢神経系は、12対の脳神経と31対の脊髄神経から成り立っている。", source: "No07/08-04", answer: true, exp: "正しい。脳から出る脳神経は12対、脊髄から出る脊髄神経は31対存在し、全身の諸器官と中枢を結んでいます。" },
+    { id: "test_jintai_original_No07-08_05", text: "末梢神経系は機能によって、意志に関係なく内臓などを調節する「自律神経」と、意志による運動や知覚に関わる「体性神経」に分けられる。", source: "No07/08-05", answer: true, exp: "正しい。末梢神経系は自律神経（交感・副交感神経）と体性神経（知覚・運動神経）に大別されます。" },
+    { id: "test_jintai_original_No07-08_06", text: "【体性神経】は、さらに機能の異なる「交感神経」と「副交感神経」の2つに分けられる。", source: "No07/08-06", answer: false, exp: "誤り。交感神経と副交感神経に分けられるのは「自律神経」です。体性神経は、知覚神経と運動神経に分けられます。" },
+    { id: "test_jintai_original_No07-08_07", text: "【自律神経】は、末梢からの情報を伝える「知覚神経」と、中枢の命令を筋肉に伝える「運動神経」に分けられる。", source: "No07/08-07", answer: false, exp: "誤り。知覚神経と運動神経に分けられるのは「体性神経」です。自律神経は、交感神経と副交感神経に分けられます。" },
+    { id: "test_jintai_original_No07-08_08", text: "交感神経が優位に働くと、身体が活動的な状態になり、心拍数が増加する。", source: "No07/08-08", answer: true, exp: "正しい。交感神経は闘争か逃走かという活発な時に働き、心機能を促進させます。" },
+    { id: "test_jintai_original_No07-08_09", text: "副交感神経が優位なときには唾液腺が刺激され、サラサラとした希薄な唾液が多く分泌される。", source: "No07/08-09", answer: true, exp: "正しい。副交感神経はリラックス時や食事の際などに優位となり、消化を助けるために希薄な唾液の分泌を促します。" },
+    { id: "test_jintai_original_No07-08_10", text: "交感神経が優位に働くと、瞳孔は縮小し、気管支は収縮して呼吸が抑制される。", source: "No07/08-10", answer: false, exp: "誤り。交感神経が優位になると、より多くの光や空気を取り入れるために、瞳孔は「散大」し、気管支は「拡張」します。瞳孔の縮小や気管支の収縮は、副交感神経の作用です。" },
+    { id: "test_jintai_original_No07-08_11", text: "自律神経系のうち、副交感神経は「闘争の神経」と呼ばれ、身体の活力を高める役割を担っている。", source: "No07/08-11", answer: false, exp: "誤り。闘争の神経と呼ばれ、活発な活動時に優位になって身体の活力を高めるのは交感神経です。副交感神経は体を休ませ、エネルギーを蓄える役割を担っています。" },
+    { id: "test_jintai_original_No07-08_12", text: "運動神経は体性神経の一部であり、自分の意志で動かすことができる骨格筋を支配している。", source: "No07/08-12", answer: true, exp: "正しい。運動神経は自らの意志で動かせる骨格筋を支配します。これに対し、心臓や血管、消化管などは自分の意志では動かせない不随意筋であり、自律神経によって支配されています。" },
+],
+"No09-10.感覚器系": [
+    { id: "test_jintai_original_No09-10_01", text: "眼球の構造において、光を感じる視細胞が存在し、入ってきた光を電気信号に変換する役割を担っているのは網膜である。", source: "No09/10-01", answer: true, exp: "正しい。網膜には光を感知する視細胞があり、受け取った情報を電気信号として脳へ伝える重要な役割を持っています。" },
+    { id: "test_jintai_original_No09-10_02", text: "眼の構造のうち、厚さを変えることで光を屈折させ、網膜にピントを合わせるレンズの役割を果たしているのは角膜である。", source: "No09/10-02", answer: false, exp: "誤り。ピントを合わせるレンズの役割を果たしているのは「水晶体」です。角膜は光が眼球内に侵入する際の通り道です。" },
+    { id: "test_jintai_original_No09-10_03", text: "感覚と感覚器の組み合わせにおいて、視覚に対応する正しい感覚受容器は網膜である。", source: "No09/10-03", answer: true, exp: "正しい。視覚は網膜で感知されます。半規管や前庭は平衡感覚、鼓膜は聴覚に関与する部位です。" },
+    { id: "test_jintai_original_No09-10_04", text: "内耳にある「前庭（卵形嚢・球形嚢）」は、音の振動を電気信号に変換する聴覚の受容器としての役割を担う。", source: "No09/10-04", answer: false, exp: "誤り。聴覚の受容器は「蝸牛のラセン器（コルチ器）」です。前庭は、頭の傾きや位置を感じる平衡感覚を司ります。" },
+    { id: "test_jintai_original_No09-10_05", text: "網膜に存在する視細胞のうち、杆体細胞は明暗を、錐体細胞は色を感じる役割をそれぞれ持っている。", source: "No09/10-05", answer: true, exp: "正しい。網膜には性質の異なる2種類の受容器があり、周囲の明るさや色の情報を識別しています。" },
+    { id: "test_jintai_original_No09-10_06", text: "眼球内で光を感じる重要な細胞である杆体細胞や錐体細胞は、水晶体の内部に分布している。", source: "No09/10-06", answer: false, exp: "誤り。これらの視細胞が存在するのは「網膜」です。水晶体はレンズの役割を担う組織であり、視細胞は含まれません。" },
+    { id: "test_jintai_original_No09-10_07", text: "眼球結膜（がんきゅうけつまく）は、黒目の表面である瞳孔や虹彩の前を直接覆っている膜のことである。", source: "No09/10-07", answer: false, exp: "誤り。黒目の表面（瞳孔や虹彩の前）を覆っているのは「角膜」です。眼球結膜は白目の表面を覆っている透明な粘膜を指します。" },
+    { id: "test_jintai_original_No09-10_08", text: "角膜は、外界からの光を眼球内部に透過させる必要があるため、無色透明な組織となっている。", source: "No09/10-08", answer: true, exp: "正しい。角膜は光の入り口であるため透明です。ここが不透明であると光が網膜まで届かず、ものを見ることができません。" },
+    { id: "test_jintai_original_No09-10_09", text: "強膜（きょうまく）は、いわゆる白目の部分を形成する不透明で丈夫な膜であり、眼球の形状を維持している。", source: "No09/10-09", answer: true, exp: "正しい。強膜は眼球の大部分を包む白く厚い膜で、角膜とともに眼球の外殻を構成しています。" },
+    { id: "test_jintai_original_No09-10_10", text: "水晶体は、角膜の後方に位置し、瞳孔に入る光の量を調節する「絞り」の役割を担っている組織である。", source: "No09/10-10", answer: false, exp: "誤り。光の量を調節する絞りの役割を担うのは「虹彩（こうさい）」です。水晶体は厚みを変えてピントを調節するレンズの役割を担います。" },
+    { id: "test_jintai_original_No09-10_11", text: "【虹彩（こうさい）】は、厚みを変えることで光の焦点を調節するレンズの役割を担っている。", source: "No09/10-11", answer: false, exp: "誤り。焦点を調節するレンズの役割を担うのは「水晶体」です。虹彩は、瞳孔の大きさを変えて目に入る光の量を調節する絞りの役割を担います。" },
+    { id: "test_jintai_original_No09-10_12", text: "【毛様体（もうようたい）】は、毛様体小帯（チン小帯）を介して水晶体の厚みを変え、ピントを調節する働きを持つ。", source: "No09/10-12", answer: true, exp: "正しい。毛様体筋の収縮と弛緩によって水晶体の厚さが変化し、遠近の調節が行われます。" },
+    { id: "test_jintai_original_No09-10_13", text: "眼球の最前面にある【角膜】は、メラニン色素が豊富に含まれる層であり、光を通さない性質を持つ。", source: "No09/10-13", answer: false, exp: "誤り。メラニン色素が豊富で光を通さない層は「脈絡膜」です。角膜は無色透明な膜で、外界の光を眼球内に透過させます。" },
+    { id: "test_jintai_original_No09-10_14", text: "【硝子体（しょうしたい）】とは、眼球の内腔に存在する、寒天状（ゼリー状）の透明な物質のことである。", source: "No09/10-14", answer: true, exp: "正しい。硝子体は眼球の内腔を満たす透明な物質で、眼球の形状を維持する役割を担っています。" },
+    { id: "test_jintai_original_No09-10_15", text: "【脈絡膜（みゃくらくまく）】には、光を感じる視細胞である「杆体細胞」と「錐体細胞」が存在している。", source: "No09/10-15", answer: false, exp: "誤り。光を感じる視細胞が存在するのは「網膜」です。脈絡膜は、血管やメラニン色素を豊富に含み、眼球に栄養を与えたり暗室の状態を作ったりする層です。" },
+    { id: "test_jintai_original_No09-10_16", text: "【黄斑（おうはん）】とは、網膜の中央にある視細胞が集まった部位のことであり、視力が最もよい。", source: "No09/10-16", answer: true, exp: "正しい。黄斑は網膜の中心付近に位置し、物を見る際に最も重要な役割を果たす部分です。" },
+    { id: "test_jintai_original_No09-10_17", text: "【中心窩（ちゅうしんか）】は、錐体細胞が集まって凹んでいる場所であり、解像度が最も高い部分である。", source: "No09/10-17", answer: true, exp: "正しい。中心窩は黄斑の中央にある窪みで、色の識別に優れた錐体細胞のみが集まっているため、最も鮮明にものが見える場所です。" },
+    { id: "test_jintai_original_No09-10_18", text: "【視神経乳頭】は、網膜からの神経が眼球の外へ出る場所であり、視細胞が高密度に密集している。", source: "No09/10-18", answer: false, exp: "誤り。視神経乳頭には視細胞（感覚細胞）が全く存在しません。そのため、光を全く感じることができない場所となっています。" },
+    { id: "test_jintai_original_No09-10_19", text: "視野の中でまったく見えない部分のことを、【盲斑（マリオット盲点）】と呼ぶ。", source: "No09/10-19", answer: true, exp: "正しい。視細胞が存在しない視神経乳頭に対応する視野の欠落部位を盲斑といいます。" },
+    { id: "test_jintai_original_No09-10_20", text: "【外耳】は、耳介と外耳道、および鼓室の3つの部位で構成される。", source: "No09/10-20", answer: false, exp: "誤り。外耳は「耳介」と「外耳道」の2つの部分から構成されます。鼓室は中耳に含まれる部位です。" },
+    { id: "test_jintai_original_No09-10_21", text: "耳の構造において、鼓膜、耳小骨、耳管の3つは「中耳（ちゅうじ）」を構成する要素である。", source: "No09/10-21", answer: true, exp: "正しい。鼓膜、耳小骨、耳管は中耳に含まれます。これらを内耳と混同しないよう注意が必要です。" },
+    { id: "test_jintai_original_No09-10_22", text: "「中耳」には、蝸牛のラセン器、半規管（三半規管）、および前庭が含まれている。", source: "No09/10-22", answer: false, exp: "誤り。蝸牛、半規管、前庭（卵形嚢・球形嚢）は耳の最も奥にある「内耳（ないじ）」の構成要素です。中耳には鼓膜や耳小骨があります。" },
+    { id: "test_jintai_original_No09-10_23", text: "生理学的な「5基本味」とは、甘味、塩味、酸味、苦味、うま味の5つの味のことを指す。", source: "No09/10-23", answer: true, exp: "正しい。これら5つが基本味です。渋味や辛味は、味覚神経ではなく三叉神経などを介して感じる皮膚感覚に近い刺激として分類されるため、基本味には含まれません。" },
+    { id: "test_jintai_original_No09-10_24", text: "味覚と嗅覚は、同じ刺激が続いても感度が低下しにくいという「順応（慣れ）」が起こりにくい性質を持っている。", source: "No09/10-24", answer: false, exp: "誤り。味覚と嗅覚は、同じ刺激が続くと感度が低下する「順応（慣れ）」が非常に起こりやすい性質を持っています。" },
+    { id: "test_jintai_original_No09-10_25", text: "嗅覚の受容器である嗅細胞は、鼻腔の「下部」にある嗅部（嗅粘膜）に位置している。", source: "No09/10-25", answer: false, exp: "誤り。嗅細胞が存在するのは、鼻腔の「上部」にある嗅部（嗅粘膜）あるいは嗅上皮です。" },
+    { id: "test_jintai_original_No09-10_26", text: "知覚神経の終末には、冷覚、温覚、触覚（圧覚）、痛覚といった皮膚感覚を感知するための感覚受容器が存在する。", source: "No09/10-26", answer: true, exp: "正しい。皮膚やそれに続く粘膜には、それぞれの感覚に対応した受容器が分布しており、外界からの刺激を感知しています。" },
+],
+"No11-12.血液・循環器系(血液・免疫)": [
+    { id: "test_jintai_original_No11-12_01", text: "単球は、血液を構成する血球成分（細胞成分）の一つである。", source: "No11/12-01", answer: true, exp: "正しい。血液は液体成分の血漿と、細胞成分（赤血球、白血球、血小板）から成り、単球は白血球の一種です。" },
+    { id: "test_jintai_original_No11-12_02", text: "白血球の主な役割は、全身の組織へ酸素を運搬することである。", source: "No11/12-02", answer: false, exp: "誤り。酸素の運搬を担うのは「赤血球」の役割です。白血球の主な役割は、病原体や異物を排除する生体防御です。" },
+    { id: "test_jintai_original_No11-12_03", text: "血小板は、血管が損傷した際に集まって粘着し、血液を固めて止血する「血液凝固」の役割を担う。", source: "No11/12-03", answer: true, exp: "正しい。血小板は止血に欠かせない成分であり、血管の損傷部位で凝固に関わります。" },
+    { id: "test_jintai_original_No11-12_04", text: "リンパ球は、体内に侵入した特定の異物に対して働く免疫反応の中心的役割を担う。", source: "No11/12-04", answer: true, exp: "正しい。リンパ球（B細胞、T細胞など）は、特異的な免疫応答に関与する重要な血球です。" },
+    { id: "test_jintai_original_No11-12_05", text: "成熟した赤血球は、より多くの酸素を運搬するために「核」を持っていない。", source: "No11/12-05", answer: true, exp: "正しい。哺乳類の成熟した赤血球は、分化の過程で核を消失（脱核）させてヘモグロビンのスペースを確保します。" },
+    { id: "test_jintai_original_No11-12_06", text: "細胞が必要な物質を取り入れ、不要になったものを排出する一連のはたらきを「消化」という。", source: "No11/12-06", answer: false, exp: "誤り。このはたらきは「物質代謝」と呼ばれます。細胞レベルでのエネルギーや物質の入れ替えを指します。" },
+    { id: "test_jintai_original_No11-12_07", text: "血液を血管から取り出して放置したときにできる、ゼリー状の赤いかたまりを「血餅（けっぺい）」という。", source: "No11/12-07", answer: true, exp: "正しい。凝固因子のはたらきにより、フィブリンが血球を絡め取って形成される塊のことです。" },
+    { id: "test_jintai_original_No11-12_08", text: "血液を放置して凝固した際に、血餅の周囲ににじみ出てくる透明な淡黄色の液体を、血餅という。", source: "No11/12-08", answer: false, exp: "誤り。この上澄みの液体は「血清（けっせい）」と呼びます。血餅は赤いかたまりの部分を指します。" },
+    { id: "test_jintai_original_No11-12_09", text: "正常な成人の血液量は、体重の約13％に相当する。", source: "No11/12-09", answer: false, exp: "誤り。正常な成人の血液量は、体重の約「8％」です。体重の13分の1程度という指標と混同しないよう注意が必要です。" },
+    { id: "test_jintai_original_No11-12_10", text: "血液の全体量の中に「白血球」が占める容積の割合のことを、ヘマトクリットという。", source: "No11/12-10", answer: false, exp: "誤り。ヘマトクリットとは、血液中に占める「赤血球」の容積の割合のことです。" },
+    { id: "test_jintai_original_No11-12_11", text: "赤血球の寿命は血球としては比較的長く、約120日（約4カ月）である。", source: "No11/12-11", answer: true, exp: "正しい。赤血球の寿命は約120日であり、寿命を終えたものは主に脾臓や肝臓で破壊・代謝されます。" },
+    { id: "test_jintai_original_No11-12_12", text: "物質代謝で生じた二酸化炭素は、そのほとんどが赤血球内のヘモグロビンと結合して肺まで運搬される。", source: "No11/12-12", answer: false, exp: "誤り。呼吸によって取り込まれた**「酸素」の大部分が、赤血球にあるヘモグロビンと結合して全身へ運ばれます。一方、代謝によって生じた二酸化炭素は、ヘモグロビンとはほとんど結合せず、主に血漿（けっしょう：血液の液体成分）のなかに溶け込むような形で肺まで運ばれます。" },
+    { id: "test_jintai_original_No11-12_13", text: "リンパ球のうち、細胞性免疫に関わるのはT細胞、体液性免疫に関与するのはB細胞である。", source: "No11/12-13", answer: true, exp: "正しい。T細胞は感染細胞を直接攻撃する細胞性免疫を、B細胞は抗体（免疫グロブリン）を産生する体液性免疫をそれぞれ担います。" },
+    { id: "test_jintai_original_No11-12_14", text: "体内で炎症が起こると、生体防御反応として白血球の数は急激に減少する。", source: "No11/12-14", answer: false, exp: "誤り。細菌感染や炎症が起こると、異物と戦うために生体防御反応として白血球の数は増加します。" },
+    { id: "test_jintai_original_No11-12_15", text: "獲得免疫（後天性免疫）において、同じ抗原が再び侵入した場合には初回よりも弱い免疫反応となる。", source: "No11/12-15", answer: false, exp: "誤り。獲得免疫には「免疫記憶」があり、同じ抗原が再度侵入した際は、初回よりも素早く強力な反応（二次応答）を示します。" },
+    { id: "test_jintai_original_No11-12_16", text: "ナチュラルキラー（NK）細胞は、ウイルスに感染した細胞やがん細胞などを非特異的に攻撃する。", source: "No11/12-16", answer: true, exp: "正しい。NK細胞は特定の相手を記憶せずに攻撃するため、非特異的な防御機構（自然免疫）に分類されます。" },
+    { id: "test_jintai_original_No11-12_17", text: "皮膚の表皮に存在するランゲルハンス細胞は、侵入した異物をキャッチして情報を伝える「抗原提示細胞」である。", source: "No11/12-17", answer: true, exp: "正しい。ランゲルハンス細胞は樹状細胞の一種であり、異物を認識してその情報をリンパ球へ伝える重要な役割を担っています。" },
+    { id: "test_jintai_original_No11-12_18", text: "免疫系は、特異的防御機構である「自然免疫」と、非特異的防御機構である「獲得免疫」に大別される。", source: "No11/12-18", answer: false, exp: "誤り。定義の組み合わせが逆です。自然免疫（先天性免疫）は「非特異的」、獲得免疫（後天性免疫）は「特異的」な防御機構です。" },
+    { id: "test_jintai_original_No11-12_19", text: "先天性免疫（自然免疫）は、異物の侵入に対して短時間で反応するが、処理が不十分な場合がある。", source: "No11/12-19", answer: true, exp: "正しい。自然免疫は異物の侵入直後から即座に攻撃を開始しますが、特定の相手を狙い撃ちするわけではないため、強力な異物を処理しきれないことがあります。" },
+    { id: "test_jintai_original_No11-12_20", text: "後天性免疫（獲得免疫）は、異物の侵入直後から即座に反応を開始するため、自然免疫よりも反応が早い。", source: "No11/12-20", answer: false, exp: "誤り。獲得免疫は特定の抗原を認識して攻撃の準備を整えるまでに時間がかかるため、即座に反応する自然免疫（先天性免疫）よりも反応は遅くなります。" },
+    { id: "test_jintai_original_No11-12_21", text: "皮膚の表皮に存在するランゲルハンス細胞は、侵入した異物をキャッチして情報を伝える「抗原提示細胞」としての役割を担っている。", source: "No11/12-21", answer: true, exp: "正しい。ランゲルハンス細胞は樹状細胞の一種であり、異物を認識してその情報をリンパ球へ伝える重要な役割を担っています。" },
+    { id: "test_jintai_original_No11-12_22", text: "香粧品アレルギーについて、以前から長期間使用して異常がなかった製品であれば、その後突然アレルギー反応が起こることはない。", source: "No11/12-22", answer: false, exp: "誤り。それまで問題なく使えていたものであっても、ある日突然、生体の許容範囲を超えてアレルギー反応が発症する可能性は十分にあります。" },
+    { id: "test_jintai_original_No11-12_23", text: "抗体は、免疫グロブリン（γグロブリン）というタンパク質であり、ヒトではIgG、IgM、IgA、IgEなどの種類がある。", source: "No11/12-23", answer: true, exp: "正しい。抗体は免疫グロブリンと呼ばれ、特定の抗原と結合して無毒化したり、排除を促したりする働きをします。" },
+    { id: "test_jintai_original_No11-12_24", text: "免疫反応が過剰に機能した状態を「アレルゲン」といい、その原因となる抗原のことを「アレルギー」と呼ぶ。", source: "No11/12-24", answer: false, exp: "誤り。用語の定義が逆です。過剰な免疫反応そのものを「アレルギー」、その原因となる物質を「アレルゲン」と呼びます。" },
+    { id: "test_jintai_original_No11-12_25", text: "アレルギー反応は、現在一般的に、免疫反応の仕組みや症状が出るまでの時間に基づいてⅠ型からⅣ型の4つに分類される。", source: "No11/12-25", answer: true, exp: "正しい。教科書では、アレルギーのメカニズムの違いにより、I型（即時型）からIV型（遅延型）までの4つに分類して説明されています。" },
+    { id: "test_jintai_original_No11-12_26", text: "Ⅰ型アレルギー反応は、アレルゲンと接触してから15〜30分程度の極めて短時間で発症するため、遅延型アレルギー反応と呼ばれる。", source: "No11/12-26", answer: false, exp: "誤り。Ⅰ型アレルギーは発症が早いため「即時型（そくじがた）」と呼ばれます。遅延型は、発症までに時間がかかるⅣ型アレルギーの別名です。" },
+    { id: "test_jintai_original_No11-12_27", text: "Ⅳ型アレルギー反応はＴ細胞（感作Ｔリンパ球）が関与しており、発症までに数日を要するため、遅延型アレルギー反応に分類される。", source: "No11/12-27", answer: true, exp: "正しい。Ⅳ型は抗体ではなくＴ細胞が直接関与する免疫反応であり、反応が遅いため遅延型と呼ばれます。" },
+    { id: "test_jintai_original_No11-12_28", text: "即時型アレルギー（Ⅰ型アレルギー反応）において、アレルゲンと結合して反応を引き起こす抗体は、主にIgG抗体である。", source: "No11/12-28", answer: false, exp: "誤り。Ⅰ型アレルギーに深く関与する抗体は「IgE抗体」です。IgG抗体は血液中に最も多く存在する一般的な抗体です。" },
+    { id: "test_jintai_original_No11-12_29", text: "Ⅰ型アレルギー反応の代表的な疾患として、香粧品によるかぶれ（接触皮膚炎）や金属アレルギーが挙げられる。", source: "No11/12-29", answer: false, exp: "誤り。接触皮膚炎や金属アレルギーは「Ⅳ型（遅延型）」に分類されます。Ⅰ型の代表例は蕁麻疹、花粉症、食物アレルギーなどです。" },
+    { id: "test_jintai_original_No11-12_30", text: "Ⅳ型アレルギー反応の主な疾患には、香粧品による接触皮膚炎や金属アレルギーがあり、発症までに数時間から数日かかる性質を持つ。", source: "No11/12-30", answer: true, exp: "正しい。これらはＴ細胞が関与する遅延型の反応であり、抗原に接触してすぐには症状が出ないことが特徴です。" },
+    { id: "test_jintai_original_No11-12_31", text: "Ⅰ型アレルギー反応（即時型）の診断には、皮膚テストとしてプリックテストや皮内テストが用いられる。", source: "No11/12-31", answer: true, exp: "正しい。Ⅰ型アレルギーの診断には、皮膚の表面を少し傷つけて反応を見るプリックテストや、皮膚の中に少量のアレルゲンを注入する皮内テストが用いられます。" },
+    { id: "test_jintai_original_No11-12_32", text: "Ⅳ型アレルギー反応（遅延型）の皮膚テストとして、プリックテストが一般的に行われる。", source: "No11/12-32", answer: false, exp: "誤り。Ⅳ型アレルギー（遅延型）の診断に用いられるのは、原因物質を皮膚に貼り、48時間後や72時間後の反応を確認する「パッチテスト」です。" },
+    { id: "test_jintai_original_No11-12_33", text: "Ⅰ型アレルギー反応は「即時型」に分類され、抗原が体内に侵入してから数分から数十分以内の極めて短時間で反応が起こる。", source: "No11/12-33", answer: true, exp: "正しい。Ⅰ型アレルギーは即時型と呼ばれ、短時間で症状が出ます。数日後に反応が起こるのはⅣ型（遅延型）です。" },
+    { id: "test_jintai_original_No11-12_34", text: "Ⅳ型アレルギー（遅延型）の症状は、アレルゲンと接触してから遅くとも48時間以内には必ずピークを迎え、それ以降に発生することはない。", source: "No11/12-34", answer: false, exp: "誤り。Ⅳ型アレルギーは接触から24〜48時間、場合によっては72時間以降にピークを迎えることもあります。" },
+],
+"No13-14.血液・循環器系(心臓・循環・リンパ)": [
+    { id: "test_jintai_original_No13-14_01", text: "心臓の筋肉（心筋）自体に酸素や栄養を運ぶ血管を「冠状動脈」と呼ぶ。", source: "No13/14-01", answer: true, exp: "正しい。心臓がポンプとして活動を続けるために必要な栄養や酸素は、この冠状動脈によって供給されています。" },
+    { id: "test_jintai_original_No13-14_02", text: "循環器系において、ポンプの役割を果たすのが【血管】、パイプ（通路）の役割を果たすのが【心臓】である。", source: "No13/14-02", answer: false, exp: "誤り。役割の定義が逆です。ポンプの役割を果たすのが心臓であり、血管やリンパ管は液体を運ぶパイプ（通路）の役割を果たします。" },
+    { id: "test_jintai_original_No13-14_03", text: "人体の血管系は、心臓から送り出される血液が通る「動脈」、心臓へ戻る血液が通る「静脈」、および「毛細血管」の3種類で構成されている。", source: "No13/14-03", answer: true, exp: "正しい。これら3種類の血管がネットワークを形成し、全身の物質交換と循環を行っています。" },
+    { id: "test_jintai_original_No13-14_04", text: "心臓の左側（左心房と左心室の間）にある房室弁の名称は、三尖弁である。", source: "No13/14-04", answer: false, exp: "誤り。左側にある房室弁は「僧帽弁（二尖弁）」です。三尖弁は、右側の房室弁を指します。" },
+    { id: "test_jintai_original_No13-14_05", text: "心臓の栄養を司る冠状動脈は、大動脈の起始部（根本）から左右に2本分かれて出ている。", source: "No13/14-05", answer: true, exp: "正しい。大動脈の根本から分岐した冠状動脈が、心臓全体を取り囲むように走って心筋に栄養を送ります。" },
+    { id: "test_jintai_original_No13-14_06", text: "血液の逆流を防ぐための「弁」は、血圧の高い動脈にのみ存在している。", source: "No13/14-06", answer: false, exp: "誤り。血液が心臓から送り出される「動脈」は、非常に血圧が高く勢いよく流れるため、途中の血管に逆流防止弁は必要ありません。一方、心臓へ戻る「静脈」や「リンパ管」は、血圧が低く流れが滞ったり逆流したりしやすいため、血管の途中にたくさんの逆流防止弁が備わっています。（※なお、心臓と動脈の境目にある出口の弁を除き、一般的な動脈の管の中に弁はありません。）" },
+    { id: "test_jintai_original_No13-14_07", text: "心臓が収縮して血液を送り出すときの高い血圧のことを、最低血圧（拡張期血圧）と呼ぶ。", source: "No13/14-07", answer: false, exp: "誤り。心臓の収縮時の高い血圧は「最高血圧（収縮期血圧）」です。心臓が拡張したときの低い血圧を最低血圧と呼びます。" },
+    { id: "test_jintai_original_No13-14_08", text: "健康な成人の血圧において、最大血圧（最高血圧）の目安は110～130mmHg程度である。", source: "No13/14-08", answer: true, exp: "正しい。成人の正常な血圧範囲として、最大血圧は110～130mmHg、最小血圧は65～80mmHg程度が目安とされています。" },
+    { id: "test_jintai_original_No13-14_09", text: "健康な成人の安静時における脈拍数は、一般的に1分間に30〜40回程度である。", source: "No13/14-09", answer: false, exp: "誤り。健康な成人の安静時の脈拍数は、1分間に60〜80回程度です。30〜40回は徐脈と呼ばれる著しく少ない状態です。" },
+    { id: "test_jintai_original_No13-14_10", text: "心臓の右心室から押し出された血液が次に流れる血管は、肺動脈である。", source: "No13/14-10", answer: true, exp: "正しい。右心室から出た血液は、肺動脈を通って肺へ運ばれ、そこでガス交換が行われます。" },
+    { id: "test_jintai_original_No13-14_11", text: "肺で酸素を取り込んだ後の「肺静脈」には、酸素を多く含む動脈血が流れている。", source: "No13/14-11", answer: true, exp: "正しい。肺静脈は名称こそ静脈ですが、肺で酸素を補充したばかりの新鮮な動脈血を心臓へ運びます。" },
+    { id: "test_jintai_original_No13-14_12", text: "体循環（大循環）は、右心房から送り出された血液が全身を巡り、左心室に戻る経路のことである。", source: "No13/14-12", answer: false, exp: "誤り。体循環の経路は、左心室から送り出され、全身を巡って右心房に戻ります。" },
+    { id: "test_jintai_original_No13-14_13", text: "肺静脈には、二酸化炭素が多く酸素が少ない「静脈血」が流れている。", source: "No13/14-13", answer: false, exp: "誤り。肺静脈には、肺でガス交換を行い酸素を補充したばかりの「動脈血」が流れています。" },
+    { id: "test_jintai_original_No13-14_14", text: "小循環（肺循環）は、右心室から送り出された血液が肺でガス交換を行い、左心房に戻る経路のことである。", source: "No13/14-14", answer: true, exp: "正しい。肺循環は、全身から戻った二酸化炭素の多い血液を肺へ送り、酸素を補充して心臓へ戻す経路です。" },
+    { id: "test_jintai_original_No13-14_15", text: "人体の血液循環には、全身を巡る「体循環（大循環）」と、肺を巡る「肺循環（小循環）」、および「門脈循環」の3つがある。", source: "No13/14-15", answer: true, exp: "正しい。血液循環はこれら3つの主要な経路によって構成されています。" },
+    { id: "test_jintai_original_No13-14_16", text: "動脈血とは、二酸化炭素を多く含み暗赤色をした血液のことを指す。", source: "No13/14-16", answer: false, exp: "誤り。二酸化炭素を多く含み暗赤色をした血液は「静脈血」です。動脈血は酸素を多く含み、鮮紅色をしています。" },
+    { id: "test_jintai_original_No13-14_17", text: "リンパ管は最終的に、首の付け根付近にある「静脈角」で静脈（鎖骨下静脈）に合流し、血液循環に戻る。", source: "No13/14-17", answer: true, exp: "正しい。リンパ管は組織液の一部を回収し、静脈に合流することで再び血液循環系へと戻されます。" },
+    { id: "test_jintai_original_No13-14_18", text: "理容・美容の現場において、冷水浴は皮膚の血流やリンパの循環を盛んにするために効果的である。", source: "No13/14-18", answer: false, exp: "誤り。冷たい刺激は血管を収縮させ、血流を一時的に抑制します。血流やリンパの循環を盛んにするのは、一般的に温熱刺激やマッサージです。" },
+    { id: "test_jintai_original_No13-14_19", text: "人体で最大のリンパ管である「胸管（左リンパ本幹）」は、下半身と左上半身のリンパを集めて左鎖骨下静脈に入る。", source: "No13/14-19", answer: true, exp: "正しい。胸管は大部分のリンパを集める主要な通路で、左の静脈角へと注ぎ込みます。" },
+    { id: "test_jintai_original_No13-14_20", text: "直径が同程度の動脈と静脈の壁の厚さを比較すると、静脈のほうが動脈よりも厚い。", source: "No13/14-20", answer: false, exp: "誤り。動脈は高い血圧に耐える必要があるため、同程度の太さの静脈と比較して壁が厚く作られています。" },
+],
+"No15-16.呼吸器系": [
+    { id: "test_jintai_original_No15-16_01", text: "喉頭は単なる管状の気道であり、その下に続く発声器官（声帯）を含む部位を気管という。", source: "No15/16-01", answer: false, exp: "誤り。発声器官（声帯）を含む部位は「喉頭」です。喉頭の下に続く管状の気道を「気管」といいます。" },
+    { id: "test_jintai_original_No15-16_02", text: "鼻腔から肺に至る空気の通り道は、咽頭、喉頭、気管、気管支の順である。", source: "No15/16-02", answer: true, exp: "正しい。空気が通過する正しい順番は、鼻腔、咽頭、喉頭、気管、気管支の順になります。" },
+    { id: "test_jintai_original_No15-16_03", text: "気道のうち、気管、気管支、および肺までを含めて「上気道」と呼ぶ。", source: "No15/16-03", answer: false, exp: "誤り。気管から肺までは「下気道」と呼ばれます。鼻腔から喉頭までが「上気道」です。" },
+    { id: "test_jintai_original_No15-16_04", text: "咽頭は、気道としては鼻腔から喉頭へ、消化管としては口腔から食道へとつながる「２系統の交差点」といえる。", source: "No15/16-04", answer: true, exp: "正しい。咽頭は呼吸器と消化器が交差する場所にあり、嚥下時には喉頭蓋が閉じることで誤嚥を防いでいます。" },
+    { id: "test_jintai_original_No15-16_05", text: "「声帯」は咽頭に存在し、その下に続く管状の気道を気管支と呼ぶ。", source: "No15/16-05", answer: false, exp: "誤り。声帯があるのは「喉頭」です。また、喉頭の下に続く気道は「気管」であり、気管支は気管が分かれた後の部分を指します。" },
+    { id: "test_jintai_original_No15-16_06", text: "気管支や肺動脈・肺静脈などの血管が肺に入る肺の内側の部分を「肺門（はいもん）」という。", source: "No15/16-06", answer: true, exp: "正しい。肺の内側面にある肺門から、気管支や血管、神経などが出入りしています。" },
+    { id: "test_jintai_original_No15-16_07", text: "肺胞内の空気と毛細血管の血液との間で行われるガス交換のことを「組織呼吸」という。", source: "No15/16-07", answer: false, exp: "誤り。空気と血液の間で行われるガス交換は「肺呼吸（外呼吸）」です。血液と組織細胞の間で行われるものが組織呼吸です。" },
+    { id: "test_jintai_original_No15-16_08", text: "口（口腔）は本来食物をとるための器官であり、解剖学上の呼吸器系には分類されない。", source: "No15/16-08", answer: true, exp: "正しい。口腔は消化器系に分類されます。呼吸器系は鼻腔から始まります。" },
+    { id: "test_jintai_original_No15-16_09", text: "気道の内面は線毛上皮で覆われており、吸い込んだ異物や埃を粘液とともに口側へ運び出す「線毛運動」を行っている。", source: "No15/16-09", answer: true, exp: "正しい。気管や気管支などの線毛が波状運動を行うことで、肺に異物が侵入するのを防いでいます。" },
+    { id: "test_jintai_original_No15-16_10", text: "息を吐く（呼気）ときは、吸気時に収縮していた外肋間筋と横隔膜がさらに強く収縮することで胸郭を狭めている。", source: "No15/16-10", answer: false, exp: "誤り。息を吐くときは、外肋間筋と横隔膜が「弛緩（緩む）」することで胸郭が狭まり、空気が押し出されます。" },
+    { id: "test_jintai_original_No15-16_11", text: "内肋間筋や外肋間筋、横隔膜を総称して「呼吸筋」という。", source: "No15/16-11", answer: true, exp: "正しい。肺自体には自ら膨らむ筋肉がないため、これらの呼吸筋が動くことで胸郭の容積を変え、受動的に呼吸が行われます。" },
+    { id: "test_jintai_original_No15-16_12", text: "左右の鼻腔の側面には、それぞれ「鼻甲介（びこうかい）」と呼ばれる3つのひだ状の突起が存在する。", source: "No15/16-12", answer: true, exp: "正しい。上・中・下の3つの鼻甲介があることで、鼻腔内の表面積が広がり、吸い込んだ空気を効率よく加湿・加温できます。" },
+    { id: "test_jintai_original_No15-16_13", text: "一酸化炭素中毒の主な原因は、一酸化炭素が肺胞の組織を直接破壊し、ガス交換を物理的に停止させることにある。", source: "No15/16-13", answer: false, exp: "誤り。一酸化炭素中毒の原因は、一酸化炭素がヘモグロビンと強力に結合することで、酸素がヘモグロビンと結合するのを阻害し、血液が酸素を運べなくなるためです。" },
+    { id: "test_jintai_original_No15-16_14", text: "一酸化炭素は酸素に比べてヘモグロビンとの結合力が極めて強いため、空気中に少量存在するだけでも中毒になる可能性がある。", source: "No15/16-14", answer: true, exp: "正しい。一酸化炭素のヘモグロビン結合力は酸素の200倍以上と非常に強いため、わずかな量でも酸素運搬を強力に阻害し、中毒症状を引き起こします。" },
+    { id: "test_jintai_original_No15-16_15", text: "肺門に入った気管支は、右肺で2本、左肺で3本の葉気管支に分かれる。", source: "No15/16-15", answer: false, exp: "誤り。数が逆です。右肺は3葉（上・中・下）あるため右の葉気管支は3本、左肺は2葉（上・下）のため左の葉気管支は2本に分かれます。" },
+    { id: "test_jintai_original_No15-16_16", text: "気管から分かれた葉気管支は、枝分かれを繰り返して最終的に直径0.1〜0.2mm程度の「肺胞」に達する。", source: "No15/16-16", answer: true, exp: "正しい。葉気管支はさらに細かく枝分かれを繰り返し、最終的にガス交換を行う場所である肺胞に達します。" },
+    { id: "test_jintai_original_No15-16_17", text: "胸郭の内腔は、呼吸運動において肋骨を引き上げる「外肋間筋」のみのはたらきによって拡大される。", source: "No15/16-17", answer: false, exp: "誤り。息を吸って胸郭を拡大させるときは、肋骨を引き上げる「外肋間筋」だけでなく、お腹との境界にある**「横隔膜（おうかくまく）」も同時に収縮（下降）**して働きます。この2つの筋肉が主となって胸の空間を広げています。" },
+    { id: "test_jintai_original_No15-16_18", text: "呼吸運動は、肋間筋による胸郭の運動だけでなく、横隔膜が収縮・弛緩することによっても行われる。", source: "No15/16-18", answer: true, exp: "正しい。肋間筋による胸式呼吸と、横隔膜の上下運動による腹式呼吸の組み合わせによって呼吸運動が行われます。" },
+    { id: "test_jintai_original_No15-16_19", text: "成人の安静時における1分間あたりの呼吸回数は、一般的に60〜80回程度である。", source: "No15/16-19", answer: false, exp: "誤り。成人の安静時の呼吸回数は、1分間に約15〜20回です。60〜80回という数値は、安静時の成人の脈拍数、あるいは新生児の呼吸回数に相当します。" },
+    { id: "test_jintai_original_No15-16_20", text: "安静時において、1回の呼吸で肺を出入りする空気の量を「1回換気量」と呼び、成人の平均は約500mLである。", source: "No15/16-20", answer: true, exp: "正しい。安静時に1回の呼吸（吸気と呼気）で肺に出入りする空気量は約500mLとされています。" },
+    { id: "test_jintai_original_No15-16_21", text: "最大限に深く吸い込み、そこから最大限に吐き出した空気の量を「肺活量」という。", source: "No15/16-21", answer: true, exp: "正しい。肺活量は「1回換気量」「予備吸気量」「予備呼気量」の合計値であり、体力指標の一項目となっています。" },
+    { id: "test_jintai_original_No15-16_22", text: "息を吸う（吸気）ときは、内肋間筋が収縮し、横隔膜が弛緩（上昇）することで胸郭が広がる。", source: "No15/16-22", answer: false, exp: "誤り。息を吸う（吸気）ときは、外肋間筋が収縮し、横隔膜も収縮（下降）することで胸郭が広がります。内肋間筋は主に強制的に息を吐くときに働きます。" },
+],
+"No17-18.消化器系": [
+    { id: "test_jintai_original_No17-18_01", text: "消化管とは、口腔から始まり、咽頭、食道、胃、小腸、大腸を経て肛門まで続く一本の管のことである。", source: "No17/18-01", answer: true, exp: "正しい。咽頭は消化管に含まれます。一方で、肝臓や膵臓などは消化を助ける消化腺（付属器官）に分類されます。" },
+    { id: "test_jintai_original_No17-18_02", text: "食物に含まれる三大栄養素とは、タンパク質、脂肪、およびビタミンの3つのことである。", source: "No17/18-02", answer: false, exp: "誤り。三大栄養素は、タンパク質、脂肪（脂質）、糖質（炭水化物）の3つを指します。ビタミンは三大栄養素には含まれません。" },
+    { id: "test_jintai_original_No17-18_03", text: "栄養素を体内に取り入れるために、吸収可能な大きさまで分解していく一連の過程を「消化」という。", source: "No17/18-03", answer: true, exp: "正しい。咀嚼による機械的な分解と、消化酵素による化学的な分解によって、栄養素は吸収できるサイズになります。" },
+    { id: "test_jintai_original_No17-18_04", text: "成人の消化管の全長は、口から肛門までの生体時において約3mである。", source: "No17/18-04", answer: false, exp: "誤り。成人の消化管の全長は、生体時で約9mあります。3mという記述は短すぎます。" },
+    { id: "test_jintai_original_No17-18_05", text: "口腔の天井にあたる上壁は「口蓋（こうがい）」と呼ばれ、その後方の硬い部分は硬口蓋である。", source: "No17/18-05", answer: false, exp: "誤り。口蓋の前方の硬い部分を硬口蓋、後方の柔らかい部分を軟口蓋（なんこうがい）と呼びます。" },
+    { id: "test_jintai_original_No17-18_06", text: "軟口蓋の中央から垂れ下がっている「口蓋垂（こうがいすい）」は、一般的に「のどちんこ」と呼ばれている。", source: "No17/18-06", answer: true, exp: "正しい。口蓋の後端にある柔らかい筋質が垂れ下がった突起部分のことです。" },
+    { id: "test_jintai_original_No17-18_07", text: "大きなリンパ節である「口蓋扁桃（こうがいへんとう）」は、口蓋垂の左右の両脇に位置している。", source: "No17/18-07", answer: true, exp: "正しい。口蓋垂の上下ではなく、左右の両脇に一対存在しています。" },
+    { id: "test_jintai_original_No17-18_08", text: "主要な唾液腺には、耳下腺（じかせん）、顎上腺（がくじょうせん）、舌上腺（ぜつじょうせん）の3種類がある。", source: "No17/18-08", answer: false, exp: "誤り。正しい名称は「耳下腺」「顎下腺（がっかせん）」「舌下腺（ぜっかせん）」です。" },
+    { id: "test_jintai_original_No17-18_09", text: "食道において、食塊の刺激によって次々に収縮が起こり、内容物を胃まで運ぶ運動を「蠕動（ぜんどう）運動」という。", source: "No17/18-09", answer: true, exp: "正しい。消化管の壁が波打つように収縮することで、食物を先へと送り出す重要な運動です。" },
+    { id: "test_jintai_original_No17-18_10", text: "胃の入り口（食道側）の部分を「幽門（ゆうもん）」と呼び、十二指腸へ続く出口の部分を「噴門（ふんもん）」と呼ぶ。", source: "No17/18-10", answer: false, exp: "誤り。名称が逆です。入り口が「噴門」、出口が「幽門」です。" },
+    { id: "test_jintai_original_No17-18_11", text: "胃の食道側に続く入り口の部分を、幽門と呼ぶ。", source: "No17/18-11", answer: false, exp: "誤り。胃の入り口（食道側）は「噴門（ふんもん）」と呼びます。十二指腸へ続く出口の部分が「幽門（ゆうもん）」です。" },
+    { id: "test_jintai_original_No17-18_12", text: "胃の幽門には、十二指腸へ送る食物の量を調節するための幽門括約筋が存在する。", source: "No17/18-12", answer: true, exp: "正しい。幽門には括約筋（環状の平滑筋）があり、これが収縮・弛緩することで胃から十二指腸へ送る食物の量を調節しています。" },
+    { id: "test_jintai_original_No17-18_13", text: "小腸は、胃に続く細くて長い管であり、十二指腸、空腸、回腸の三部に分けられる。", source: "No17/18-13", answer: true, exp: "正しい。これら三つの部位を合わせて小腸と呼びます。盲腸・結腸・直腸は「大腸」の区分です。" },
+    { id: "test_jintai_original_No17-18_14", text: "大腸は消化管の最後にある管で、解剖学的に盲腸、結腸、直腸の三部に分けられる。", source: "No17/18-14", answer: true, exp: "正しい。これら三つの部位が大腸を構成します。十二指腸・空腸・回腸は「小腸」の区分です。" },
+    { id: "test_jintai_original_No17-18_15", text: "小腸の絨毛から吸収された栄養物のうち、ブドウ糖とアミノ酸は毛細血管へ、脂肪分は毛細リンパ管へと吸収される。", source: "No17/18-15", answer: true, exp: "正しい。ブドウ糖とアミノ酸は血管系へ、大きな粒子である脂肪分は毛細リンパ管（乳糜管）へとそれぞれ吸収されます。" },
+    { id: "test_jintai_original_No17-18_16", text: "【腎臓】は、エネルギーの産生、グリコーゲンの貯蔵、有害物質の解毒、および胆汁の生成に関与する。", source: "No17/18-16", answer: false, exp: "誤り。多彩な代謝や解毒、胆汁の生成を行う器官は「肝臓（かんぞう）」です。腎臓の主な役割は尿を生成することです。" },
+    { id: "test_jintai_original_No17-18_17", text: "膵臓は「外分泌腺」としての役割も持ち、強力な消化酵素を含む膵液を十二指腸に分泌する。", source: "No17/18-17", answer: true, exp: "正しい。膵臓は外分泌腺として膵液を産生し、タンパク質・糖質・脂質の消化に貢献します。" },
+    { id: "test_jintai_original_No17-18_18", text: "膵臓の内分泌細胞であるランゲルハンス島の【α細胞】から、血糖値を下げるインスリンがつくり出される。", source: "No17/18-18", answer: false, exp: "誤り。インスリンを産生・分泌するのは、ランゲルハンス島の「β（ベータ）細胞」です。問題文にある「α（アルファ）細胞」からは、逆に血糖値を上げる「グルカゴン」というホルモンが分泌されます。" },
+    { id: "test_jintai_original_No17-18_19", text: "腸の機械的な運動には、蠕動運動、分節運動、および【嚥下（えんげ）運動】の3種類がある。", source: "No17/18-19", answer: false, exp: "誤り。腸の運動には「蠕動運動」「分節運動」「振子運動」の3つがあります。嚥下運動は「飲み込み」の動作であり、口腔・咽頭・食道に関連する運動です。" },
+    { id: "test_jintai_original_No17-18_20", text: "消化器のはたらきにおいて、消化酵素のはたらきによって栄養素を分解する過程を「機械的消化」という。", source: "No17/18-20", answer: false, exp: "誤り。消化酵素による分解は「化学的消化」といいます。機械的消化は、咀嚼や胃腸の運動などによって物理的に細かくすることを指します。" },
+    { id: "test_jintai_original_No17-18_21", text: "消化酵素などを用いて、化学反応によって食物を分解していく過程を「機械的消化」という。", source: "No17/18-21", answer: false, exp: "誤り。消化酵素などを用いて化学反応で分解するのは「化学的消化」です。機械的消化とは、咀嚼や胃腸の運動などによって物理的に食べ物を細かくすることを指します。" },
+    { id: "test_jintai_original_No17-18_22", text: "咀嚼（そしゃく）は、歯を中心として、咀嚼筋や舌、口腔壁などが協力して食べ物を噛み砕く機械的消化の第一歩である。", source: "No17/18-22", answer: true, exp: "正しい。咀嚼は、顎の上下運動を行う咀嚼筋や舌などが連動して行われる、食物を細かく砕くための運動です。" },
+    { id: "test_jintai_original_No17-18_23", text: "「物質代謝」とは、体内の化学変化において物質を分解する「異化」のみを指し、新たな物質を合成する「同化」は含まれない。", source: "No17/18-23", answer: false, exp: "誤り。物質代謝（新陳代謝）とは、物質を分解する「異化」と、新たな物質を合成する「同化」の両方を合わせた体内での化学変化全体を指します。" },
+    { id: "test_jintai_original_No17-18_24", text: "同化（合成）の一例として、腸から吸収されたブドウ糖が多すぎた際に、体内で脂肪として蓄えられる合成反応があげられる。", source: "No17/18-24", answer: true, exp: "正しい。余ったエネルギー源を脂肪として合成し蓄えることは、物質を新しく作り出す「同化」という代謝の一種です。" },
+    { id: "test_jintai_original_No17-18_25", text: "「肥満」とは、摂取エネルギーが消費エネルギーを大幅に下回ることで、脂肪組織が必要以上に増える現象である。", source: "No17/18-25", answer: false, exp: "誤り。肥満は、摂取エネルギーが消費エネルギーを【上回る】ことで、皮下や内臓の脂肪組織が過剰に蓄積した状態を指します。" },
+    { id: "test_jintai_original_No17-18_26", text: "唾液などに含まれる消化酵素である「アミラーゼ」は、三大栄養素のうちのデンプン（糖質）を分解する役割を持つ。", source: "No17/18-26", answer: true, exp: "正しい。アミラーゼは炭水化物を分解する酵素です。タンパク質はペプシンやトリプシン、脂肪はリパーゼ（ステアプシン）によって分解されます。" },
+    { id: "test_jintai_original_No17-18_27", text: "消化された食物の栄養素は、主に「大腸」の内壁にある絨毛（じゅうもう）から吸収され、初めて栄養物質としての役割を果たす。", source: "No17/18-27", answer: false, exp: "誤り。栄養素の吸収の大部分は「小腸」の絨毛で行われます。大腸の主な役割は、水分の吸収です。" },
+    { id: "test_jintai_original_No17-18_28", text: "小腸で吸収されたアミノ酸やブドウ糖などの栄養素は、門脈を通って肝臓へと運ばれる。", source: "No17/18-28", answer: true, exp: "正しい。小腸の毛細血管から吸収されたアミノ酸や単糖類は、門脈という血管を経由して一度肝臓へ集められます。" },
+    { id: "test_jintai_original_No17-18_29", text: "血液中のブドウ糖のうち過剰なものは、多糖類であるグリコーゲンへと変換され、主に「膵臓（すいぞう）」に蓄えられる。", source: "No17/18-29", answer: false, exp: "誤り。グリコーゲンとして蓄えられる主な場所は「肝臓」や「筋肉」です。膵臓は、血糖値を調節するホルモンであるインスリンなどを分泌する器官です。" },
+    { id: "test_jintai_original_No17-18_30", text: "過剰な飲酒などで肝臓の細胞が破壊されると、肝細胞に含まれる酵素であるAST（GOT）やALT（GPT）の数値が血液中で高くなる。", source: "No17/18-30", answer: true, exp: "正しい。これらの酵素は肝細胞に含まれており、細胞が壊れると血液中に漏れ出すため、肝機能の状態を示す指標として用いられます。" }
+　　　　　　]
+        }
+    },
+    "test_jintai_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_jintai_past_2025_01", text: "内眼角（めがしら）の内側には「涙丘」という赤みを帯びた小さな高まりがあり、周辺にある「涙点」という孔から余分な涙が鼻涙管へと流れていく。", source: "52回 問題26", answer: true, exp: "正しい。目頭の赤みは涙丘、小さな孔は涙点と呼ばれます。涙は涙点から入り、鼻涙管を通って鼻腔へと排出されます。" },
+    { id: "test_jintai_past_2025_02", text: "骨の組織の中で、血液をつくる「造血作用」を主に行っている部位は、骨の外側を包む骨膜である。", source: "52回 問題27", answer: false, exp: "誤り。造血作用を主に行っているのは、骨の内部にある「骨髄（特に赤色骨髄）」です。骨膜は骨の保護や太さの成長に関わります。" },
+    { id: "test_jintai_past_2025_03", text: "口輪筋（こうりんきん）は、口を閉じたり、口の周囲を前方に尖らせたりする動作の際にはたらく筋肉である。", source: "52回 問題28", answer: true, exp: "正しい。口輪筋は口を閉じる役割を持ち、唇を突き出すような動作も行います。オトガイ筋は顎にシワを作る筋肉です。" },
+    { id: "test_jintai_past_2025_04", text: "自律神経の作用において、副交感神経の活動が低下すると、相対的に交感神経が優位となるため瞳孔は散大する。", source: "52回 問題29", answer: true, exp: "正しい。副交感神経の活動低下（あるいは交感神経の亢進）により、瞳孔は開きます。気管支は交感神経の活動で拡張します。" },
+    { id: "test_jintai_past_2025_05", text: "リンパ管を通って組織から回収されたリンパ液は、最終的に「動脈」へと合流して全身を巡る。", source: "52回 問題30", answer: false, exp: "誤り。リンパ管は最終的に「静脈（鎖骨下静脈）」に合流し、血液循環へと戻ります。動脈に直接合流することはありません。" },
+    { id: "test_jintai_past_2025_06", text: "睫毛（まつげ）の本数を比較すると、一般的に下眼瞼（したまぶた）よりも上眼瞼（うわまぶた）の方が多く、かつ長い。", source: "51回 問題26", answer: true, exp: "正しい。睫毛は上まぶたの方が下まぶたよりも本数が多く、長さも長いのが一般的です。生え際の内側にはマイボーム腺が開口しています。" },
+    { id: "test_jintai_past_2025_07", text: "自分の意思で動かすことができる筋肉を随意筋と呼ぶが、心臓を構成する「心筋」も随意筋に分類される。", source: "51回 問題27", answer: false, exp: "誤り。心筋は自分の意思で動かすことができない「不随意筋」です。骨格に付着する筋肉（上肢や下肢など）は随意筋です。" },
+    { id: "test_jintai_past_2025_08", text: "瞳孔が開く（散大する）ときに直接はたらくのは、自律神経のうち「交感神経」である。", source: "51回 問題28", answer: true, exp: "正しい。交感神経が興奮すると瞳孔が開き、副交感神経が興奮すると瞳孔が閉じます。これらは不随意に調節されています。" },
+    { id: "test_jintai_past_2025_09", text: "耳の器官のうち、体の傾きや直線加速度を感知するのは「半規管（三半規管）」である。", source: "51回 問題29", answer: false, exp: "誤り。体の回転を感知するのが「半規管」です。傾きや直線加速度を感知するのは、前庭にある「卵形嚢（らんけいのう）」や「球形嚢（きゅうけいのう）」です。" },
+    { id: "test_jintai_past_2025_10", text: "空気の通り道である「気道」を構成する器官には、鼻腔、喉頭、食道、気管支が含まれる。", source: "51回 問題30", answer: false, exp: "誤り。気道には鼻腔、咽頭、喉頭、気管、気管支が含まれますが、「食道」は食物が通る消化管の一部であり、気道には含まれません。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_jintai_past_2024_01", text: "眼の構造において、瞳孔は虹彩の最も外側を取り囲んでいる部分を指す。", source: "50回 問題26", answer: false, exp: "誤り。瞳孔は、虹彩の中央にある黒く見える部分のことを指します。" },
+    { id: "test_jintai_past_2024_02", text: "横隔膜は骨格筋（随意筋）に分類され、運動神経である横隔神経の支配を受けて収縮する。", source: "50回 問題27", answer: true, exp: "正しい。横隔膜は、内臓を動かす平滑筋や心筋とは異なり、顕微鏡で見ると横紋を持つ「骨格筋」に分類されます。また、自律神経ではなく、体性神経系である「運動神経（横隔神経）」の支配を受けます。※呼吸は無意識にも行われますが、自分の意思で息を止めることもできるため、支配神経や筋肉の構造から骨格筋として扱われます。" },
+    { id: "test_jintai_past_2024_03", text: "呼吸や心臓、血管運動などの生命維持に不可欠な中枢機能は、主に大脳の表面にある大脳皮質に集中している。", source: "50回 問題28", answer: false, exp: "誤り。生命維持に不可欠な中枢機能は、脳幹の一部である「延髄」に集中しています。" },
+    { id: "test_jintai_past_2024_04", text: "中耳（鼓室）は、咽頭とつながる「耳管」という通路を持っており、これによって鼓膜の内外の圧力を調節している。", source: "50回 問題29", answer: true, exp: "正しい。中耳は耳管を介して咽頭と通じており、周囲の気圧変化に対応して鼓膜の状態を保っています。" },
+    { id: "test_jintai_past_2024_05", text: "血液中の血球成分のうち、酸素を運搬する機能を持っているのは血小板である。", source: "50回 問題30", answer: false, exp: "誤り。酸素を運搬するのは「赤血球」に含まれるヘモグロビンのはたらきです。血小板は血液凝固に関わります。" },
+    { id: "test_jintai_past_2024_06", text: "上腕二頭筋を自分の意思で収縮させるとき、その指令を直接伝えるのは運動神経である。", source: "49回 問題26", answer: true, exp: "正しい。骨格筋の収縮は、体性神経の一つである運動神経によって引き起こされます。" },
+    { id: "test_jintai_past_2024_07", text: "網膜にある杆体細胞や錐体細胞で受け取った光の刺激は、知覚神経を通して小脳に伝えられる。", source: "49回 問題27", answer: false, exp: "誤り。網膜で受け取った光の刺激（視覚情報）は、視神経を通って大脳（後頭葉の視覚野）へと伝えられ、そこで初めて「見えている」と認識されます。小脳は主に体のバランス（平衡感覚）や運動の調節を司る器官です。" },
+    { id: "test_jintai_past_2024_08", text: "健康な成人の血液において、成熟した赤血球や血小板には細胞核が存在しない。", source: "49回 問題28", answer: true, exp: "正しい。成熟した赤血球や血小板は、白血球とは異なり核を持たないのが特徴です。" },
+    { id: "test_jintai_past_2024_09", text: "喉頭（こうとう）は、肺胞と同じく血液と空気の間でガス交換が直接行われる主要な部位である。", source: "49回 問題29", answer: false, exp: "誤り。血液と空気のガス交換が行われるのは「肺胞」です。喉頭は空気の通り道（気道）の一部です。" },
+    { id: "test_jintai_past_2024_10", text: "小腸の蠕動（ぜんどう）運動は、筋肉の収縮波を伝えることで、消化管の内容物を肛門側へと送る役割を担う。", source: "49回 問題30", answer: true, exp: "正しい。小腸の運動には「蠕動（ぜんどう）運動」「分節運動」「振子運動」の3つがあります。このうち蠕動運動は、内容物を口側から肛門側へと移動させる（送り出す）役割を持ちます。分節運動と振子運動は、内容物と消化液を「混和（混ぜ合わせる）」させるのが主な役割です。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_jintai_past_2023_01", text: "鼻唇溝（びしんこう）は、鼻翼の付け根から口角の外側に向かう溝であり、俗に「ほうれい線」とも呼ばれる。", source: "48回 問題26", answer: true, exp: "正しい。鼻唇溝は解剖学的な名称で、一般的にはほうれい線として知られています。人中は上唇の正中にある溝を指します。" },
+    { id: "test_jintai_past_2023_02", text: "骨の組織の中で造血作用を主に行っているのは、加齢とともに脂肪化した黄色骨髄である。", source: "48回 問題27", answer: false, exp: "誤り。造血作用を主に行っているのは「赤色骨髄」です。黄色骨髄は、赤色骨髄が加齢により脂肪化して造血機能を失った状態を指します。" },
+    { id: "test_jintai_past_2023_03", text: "副交感神経が興奮して優位な状態になると、気管支の平滑筋は収縮し、瞳孔は縮小する。", source: "48回 問題28", answer: true, exp: "正しい。副交感神経のはたらきにより、休息時に適した状態として気管支の収縮や瞳孔の縮小が起こります。" },
+    { id: "test_jintai_past_2023_04", text: "眼の構造において、光の量を調節する「絞り」の役割を果たしているのは、眼球の正面中央にある透明な角膜である。", source: "48回 問題29", answer: false, exp: "誤り。光の量を調節する絞りの役割を果たすのは「虹彩」です。角膜は外界の光を眼球内に通す窓の役割をします。" },
+    { id: "test_jintai_past_2023_05", text: "組織から回収されたリンパ液を運ぶリンパ管は、最終的に静脈（鎖骨下静脈）へと合流して血液循環に戻る。", source: "48回 問題30", answer: true, exp: "正しい。リンパ管は組織液を回収し、静脈系に合流させることで再び血液循環の一部となります。" },
+    { id: "test_jintai_past_2023_06", text: "蝶番関節は関節頭が球状をしており、肩関節や股関節のように最も自由に運動できる関節形態である。", source: "47回 問題26", answer: false, exp: "誤り。最も自由に運動できるのは、関節頭が球状の「球関節」です。蝶番関節は関節頭が円柱状で、一方向のみに屈曲できる形態を指します。" },
+    { id: "test_jintai_past_2023_07", text: "頭部の筋肉のうち、眼輪筋や口輪筋、側頭筋はすべて表情筋（皮筋）に分類される。", source: "47回 問題27", answer: false, exp: "誤り。眼輪筋や口輪筋は表情筋ですが、側頭筋は下顎を動かして物を噛むための「咀嚼筋」に分類されます。" },
+    { id: "test_jintai_past_2023_08", text: "交感神経が優位に機能する興奮時には、より多くの光を眼に取り込むために瞳孔が散大（拡大）する。", source: "47回 問題28", answer: true, exp: "正しい。交感神経のはたらきにより、活動時に必要な視覚情報を得るため瞳孔が大きく開きます。" },
+    { id: "test_jintai_past_2023_09", text: "網膜の中央部にある黄斑には、錐体細胞のみが集まり視力が最も良い「中心窩」と呼ばれる場所がある。", source: "47回 問題29", answer: true, exp: "正しい。中心窩は視界の中心となる最も視力が鋭敏な部位であり、黄斑の中央に位置しています。" },
+    { id: "test_jintai_past_2023_10", text: "血液の小循環（肺循環）は、左心室から送り出された血液が全身を巡り、右心房に戻る経路のことである。", source: "47回 問題30", answer: false, exp: "誤り。それは「大循環（体循環）」の経路です。小循環（肺循環）は、右心室から肺へ送られ、左心房に戻る経路を指します。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_jintai_past_2022_01", text: "眼球が収まるくぼみである眼窩（がんか）部は、顔面の骨の一つである頬骨と接している。", source: "46回 問題26", answer: true, exp: "正しい。眼窩部は頬骨と接した構造になっています。一方、オトガイ部は下あごの部分を指します。" },
+    { id: "test_jintai_past_2022_02", text: "骨を形づくる構造のうち、血球（赤血球、白血球、血小板）を産生する造血作用を持つ部位は「骨膜」である。", source: "46回 問題27", answer: false, exp: "誤り。造血機能を持つのは、骨の内部にある「赤色骨髄」です。骨膜は骨の表面を覆う膜で、造血作用は持ちません。" },
+    { id: "test_jintai_past_2022_03", text: "眼輪筋は眼の周囲を囲むように走っている表情筋であり、眼を閉じるときにはたらく骨格筋である。", source: "46回 問題28", answer: true, exp: "正しい。眼輪筋が収縮することで眼を閉じることができます。額にしわを作るのは前頭筋のはたらきです。" },
+    { id: "test_jintai_past_2022_04", text: "神経系の分類において、脳とともに中枢神経系を構成するのは、全身に張り巡らされている「自律神経」である。", source: "46回 問題29", answer: false, exp: "誤り。中枢神経系は「脳」と「脊髄」の2つのみです。自律神経は、脳神経や脊髄神経とともに末梢神経系に分類されます。" },
+    { id: "test_jintai_past_2022_05", text: "耳の器官のうち、前庭（卵形嚢・球形嚢）や半規管は、音を伝える聴覚ではなく、体の傾きやバランスを保つ「平衡感覚」に関与している。", source: "46回 問題30", answer: true, exp: "正しい。前庭や半規管は内耳に位置する平衡器官です。鼓膜や耳小骨、蝸牛は聴覚に関与します。" },
+    { id: "test_jintai_past_2022_06", text: "鼻の下から上唇の中央にかけて伸びる縦方向の溝である「人中（にんちゅう）」は、顔の正中線上に位置する。", source: "45回 問題26", answer: true, exp: "正しい。人中は顔の左右を分ける中央の線（正中線）の上に位置します。鼻唇溝（ほうれい線）などは左右に存在します。" },
+    { id: "test_jintai_past_2022_07", text: "自律神経のうち、心拍数を減少させ心臓の収縮力を抑制するように直接はたらくのは、交感神経である。", source: "45回 問題27", answer: false, exp: "誤り。心機能を抑制するのは「副交感神経」です。交感神経は逆に心拍数や収縮力を増加させ、体を活動状態にします。" },
+    { id: "test_jintai_past_2022_08", text: "内耳に位置する平衡器官には、外界からの音の振動を最初に入力する「鼓膜」が含まれる。", source: "45回 問題28", answer: false, exp: "誤り。鼓膜は「中耳」の入り口に位置し、音を伝える器官です。内耳にある平衡器官は、半規管や前庭（卵形嚢、球形嚢）です。" },
+    { id: "test_jintai_past_2022_09", text: "血液の成分である赤血球には、全身の組織へ酸素を運搬する役割を担うヘモグロビン（血色素）が含まれている。", source: "45回 問題29", answer: true, exp: "正しい。赤血球に含まれるヘモグロビンが酸素と結合し、全身へと運びます。血小板は血液凝固、リンパ球は免疫に関わります。" },
+    { id: "test_jintai_past_2022_10", text: "咀嚼筋の一つである「咬筋（こうきん）」は、横隔膜などとともに、肺に空気を取り込む呼吸運動を引き起こすための筋肉である。", source: "45回 問題30", answer: false, exp: "誤り。咬筋は下顎を動かす「咀嚼筋」であり、呼吸運動には関与しません。呼吸運動を行うのは横隔膜や肋間筋です。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_jintai_past_2021_01", text: "鼻の構造のうち、鼻背、鼻根、鼻翼はすべて顔の正中線上（中央のライン）に位置している。", source: "44回 問題26", answer: false, exp: "誤り。鼻翼（小鼻）は顔の正中線から左右に外れた位置にあります。正中線上にあるのは鼻背、鼻根、鼻尖などです。" },
+    { id: "test_jintai_past_2021_02", text: "胸鎖乳突筋は、首（頸部）を斜めに走る代表的な筋肉である。", source: "44回 問題27", answer: true, exp: "正しい。胸鎖乳突筋は頸部の筋肉に分類されます。咬筋は頭部、三角筋は上肢、広背筋は体幹の筋です。" },
+    { id: "test_jintai_past_2021_03", text: "延髄は脳幹の一部であり、解剖学上「脳」に含まれる部位である。", source: "44回 問題28", answer: true, exp: "正しい。延髄は脳に含まれます。一方、胸髄、頸髄、仙髄などは脊髄に分類され、脳とは区別されます。" },
+    { id: "test_jintai_past_2021_04", text: "耳の構造において、内耳には聴覚を司る蝸牛や平衡感覚を司る前庭のほか、鼓膜が含まれる。", source: "44回 問題29", answer: false, exp: "誤り。鼓膜は「中耳」に含まれる器官です。内耳には蝸牛、前庭、半規管が含まれます。" },
+    { id: "test_jintai_past_2021_05", text: "血液成分の一つである血小板は、止血のために血液を固める「血液凝固」の機能を担っている。", source: "44回 問題30", answer: true, exp: "正しい。血小板は血管が損傷した際に集まり、血液を固めて止血する重要な役割を果たします。" },
+    { id: "test_jintai_past_2021_06", text: "腕を動かすときなど、中枢神経系からの指令を骨格筋に伝える神経は知覚神経である。", source: "43回 問題26", answer: false, exp: "誤り。中枢からの指令を骨格筋（随意筋）に伝えるのは「運動神経」です。知覚神経は末梢からの感覚情報を中枢へ伝えます。" },
+    { id: "test_jintai_past_2021_07", text: "自律神経のうち、交感神経が優位に機能すると眼の瞳孔は散大（拡大）する。", source: "43回 問題27", answer: true, exp: "正しい。交感神経が優位になると、活動に適した状態にするため瞳孔が大きく開きます。副交感神経が優位になると瞳孔は縮小します。" },
+    { id: "test_jintai_past_2021_08", text: "内耳にある器官のうち、聴覚ではなく体のバランスを保つための「平衡器官」は蝸牛である。", source: "43回 問題28", answer: false, exp: "誤り。蝸牛は「聴覚」を司る器官です。平衡感覚を司る平衡器官は、半規管や前庭（卵形嚢・球形嚢）です。" },
+    { id: "test_jintai_past_2021_09", text: "リンパ球（B細胞、T細胞、NK細胞）は、体内に入った異物などに対して免疫反応を担う役割を持つ。", source: "43回 問題29", answer: true, exp: "正しい。リンパ球は白血球の一種で、体内の防御システムである免疫反応において中心的な役割を果たします。" },
+    { id: "test_jintai_past_2021_10", text: "血液の循環経路のうち「小循環」とは、心臓から送り出された血液が「脳」を巡って心臓に戻る経路のことである。", source: "43回 問題30", answer: false, exp: "誤り。小循環（肺循環）は、心臓と「肺」の間で行われる循環です。脳や肝臓、筋肉などを巡るのは大循環（体循環）に含まれます。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_jintai_past_2020_01", text: "球関節（肩関節や股関節）は、関節頭が球状をしており、あらゆる関節の中で最も広い範囲で自由に運動できる。", source: "42回 問題26", answer: true, exp: "正しい。球関節は自由度が極めて高く、多方向への運動が可能です。" },
+    { id: "test_jintai_past_2020_02", text: "表情筋は顔の表情をつくる薄い筋肉の総称であり、眼輪筋、口輪筋、咬筋などがこれに含まれる。", source: "42回 問題27", answer: false, exp: "誤り。眼輪筋や口輪筋は表情筋ですが、咬筋は食べ物を噛むときにはたらく「咀嚼筋」に分類されます。" },
+    { id: "test_jintai_past_2020_03", text: "中枢神経系は、大脳や延髄を含む脳と、脳から直接左右に出ている12対の脳神経によって構成される。", source: "42回 問題28", answer: false, exp: "誤り。中枢神経系は脳と脊髄の2つのみを指します。脳神経は末梢神経系に分類されます。" },
+    { id: "test_jintai_past_2020_04", text: "交感神経が優位にはたらくと、心身が活動に適した興奮状態となり、心拍数が増加する。", source: "42回 問題29", answer: true, exp: "正しい。交感神経のはたらきにより、心拍数の増加や気管支の拡張などが引き起こされます。" },
+    { id: "test_jintai_past_2020_05", text: "血球成分の一つであるリンパ球は、体内に入った異物や病原体を認識し、主に免疫反応に関わっている。", source: "42回 問題30", answer: true, exp: "正しい。リンパ球（B細胞やT細胞など）は、生体防御のための免疫システムにおいて中心的な役割を果たします。" },
+    { id: "test_jintai_past_2020_06", text: "顔部を構成する「オトガイ」とは、鼻の先端から上唇の中央にかけて伸びる溝の部分を指す名称である。", source: "41回 問題26", answer: false, exp: "誤り。オトガイは下顎（したあご）の先端部分を指します。鼻の下の溝は「人中」と呼ばれます。" },
+    { id: "test_jintai_past_2020_07", text: "骨の組織の中にある赤色骨髄には、血液成分を産生する造血作用がある。", source: "41回 問題27", answer: true, exp: "正しい。骨髄のうち、赤色をしている赤色骨髄で血球が作られます。脂肪化した黄色骨髄には造血機能はありません。" },
+    { id: "test_jintai_past_2020_08", text: "眼の周囲にある眼輪筋は、光の刺激などを受けて強く眼を開くときにはたらく表情筋である。", source: "41回 問題28", answer: false, exp: "誤り。眼輪筋は「眼を閉じる」ときにはたらく筋肉です。" },
+    { id: "test_jintai_past_2020_09", text: "眼球の最内層にある網膜には視細胞が存在しており、外から入ってきた光の刺激を感知する。", source: "41回 問題29", answer: true, exp: "正しい。網膜は光を受け取るスクリーンのような役割を果たしており、視細胞がその刺激を電気信号に変えて脳へ伝えます。" },
+    { id: "test_jintai_past_2020_10", text: "心臓の右心室が収縮すると、二酸化炭素を排出するために血液は「肺静脈」へと送り出される。", source: "41回 問題30", answer: false, exp: "誤り。心臓の右心室から肺へと血液が送り出される際に通る血管は「肺動脈」です。「心臓から出ていく血管」はすべて「動脈」と呼ばれます。※このとき肺動脈を流れているのは二酸化炭素を多く含む「静脈血」であるため、名称（動脈）と中身（静脈血）が逆転しており、国家試験で狙われるポイントです。肺で酸素を受け取った血液は、「肺静脈」を通って左心房へと戻ります。" }
+]
+        }
+    },
+     "test_jintai_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.頭部、顔部、頸部の体表解剖学": [
+    { id: "test_jintai_extra_kaibogaku_No01", text: "一重瞼（ひとえまぶた）と二重瞼（ふたえまぶた）は、下眼瞼に溝があるかないかによって区別される名称である。", source: "No.01", answer: false, exp: "誤り。一重瞼と二重瞼は、下眼瞼ではなく「上眼瞼（うわまぶた）」に溝があるかないかによって区別される名称です。" },
+    { id: "test_jintai_extra_kaibogaku_No02", text: "解剖学的な分類において、前頸部（ぜんけいぶ）は「首」の前面にあたる部位であり、顔部には含まれない。", source: "No.02", answer: true, exp: "正しい。前頸部は首の前面を指す部位であり、顔部（額、眼、鼻、口、頬、オトガイ部など）とは区別されます。" },
+    { id: "test_jintai_extra_kaibogaku_No03", text: "鼻孔の粘膜は、皮膚に比べて外気による乾燥や摩擦に強く、角化が進んだ組織であるため、血管が少なく血行があまりよくない。", source: "No.03", answer: false, exp: "誤り。鼻孔の粘膜は角化しておらず、むしろ薄くてデリケートな組織です。また、湿り気を保ち吸入した空気を温めるために血管が非常に豊富で、血行（血のめぐり）が極めてよい部位であるのが特徴です（そのため鼻血が出やすい場所でもあります）。" },
+],
+"B.骨格器系": [
+    { id: "test_jintai_extra_kokkakukike_original_No04", text: "成人の体において、骨が占める重さは体重の約40％である。", source: "No.04", answer: false, exp: "誤り。成人の体において、骨（骨格）が占める総重量は体重の約15〜20％です。問題文にある「約40％」という数値は、骨ではなく「骨格筋（筋肉）」が占める割合の目安です。(筋肉量は、性別や年齢、運動習慣によって標準値が異なり高齢では20％台になることもあります。)" },
+    { id: "test_jintai_extra_kokkakukike_original_No05", text: "人間の顔面を構成する「頬骨（きょうこつ）」は、解剖学的に頭蓋に属する骨である。", source: "No.05", answer: true, exp: "正しい。頬骨は顔面を構成する頭蓋の骨の一部に分類されます。" },
+    { id: "test_jintai_extra_kokkakukike_original_No06", text: "頭蓋骨（大脳頭蓋や顔面頭蓋）を構成する多くの骨は、基本的にすべて「縫合」という不動の連結によって結ばれている。", source: "No.06", answer: true, exp: "正しい。頭蓋を構成する骨の大部分は、ギザギザの噛み合わせである「縫合」によってしっかりと固定されており、動かすことができません（不動連結）。ただし、下顎を動かすための「下顎骨」などは可動性のある関節として区別されます。" },
+    { id: "test_jintai_extra_kokkakukike_original_No07", text: "脛骨（けいこつ）は「すね」を構成する骨であり、鎖骨や尺骨と同じ上肢骨に分類される。", source: "No.07", answer: false, exp: "誤り。脛骨は「すね」の骨であり、下肢骨に属します。鎖骨や尺骨は上肢骨（腕の骨）です。" },
+    { id: "test_jintai_extra_kokkakukike_original_No08", text: "人間の骨の内部にある骨髄は、加齢とともに造血作用を持つ「赤色骨髄」へと変化していく。", source: "No.08", answer: false, exp: "誤り。加齢とともに造血作用のある赤色骨髄は減少し、脂肪化した「黄色骨髄」が増加します。" },
+    { id: "test_jintai_extra_kokkakukike_original_No09", text: "「大泉門（だいせんもん）」は新生児の頭頂部にある隙間で、成長とともに閉鎖されるため成人には存在しない。", source: "No.09", answer: true, exp: "正しい。大泉門は新生児特有の膜状の隙間で、生後1年半から2年までに閉鎖して骨となります。" },
+],
+"C.筋系": [
+    { id: "test_jintai_extra_kinke_original_No10", text: "咀嚼筋（そしゃくきん）は、下顎を動かし噛む動作に関わる「頭部の筋」である。", source: "No.10", answer: true, exp: "正しい。咀嚼筋は、咬筋や側頭筋などを含み、食べ物を噛むために下顎を動かす役割を担う頭部の筋肉です。" },
+    { id: "test_jintai_extra_kinke_original_No11", text: "肩を覆う筋肉である三角筋は、腕を上げる運動に関与するが、自分の意思で動かすことのできない「不随意筋」に分類される。", source: "No.11", answer: false, exp: "誤り。三角筋は骨格筋であり、自分の意思で動かすことができる「随意筋」です。" },
+    { id: "test_jintai_extra_kinke_original_No12", text: "肋間筋（ろっかんきん）は肋骨の間に位置しており、横隔膜とともに胸郭を動かして呼吸運動を行う役割を持つ。", source: "No.12", answer: true, exp: "正しい。肋間筋は呼吸運動に直接関与する筋肉であり、横隔膜と協力して胸郭の容積を変化させます。" },
+    { id: "test_jintai_extra_kinke_original_No13", text: "胸の表面を広く覆っている強大な筋肉である大胸筋は、解剖学的な分類において「頭部の筋」に属している。", source: "No.13", answer: false, exp: "誤り。大胸筋は、胸部を構成する「体幹の筋」に分類されます。" },
+    { id: "test_jintai_extra_kinke_original_No14", text: "上腕二頭筋は、腕の前面にある代表的な筋肉であり、解剖学上は「上肢の筋」に分類される。", source: "No.14", answer: true, exp: "正しい。上腕二頭筋は、肘を曲げる動作など腕の運動に関わる主要な筋肉であり、上肢（腕）の筋に属します。" },
+    { id: "test_jintai_extra_kinke_original_No15", text: "僧帽筋（そうぼうきん）は、首から背中にかけて広がる表情筋の一種であり、顔の複雑な表情を作り出す働きを担っている。", source: "No.15", answer: false, exp: "誤り。僧帽筋は首から背中に広がる「背部の筋」であり、表情筋ではありません。表情に関わるのは眼輪筋や口輪筋などです。" },
+    { id: "test_jintai_extra_kinke_original_No16", text: "頬（ほほ）の主要な筋肉である頬筋は、下顎を動かして噛む動作を行う「咀嚼筋」の一つとして分類される。", source: "No.16", answer: false, exp: "誤り。頬筋は、顔の表情を作る「表情筋」に分類されます。咀嚼筋には咬筋や側頭筋などが含まれます。" },
+    { id: "test_jintai_extra_kinke_original_No17", text: "骨格筋は、顕微鏡で観察すると横縞が見えるため「横紋筋」と呼ばれ、運動神経の支配を受けて意識的に動かせる随意筋である。", source: "No.17", answer: true, exp: "正しい。骨格筋は特徴的な縞模様を持つため横紋筋に分類され、自分の意思でコントロールできる随意筋です。" },
+    { id: "test_jintai_extra_kinke_original_No18", text: "胃腸の壁を構成する筋肉や血管の壁にある筋肉は、骨格筋と同様に私たちの意思に従って自由に動かせる「随意筋」である。", source: "No.18", answer: false, exp: "誤り。胃腸や血管の筋肉は「平滑筋」であり、自律神経の支配を受けて意思とは無関係に動く「不随意筋」です。" },
+],
+"D.神経系": [
+    { id: "test_jintai_extra_sinkeke_original_No19_19", text: "解剖学的な分類において、脊髄から全身に伸びる「脊髄神経」は、中枢神経系に分類される。", source: "No.19", answer: false, exp: "誤り。脊髄神経は、脳や脊髄という「中枢」から枝分かれして全身に分布する「末梢神経系」に分類されます。" },
+    { id: "test_jintai_extra_sinkeke_original_No20_20", text: "左右に12対ある脳神経は末梢神経系であり、左右に31対ある脊髄神経は脊髄とつながっている。", source: "No.20", answer: true, exp: "正しい。脳神経は12対、脊髄神経は31対あり、いずれも末梢神経系に属しています。" },
+    { id: "test_jintai_extra_sinkeke_original_No21_21", text: "神経系は、脳と脊髄から成る「中枢神経系」と、そこから全身に伸びる「末梢神経系」に大別される。", source: "No.21", answer: true, exp: "正しい。脳と脊髄が司令塔となる中枢であり、そこから伸びる脳神経や脊髄神経が末梢として情報を伝達します。" },
+    { id: "test_jintai_extra_sinkeke_original_No22_22", text: "交感神経が優位にはたらくと、身体を活動的な状態にするために、瞳孔は縮小し、気管支は収縮する。", source: "No.22", answer: false, exp: "誤り。交感神経がはたらくと、活動に適した状態を作るために瞳孔は「拡大」し、気管支は「拡張」します。" },
+    { id: "test_jintai_extra_sinkeke_original_No23_23", text: "脳の各部位の配置において、大脳は脳幹の後方にあり、小脳は橋の真下に位置している。", source: "No.23", answer: false, exp: "誤り。大脳は脳幹の上（前方）にあり、小脳は橋や延髄の背側（後ろ側）に位置しています。" },
+    { id: "test_jintai_extra_sinkeke_original_No24_24", text: "末梢神経系には、脳から直接出ている「脳神経」と、脊髄から出ている「脊髄神経」の2種類が含まれる。", source: "No.24", answer: true, exp: "正しい。脳神経（12対）と脊髄神経（31対）は、中枢から末梢へ、あるいは末梢から中枢へ情報を伝える末梢神経系です。" },
+],
+"E.感覚器系": [
+    { id: "test_jintai_extra__kankakukike_original_No25", text: "眼のはたらきにおいて、色を感じる役割を担っているのは「水晶体」である。", source: "No.25", answer: false, exp: "誤り。色を感じる役割を担うのは、網膜にある錐体細胞です。水晶体はレンズとしてピントを調節する役割を果たします。" },
+    { id: "test_jintai_extra__kankakukike_original_No26", text: "眼球の構造において、光を感じる杆体細胞や色を感じる錐体細胞が存在する膜を「網膜」という。", source: "No.26", answer: true, exp: "正しい。網膜には視細胞が存在し、外から入ってきた光や色の情報を神経信号に変えて脳へ伝えます。" },
+    { id: "test_jintai_extra__kankakukike_original_No27", text: "近視（近眼）は、眼球に入った光のピントが網膜よりも「奥」で合ってしまうために起こる現象である。", source: "No.27", answer: false, exp: "誤り。近視はピントが網膜より「手前」で合ってしまう状態です。ピントが網膜より奥にあるのは遠視です。" },
+    { id: "test_jintai_extra__kankakukike_original_No28", text: "耳の構造のうち、聴覚を司る蝸牛や平衡感覚を司る半規管（三半規管）は、中耳ではなく「内耳」に位置している。", source: "No.28", answer: true, exp: "正しい。内耳は聴覚を担当する蝸牛と、体のバランスを保つ平衡感覚を担当する半規管や前庭から構成されています。" },
+    { id: "test_jintai_extra__kankakukike_original_No29", text: "鼓膜は中耳にある人体最小の骨であり、耳小骨と協力して音の振幅を増幅する役割をもっている。", source: "No.29", answer: false, exp: "誤り。鼓膜は外耳と中耳の境目にある膜です。人体最小の3つの骨は中耳（鼓室内）にある「耳小骨」を指します。" },
+    { id: "test_jintai_extra__kankakukike_original_No30", text: "人間の感覚器における組み合わせにおいて、平衡感覚を司るのは「半規管（三半規管）」や「前庭」である。", source: "No.30", answer: true, exp: "正しい。半規管は体の回転を、前庭（卵形嚢・球形嚢）は体の傾きなどを感知する平衡感覚の受容器です。" },
+    { id: "test_jintai_extra__kankakukike_original_No31", text: "人間の味覚の基本となる「4基本味」とは、甘味、酸味、塩味、苦味の4つのことである。", source: "No.31", answer: true, exp: "正しい。これら4つの基本味に、近年では「うま味」を加えた5基本味が一般的に認知されています。" },
+    { id: "test_jintai_extra__kankakukike_original_No32", text: "触覚や痛覚などの皮膚感覚を感知するための感覚受容器は、主に脳の中にある「下垂体」に集まっている。", source: "No.32", answer: false, exp: "誤り。触覚などの皮膚感覚を感知する受容器は、全身の「皮膚」や皮膚に続く粘膜に分布しています。下垂体は内分泌器官です。" },
+    { id: "test_jintai_extra__kankakukike_original_No33", text: "嗅覚の感覚器は、鼻腔粘膜の最上部にある「嗅細胞」であり、特定のにおいを嗅ぎ続けると感じにくくなる「順応」が起こりやすい。", source: "No.33", answer: true, exp: "正しい。嗅覚は五感の中で最も順応が早く、同じにおいの中にいるとすぐにその刺激を感じにくくなる性質があります。" },
+],
+"F.血液系と免疫系": [
+    { id: "test_jintai_extra_ketuekitomenekike_original_No34", text: "血液成分のうち、白血球は全身の細胞へ酸素を運び、二酸化炭素を回収するガス交換の役割を担っている。", source: "No.34", answer: false, exp: "誤り。ガス交換（酸素の運搬）を担当するのは赤血球です。白血球は免疫（生体防御）に関わります。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No35", text: "赤血球は中央がくぼんだ円盤状の形をしており、内部に含まれるヘモグロビン（血色素）が全身の細胞へ酸素を運ぶ役割を果たす。", source: "No.35", answer: true, exp: "正しい。赤血球は表面積を広くするために中央がくぼんだ形をしており、ヘモグロビンの働きで全身へ効率よく酸素を供給します。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No36", text: "血液中の血小板は、血管が損傷した際にその穴をふさいで止血（血液凝固）を行う重要な役割をもっている。", source: "No.36", answer: true, exp: "正しい。血小板の主な機能は血液凝固（止血作用）であり、出血を止めるための生体防御反応に深く関与しています。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No37", text: "獲得免疫（後天性免疫）は、以前に侵入したことがあるのと同じ抗原が再び侵入した場合、前回よりも弱い免疫反応を示す性質がある。", source: "No.37", answer: false, exp: "誤り。獲得免疫には免疫記憶があるため、同じ抗原が再度侵入すると、前回よりも速く、より強力な免疫反応を示します。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No38", text: "ナチュラルキラー（NK）細胞は、ウイルスに感染した細胞やがん細胞などを直接攻撃して排除する働きがある。", source: "No.38", answer: true, exp: "正しい。NK細胞は非特異的防御機構に関与し、異常な細胞を発見して即座に攻撃する役割を担っています。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No39", text: "皮膚の表皮に存在するランゲルハンス細胞は、体内に侵入した細菌や異物を認識し、その情報をリンパ球へ伝える「抗原提示細胞」としてはたらく。", source: "No.39", answer: true, exp: "正しい。ランゲルハンス細胞は異物をキャッチして情報を提示し、免疫反応をスタートさせる司令塔のような役割を持っています。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No40", text: "I型アレルギー反応は、抗原が体内に侵入してから数日後に症状が現れる「遅延型」に分類される。", source: "No.40", answer: false, exp: "誤り。I型アレルギーは、数分から数十分という短時間で発症する「即時型」です。数日後に反応が現れるのはIV型（遅延型）です。" },
+    { id: "test_jintai_extra_ketuekitomenekike_original_No41", text: "IV型アレルギー反応（遅延型）は、原因物質に接触してから反応がピークに達するまで時間がかかるため、48時間以降に症状が発生することはない。", source: "No.41", answer: false, exp: "誤り。IV型アレルギー（遅延型）は反応のピークが48時間から72時間後に現れるため、48時間以降に症状が発生するのが大きな特徴です。" },
+],
+"G.循環器系": [
+    { id: "test_jintai_extra_junkankike_original_No42", text: "心臓は胸郭の中央よりやや左側に位置しており、血液を全身へ送り出すためのポンプとしての役割を果たしている。", source: "No.42", answer: true, exp: "正しい。心臓は血液循環の動力源となるポンプの役目を担っており、位置は中央からやや左に寄っています。" },
+    { id: "test_jintai_extra_junkankike_original_No43", text: "血液の循環経路のうち小循環（肺循環）は、右心室から肺静脈を通って肺へ行き、ガス交換を行った後に肺動脈を通って左心房へ戻る経路である。", source: "No.43", answer: false, exp: "誤り。肺循環は、右心室から「肺動脈」を通って肺へ行き、ガス交換後に「肺静脈」を通って左心房へ戻る経路です。" },
+    { id: "test_jintai_extra_junkankike_original_No44", text: "大循環（体循環）の経路を順に並べると、左心室から送り出された血液が大動脈、全身の毛細血管、大静脈を経て右心房に戻る流れとなる。", source: "No.44", answer: true, exp: "正しい。大循環は左心室からスタートして全身の組織に酸素や栄養を届け、右心房へと戻ってくる循環経路を指します。" },
+    { id: "test_jintai_extra_junkankike_original_No45", text: "血管の構造において、心臓から出る血液を運ぶ動脈には、血液の逆流を防ぐための「動脈弁」が各所に備わっている。", source: "No.45", answer: false, exp: "誤り。血液の逆流を防ぐための弁（静脈弁）が備わっているのは、心臓へ戻る血液が流れる静脈です。" },
+    { id: "test_jintai_extra_junkankike_original_No46", text: "心拍に伴う血圧の変化において、心臓の筋肉（心筋）が収縮したときに血圧は最も高くなり、心筋が緩んだときに最も低くなる。", source: "No.46", answer: true, exp: "正しい。心筋が縮んだときの血圧を最高血圧、緩んだ（弛緩した）ときの血圧を最低血圧といいます。" },
+    { id: "test_jintai_extra_junkankike_original_No47", text: "心臓自体の活動に必要な酸素や栄養分は、心臓の表面を走る「冠状静脈」によって心筋の細胞へ供給されている。", source: "No.47", answer: false, exp: "誤り。心臓に酸素や栄養を供給するのは「冠状動脈」です。冠状静脈は、心筋で使われた後の血液を回収して戻す役割を担います。" },
+    { id: "test_jintai_extra_junkankike_original_No48", text: "心臓から全身へ血液を力強く送り出す必要があるため、解剖学的に右心室の心筋は左心室の心筋よりも厚く発達している。", source: "No.48", answer: false, exp: "誤り。全身に血液を巡らせる強力なポンプ機能を担うのは左心室であるため、左心室の筋層の方が右心室よりも厚く発達しています。" },
+],
+"H.呼吸器系": [
+    { id: "test_jintai_extra_kokyukike_original_No49", text: "肺自体には自ら動くための筋組織がないため、呼吸運動は横隔膜や肋骨を動かす筋肉の働きによって行われる。", source: "No.49", answer: true, exp: "正しい。肺自体には運動能力がないため、周囲の横隔膜や肋間筋が収縮・弛緩することで胸郭を動かし、呼吸が行われます。" },
+    { id: "test_jintai_extra_kokyukike_original_No50", text: "空気が鼻から肺に至るまでの正確な経路は、鼻腔から気管、次に咽頭、喉頭を経て気管支、肺へと至る順番である。", source: "No.50", answer: false, exp: "誤り。正しい順番は、鼻腔→咽頭→喉頭→気管→気管支→肺です。咽頭・喉頭は気管よりも手前に位置しています。" },
+    { id: "test_jintai_extra_kokyukike_original_No51", text: "「声」は、咽頭にある一対の筋性の膜である声帯の間を、呼気が通る際に生じる振動によって作られる。", source: "No.51", answer: false, exp: "誤り。声帯があるのは咽頭ではなく「喉頭」です。声を出すときは閉じられた声帯の間を空気が通り、その振動が音となります。" },
+    { id: "test_jintai_extra_kokyukike_original_No52", text: "肺の構造において、右肺は上・中・下の3葉に分かれているが、左肺は上・下の2葉から成っている。", source: "No.52", answer: true, exp: "正しい。心臓がやや左側に位置しているため、左肺は右肺よりも少ない2枚の葉で構成されています。" },
+    { id: "test_jintai_extra_kokyukike_original_No53", text: "気管支や血管が肺に出入りする部分は「幽門」と呼ばれ、ここを通って空気が各肺胞へと送り込まれる。", source: "No.53", answer: false, exp: "誤り。気管支などが肺に出入りする部分は「肺門」といいます。幽門は胃の出口にあたる部分の名称です。" },
+],
+"I.消化器系": [
+    { id: "test_jintai_extra_shokakike_original_No54", text: "口腔から肛門に至るまでの消化管の正しい順序は、口腔→食道→咽頭→胃→小腸→大腸→肛門である。", source: "No.54", answer: false, exp: "誤り。消化管の正しい順序は、口腔、咽頭、食道、胃、小腸、大腸、肛門です。咽頭は食道よりも手前に位置しています。" },
+    { id: "test_jintai_extra_shokakike_original_No55", text: "小腸は、十二指腸、空腸、回腸の3つの部分に分けられる。", source: "No.55", answer: true, exp: "正しい。胃に続く十二指腸から始まり、空腸、回腸の順で小腸を構成しています。" },
+    { id: "test_jintai_extra_shokakike_original_No56", text: "大腸を構成している主な部位の組み合わせは、盲腸、回腸、直腸である。", source: "No.56", answer: false, exp: "誤り。回腸は小腸の一部です。大腸は、盲腸、結腸、直腸に分けられます。" },
+    { id: "test_jintai_extra_shokakike_original_No57", text: "唾液に含まれている消化酵素であるインスリンには、デンプンを分解するはたらきがある。", source: "No.57", answer: false, exp: "誤り。唾液に含まれるデンプン分解酵素は「プチアリン（唾液アミラーゼ）」です。インスリンは膵臓から分泌される血糖値を下げるためのホルモンです。" },
+    { id: "test_jintai_extra_shokakike_original_No58", text: "歯の名称において、歯肉の外に出ている部分を歯冠（しかん）、歯槽骨の中に入っている部分を歯根（しこん）という。", source: "No.58", answer: true, exp: "正しい。歯冠は口腔内に露出している部分、歯根は骨に埋まって歯を支えている部分を指します。" },
+    { id: "test_jintai_extra_shokakike_original_No59", text: "十二指腸は小腸の始まりの部分であり、口腔から肛門まで続く消化管の一部として含まれる。", source: "No.59", answer: true, exp: "正しい。全長約9mにおよぶ消化管には、小腸の構成要素である十二指腸もしっかりと含まれています。" },
+    { id: "test_jintai_extra_shokakike_original_No60", text: "デンプンなどの糖質が、消化酵素などの化学的なはたらきによって分解されブドウ糖になる過程を「機械的消化」という。", source: "No.60", answer: false, exp: "誤り。酵素などによって物質が化学的に変化し分解される過程は「化学的消化」です。歯でかみ砕いたり、胃腸の運動で送ることを機械的消化といいます。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_jintai_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_jintai_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_jintai_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_jintai_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
