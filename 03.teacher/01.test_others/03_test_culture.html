@@ -1,0 +1,1690 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『文化論』</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題(頻出抜粋)</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_bunkaron_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_bunkaron_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題(頻出抜粋)",  // ここを修正！
+        questionPool: {
+"No01.日本の美容業の歴史・ファッション文化史 日本編": [
+    { id: "test_bunkaron_original_No01_01", text: "明治時代、女性の断髪は強い非難を浴びる対象となり、東京府は女子の断髪を禁止する布達を出した。", source: "No01-01", answer: true, exp: "正しい。文明開化の時期であっても女性の断髪には抵抗が強く、1872年に東京府によって公式に禁止されました。" },
+    { id: "test_bunkaron_original_No01_02", text: "花嫁の和装の礼装では、髪は文金高島田に結い、べっこうの花笄や櫛などが髪飾りとして使われる。", source: "No01-02", answer: true, exp: "正しい。文金高島田は花嫁の代表的な髪型であり、祝儀にふさわしいべっこうの豪華な髪飾りが添えられます。" },
+    { id: "test_bunkaron_original_No01_03", text: "明治時代に登場した洋風の束髪（そくはつ）の一種である「ひさし髪」のうち、日露戦争の激戦地にちなんで前髪や頭頂部を極端に高く張り出したスタイルは、二百三高地髷（にひゃくさんこうちまげ）と呼ばれ流行した。", source: "No01-03", answer: true, exp: "正しい。明治期に流行した「ひさし髪（前髪や脇髪を庇のように張り出す洋風束髪）」の変形（バリエーション）として、日露戦争（1904〜1905年）の激戦地にちなんで上部を非常に高く膨らませた「二百三高地髷」が登場し、大流行しました。" },
+    { id: "test_bunkaron_original_No01_04", text: "明治時代の女性の髪型のうち、ひさし髪は日本固有の伝統的な日本髪に該当する。", source: "No01-04", answer: false, exp: "誤り。ひさし髪は、従来の日本髪から簡便な髪型へ改めようとして生まれた洋風の束髪に分類されます。" },
+    { id: "test_bunkaron_original_No01_05", text: "明治時代の女性の髪型は、一部で束髪が発達したものの、和装に束髪を合わせるスタイルが一般的であった。", source: "No01-05", answer: true, exp: "正しい。洋装がまだ一般的ではなかった明治時代には、伝統的な和装に、衛生的で手入れのしやすい束髪を組み合わせるスタイルが多くの女性に受け入れられました。" },
+    { id: "test_bunkaron_original_No01_06", text: "明治時代に流行した「束髪」は、伝統的な日本髪をより複雑に結い上げるために考案された様式である。", source: "No02-01", answer: false, exp: "誤り。束髪は、従来の日本髪を簡便・衛生的・経済的にし、自分でも簡単に結えるようにと婦人束髪会などによって考案された「洋風束髪（そくはつ）」の一種です。複雑にするためではなく、簡略化して活動的にするために生まれました。" },
+    { id: "test_bunkaron_original_No01_07", text: "明治時代に流行した日本髪の一つである桃割れは、当時の洋風の髪型である束髪に分類される。", source: "No02-02", answer: false, exp: "誤り。桃割れは明治時代に少女の間で結われた代表的な日本髪の一つであり、西洋の結髪法を取り入れた束髪には含まれません。" },
+    { id: "test_bunkaron_original_No01_08", text: "明治時代に入ると、近代化の象徴として、警官や鉄道員などの制服にいち早く洋装が採用されるようになった。", source: "No02-03", answer: true, exp: "正しい。明治維新後の官制の洋風化に伴い、警官や鉄道員、軍人などの制服は従来の和装から洋装へと規定されました。" },
+    { id: "test_bunkaron_original_No01_09", text: "大正時代から昭和初期にかけて、モダンガールと呼ばれた女性たちの間では、髪を短く切る断髪が流行した。", source: "No02-04", answer: true, exp: "正しい。大正時代、西洋文化の影響を受けたモダンガール（モガ）たちの間で、従来の日本髪に代わる新しいスタイルとして断髪が流行しました。" },
+    { id: "test_bunkaron_original_No01_10", text: "大正時代の女学生の間では、従来の着物スタイルに代わって、セーラー服とスカートが最も一般的な通学服として全国的に普及した。", source: "No02-05", answer: false, exp: "誤り。大正時代の女学生の通学服として最も一般的だったのは、矢絣（やがすり）などの着物に「袴（はかま）」を組み合わせるスタイルです。セーラー服などの洋装制服が考案され、全国的に普及して主流となったのは昭和初期以降のことです。" },
+    { id: "test_bunkaron_original_No01_11", text: "日本の女性の間で洋装が一般的に定着したのは、日露戦争頃の国粋主義が台頭し和装へと戻った時期である。", source: "No03-01", answer: false, exp: "誤り。洋装が定着したのは1923年の関東大震災以降です。日清・日露戦争の頃は、国粋主義の影響でむしろ和装への回帰が見られました。" },
+    { id: "test_bunkaron_original_No01_12", text: "1956年ころにダンスホールに集まった若い男性の間で、マンボズボンと呼ばれる細身のズボンが流行した。", source: "No03-02", answer: true, exp: "正しい。マンボズボンは1950年代半ば、マンボのリズムの流行とともに若い男性の間で着用された、裾の細い特徴的なシルエットのズボンです。" },
+    { id: "test_bunkaron_original_No01_13", text: "ピーコック革命とは、ネズミ色や黒などのダークな色が主体であった女性ファッションを、カラフルにしようとする1960年代の動きである。", source: "No03-03", answer: false, exp: "誤り。ピーコック革命は、保守的だった男性ファッションを孔雀のようにカラフルにしようという1960年代の動きを指します。" },
+    { id: "test_bunkaron_original_No01_14", text: "ピーコック革命とは、1960年代に起こった、女性のファッションを孔雀のようにカラフルにしようとする動きである。", source: "No03-04", answer: false, exp: "誤り。ピーコック革命は、それまでダークな色が主体だった「男性」のファッションを、孔雀のようにカラフルにしようとする1960年代の動きを指します。" },
+    { id: "test_bunkaron_original_No01_15", text: "1960年代にパリのオートクチュールデザイナーが発表し始めた高級既製服（プレタポルテ）は、当時の日本では販売されていなかった。", source: "No03-05", answer: false, exp: "誤り。1960年代にはパリのデザイナーによるプレタポルテが日本でも販売されるようになり、日本のファッションが既製服主体へと移行するきっかけとなりました。" },
+    { id: "test_bunkaron_original_No01_16", text: "ロンドンでマリー・クワントがミニスカートを商品化し、日本でも「ミニの女王」と呼ばれたツィッギーが来日して爆発的なブームとなったのは1960年代後半である。", source: "No03-06", answer: true, exp: "正しい。世界的なミニスカートブームは1960年代に始まり、日本においては1967年（昭和42年）のイギリスのモデル、ツィッギーの来日をきっかけに、1960年代後半に爆発的な大流行となりました。" },
+    { id: "test_bunkaron_original_No01_17", text: "1960年代にわが国で流行したミニスカートは、イギリスのモデルであるツイッギーの来日後に流行のピークを迎えた。", source: "No03-07", answer: true, exp: "正しい。1967年に「ミニの女王」と呼ばれたツイッギーが来日したことをきっかけに、ミニスカートブームは社会現象となるほどの爆発的な流行を見せました。" },
+    { id: "test_bunkaron_original_No01_18", text: "1960年代にアメリカのヒッピー運動の影響から生まれたファッションを、ニュートラファッションと呼ぶ。", source: "No03-08", answer: false, exp: "誤り。ヒッピー運動の影響で生まれたのはヒッピーファッションです。ニュートラは1970年代半ばに流行しました。" },
+    { id: "test_bunkaron_original_No01_19", text: "1970年代半ばから流行したニュートラファッションは、ブランド志向の上品な大人の装いであり、原宿の歩行者天国で派手な衣装を着て集団で踊った若者たちのスタイルとは異なる。", source: "No03-09", answer: true, exp: "正しい。ニュートラ（ニュートラディショナル）は、神戸の女子大生を発祥とする、海外の一流ブランドとトラディショナルな服を組み合わせた上品なコンサバ系ファッションです。原宿の歩行者天国で派手なサテンの衣装（民族服風）を着て踊ったのは、1970年代末から1980年代前半に流行した「竹の子族」であり、ニュートラとは全く異なる系統のスタイルです。" },
+],
+"No02.ファッション文化史 西洋編": [
+    { id: "test_bunkaron_original_No02_01", text: "映画『ローマの休日』のヒロインの髪型をモデルとし、前髪を短く不規則に切り下げ、両サイドをなでつけた短いスタイルを「ヘップバーンカット」と呼び、1950年代に大流行した。", source: "No03-10", answer: true, exp: "正しい。ヘップバーンカットは、1953年公開の映画『ローマの休日』でオードリー・ヘップバーンが見せたショートヘアに由来し、1950年代（昭和20年代後半〜30年代前半）の日本において、女性のショートカットブームを決定づけました。" },
+    { id: "test_bunkaron_original_No02_02", text: "ポニーテールは、第2次世界大戦後から1950年代にかけて、スクリーンファッションとともにわが国に登場したヘアスタイルの一つである。", source: "No03-11", answer: true, exp: "正しい。1950年代にはオードリー・ヘップバーンなどの映画スターの影響を受け、ポニーテールやセシールカット、ヘップバーンカットといった髪型が日本でも広く親しまれました。" },
+    { id: "test_bunkaron_original_No02_03", text: "映画『悲しみよこんにちは』のセシル役の髪型をモデルとした、髪全体を極端に短くしたボーイッシュな「セシールカット」は、1950年代（昭和30年代前半）に日本で大流行した。", source: "No03-12", answer: true, exp: "正しい。セシールカットは、1958年公開のフランス映画のヒロイン（ジーン・セバーグ）の髪型に由来するショートヘアスタイルで、1950年代後半の日本の若い女性たちの間で爆発的な流行を巻き起こしました。" },
+    { id: "test_bunkaron_original_No02_04", text: "1960年代から1970年代にかけて、若者男性の間でアフロヘアやマッシュルームカットなどの多様なヘアスタイルが流行した。", source: "No03-26", answer: true, exp: "正しい。この時期はビートルズの影響によるマッシュルームカットや、黒人文化に端を発するアフロヘア、さらにはロングヘアなど、男性の髪型が急激に多様化しました。" },
+    { id: "test_bunkaron_original_No02_05", text: "1970年代に流行したウルフカットは、1950年代に流行したヘップバーンカットと同様に、前髪を切り下げサイドをなでつけた短いスタイルである。", source: "No03-13", answer: false, exp: "誤り。ウルフカットは、襟足（首筋の髪）を長く残し、全体にレイヤー（段）を入れて狼の毛並みのようにワイルドに仕上げたスタイルです。設問の記述（前髪を切り下げてサイドをなでつける短いスタイル）は、1950年代に流行したヘップバーンカットの特徴を指しています。" },
+    { id: "test_bunkaron_original_No02_06", text: "ウルフカットは、襟足を長めに残して全体を段々に削いでいくため、段カットとも呼ばれた。", source: "No03-14", answer: true, exp: "正しい。1970年代に流行したウルフカットは、襟足を長く残し、全体をワイルドに削いで段をつける特徴から、段カットとも呼ばれていました。" },
+],
+"No03.礼装の種類": [
+    { id: "test_bunkaron_original_No03_01", text: "着物の格付けにおいて、未婚女性が着用する振袖は、女性の準礼装に分類される。", source: "No03-15", answer: false, exp: "誤り。振袖は未婚女性の第一礼装（正礼装）です。準礼装には一つ紋の訪問着などが該当します。" },
+    { id: "test_bunkaron_original_No03_02", text: "女性の礼装である留袖のうち、色のついたものは色留袖といい、黒地のものは黒留袖と呼ぶ。", source: "No03-16", answer: true, exp: "正しい。黒留袖は既婚女性の第一礼装ですが、色留袖は既婚・未婚を問わず着用できる礼装として用いられます。" },
+    { id: "test_bunkaron_original_No03_03", text: "着物の紬（つむぎ）は、一つ紋を付けることによって女性の準礼装として用いることができる。", source: "No03-17", answer: false, exp: "誤り。紬はおしゃれ着やカジュアル着に分類され、紋を付けても準礼装にはなりません。江戸小紋に一つ紋を付けると、色無地と同格の準礼装となります。" },
+    { id: "test_bunkaron_original_No03_04", text: "訪問着は、未婚者・既婚者の区別なく、披露宴やパーティーなどの準礼装として用いることができる。", source: "No03-18", answer: true, exp: "正しい。訪問着は既婚・未婚を問わず着用できる準礼装であり、絵羽模様が特徴の華やかな着物です。" },
+    { id: "test_bunkaron_original_No03_05", text: "和装の第1礼装である黒留袖は、既婚女性の正礼装であり、主に親族ではない一般の招待客が結婚披露宴で着用するものである。", source: "No03-19", answer: false, exp: "誤り。黒留袖は、新郎新婦の母親や既婚の姉妹、仲人婦人など、結婚式に列席する身内（主催者側）が着用する最も格の高い正礼装です。親族以外の一般の招待客が参列する場合は、訪問着や付け下げ、色無地などを着用するのがマナーとされています。" },
+    { id: "test_bunkaron_original_No03_06", text: "花嫁の和装礼装において、身を守るための守り刀である懐剣は、帯の右胸下にさすのが正式な作法である。", source: "No03-20", answer: false, exp: "誤り。懐剣は帯の左胸下にさすのが正しい作法です。" },
+    { id: "test_bunkaron_original_No03_07", text: "着物の「付け下げ」の模様は、黒留袖と同様に裾の部分だけに配置されているのが特徴である。", source: "No03-21", answer: false, exp: "誤り。付け下げの模様は裾だけでなく、上前、後ろ身ごろ、肩、袖、胸に、縫い目をまたがないように配置されているのが特徴です。" },
+    { id: "test_bunkaron_original_No03_08", text: "花嫁の和装礼装において、かつて打掛の下に着用されていた「小袖」は、現代の婚礼衣装では「掛下（かけした）」と呼ばれる振袖の形式になっている。", source: "No03-22", answer: true, exp: "正しい。江戸時代の武家女性の正装に由来する「打掛（うちかけ）」ですが、かつてはその下に「小袖」を重ねて着用していました。現代の婚礼衣装では、この小袖の代わりに、同じ白地や色柄物で仕立てた袖丈の長い振袖である「掛下」を下に着用する形式が定着しています。" },
+    { id: "test_bunkaron_original_No03_09", text: "男性の礼装のうち、燕尾服（ホワイトタイ）は昼間に着用される最も格式高い正式礼装である。", source: "No03-23", answer: false, exp: "誤り。燕尾服は夜の正式礼装（正礼装）です。昼間の正式礼装はモーニングコートです。" },
+    { id: "test_bunkaron_original_No03_10", text: "男性の洋装礼装において、モーニングコートは昼間の最も格式高い正式礼装として着用される。", source: "No03-24", answer: true, exp: "正しい。モーニングコートは、昼間の結婚式や式典、葬儀などで着用される男性の第一礼装（正礼装）です。" },
+    { id: "test_bunkaron_original_No03_11", text: "男性の正式礼装であるモーニングコートは、前裾（フロント）から後ろ身ごろにかけて丸く大きく刈り落としたような形状が特徴であり、夜の式典やパーティーで着用される。", source: "No03-25", answer: false, exp: "誤り。モーニングコートは「昼間」の正式礼装（正礼装）であり、乗馬しやすいように前裾（フロント）を丸くカットしたコートが起源となっています。夜の正式礼装は、後ろ身ごろが燕の尾のように二つに割れて長い「燕尾服（テールコート）」です。" },
+　　　　　　]
+        }
+    },
+    "test_bunkaron_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_bunkaron_past_2025_01", text: "1960年代にアメリカのヒッピー運動の影響から生まれたヒッピーファッションは、1970年代後半に流行した「竹の子族」のファッションを指す。", source: "52回 問題41", answer: false, exp: "誤り。1960年代にアメリカのヒッピー運動の影響から生まれたのは「ヒッピーファッション」である。竹の子族のファッションは、1970年代後半に原宿を中心に流行したものである。" },
+    { id: "test_bunkaron_past_2025_02", text: "昭和時代に流行したウルフカットは、襟足を長めにして段々に削ぎ、狼のたてがみのように見せた髪型である。", source: "52回 問題42", answer: true, exp: "正しい。ウルフカットは襟足を長めに残して段状に削るスタイルで、その見た目が狼のたてがみに似ていることに由来する。" },
+    { id: "test_bunkaron_past_2025_03", text: "花嫁の和装の礼装において、扇子の別名を「筥迫（はこせこ）」といい、慶事用は片面に金が塗られているのが特徴である。", source: "52回 問題43", answer: false, exp: "誤り。扇子の別名は「末広（すえひろ）」である。筥迫（はこせこ）は胸元に差し込む懐中用の小物入れを指す。" },
+    { id: "test_bunkaron_past_2025_04", text: "明治時代に流行した「ひさし髪」は、日露戦争の激戦地にちなんで「二百三高地髷（にひゃくさんこうちまげ）」と呼ばれた。", source: "51回 問題41", answer: true, exp: "正しい。日露戦争の激戦地となった二百三高地にちなみ、前髪や髷を非常に高く張り出した髪型がこのように呼ばれた。" },
+    { id: "test_bunkaron_past_2025_05", text: "1960年代のファッションとして、ケンゾー（高田賢三）が提案したフォークルックが日本国内で大流行した。", source: "51回 問題42", answer: false, exp: "誤り。ケンゾーのフォークルック（フォークロアファッション）が流行したのは1974年（1970年代）であり、1960年代の出来事ではない。" },
+    { id: "test_bunkaron_past_2025_06", text: "女性の和装において、一つ紋を入れた訪問着は準礼装として扱われる。", source: "51回 問題43", answer: true, exp: "正しい。黒留袖や振袖、五つ紋の色留袖などが正礼装であるのに対し、一つ紋の訪問着は準礼装に該当する。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_bunkaron_past_2024_01", text: "明治時代の女性の髪型のうち、銀杏返しは日本髪に該当する。", source: "50回 問題41", answer: true, exp: "正しい。銀杏返しは明治時代においても日本髪に該当する。一方、ひさし髪や二百三高地髷、まがれいとなどは束髪に分類される。" },
+    { id: "test_bunkaron_past_2024_02", text: "近代の服装において、日清戦争の頃に国粋主義が台頭したことで、洋装化がさらに進んだ。", source: "50回 問題42", answer: false, exp: "誤り。日清戦争頃に国粋主義が台頭した際には、洋装化が進むのではなく、ファッションが和装へと戻る動きがみられた。" },
+    { id: "test_bunkaron_past_2024_03", text: "女性の礼装である留袖の模様は、肩から裾にかけて連続した絵羽模様があしらわれているのが特徴である。", source: "50回 問題43", answer: false, exp: "誤り。既婚女性の正礼装である「留袖（特に黒留袖）」の模様は、裾部分だけに限定してあしらわれているのが最大の特徴です。肩から裾にかけて縫い目をまたいで連続する絵羽模様があるのは、未婚・既婚を問わず着用できる「訪問着」などの特徴です。" },
+    { id: "test_bunkaron_past_2024_04", text: "明治時代の女性の髪型のうち、唐人髷や結綿は代表的な日本髪である。", source: "49回 問題41", answer: true, exp: "正しい。唐人髷や結綿は束髪ではなく、日本髪の代表的な髪型として挙げられる。" },
+    { id: "test_bunkaron_past_2024_05", text: "1958年のパリ・コレクションで多くのデザイナーに採用されたサックドレスは、筒形で袋のようなシルエットが特徴である。", source: "49回 問題42", answer: true, exp: "正しい。サックドレスは「サック（袋）」という名の通り、筒形で袋のようなシルエットを持つ洋服で、日本でも大流行した。" },
+    { id: "test_bunkaron_past_2024_06", text: "花嫁の和装礼装において、懐剣（かいけん）は帯の右胸下にさすのが正式な作法である。", source: "49回 問題43", answer: false, exp: "誤り。懐剣は帯の右胸下ではなく、左胸下にさすのが正しい作法である。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_bunkaron_past_2023_01", text: "明治時代に流行した髪型のうち、二百三高地（にひゃくさんこうち）は日本髪に分類される。", source: "48回 問題41", answer: false, exp: "誤り。二百三高地は日本髪ではなく、明治時代に登場した「束髪（そくはつ）」の一つである。" },
+    { id: "test_bunkaron_past_2023_02", text: "明治時代の服装の洋風化に伴い、警官や鉄道員などの制服には洋装が採用された。", source: "48回 問題42", answer: true, exp: "正しい。明治維新後、公的な職種の制服から率先して洋装化が進められたことが記述されている。" },
+
+    { id: "test_bunkaron_past_2023_04", text: "昭和時代に流行したセシールカットは、髪全体を極端に短くしたボーイッシュな髪型が特徴である。", source: "47回 問題41", answer: true, exp: "正しい。セシールカットは、映画「悲しみよこんにちは」のヒロインにちなんだ非常に短いショートカットである。" },
+    { id: "test_bunkaron_past_2023_05", text: "1960年代から1970年代にかけての若者男性の間では、GI刈のヘアスタイルが広く流行した。", source: "47回 問題42", answer: false, exp: "誤り。GI刈が流行したのは1945年から1950年代にかけての戦後混迷期であり、1960年代以降はロングヘアなどが流行した。" },
+    { id: "test_bunkaron_past_2023_06", text: "1960年代、アンドレ・クレージュがパリ・コレクションでミニスカートを取り上げ、世界的な話題となった。", source: "47回 問題43", answer: true, exp: "正しい。1965年にアンドレ・クレージュが発表したミニスカートは、ファッション革命として大きな旋風を巻き起こした。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_bunkaron_past_2022_01", text: "明治時代において、束髪の普及に伴い日本髪は日常的に結われることはなくなった。", source: "46回 問題41", answer: false, exp: "誤り。明治時代には束髪という新しい髪型が普及したが、日本髪も依然として多くみられた。" },
+    { id: "test_bunkaron_past_2022_02", text: "1970年代に流行したウルフカットは、襟足あたりを長めにして段々に削いだ野性的な髪型である。", source: "46回 問題42", answer: true, exp: "正しい。ウルフカットは襟足を長く残し、段状に削る（段カット）ことで狼のたてがみのように見せた髪型である。" },
+    { id: "test_bunkaron_past_2022_03", text: "女性の和装において、おしゃれ着である紬（つむぎ）は一つ紋を付けることで準礼装となる。", source: "46回 問題43", answer: false, exp: "誤り。紬（つむぎ）は「織り（先に糸を染めてから織る）」の着物であり、格としてはどれほど高価なものであっても「普段着・おしゃれ着」に分類されます。そのため、紋を付けても準礼装として着用することはできません。" },
+    { id: "test_bunkaron_past_2022_04", text: "大正時代になると、都会の男性会社員（サラリーマン）の間で背広上下が普及した。", source: "45回 問題41", answer: true, exp: "正しい。大正時代には都市生活者を中心に洋装化が進み、男性の仕事着として背広が一般化した。" },
+    { id: "test_bunkaron_past_2022_05", text: "昭和時代に流行したセシルカットは、映画「ローマの休日」のヒロインの髪型を模したものである。", source: "45回 問題42", answer: false, exp: "誤り。映画「ローマの休日」の髪型はヘップバーンカットである。セシルカットは映画「悲しみよこんにちは」のヒロインの髪型を指す。" },
+    { id: "test_bunkaron_past_2022_06", text: "女性の和装において、一般的な総柄の小紋（こもん）は礼装や準礼装ではなく、おしゃれ着（普段着）に該当する。", source: "45回 問題43", answer: true, exp: "正しい。 全体に細かい模様が繰り返されている一般的な「小紋」は、日常の外出着やお稽古着などの「おしゃれ着（カジュアル着）」に該当し、結婚式などのフォーマルな席の礼装・準礼装とは明確に区別されます。ただし、江戸小紋に一つ紋を付けた場合は準礼装として扱われる" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_bunkaron_past_2021_01", text: "大正時代に流行した髪型のうち、二百三高地髷（にひゃくさんこうちまげ）は日本髪の一種である。", source: "44回 問題41", answer: false, exp: "誤り。 二百三高地髷（にひゃくさんこうちまげ）は、日露戦争（明治37〜38年）の激戦地にちなんで明治時代後期に大流行した髪型であり、日本髪ではなく**「束髪（洋風の髪型）」**に分類され、ひさし髪の一種である。" },
+    { id: "test_bunkaron_past_2021_02", text: "1958年に来日し、日本に洋服の立体裁断（ドレーピング）の技術を伝えたのはピエール・カルダンである。", source: "44回 問題42", answer: true, exp: "正しい。1958年に来日して立体裁断を伝えたのはピエール・カルダンであり、当時の日本のファッション界に大きな影響を与えた。" },
+
+    { id: "test_bunkaron_past_2021_04", text: "明治時代に入っても、江戸時代からの慣習や髪型の伝統が引き継がれ、身分や階級、既婚・未婚などの区別に応じた日本髪が一般の女性の間で結われ続けた。", source: "43回 問題41", answer: true, exp: "正しい。 明治維新によって法的な身分制度や髪型の制限（散髪脱刀令など）は撤廃されましたが、一般の女性の間では、江戸時代からの強い慣習として、既婚（丸髷）や未婚（桃割れ・結綿）などの社会的立場に応じた日本髪の結い分けが明治時代を通じて根強く行われました。" },
+    { id: "test_bunkaron_past_2021_05", text: "1960年代には、髪全体を同じ長さに切りそろえるワンレングスカットと「ボディコン」ファッションが同時に流行した。", source: "43回 問題42", answer: false, exp: "誤り。「ワンレン・ボディコン」が社会現象として話題になったのは1980年代後半であり、1960年代の流行ではない。" },
+    { id: "test_bunkaron_past_2021_06", text: "女性の和装において、訪問着は着用者の既婚・未婚を問わず準礼装として用いることができる。", source: "43回 問題43", answer: true, exp: "正しい。黒留袖（既婚用）や振袖（未婚用）と異なり、訪問着は結婚の有無にかかわらず、格式の高い社交着や準礼装として着用される。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_bunkaron_past_2020_01", text: "第2次世界大戦後から1950年代にかけてのスクリーンファッションとして、サーファーカットがわが国に登場した。", source: "42回 問題41", answer: false, exp: "誤り。サーファーカットは1970年代後半に世界的なサーフィンブームとともに登場したものであり、1950年代のスクリーンファッションにはセシールカットやポニーテール、ヘップバーンカットなどが該当する。" },
+    { id: "test_bunkaron_past_2020_02", text: "竹の子族のファッションは、原宿のブティック「竹の子」で販売されていた国籍不明の民族服が人気となったことに由来する。", source: "42回 問題42", answer: true, exp: "正しい。1970年代後半、原宿のブティック「竹の子」の派手な衣装を着用して歩行者天国などで踊った若者たちが「竹の子族」と呼ばれた。" },
+    { id: "test_bunkaron_past_2020_03", text: "花嫁の和装の礼装において、打掛の下に着用する小袖（掛下）の身丈は、かかとの位置に仕立てるのが正式である。", source: "42回 問題43", answer: false, exp: "誤り。花嫁衣装の小袖（掛下）の身丈は、かかとの位置ではなく、裾を長く引く「引き裾」の位置に仕立てる。" },
+    { id: "test_bunkaron_past_2020_04", text: "1960年代に流行したミニスカートは、背が低い傾向の日本人に合うスタイルとして、世代を超えて受け入れられた。", source: "41回 問題41", answer: true, exp: "正しい。ミニスカートは日本人の体格に合うスタイルとして広く受け入れられ、1967年のツイッギー来日を機に大流行した。" },
+    { id: "test_bunkaron_past_2020_05", text: "男子の和装礼装である黒羽二重五つ紋付きの着物と羽織、袴は、慶事のみに着用するものである。", source: "41回 問題42", answer: false, exp: "誤り。男子礼装の黒羽二重五つ紋付きは、慶事（婚礼・成人式など）と弔事（葬儀など）のどちらにも着用され、慶弔による違いはほとんどない。" },
+    { id: "test_bunkaron_past_2020_06", text: "燕尾服は夜の正式礼装であり、後ろの裾が燕の尾を思わせる形状をしていることからその名が付けられた。", source: "41回 問題43", answer: true, exp: "正しい。燕尾服は夜の正礼装で、前身ごろはウエスト丈だが後ろは長く二股に分かれた燕の尾のような形状が特徴である。" }
+]
+        }
+    },
+    "test_bunkaron_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.総論 と 日本の美容業の歴史": [
+    { id: "test_bunkaron_extra_sorontobiyogyonorekisi_No01", text: "我が国では明治前期、男性の髪を整え、あわせて顔剃りも行う職業を「美容業」と呼んでいた。", source: "No.01", answer: false, exp: "誤り。明治前期に顔剃りもあわせて行う職業は、美容業ではなく理髪業（理容業）と呼ばれていました。美容業は主に女性の結髪や化粧を指します。" },
+    { id: "test_bunkaron_extra_sorontobiyogyonorekisi_No02", text: "理容業の前身である「髪結（髪結い）」の専門職は、室町時代中期頃に京の町中にみられるようになったといわれています。", source: "No.02", answer: true, exp: "正しい。理容業の直接のルーツとされる「髪結（髪結い）」という専門職は、室町時代の中期頃に京都の町中で活動を始めたといわれています。なお、「髪結床（店舗を構えて営業するスタイル）」が一般的になり、広く普及していくのは江戸時代に入ってからのことです。" },
+    { id: "test_bunkaron_extra_sorontobiyogyonorekisi_No03", text: "江戸時代に使用された「元結（もっとい）」とは、髷を束ねるための紐そのものを指す言葉である。", source: "No.03", answer: true, exp: "正しい。元結とは、髷を束ねるための紐（紙縒りなど）のことを指します。ひもで束ねた髷そのもののことではありません。" },
+    { id: "test_bunkaron_extra_sorontobiyogyonorekisi_No04", text: "大正から昭和へ移る間、日本の文化向上や人口増加は進んだが、理容師や美容師の需要は低かった。", source: "No.04", answer: false, exp: "誤り。大正から昭和にかけて、生活の洋風化や文化の向上により、理容・美容の需要は急速に高まりました。" },
+],
+"B.ファッション文化史 日本編": [
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No05", text: "1970年代に流行した「ウルフカット」は、襟足を長く残して全体にレイヤー（段）を入れるのが特徴である。", source: "No.05", answer: true, exp: "正しい。襟足あたりを長めにして段々に削いでいく手法から、段カットとも呼ばれました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No06", text: "第二次世界大戦後の1950年代、映画の影響で、落下傘（パラシュート）のように広がるスカートが流行した。", source: "No.06", answer: true, exp: "正しい。第二次世界大戦が終わった後の1950年代、映画（『ローマの休日』など）の爆発的なヒットに伴い、まるでパラシュート（落下傘）のようにふんわりと大きく広がるシルエットのスカートが日本の女性たちの間で大流行しました。※「1970年代」は、フォークロアやベルボトムジーンズなど、より自由でカジュアルなファッションが主流となった時代です。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No07", text: "ソバージュは、髪全体に細かくウエーブをつけた髪型のことである。", source: "No.07", answer: true, exp: "正しい。フランス語で「野性的な」という意味を持ち、日本では1980年代に大流行しました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No08", text: "明治時代に束髪が普及したことにより、女性が日常的に日本髪を結う風習は完全になくなった。", source: "No.08", answer: false, exp: "誤り。束髪が普及し始めた時期ではありましたが、依然として多くの女性が日常的に日本髪を結っていました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No09", text: "1930年代の日本において、アメリカ兵の影響を受けた角丸型の短髪であるGI刈が流行した。", source: "No.09", answer: false, exp: "誤り。GI刈がアメリカ兵の影響で流行したのは、第二次世界大戦後の1940年代後半から1950年代にかけてです。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No10", text: "1956年に石原慎太郎の小説が映画化された影響で、若者の間で「慎太郎刈」という短髪が流行した。", source: "No.10", answer: true, exp: "正しい。映画『太陽の季節』のヒットにより、石原慎太郎の髪型を真似たスタイルが当時の若者に支持されました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No11", text: "1940年代後半から1950年代にかけて、女優のオードリー・ヘップバーンによるヘップバーンカットが流行した。", source: "No.11", answer: true, exp: "正しい。映画「ローマの休日」のヒロインの髪型は当時の主要なトレンドとなり、日本でも広く親しまれました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No12", text: "竹の子族ファッションは、1970年代後半から1980年代初頭に流行した、女子大生を中心に広がったサーファー風のレイヤード（重ね着）スタイルが特徴である。", source: "No.12", answer: false, exp: "誤り。竹の子族ファッションは、原宿の歩行者天国（ホコ天）で派手なアラビア風・中近東風の衣装（ハーレムパンツなど）を身にまとって踊った若者たちのスタイルです。設問にある「女子大生を中心に広がったサーファー風スタイル（サーファーカットやレイヤード）」は、同時期の1970年代後半〜1980年代初頭に流行した「サーファールック」の特徴であり、竹の子族とは全く異なります。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No13", text: "1958年に来日したピエール・カルダンは、前衛的なスタイル（サック・ドレスなど）を紹介し、日本の既製服（プレタポルテ）産業の発展に大きな影響を与えた。", source: "No.13", answer: true, exp: "正しい。1958年（昭和33年）に来日したピエール・カルダンは、当時の日本に新しい高感度なデザイン（サック・ドレスなど）を紹介しました。これが刺激となり、日本のアパレル界は「注文服（オートクチュール）」から「既製服（プレタポルテ）」の大量生産時代へと大きく舵を切る契機となりました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No14", text: "1960年代には、ワンレン・ボディコンといわれる身体にフィットした女性的な服装が大流行した。", source: "No.14", answer: false, exp: "誤り。ワンレン・ボディコンが流行したのは、1980年代後半のバブル期です。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No15", text: "1871年（明治4年）の太政官布告により、断髪が奨励され「散切り頭」が文明開化の象徴となった。", source: "No.15", answer: true, exp: "正しい。断髪脱刀令（散髪脱刀勝手令）によって、それまでの髷を落とした散切り頭が近代化の象徴とされました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No16", text: "大正時代、軍服をモデルにした「国民服」が制定され、都会の男性会社員の間で背広上下とともに普及した。", source: "No.16", answer: false, exp: "誤り。国民服が制定されたのは大正時代ではなく、戦時体制下の昭和15年（1940年）のことです。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No17", text: "1960年代に流行したミニスカートは、既成の価値観を拒否する「ヒッピーファッション」の一種として広まった。", source: "No.17", answer: false, exp: "誤り。ミニスカートはモッズやピーコックの流れを汲む流行であり、反体制的なヒッピーファッションとは系統が異なります。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No18", text: "明治時代の学生や兵士の間では、クリッパー（バリカン）を使用した丸刈りやチャン刈りが流行した。", source: "No.18", answer: true, exp: "正しい。国産のクリッパーが完成したこともあり、短髪スタイルが当時の学生や軍人の間で定着しました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No19", text: "日露戦争後に流行した「二百三高地髷（にひゃくさんこうちまげ）」は、代表的な日本髪のスタイルである。", source: "No.19", answer: false, exp: "誤り。二百三高地髷は日本髪ではなく、西洋のスタイルを取り入れた「束髪」の一種に分類されます。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No20", text: "1960年代、イギリスのロックグループであるビートルズの影響により「マッシュルームカット」が流行した。", source: "No.20", answer: true, exp: "正しい。当時の若者文化において、イギリス発の音楽と連動したヘアスタイルが大きな影響力を持っていました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No21", text: "明治時代初期、武士にとって髷を切ることは、自らの身分と誇りを失うことへの強い抵抗を伴うものだった。", source: "No.21", answer: true, exp: "正しい。断髪を奨励する布告が出されたものの、伝統的な髷を切り落とすことに反対する旧武士層は多く存在しました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No22", text: "アイビールックやコンチネンタルルックは、大正時代に20〜30代の若者を中心にトータルファッションとして流行した。", source: "No.22", answer: false, exp: "誤り。アイビールックやコンチネンタルルックが流行したのは、昭和中期（1950〜60年代）のことです。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No23", text: "昭和初期の1933年（昭和8年）頃、新しい洋風スタイルとして、ポマードで両側面の髪を後ろへ撫でつける「リーゼントスタイル（リーゼント）」が紹介され、モダンな男性の間で流行した。", source: "No.23", answer: true, exp: "正しい。昭和初期の1933年（昭和8年）頃、イギリス発祥の新しい男性用ヘアスタイルとして「リーゼント」が日本に紹介されました。これは、ポマードなどの整髪料を使い、サイドの髪を後方へ流してバックで合わせるモダンなスタイルで、当時の最先端のおしゃれを追求する男性たちの間で大流行しました。大正時代までの伝統的な短髪や散切り頭とは一線を画す、昭和の新しい洋風トレンドの代表例です。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No24", text: "明治時代に入り西洋束髪が普及したことで、日本髪を結う女性は公式な場も含めて一切いなくなった。", source: "No.24", answer: false, exp: "誤り。明治時代も公式な場や伝統的な生活を重んじる環境においては、引き続き日本髪が結われていました。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No25", text: "1945年から1950年代にかけて、モダンガールと呼ばれる女性たちが銀座や心斎橋を闊歩した。", source: "No.25", answer: false, exp: "誤り。モダンガール（モガ）が流行したのは1920年代（大正から昭和初期）の風俗であり、戦後の1945年から1950年代の流行ではありません。" },
+    { id: "test_bunkaron_extra_fasshonsbunnkasinihonhen_No26", text: "大正時代に登場したバスガール（女車掌）の制服は、上着とスカートといった洋服が標準であった。", source: "No.26", answer: true, exp: "正しい。大正時代に登場したバスガールの制服は、それまでの和装ではなく洋服が標準的なスタイルでした。" },
+],
+"C.ファッション文化史 西洋編": [
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No27", text: "1960年代に発表された「ジオメトリックカット」は、当時の若者に大流行したミニスカートの名称である。", source: "No.27", answer: false, exp: "誤り。ジオメトリックカットはヴィダル・サスーンらが提案したヘアスタイルの名称であり、ミニスカートはマリー・クワントらが発表した衣服の名称です。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No28", text: "古代ギリシアでは、エジプトのような宗教的意味合いのかつらは好まれず、自然な髪が好まれた。", source: "No.28", answer: true, exp: "正しい。古代エジプトではかつらが身分象徴として重要視されましたが、古代ギリシアでは対照的に自髪を活かしたスタイルが主流でした。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No29", text: "中世初期から13世紀頃まで、キリスト教会は女性に対し、ヘアスタイルやメイクを華やかにして美しく装うことを求めた。", source: "No.29", answer: false, exp: "誤り。当時の中世キリスト教会は虚飾を禁じており、身だしなみに対しては質素で節度あるものを求めていました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No30", text: "17世紀初頭の男性の間で、カールさせた一房の長い巻き毛に蝶結びのリボンを付けて前に垂らす「ラブロック」が流行した。", source: "No.30", answer: true, exp: "正しい。バロック期の貴族の間で、このように一房のカールを胸元に垂らすスタイルがステータスとして流行し始めました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No31", text: "18世紀の男性のかつらのうち、うなじのあたりで一房にまとめてリボンで結んでいるものは「結びかつら」の主要な特徴である。", source: "No.31", answer: true, exp: "正しい。18世紀、男性の間では「結びかつら（キャトガン／カドガンなど）」が広く流行しました。これは、髪を後ろで一房にまとめ、リボンなどで留めるスタイルを指します。※なお、「カドガン」は、前髪を高く上げ、後ろの髪をうなじのあたりで結んで下げるのが特徴とされています。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No32", text: "19世紀前半の男性は、フランス革命を境にそれまでの貴族的なキュロットを捨て、長ズボン（パンタロン）を着用するようになった。", source: "No.32", answer: true, exp: "正しい。革命による社会の変化に伴い、労働者の服装であった長ズボンが市民階級の一般的な服装として定着しました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No33", text: "20世紀初頭に普及した「マーセルウエーブ」は、薬剤の化学反応を利用して、半永久的なウエーブを形づくる技術である。", source: "No.33", answer: false, exp: "誤り。マーセルウエーブは、「専用のアイロン（コテ）を熱して、髪に一時的なウエーブをつける技術」です。設問にある「薬剤の化学反応を利用して半永久的なウエーブ（パーマネントウエーブ）をかける技術」が普及し始めるのは、1906年にカール・ネッスラーが熱化学式の方法（ネッスラー波）を発表した後のことです。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No34", text: "1950年代に公開された映画『ローマの休日』の影響により、日本でも「ヘップバーンカット」が若い女性の間で大流行した。", source: "No.34", answer: true, exp: "正しい。戦後はスクリーンファッションの影響が極めて大きく、オードリー・ヘップバーンのスタイルは当時の主要なトレンドとなりました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No35", text: "古代ギリシアは、宗教的儀式やミイラ製作のために体を清めるための香油づくりにおいて、非常に優れた技術を持っていた。", source: "No.35", answer: false, exp: "誤り。ミイラ製作に関連する高度な香油製造技術を誇っていたのは、古代ギリシアではなく古代エジプトです。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No36", text: "15世紀、上流の女性の間で、布を幾重にも巻いたり角のように立てたりした豪華なかぶり物である「エスコフィオン」が作られた。", source: "No.36", answer: true, exp: "正しい。15世紀の中世末期には、装飾性の高い巨大なかぶり物であるエスコフィオンやヘニン（円錐帽）などが流行しました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No37", text: "16世紀のヨーロッパでは、入浴は体に害を及ぼすと信じられていた傾向があり、体臭を隠すために香水への欲求が高まっていった。", source: "No.37", answer: true, exp: "正しい。当時のヨーロッパでは入浴が悪影響を及ぼすと信じられており、体臭を隠すために香水文化が発達しました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No38", text: "フランス革命後の女性の髪型は、それまでの巨大な盛り上げスタイルをさらに追求した、極めて華美な装飾が主流となった。", source: "No.38", answer: false, exp: "誤り。フランス革命後は貴族文化の象徴であった過度な装飾が排され、古代ギリシア・ローマ風のナチュラルなスタイルが流行しました。" },
+    { id: "test_bunkaron_extra_fasshonbunkasiseyohen_No39", text: "フランス革命後の男性のファッションの大きな変化として、脚の形がわかるほど細い長ズボン（パンタロン）を着用するようになったことが挙げられる。", source: "No.39", answer: true, exp: "正しい。社会構造の変化に伴い、貴族的なキュロットは廃れ、労働者の服装をルーツとする長ズボンが一般化しました。" },
+],
+"D.礼装の種類": [
+    { id: "test_bunkaron_extra__resonoshurui_No40", text: "モーニングコートは昼間の正礼装であり、準礼装であるディレクターズスーツより格上の服装である。", source: "No.40", answer: true, exp: "正しい。モーニングコートは昼間の最も格の高い正礼装に分類されます。" },
+    { id: "test_bunkaron_extra__resonoshurui_No41", text: "洋装における男性の昼の正礼装は、タキシードである。", source: "No.41", answer: false, exp: "誤り。昼の正礼装はモーニングコートです。タキシードは夜の準礼装にあたります。" },
+    { id: "test_bunkaron_extra__resonoshurui_No42", text: "和装の花嫁衣装である白無垢は、掛下、帯、小物類すべてを白一色に揃えるのが特徴である。", source: "No.42", answer: true, exp: "正しい。すべてを白で統一することで、清浄無垢な状態を表しています。" },
+    { id: "test_bunkaron_extra__resonoshurui_No43", text: "男性の和装における正礼装は、染め抜き三つ紋の黒紋付羽織袴を着用するのが正式である。", source: "No.43", answer: false, exp: "誤り。男性の和装正礼装は、染め抜き「五つ紋」の黒紋付羽織袴が正式です。" },
+    { id: "test_bunkaron_extra__resonoshurui_No44", text: "訪問着は、未婚者、既婚者の区別なく、準礼装として用いることができる。", source: "No.44", answer: true, exp: "正しい。訪問着は幅広い層で準礼装として一般的に用いられます。" },
+    { id: "test_bunkaron_extra__resonoshurui_No45", text: "燕尾服は、黒の蝶ネクタイを着用するため、通称ブラックタイと呼ばれている。", source: "No.45", answer: false, exp: "誤り。ブラックタイと呼ばれるのはタキシードです。燕尾服は白の蝶ネクタイを用いるためホワイトタイと呼ばれます。" },
+    { id: "test_bunkaron_extra__resonoshurui_No46", text: "洋装の男性礼装において、夜の正礼装として着用されるのは燕尾服である。", source: "No.46", answer: true, exp: "正しい。夜間の最も格の高い礼装（正礼装）は燕尾服と定められています。" },
+    { id: "test_bunkaron_extra__resonoshurui_No47", text: "男性の昼の準礼装としては、タキシードが最も適している。", source: "No.47", answer: false, exp: "誤り。タキシードは「夜」の準礼装（ブラックタイ指定）であり、昼間の準礼装としては適していません。なお、男性の昼の準礼装として着用されるのは「ディレクターズスーツ」です。このように、フォーマルウェアは「昼」と「夜」、そして「正礼装」「準礼装」「略礼装」といった時間帯と格式の組み合わせを正しく整理することが非常に重要です。" },
+    { id: "test_bunkaron_extra__resonoshurui_No48", text: "燕尾服は白の蝶ネクタイを着用することがルールの正礼装であるため、ホワイトタイと呼ばれる。", source: "No.48", answer: true, exp: "正しい。夜の正礼装である燕尾服は、ドレスコードとしてホワイトタイと呼ばれます。" },
+    { id: "test_bunkaron_extra__resonoshurui_No49", text: "和装の礼装で用いられる「仙台平」とは、絹製の男性用羽織の総称である。", source: "No.49", answer: false, exp: "誤り。仙台平は羽織ではなく、袴（はかま）に用いる最高級の絹織物の名称です。" },
+    { id: "test_bunkaron_extra__resonoshurui_No50", text: "一つ紋を入れた訪問着は、女性の礼装において準礼装に分類される。", source: "No.50", answer: true, exp: "正しい。紋を入れた訪問着は準礼装の代表的なスタイルです。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_bunkaron_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題(頻出抜粋)",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_bunkaron_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_bunkaron_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_bunkaron_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
