@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『衛生管理』<br>【感染症ver】</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_kansensho_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_kansensho_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No06.総論 人と感染症": [
+    { id: "test_kansensho_original_No06_01", text: "美容師が結核に感染した場合、感染症法に基づき、感染させるおそれがある期間は就業が制限されることがある。", source: "No06-01", answer: true, exp: "正しい。結核は感染症法上の二類感染症です。美容師が罹患した場合、公衆衛生上の観点から、保健所や都道府県知事等の判断により、感染の恐れがある期間は就業制限の対象となります。" },
+    { id: "test_kansensho_original_No06_02", text: "インフルエンザは、咳やくしゃみによって飛び散る飛沫を吸い込むことで感染する代表的な疾患である。", source: "No06-02", answer: true, exp: "正しい。インフルエンザは飛沫感染によって伝播します。一方、ポリオは経口感染、日本脳炎は蚊の媒介により感染します。" },
+    { id: "test_kansensho_original_No06_03", text: "コレラは、主として性行為によって感染する感染症である。", source: "No06-03", answer: false, exp: "誤り。コレラは飲食物を介した経口感染が主である。性行為が主な感染経路の一つとなるのはB型肝炎などである。" },
+    { id: "test_kansensho_original_No06_04", text: "A型肝炎は、汚染された血液や注射器を介して感染する疾患である。", source: "No06-04", answer: false, exp: "誤り。A型肝炎は汚染された飲食物や手指を介して口から入る経口感染が主である。血液等を介して感染するのはB型やC型肝炎である。" },
+    { id: "test_kansensho_original_No06_05", text: "デング熱は、ネッタイシマカやヒトスジシマカといった蚊によって媒介される感染症である。", source: "No06-05", answer: true, exp: "正しい。デング熱は蚊によって媒介される代表的な感染症である。" },
+    { id: "test_kansensho_original_No06_06", text: "麻しん（はしか）は、非常に強い感染力を持ち、空気感染（飛沫核感染）を起こす感染症である。", source: "No06-06", answer: true, exp: "正しい。麻しんは飛沫感染もしますが、最大の特徴は極めて感染力の強い「空気感染（飛沫核感染）」です。同じ空間にいるだけで免疫のない人に感染させるリスクがあるため、他疾患と区別して理解しておく必要があります。" },
+    { id: "test_kansensho_original_No06_07", text: "百日せきの病原体は、「百日咳ウイルス」である。", source: "No06-07", answer: false, exp: "誤り。百日せきの病原体は「百日咳菌」という「細菌」です。ウイルスではありません。微生物は細菌かウイルスかといった基本的な分類を理解することが重要です。" },
+    { id: "test_kansensho_original_No06_08", text: "破傷風は、土壌の中に存在する菌が傷口から侵入することによって感染する。", source: "No06-08", answer: true, exp: "正しい。破傷風は土壌を介して感染する。一方、ペストはネズミやノミを介して感染する。" },
+    { id: "test_kansensho_original_No06_09", text: "感染症法における三類感染症は、特定の業務（飲食物の製造・取扱い等）への従事に関し、集団感染予防の観点から就業制限の規定がある。", source: "No06-09", answer: true, exp: "正しい。三類感染症（コレラ、細菌性赤痢等）は、必ずしも重症であるとは限りませんが、感染力や病原性が強いため、食品を扱うなど特定の職業に就くことが制限されます。これにより集団発生を防止しています。" },
+    { id: "test_kansensho_original_No06_10", text: "C型肝炎は、結核やジフテリアと同様に、感染症法に基づき美容師の業務を一律に制限しなければならない疾患である。", source: "No06-10", answer: false, exp: "誤り。C型肝炎は五類感染症であり、通常の接触で感染するリスクが低いため、一律の就業制限の対象にはなっていません。" },
+    { id: "test_kansensho_original_No06_11", text: "A型肝炎は、結核や水痘（水ぼうそう）と同じく、空気中に浮遊する微粒子を吸い込んで感染する空気感染の代表例である。", source: "No06-11", answer: false, exp: "誤り。A型肝炎は飲食物を介した経口感染であり、空気感染はしません。結核や水痘は空気感染（飛沫核感染）をします。" },
+    { id: "test_kansensho_original_No06_12", text: "デング熱は蚊によって媒介される感染症であり、コレラや腸チフスなどの消化器系感染症（経口感染）には該当しない。", source: "No06-12", answer: true, exp: "正しい。デング熱は節足動物媒介感染症です。コレラや腸チフスは水や食べ物を介して感染する消化器系感染症です。" },
+    { id: "test_kansensho_original_No06_13", text: "1928年に世界初の抗生物質であるペニシリンを発見したのは、コッホである。", source: "No06-13", answer: false, exp: "誤り。ペニシリンを発見したのはフレミングです。コッホは結核菌や炭疽菌などを発見した人物です。" },
+    { id: "test_kansensho_original_No06_14", text: "狂犬病やB型肝炎は、麻しんと同様に飛沫感染や空気感染によって伝播する。", source: "No06-14", answer: false, exp: "誤り。狂犬病は咬傷（血液等）を介し、B型肝炎も血液等を介して感染します。飛沫・空気感染をする代表は麻しんです。" },
+],
+"No07.総論 病原微生物": [
+    { id: "test_kansensho_original_No07_01", text: "細菌の一部が形成する芽胞は、100℃の煮沸にも耐えるほどの強い耐熱性や耐乾燥性を持っている。", source: "No07-01", answer: true, exp: "正しい。芽胞は一部の細菌が過酷な環境で生き延びるために作る構造体で、熱や乾燥に対して極めて強い抵抗力を持ちます。" },
+    { id: "test_kansensho_original_No07_02", text: "細菌は、適切な栄養・水分・温度などの条件が整えば、人工培地などを用いて自力で増殖することができる。", source: "No07-02", answer: true, exp: "正しい。細菌は自己複製能力を持っており、生きた細胞がなくても条件さえ合えば増殖可能です。" },
+    { id: "test_kansensho_original_No07_03", text: "細菌は、遺伝情報を司る核酸として、DNAまたはRNAのいずれか一方のみを細胞内に持っている。", source: "No07-03", answer: false, exp: "誤り。細菌は細胞内にDNAとRNAの両方を持っています。核酸をいずれか一方のみ持つのはウイルスの特徴です。" },
+    { id: "test_kansensho_original_No07_04", text: "細菌の成分構成において、菌体全体のおよそ80%はタンパク質によって占められている。", source: "No07-04", answer: false, exp: "誤り。細菌の成分の約80%は水分です。タンパク質は水分を除いた固形成分のうちのおよそ半分を占めています。" },
+    { id: "test_kansensho_original_No07_05", text: "結核菌は、環境が成育に不適当な状態になると、細胞内に芽胞と呼ばれる休眠型の構造体を作る。", source: "No07-05", answer: false, exp: "誤り。結核菌は芽胞を作りません。芽胞を作る代表的な細菌は、破傷風菌やボツリヌス菌、炭疽菌などです。" },
+    { id: "test_kansensho_original_No07_06", text: "ウイルスは自己複製能力を持たないため、生きた細胞（宿主）に寄生しなければ増殖することができない。", source: "No07-06", answer: true, exp: "正しい。ウイルスは偏性細胞内寄生体であり、生きた細胞のシステムを利用して初めて増殖が可能となります。" },
+    { id: "test_kansensho_original_No07_07", text: "ウイルスの増殖は細菌のような2分裂ではなく、宿主細胞内の材料を利用して自分の部品を大量に作らせる方式で行われる。", source: "No07-07", answer: true, exp: "正しい。ウイルスは宿主細胞に入り込み、多数のウイルス粒子を産生・成熟させてから細胞外へ放出されることで増殖します。" },
+    { id: "test_kansensho_original_No07_08", text: "多くの病原細菌が発育するのに最も適したpH（水素イオン指数）は、酸性である。", source: "No07-08", answer: false, exp: "誤り。多くの病原細菌の発育に最適なpHは、中性もしくは弱アルカリ性（pH7.0〜7.4程度）です。" },
+    { id: "test_kansensho_original_No07_09", text: "微生物の大きさを比較すると、発疹チフスリケッチアは、一般的な細菌（結核菌など）よりも小さく、ウイルスよりも大きい。", source: "No07-09", answer: true, exp: "正しい。リケッチアは分類学上は細菌の一種ですが、ウイルスと同様に細胞内でしか増殖できない「偏性細胞内寄生性」という特徴を持ち、一般的な細菌よりもサイズが小さいのが特徴です。" },
+    { id: "test_kansensho_original_No07_10", text: "多くの病原菌が発育可能な温度範囲は15〜45℃であり、その中でも37℃前後が最も増殖に適した至適温度である。", source: "No07-10", answer: true, exp: "正しい。多くの病原菌は人間の体温に近い37℃前後で最も活発に増殖し、15〜45℃程度が発育できる範囲とされています。" },
+],
+"No08.総論 感染症の予防": [
+    { id: "test_kansensho_original_No08_01", text: "感染症予防の三原則において、周囲に病原体を広げないための「患者の入院治療」は、感染経路対策に該当する。", source: "No08-01", answer: false, exp: "誤り。患者の入院治療は、病原体を広げないための「感染源（伝染源）対策」に該当する。感染経路対策とは、病原体が人へ運ばれるルートを遮断することを指す。" },
+    { id: "test_kansensho_original_No08_02", text: "感染症を媒介するネズミや昆虫（蚊、ダニ等）を駆除することは、感染源対策の一つである。", source: "No08-02", answer: false, exp: "誤り。ネズミや昆虫は病原体を運ぶ「媒介物」であるため、その駆除は「感染経路対策」に該当する。" },
+    { id: "test_kansensho_original_No08_03", text: "予防接種に使用される製剤のうち、麻しん（はしか）ワクチンは「トキソイド」に分類される。", source: "No08-03", answer: false, exp: "誤り。麻しんワクチンは、ウイルスの毒性を弱めた「生ワクチン」である。トキソイドは、細菌の毒素を無毒化した破傷風やジフテリアのワクチンなどが該当する。" },
+    { id: "test_kansensho_original_No08_04", text: "常在細菌叢は、大腸などの消化管だけでなく、健康な人の皮膚にも大量に存在している。", source: "No08-04", answer: true, exp: "正しい。常在細菌叢は皮膚にも存在し、外部からの病原菌の定着を防ぐバリア機能を果たしている。" },
+    { id: "test_kansensho_original_No08_05", text: "白癬（水虫）は、患者や病原体保有者が使用したタオルやスリッパなどを介して感染することがある。", source: "No08-05", answer: true, exp: "正しい。白癬はカビ（真菌）の一種であり、汚染されたタオルやバスマット、スリッパ等に触れることで皮膚に付着し感染する。" },
+    { id: "test_kansensho_original_No08_06", text: "健康な人であれば通常は感染を起こさないような病原性の低い病原体によって、感染・発病を起こすことを日和見感染という。", source: "No08-06", answer: true, exp: "正しい。日和見感染は、疾病や薬剤などの影響で宿主の抵抗力（免疫力）が低下している場合に起こりやすい。" },
+    { id: "test_kansensho_original_No08_07", text: "予防接種の実施は、人間（宿主）が病気にかからないように免疫をつける対策であるため、「宿主の感受性対策」に該当する。", source: "No08-07", answer: true, exp: "正しい。予防接種は、個人の抵抗力を高めることで感染を未然に防ぐ「宿主の感受性対策」の代表例である。" },
+    { id: "test_kansensho_original_No08_08", text: "結核菌は、健康な人の鼻腔内に常に存在する常在細菌叢の一つである。", source: "No08-08", answer: false, exp: "誤り。結核菌は「病原菌」であり、常在細菌ではない。鼻腔の常在菌としては、一般的にブドウ球菌などが挙げられる。" },
+    { id: "test_kansensho_original_No08_09", text: "狂犬病の予防接種は、日本において人間に対する「定期の予防接種」の対象には含まれていない。", source: "No08-09", answer: true, exp: "正しい。狂犬病の予防接種は、人間に対しては任意接種であるが、犬に対しては法律で登録と接種が義務付けられている。" },
+    { id: "test_kansensho_original_No08_10", text: "現在の日本の予防接種法では、定期接種の多くは「努力義務」とされており、罰則を伴う強制実施ではない。", source: "No08-10", answer: true, exp: "正しい。現在の制度では、国民は予防接種を受けるよう努めなければならないという「努力義務」として規定されている。" },
+    { id: "test_kansensho_original_No08_11", text: "「病原体に汚染された場所の消毒」は、感染症予防の三原則において感染経路対策に分類される。", source: "No08-11", answer: true, exp: "正しい。汚染された場所を消毒することは、病原体が人へ運ばれるルートを物理的に遮断する行為であるため、感染経路対策に該当する。" },
+    { id: "test_kansensho_original_No08_12", text: "感染症によって作られた抗体は、どのような疾患であっても一生涯、血清中に同じ濃度で存在し続ける。", source: "No08-12", answer: false, exp: "誤り。抗体の持続期間は疾患により異なる。麻しんのように一生続くものもあるが、インフルエンザや破傷風のように時間の経過とともに減少するものも多い。" },
+    { id: "test_kansensho_original_No08_13", text: "伝染性膿痂疹（とびひ）の主な感染経路は、日本脳炎やマラリアと同様に、蚊による媒介である。", source: "No08-13", answer: false, exp: "誤り。伝染性膿痂疹はブドウ球菌やレンサ球菌が原因であり、患部や汚染されたタオルなどを介した接触により感染する。蚊による媒介ではない。" },
+    { id: "test_kansensho_original_No08_14", text: "患者によって汚染されたタオルに接触することで感染する疾患として、白癬（皮膚真菌症）が挙げられる。", source: "No08-14", answer: true, exp: "正しい。白癬は、カビ（真菌）の一種である白癬菌による感染症です。タオルや共用のマットを介して接触感染します。頭部に発症した場合は「しらくも」と呼ばれますが、足や体に発症するものも白癬菌による同種の変化です。" },
+    { id: "test_kansensho_original_No08_15", text: "病原体が人体に付着すれば、その後の免疫機能に関わらず必ず感染が成立する。", source: "No08-15", answer: false, exp: "誤り。病原体が人体に付着しただけでは感染とは呼ばない。付着しても皮膚のバリア機能や免疫によって排除されれば、感染に至らないケースも多い。" },
+    { id: "test_kansensho_original_No08_16", text: "細菌の変異（遺伝子の変化）が起きると、薬剤耐性の獲得だけでなく、細菌の大きさや形といった形態が変化することもある。", source: "No08-16", answer: true, exp: "正しい。変異によって病原性が変化したり、鞭毛や莢膜が消失するなど形態が変化したりすることがある。" },
+    { id: "test_kansensho_original_No08_17", text: "病原体が体内に侵入しても、発育・増殖することができずに体外へ排出されてしまう状態も「感染」という。", source: "No08-17", answer: false, exp: "誤り。感染の定義は「病原体が人体に侵入して、発育、増殖すること」である。増殖できずに排出されてしまう場合は、感染とは呼ばない。" },
+],
+"No09.各論 美容と感染症、空気・飛沫を介して感染する感染症": [
+    { id: "test_kansensho_original_No09_01", text: "我が国における結核の死亡率は、現在、高齢層よりも若年層で極めて高い。", source: "No09-01", answer: false, exp: "誤り。かつては青年層の死因第1位でしたが、現在は高齢者の死亡率が高い疾患となっています。" },
+    { id: "test_kansensho_original_No09_02", text: "風しんの潜伏期間は、感染してから発症するまで通常2〜3か月である。", source: "No09-02", answer: false, exp: "誤り。風しんの潜伏期間は2〜3週間です。2〜3か月ではありません。" },
+    { id: "test_kansensho_original_No09_03", text: "麻しん（はしか）は非常に感染力が強く、空気感染（飛沫核感染）によって伝播する。", source: "No09-03", answer: true, exp: "正しい。麻しんは空気感染するため、同じ空間にいるだけで免疫がない人はほぼ感染するほど強い感染力を持っています。" },
+    { id: "test_kansensho_original_No09_04", text: "結核の予防には、BCGワクチンによる定期の予防接種が実施されている。", source: "No09-04", answer: true, exp: "正しい。生後1歳に至るまでの期間にBCGワクチンの定期接種が行われています。" },
+    { id: "test_kansensho_original_No09_05", text: "風しんの免疫を維持するためには、インフルエンザのように予防接種を毎年受ける必要がある。", source: "No09-05", answer: false, exp: "誤り。風しんの定期予防接種は、通常一生のうちに2回受けることで十分な免疫が得られます。毎年受ける必要はありません。" },
+    { id: "test_kansensho_original_No09_06", text: "季節性インフルエンザにおいて、世界的な大流行（パンデミック）を引き起こす主な原因はB型ウイルスのみである。", source: "No09-06", answer: false, exp: "誤り。大きな流行の主な原因となるのはA型とB型です。B型はA型に比べると変異が少なく、世界的な大流行は起こしにくいとされています。" },
+    { id: "test_kansensho_original_No09_07", text: "麻しんは、非常に強い感染力を持ち、飛沫感染に加えて「空気感染（飛沫核感染）」を起こす疾患である。", source: "No09-07", answer: true, exp: "正しい。麻しんは飛沫感染もしますが、最大の特徴は極めて感染力の強い「空気感染（飛沫核感染）」です。同じ空間にいるだけで免疫のない人に感染させるリスクがあるため、他疾患と区別して理解しておく必要があります。" },
+    { id: "test_kansensho_original_No09_09", text: "A型肝炎は、結核や水痘（水ぼうそう）と同様に飛沫核感染（空気感染）をする代表的な疾患である。", source: "No09-09", answer: false, exp: "誤り。A型肝炎はウイルスに汚染された飲食物を摂取することで感染する経口感染です。空気感染はしません。" },
+    { id: "test_kansensho_original_No09_10", text: "インフルエンザウイルスは、ヒトだけでなくブタや鳥などの動物にも感染する。", source: "No09-10", answer: true, exp: "正しい。インフルエンザウイルスはヒト以外の動物にも感染することが知られています。" },
+    { id: "test_kansensho_original_No09_11", text: "ジフテリアは、予防接種の普及により減少したが、我が国では2000年以降も現在まで患者の発生が続いている。", source: "No09-11", answer: false, exp: "誤り。我が国ではワクチンの普及により、1999年を最後にジフテリアの患者発生は報告されていません。" },
+    { id: "test_kansensho_original_No09_12", text: "百日せきは、発症してから通常数日程度で咳の症状がおさまるのが特徴である。", source: "No09-12", answer: false, exp: "誤り。百日せきはその名の通り、せきが数週間から数ヶ月という長期間続くのが特徴であり、数日でおさまることはありません。" },
+    { id: "test_kansensho_original_No09_13", text: "新型コロナウイルス感染症の病原体であるウイルスは、膜構造であるエンベロープを持っていない。", source: "No09-13", answer: false, exp: "誤り。新型コロナウイルスは、脂質性の膜である「エンベロープ」を有しています。そのため、アルコール消毒薬によって膜が壊れ、不活化されやすいという特徴があります。" },
+    { id: "test_kansensho_original_No09_14", text: "新型コロナウイルス感染症の予防のために、ウイルスのタンパク質の設計図を投与するmRNA（メッセンジャーRNA）ワクチンが開発された。", source: "No09-14", answer: true, exp: "正しい。メッセンジャーRNAを投与する新しいタイプのワクチン技術が実用化されました。" },
+    { id: "test_kansensho_original_No09_15", text: "新型コロナウイルスに感染してから発症するまでの潜伏期間は、一般的に1〜14日程度である。", source: "No09-15", answer: true, exp: "正しい。潜伏期間は1〜14日で、ウイルスにさらされてから5日程度で発症することが多いとされています。" },
+],
+"No10.各論 飲食物/血液/動物・節足動物を介して感染する感染症": [
+    { id: "test_kansensho_original_No10_01", text: "B型肝炎には非常に有効なワクチンがあり、日本では母子感染予防や乳幼児への定期接種が行われている。", source: "No10-01", answer: true, exp: "正しい。B型肝炎には有効なワクチンが存在し、定期接種等によって感染予防が図られています。" },
+    { id: "test_kansensho_original_No10_02", text: "腸管出血性大腸菌感染症（O157等）の潜伏期間は、通常２週間以上である。", source: "No10-02", answer: false, exp: "誤り。腸管出血性大腸菌の潜伏期間は、通常4〜8日程度です。通常２週間以上かかりません。" },
+    { id: "test_kansensho_original_No10_03", text: "風しんの潜伏期間は、感染してから症状が現れるまで通常14日から21日程度である。", source: "No10-03", answer: true, exp: "正しい。風しんの潜伏期間は約2〜3週間（14〜21日）とされています。" },
+    { id: "test_kansensho_original_No10_04", text: "梅毒は、あらかじめ予防接種を受けておくことで、感染を確実に防ぐことができる。", source: "No10-04", answer: false, exp: "誤り。梅毒に対する予防ワクチンは現在存在しません。不特定多数との性行為を避け、コンドームを使用することなどが予防に重要です。" },
+    { id: "test_kansensho_original_No10_05", text: "B型肝炎は血液だけでなく、精液や膣分泌液などの体液を介した性的交渉によっても感染する。", source: "No10-05", answer: true, exp: "正しい。B型肝炎の主な経路は血液や体液の接触であり、性的交渉も感染原因の一つとなります。" },
+    { id: "test_kansensho_original_No10_06", text: "梅毒の病原体は、梅毒ウイルスと呼ばれるウイルスの感染によって引き起こされる。", source: "No10-06", answer: false, exp: "誤り。梅毒の病原体は「梅毒トレポネーマ」という細菌であり、ウイルスではありません。" },
+    { id: "test_kansensho_original_No10_07", text: "B型肝炎の潜伏期間は、感染してから発症するまで通常2日から4日程度と非常に短い。", source: "No10-07", answer: false, exp: "誤り。B型肝炎の潜伏期間は1〜6か月です。" },
+    { id: "test_kansensho_original_No10_08", text: "エイズ（後天性免疫不全症候群）が進行して免疫が低下すると、健康な人なら通常は発症しないカビや細菌による感染症を起こすことがある。", source: "No10-08", answer: true, exp: "正しい。免疫力が著しく低下することで、普段は無害な微生物によって日和見感染（ひよりみかんせん）が引き起こされます。" },
+    { id: "test_kansensho_original_No10_09", text: "エイズ（後天性免疫不全症候群）は、HIVに感染後、数日から数週間で必ず発症し、そのまま死に至る疾患である。", source: "No10-09", answer: false, exp: "誤り。HIV感染後には数年から十数年の無症状期（潜伏期）があります。また、早期発見と適切な抗レトロウイルス療法（ART）を行えば、エイズの発症を長期にわたり抑制することが可能です。" },
+    { id: "test_kansensho_original_No10_10", text: "B型肝炎は、主にウイルスに汚染された血液や体液を介して感染する。", source: "No10-10", answer: true, exp: "正しい。B型肝炎は血液、精液、膣分泌液などの接触によって感染する代表的な血液介在性感染症です。" },
+    { id: "test_kansensho_original_No10_11", text: "腸管出血性大腸菌は熱に弱く、75℃で1分間以上の加熱を行うことにより死滅する。", source: "No10-11", answer: true, exp: "正しい。病原体は熱に弱いため、食品の十分な加熱（75℃、1分以上）により死滅し、感染を予防できます。" },
+    { id: "test_kansensho_original_No10_12", text: "C型肝炎の主な感染経路は、結核と同様に空気感染（飛沫核感染）である。", source: "No10-12", answer: false, exp: "誤り。C型肝炎は血液を介して感染します。空気感染はしません。" },
+    { id: "test_kansensho_original_No10_13", text: "細菌性赤痢の病原体は、赤痢ウイルスと呼ばれるウイルスの一種である。", source: "No10-13", answer: false, exp: "誤り。病原体は「赤痢菌」という細菌であり、ウイルスではありません。" },
+    { id: "test_kansensho_original_No10_14", text: "C型肝炎に感染した場合、感染者の半数以上の人が慢性化するといわれている。", source: "No10-14", answer: true, exp: "正しい。C型肝炎は慢性化しやすく、放置すると肝硬変や肝がんへと進行するリスクがあります。" },
+    { id: "test_kansensho_original_No10_15", text: "ラッサ熱の主な自然宿主（感染源）は、アフリカに広く生息しているブタである。", source: "No10-15", answer: false, exp: "誤り。ラッサ熱の主な感染源はマストミスというネズミの一種であり、ブタではありません。" },
+    { id: "test_kansensho_original_No10_16", text: "デング熱は、ヒトスジシマカやネッタイシマカなどの蚊を媒介して感染する疾患である。", source: "No10-16", answer: true, exp: "正しい。デング熱はデングウイルスを保有するヤブ蚊に刺されることで感染します。" },
+    { id: "test_kansensho_original_No10_17", text: "B型肝炎は、かつて飲食物を介した経口感染によって流行したことから「流行性肝炎」と呼ばれていた。", source: "No10-17", answer: false, exp: "誤り。かつて流行性肝炎と呼ばれていたのはA型肝炎です。B型肝炎は輸血等で感染することから血清肝炎と呼ばれていました。" },
+    { id: "test_kansensho_original_No10_18", text: "日本脳炎は、主にノミを媒介物としてヒトに感染する疾患である。", source: "No10-18", answer: false, exp: "誤り。日本脳炎はコガタアカイエカ（蚊）によって媒介されます。ノミを介するのはペストなどです。" },
+    { id: "test_kansensho_original_No10_19", text: "デング熱は、感染した患者の咳やくしゃみなどの飛沫を吸い込むことで、ヒトからヒトへ直接感染する。", source: "No10-19", answer: false, exp: "誤り。デング熱は蚊を介してのみ感染し、インフルエンザのようにヒトからヒトへ直接飛沫感染することはありません。" },
+],
+"No11.各論 具体的な対策例": [
+    { id: "test_kansensho_original_No11_01", text: "標準予防策（スタンダード・プリコーション）において、汗は血液や体液と同様に、感染性があるものとして取り扱う対象に含まれる。", source: "No11-01", answer: false, exp: "誤り。標準予防策では血液、体液、分泌物（飛沫等）、排泄物を感染の可能性があるものとして扱いますが、汗だけは例外として対象から除外されます。" },
+    { id: "test_kansensho_original_No11_02", text: "客に咳の症状を認める場合には、従業員や他の客への感染リスクを減らすため、客にマスクを着用してもらう等の予防対策（咳エチケット）を実施することが望ましい。", source: "No11-02", answer: true, exp: "正しい。咳をしている本人がマスクをすることが、飛沫を周囲に飛ばさないために最も効果的な対策です。" },
+    { id: "test_kansensho_original_No11_03", text: "客が嘔吐した際、二次感染を防ぐための処理方法として、吐物に直接エタノールをスプレーして消毒することが推奨される。", source: "No11-03", answer: false, exp: "誤り。ノロウイルス等の場合エタノールは効きにくいため、次亜塩素酸ナトリウムを使用するのが基本です。また、直接スプレーするとウイルスが舞い上がるため、ペーパー等で覆ってから消毒液をかけます。" },
+    { id: "test_kansensho_original_No11_04", text: "皮膚病変部に手が触れる可能性がある客への対応として、使い捨て手袋を着用して施術を行うことは、標準予防策に基づいた適切な対応である。", source: "No11-04", answer: true, exp: "正しい。病変部や血液・体液に触れる可能性がある場合には、手袋を着用して施術を行うことが感染防止において重要です。" }
+　　　　　　]
+        }
+    },
+    "test_kansensho_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_kansensho_past_2025_01", text: "細菌の核（核様体）に含まれる遺伝情報は、デオキシリボ核酸（DNA）である。", source: "52回 問題16", answer: true, exp: "正しい。細菌の核には遺伝子であるDNAが含まれています。RNAはリボソームに含まれ、タンパク質の合成に関与します。" },
+    { id: "test_kansensho_past_2025_02", text: "日本脳炎は、結核や麻しんと同様に、咳やくしゃみによる飛沫を直接吸い込むことで感染する。", source: "52回 問題17", answer: false, exp: "誤り。日本脳炎は、ブタの体内で増殖したウイルスを吸血した蚊（コガタアカイエカ）を介して感染します。ヒトからヒトへの直接感染はありません。" },
+    { id: "test_kansensho_past_2025_03", text: "結核を予防するためのBCGワクチンの定期の予防接種は、生後1歳未満の乳児を対象に行われている。", source: "52回 問題18", answer: true, exp: "正しい。BCGの定期予防接種は、乳児（標準的には生後5〜8か月）を対象として実施されています。" },
+    { id: "test_kansensho_past_2025_04", text: "インフルエンザウイルスは、ヒトのみに特異的に感染するウイルスであり、鳥などの動物に感染することはない。", source: "52回 問題19", answer: false, exp: "誤り。インフルエンザウイルスはヒト以外にも感染します。渡り鳥などの鳥類に感染する「鳥インフルエンザ」などがその代表例です。" },
+    { id: "test_kansensho_past_2025_05", text: "我が国における梅毒の報告患者数は、2010年（平成22年）以降、減少傾向が続いている。", source: "52回 問題20", answer: false, exp: "誤り。日本の梅毒患者数は、長らく減少傾向にありましたが、2010年以降は増加に転じており、現在も増加傾向が続いています。" },
+    { id: "test_kansensho_past_2025_06", text: "破傷風菌は、酸素の存在が有害であり、酸素があると発育できない「嫌気性菌」に分類される。", source: "51回 問題16", answer: true, exp: "正しい。破傷風菌やガス壊疽菌は嫌気性菌であり、酸素のない環境で増殖します。これに対し結核菌などは酸素を必要とする好気性菌です。" },
+    { id: "test_kansensho_past_2025_07", text: "予防接種法に基づく定期の予防接種の対象には、風しんと結核が含まれている。", source: "51回 問題17", answer: true, exp: "正しい。風しんと結核は定期予防接種の対象です。一方でA型肝炎などは任意接種の扱いです。" },
+    { id: "test_kansensho_past_2025_08", text: "空気感染（飛沫核感染）によって感染が広がる代表的な疾患として、水痘（みずぼうそう）が挙げられる。", source: "51回 問題18", answer: true, exp: "正しい。空気感染する疾患には、結核、麻しん、水痘の3つが代表として挙げられます。" },
+    { id: "test_kansensho_past_2025_09", text: "デング熱の主な感染経路は、空気中に浮遊する微細な粒子を吸い込むことによる飛沫核感染である。", source: "51回 問題19", answer: false, exp: "誤り。デング熱はウイルスを保有する蚊（ヒトスジシマカなど）に刺されることで感染する「節足動物媒介感染」であり、空気感染（飛沫核感染）はしません。" },
+    { id: "test_kansensho_past_2025_10", text: "風しんの潜伏期間は非常に短く、通常はウイルスに感染してから2〜3日程度で発症する。", source: "51回 問題20", answer: false, exp: "誤り。風しんの潜伏期間は2〜3週間です。2〜3日ではありません。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_kansensho_past_2024_01", text: "細菌の成分の約80%は、タンパク質によって占められている。", source: "50回 問題16", answer: false, exp: "誤り。細菌の成分の約80％は水分です。タンパク質は水以外の固形成分（約20％）のうち、およそ半分を占めています。" },
+    { id: "test_kansensho_past_2024_02", text: "不顕性感染とは、病原体に感染していても発病していない状態を指し、急性灰白髄炎（ポリオ）はその一例である。", source: "50回 問題17", answer: true, exp: "正しい。不顕性感染は、感染は成立しているが症状が現れない状態をいい、ポリオの不顕性感染はその代表例です。" },
+    { id: "test_kansensho_past_2024_03", text: "鼻腔に存在するブドウ球菌は常在細菌であるため、傷口に入っても感染源となることはない。", source: "50回 問題18", answer: false, exp: "誤り。鼻腔などの常在細菌であっても、傷口に入ったり抵抗力が落ちたりした際には、自己感染の感染源となることがあります。" },
+    { id: "test_kansensho_past_2024_04", text: "季節性インフルエンザの流行の原因となるのは、B型インフルエンザウイルスのみである。", source: "50回 問題19", answer: false, exp: "誤り。季節性インフルエンザは主にA型とB型が原因となります。なお、抗原変異が激しく世界的な大流行（パンデミック）を引き起こす可能性があるのは、主にA型です。B型は変異の幅が小さく、パンデミックは起こしにくいという特徴があります。" },
+    { id: "test_kansensho_past_2024_05", text: "麻しん（はしか）はウイルスを病原体とする感染力の非常に強い疾患であり、現在、定期の予防接種が実施されている。", source: "50回 問題20", answer: true, exp: "正しい。麻しんは非常に強い感染力を持ちますが、ワクチンの定期接種によって予防・減少が図られています。" },
+    { id: "test_kansensho_past_2024_06", text: "美容師が結核に罹患した場合、感染症法に基づき、他者に感染させるおそれがある期間は就業が制限されることがある。", source: "49回 問題16", answer: true, exp: "正しい。結核は二類感染症に分類されます。感染症法に基づき、保健所や都道府県知事等の判断により、感染させるおそれがある期間は業務への従事が制限されます。" },
+    { id: "test_kansensho_past_2024_07", text: "百日せき（百日咳）の病原体は、百日咳ウイルスと呼ばれるウイルスである。", source: "49回 問題17", answer: false, exp: "誤り。百日せきの病原体はウイルスではなく「百日咳菌」という細菌です。" },
+    { id: "test_kansensho_past_2024_08", text: "A型・B型・C型肝炎のうち、慢性肝炎に移行することがなく、一過性の感染で終わるのはA型肝炎のみである。", source: "49回 問題18", answer: true, exp: "正しい。A型肝炎は主に経口感染で一過性の経過をたどりますが、B型やC型は慢性化するリスクがあります。" },
+    { id: "test_kansensho_past_2024_09", text: "腸管出血性大腸菌感染症や腸チフスは、B型肝炎と同様に、主に血液や体液を介して感染する。", source: "49回 問題19", answer: false, exp: "誤り。腸管出血性大腸菌感染症や腸チフスは、汚染された飲食物を介する「経口感染」が主です。血液や体液を介するのはB型肝炎やエイズです。" },
+    { id: "test_kansensho_past_2024_10", text: "梅毒は、妊娠中の母体から胎盤を介して胎児に感染する垂直感染（経胎盤感染）を起こすことがある。", source: "49回 問題20", answer: true, exp: "正しい。病原体が親から子へと直接伝わる経路を垂直感染といい、梅毒はその代表的な疾患の一つです。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_kansensho_past_2023_01", text: "百日せきは、百日せき菌という細菌によって引き起こされる感染症である。", source: "48回 問題16", answer: true, exp: "正しい。百日せきは細菌が原因ですが、エイズやSARSはウイルス、アニサキス症は寄生虫が原因です。" },
+    { id: "test_kansensho_past_2023_02", text: "細菌は、ウイルスと同様に生きた細胞の中だけでしか発育・増殖することができない。", source: "48回 問題17", answer: false, exp: "誤り。ウイルスは生きた細胞内でのみ増殖しますが、細菌は適切な環境（栄養や水分など）があれば環境中でも存在し、増殖することができます。" },
+    { id: "test_kansensho_past_2023_03", text: "麻しん（はしか）は、空気感染（飛沫核感染）によって感染が広がる疾患である。", source: "48回 問題18", answer: true, exp: "正しい。空気感染（飛沫核感染）するのは、麻しん、結核、水痘（みずぼうそう）の3つが代表的です。" },
+    { id: "test_kansensho_past_2023_04", text: "我が国における結核の新規登録患者数は、近年の統計では年間1,000人程度まで減少している。", source: "48回 問題19", answer: false, exp: "誤り。結核の新規登録患者数は減少傾向にありますが、2020年のデータでも年間約1万人（12,739人）であり、1,000人程度ではありません。" },
+    { id: "test_kansensho_past_2023_05", text: "腸管出血性大腸菌（O157）は、毒性の強い「ベロ毒素」を出すのが特徴である。", source: "48回 問題20", answer: true, exp: "正しい。O157は大腸菌の中でも強力なベロ毒素を産生し、溶血性尿毒症症候群などの重篤な合併症を引き起こすことがあります。" },
+    { id: "test_kansensho_past_2023_06", text: "美容師が結核に罹患した場合は、感染症法に基づき美容の業務に従事できない制限の対象となる。", source: "47回 問題16", answer: true, exp: "正しい。結核やエボラ出血熱などの指定された感染症にかかっている間は、公衆衛生上の理由から業務に従事することが制限されます。" },
+    { id: "test_kansensho_past_2023_07", text: "現在の日本の予防接種法において、定期の予防接種は国民に課せられた罰則付きの法的義務である。", source: "47回 問題17", answer: false, exp: "誤り。以前は義務でしたが、現在は個人の尊重などの観点から、受けるように努めなければならないという「努力義務」に緩和されています。" },
+    { id: "test_kansensho_past_2023_08", text: "感染症とその病原体の組み合わせにおいて、デング熱の病原体は蠕虫（ぜんちゅう）である。", source: "47回 問題18", answer: false, exp: "誤り。デング熱の病原体はデングウイルスです。蠕虫（寄生虫）ではありません。" },
+    { id: "test_kansensho_past_2023_09", text: "風しんは、妊娠初期の母体が感染すると、胎盤を通じて胎児に感染し、先天性疾患を引き起こすことがある。", source: "47回 問題19", answer: true, exp: "正しい。風しんは胎内感染（垂直感染）の代表的な例であり、胎児に先天性風しん症候群を引き起こすリスクがあります。" },
+    { id: "test_kansensho_past_2023_10", text: "感染症予防の三原則とは、「感染源対策」「感染経路対策」「個人予防対策」の3つを指す。", source: "47回 問題20", answer: false, exp: "誤り。感染症予防の三原則は、「感染源に関する対策」「感染経路に関する対策（遮断）」「宿主の感受性対策」の3つです。個人予防対策は具体的な行動の一つであり、原則の分類名ではありません。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_kansensho_past_2022_01", text: "百日せきの身体への主な侵入経路は、気道である。", source: "46回 問題16", answer: true, exp: "正しい。百日せきは咳やくしゃみなどの飛沫を吸い込むことで、気道から感染します。" },
+    { id: "test_kansensho_past_2022_02", text: "細菌の成分構成において、菌体全体のおよそ80%はタンパク質によって占められている。", source: "46回 問題17", answer: false, exp: "誤り。細菌の成分の約80％は水分です。タンパク質は水を除いた固形成分のうちのおよそ半分を占めています。" },
+    { id: "test_kansensho_past_2022_03", text: "細菌の変異によって、化学療法剤や消毒剤に対する耐性を獲得することがある。", source: "46回 問題18", answer: true, exp: "正しい。変異により薬剤や消毒薬が効かなくなる耐性菌が出現することがあり、重要な課題となっています。" },
+    { id: "test_kansensho_past_2022_04", text: "病原体が体内に侵入した後、発育・増殖することができずにそのまま体外に排出されてしまった状態も「感染」という。", source: "46回 問題19", answer: false, exp: "誤り。感染とは病原体が体内に侵入し、定着して増殖した状態を指します。増殖せずに排出された場合は感染とは言いません。" },
+    { id: "test_kansensho_past_2022_05", text: "結核の主な感染経路は飛沫核感染（空気感染）であり、患者の早期発見のために定期の健康診断が行われている。", source: "46回 問題20", answer: true, exp: "正しい。結核は空気感染する代表的な疾患であり、法令に基づき学校や施設などで定期健康診断が実施されています。" },
+    { id: "test_kansensho_past_2022_06", text: "百日せき（百日咳）の主な感染経路は、日本脳炎と同様に、蚊などの節足動物によって媒介されるものである。", source: "45回 問題16", answer: false, exp: "誤り。百日せきは蚊などの媒介によるものではなく、患者の咳やくしゃみによる飛沫を吸い込む飛沫感染によって広がります。" },
+    { id: "test_kansensho_past_2022_07", text: "ウイルスは、生存環境に適応してしばしば変異を起こすという特徴を持っている。", source: "45回 問題17", answer: true, exp: "正しい。ウイルスは増殖の過程で頻繁に変異を起こし、新型ウイルスが現れる原因となることもあります。" },
+    { id: "test_kansensho_past_2022_08", text: "病原体が人体に付着すれば、その後の免疫機能に関わらず必ず感染が成立する。", source: "45回 問題18", answer: false, exp: "誤り。病原体が体に付着しても、人体のバリア機能や免疫によって排除されたり増殖が抑えられたりするため、必ずしも感染が成立するわけではありません。" },
+    { id: "test_kansensho_past_2022_09", text: "予防接種法に基づく予防接種には、定期に行うものと臨時に行うものがある。", source: "45回 問題19", answer: true, exp: "正しい。予防接種はワクチンの種類や流行状況などに応じて、定期接種と臨時接種に分けられます。" },
+    { id: "test_kansensho_past_2022_10", text: "麻しん（はしか）の潜伏期間は、感染してから発症するまで通常2〜3日程度と極めて短い。", source: "45回 問題20", answer: false, exp: "誤り。麻しんの潜伏期間は約10〜14日と比較的長く、2〜3日ではありません。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_kansensho_past_2021_01", text: "ウイルスは細菌と同様に、適切な栄養分があれば自ら2分裂を繰り返して自律的に増殖する。", source: "44回 問題16", answer: false, exp: "誤り。ウイルスは自己複製能力を持たず、生きた細胞内でのみ増殖します。2分裂で増殖するのは細菌の特徴です。" },
+    { id: "test_kansensho_past_2021_02", text: "人体の皮膚や粘膜などには一定の細菌が定着しており、これらを常在細菌叢（じょうざいさいきんそう）と呼ぶ。", source: "44回 問題17", answer: true, exp: "正しい。私たちの体には一定の細菌が定着しており、外部からの病原体の侵入を防ぐバリア機能などの役割も果たしています。" },
+    { id: "test_kansensho_past_2021_03", text: "予防接種の対象疾病や実施方法については、国民の健康づくりの推進を目的とした健康増進法によって定められている。", source: "44回 問題18", answer: false, exp: "誤り。予防接種の対象疾病や具体的な実施方法は「予防接種法」によって定められています。健康増進法は受動喫煙の防止などを目的とした法律です。" },
+    { id: "test_kansensho_past_2021_04", text: "伝染性膿痂疹（トビヒ）は、患者や病原体保有者が使用した汚染タオルなどへの接触を原因として感染することがある。", source: "44回 問題19", answer: true, exp: "正しい。トビヒや白癬などは、病原体に汚染された器具や布片に触れることで感染する接触感染の可能性があります。" },
+    { id: "test_kansensho_past_2021_05", text: "B型肝炎は血液や体液を介して感染する疾患であり、約1週間程度の短い潜伏期間を経て発症するのが特徴である。", source: "44回 問題20", answer: false, exp: "誤り。B型肝炎の潜伏期間は約1〜6か月と比較的長いのが特徴です。1週間程度ではありません。" },
+    { id: "test_kansensho_past_2021_06", text: "美容師が結核に罹患した場合、感染症法および美容師法の規定に基づき、就業制限の対象となる。", source: "43回 問題16", answer: true, exp: "正しい。結核は二類感染症に分類されており、一類・二類感染症に罹患した美容師は公衆衛生上の観点から業務に従事することが制限されます。" },
+    { id: "test_kansensho_past_2021_07", text: "急性灰白髄炎（ポリオ）は、インフルエンザと同様に、主に咳やくしゃみによる飛沫感染によって広がる疾患である。", source: "43回 問題17", answer: false, exp: "誤り。ポリオは主にウイルスに汚染された飲食物を介する経口感染です。インフルエンザは飛沫感染が主な経路です。" },
+    { id: "test_kansensho_past_2021_08", text: "破傷風菌などの一部の細菌が作る芽胞（がほう）は、熱や乾燥といった過酷な環境に対しても強い抵抗力を持っている。", source: "43回 問題18", answer: true, exp: "正しい。芽胞は極めて耐久性の高い休眠状態の構造であり、通常の細菌が死滅するような熱や乾燥にも耐えることができます。" },
+    { id: "test_kansensho_past_2021_09", text: "近年の日本における結核死亡率の統計では、産業革命期と同様に青年期（若年層）が死亡率のピークとなっている。", source: "43回 問題19", answer: false, exp: "誤り。かつては若年層の死亡が多かった結核ですが、現在の日本における死亡率のピークは高齢者に移行しています。" },
+    { id: "test_kansensho_past_2021_10", text: "B型肝炎は、レザーやシザーズによる皮膚の傷からも感染するリスクがあるが、現在は有効な予防ワクチンが存在する。", source: "43回 問題20", answer: true, exp: "正しい。B型肝炎には有効なワクチンがあり、現在は定期予防接種の対象にもなっています。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_kansensho_past_2020_01", text: "B型肝炎は、患者の咳やくしゃみを直接吸い込む「飛沫感染」が主な感染経路である。", source: "42回 問題16", answer: false, exp: "誤り。B型肝炎の主な感染経路は血液や性行為による接触感染です。飛沫感染はインフルエンザなどの特徴です。" },
+    { id: "test_kansensho_past_2020_02", text: "細菌は、遺伝情報を司る核酸として、DNAとRNAの両方を細胞内にもっている。", source: "42回 問題17", answer: true, exp: "正しい。細菌は自己複製能力を持ち、DNAとRNAの両方の核酸を保持しています。いずれか一方のみを持つのはウイルスの特徴です。" },
+    { id: "test_kansensho_past_2020_03", text: "感染症予防の3原則において、病原体を広げないための「患者の入院治療」は、感染経路対策に分類される。", source: "42回 問題18", answer: false, exp: "誤り。患者の入院治療は「感染源（伝染源）対策」に該当します。感染経路対策は、学級閉鎖や害虫駆除など、病原体の運搬ルートを遮断することを指します。" },
+    { id: "test_kansensho_past_2020_04", text: "妊婦が風しんにかかると、心臓病、白内障、聴力障害などの障がいをもつ子どもが生まれる危険性がある。", source: "42回 問題19", answer: true, exp: "正しい。これを先天性風しん症候群といい、特に妊娠初期の感染において注意が必要です。" },
+    { id: "test_kansensho_past_2020_05", text: "O157による腸管出血性大腸菌感染症の潜伏期間は、通常30日（約1か月）程度である。", source: "42回 問題20", answer: false, exp: "誤り。O157の潜伏期間は通常4〜8日程度です。30日もかかることはありません。" },
+    { id: "test_kansensho_past_2020_06", text: "細菌の中には、酸素の存在が有害で、酸素があると発育できない嫌気性菌（けんきせいきん）と呼ばれるものが存在する。", source: "41回 問題16", answer: true, exp: "正しい。破傷風菌などの嫌気性菌は酸素のない環境で発育します。一方、発育に酸素が必要なものは好気性菌と呼ばれます。" },
+    { id: "test_kansensho_past_2020_07", text: "A型肝炎は、主にウイルスに汚染された血液の輸血を介して感染する血液介在性感染症である。", source: "41回 問題17", answer: false, exp: "誤り。A型肝炎の主な感染経路は、汚染された飲食物を摂取することによる経口感染です。血液を介するのは主にB型やC型です。" },
+    { id: "test_kansensho_past_2020_08", text: "感染症の国内侵入を防ぐために空港や港で行われる「検疫」は、感染症予防の3原則のうち、感染源対策にあたる。", source: "41回 問題18", answer: true, exp: "正しい。検疫は感染源となる患者や病原体保有者を早期に発見し、流行を防ぐための感染源対策の一つです。" },
+    { id: "test_kansensho_past_2020_09", text: "麻しん（はしか）は空気感染をするため、感染力は非常に強い。", source: "41回 問題19", answer: true, exp: "正しい。麻しんは飛沫核が空気中を漂うことで広がるため、非常に強力な感染力を持っています。" },
+    { id: "test_kansensho_past_2020_10", text: "風しんの潜伏期間は、ウイルスに感染してから通常2〜3日程度で発症するほど非常に短い。", source: "41回 問題20", answer: false, exp: "誤り。風しんの潜伏期間は約14日〜21日（2〜3週間）です。2〜3日ではありません。" },
+]
+        }
+    },
+    "test_kansensho_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.感染症の総論": [
+    { id: "test_kansensho_extra_soron_No01", text: "エボラ出血熱は、感染症法において極めて危険性が高い「一類感染症」に分類される。", source: "No.01", answer: true, exp: "正しい。エボラ出血熱は、感染症法で最も危険度が高い一類感染症に分類されている。" },
+    { id: "test_kansensho_extra_soron_No02", text: "結核は、感染症法において「三類感染症」に分類される。", source: "No.02", answer: false, exp: "誤り。結核は三類ではなく「二類感染症」に分類される。" },
+    { id: "test_kansensho_extra_soron_No03", text: "腸管出血性大腸菌感染症（O157など）は、感染症法において「三類感染症」に分類される。", source: "No.03", answer: true, exp: "正しい。腸管出血性大腸菌感染症は、三類感染症に該当する。" },
+    { id: "test_kansensho_extra_soron_No04", text: "感染症法の四類感染症は、原則としてヒトからヒトへ直接伝播（感染）する感染症のグループである。", source: "No.04", answer: false, exp: "誤り。四類感染症は、主に動物や昆虫、飲食物を介して感染するもので、原則としてヒトからヒトへの直接的な感染はない。" },
+    { id: "test_kansensho_extra_soron_No05", text: "ツツガムシ病の病原体は、細菌の一種であるリケッチアである。", source: "No.05", answer: true, exp: "正しい。ツツガムシ病は、リケッチアを病原体とする感染症である。" },
+    { id: "test_kansensho_extra_soron_No06", text: "結核を引き起こす病原体は、細菌ではなくリケッチアに分類される。", source: "No.06", answer: false, exp: "誤り。結核の病原体は結核菌（細菌）である。リケッチアを病原体とするのはツツガムシ病である。" },
+    { id: "test_kansensho_extra_soron_No07", text: "結核は細菌を病原体とし、マラリアは原虫を病原体とする感染症である。", source: "No.07", answer: true, exp: "正しい。結核は細菌（結核菌）、マラリアは原虫（マラリア原虫）によって引き起こされる。" },
+    { id: "test_kansensho_extra_soron_No08", text: "コレラの病原体は、ウイルスに分類される。", source: "No.08", answer: false, exp: "誤り。コレラの病原体はコレラ菌という「細菌」である。ウイルスではない。" },
+    { id: "test_kansensho_extra_soron_No09", text: "麻しん（はしか）は、リケッチアを病原体とする感染症に分類される。", source: "No.09", answer: false, exp: "誤り。麻しんの病原体はウイルスである。リケッチアを病原体とするのはツツガムシ病である。" },
+    { id: "test_kansensho_extra_soron_No10", text: "原虫によって引き起こされる感染症の代表例として、マラリアが挙げられる。", source: "No.10", answer: true, exp: "正しい。マラリアは、マラリア原虫という原虫が病原体となる感染症である。" },
+    { id: "test_kansensho_extra_soron_No11", text: "一部の細菌が形成する「芽胞」は、乾燥などの過酷な環境に対して非常に強い抵抗力を持つ。", source: "No.11", answer: true, exp: "正しい。芽胞は熱や乾燥に対して極めて強い抵抗力を持ち、過酷な環境下でも生き残ることができる構造である。" },
+    { id: "test_kansensho_extra_soron_No12", text: "細菌の成分のうち、およそ80%はタンパク質によって占められている。", source: "No.12", answer: false, exp: "誤り。細菌の成分の約80%は水分であり、タンパク質は全成分の約10%程度（固形成分のおよそ半分）である。" },
+    { id: "test_kansensho_extra_soron_No13", text: "細菌は、その形状から「球菌」「桿菌」「らせん菌」の3つに大別される。", source: "No.13", answer: true, exp: "正しい。細菌は形によって、球状の球菌、棒状の桿菌、ねじれた形のらせん菌の3つに分類される。" },
+    { id: "test_kansensho_extra_soron_No14", text: "すべての細菌は、増殖の過程において必ず酸素の供給を必要とする。", source: "No.14", answer: false, exp: "誤り。酸素を必要とする好気性菌だけでなく、酸素があると発育できない嫌気性菌や、酸素の有無にかかわらず発育できる通性嫌気性菌も存在する。" },
+    { id: "test_kansensho_extra_soron_No15", text: "ウイルスは自力で増殖する能力を持たず、生きた細胞内でのみ増殖することができる。", source: "No.15", answer: true, exp: "正しい。ウイルスは生きた細胞のシステムを利用して増殖する「偏性細胞内寄生体」である。" },
+    { id: "test_kansensho_extra_soron_No16", text: "リケッチアは、一般的な細菌と同様に人工培地を用いて容易に増殖させることができる。", source: "No.16", answer: false, exp: "誤り。リケッチアは人工培地では発育せず、他生物の細胞内でのみ増殖可能な微生物である。" },
+    { id: "test_kansensho_extra_soron_No17", text: "紫外線は細菌のDNAを損傷させる作用があるため、細菌の発育・増殖に対して有害である。", source: "No.17", answer: true, exp: "正しい。紫外線には強い殺菌作用があり、細菌を死滅させるため、増殖には適さない。" },
+    { id: "test_kansensho_extra_soron_No18", text: "微生物の大きさを比較すると、一般的にウイルスは細菌よりも大きい。", source: "No.18", answer: false, exp: "誤り。ウイルスは細菌よりもはるかに小さく、電子顕微鏡でなければ観察できないほどのサイズである。" },
+    { id: "test_kansensho_extra_soron_No19", text: "感染の後、人体の組織や臓器に病的な変化が起こる状態を「発病」という。", source: "No.19", answer: true, exp: "正しい。病原体の侵入・増殖（感染）によって、何らかの臨床症状や機能障害が現れることを発病と呼ぶ。" },
+    { id: "test_kansensho_extra_soron_No20", text: "病原体が侵入してから最初に症状が現れるまでの潜伏期間は、すべての感染症において一律に5日以内である。", source: "No.20", answer: false, exp: "誤り。潜伏期間は感染症の種類により大きく異なり、数日のものから、数ヶ月、あるいは数年に及ぶものまで様々である。" },
+    { id: "test_kansensho_extra_soron_No21", text: "病原体が人体に付着すれば、人体の免疫機能に関わらず必ず感染・発病する。", source: "No.21", answer: false, exp: "誤り。人体には免疫があるため、病原体が付着・侵入しても必ずしも感染・発病するとは限りません。" },
+    { id: "test_kansensho_extra_soron_No22", text: "急性灰白髄炎（ポリオ）は、予防接種法に基づいて定期の予防接種が行われている。", source: "No.22", answer: true, exp: "正しい。ポリオは予防接種法に基づく定期予防接種の対象です。" },
+    { id: "test_kansensho_extra_soron_No23", text: "C型肝炎は、予防接種法による定期の予防接種の対象となっている。", source: "No.23", answer: false, exp: "誤り。C型肝炎に対するワクチンは実用化されておらず、定期予防接種の対象ではありません。" },
+    { id: "test_kansensho_extra_soron_No24", text: "マラリアはカ（ハマダラカ）を介して感染し、破傷風は土壌を介して感染する。", source: "No.24", answer: true, exp: "正しい。マラリアはカが媒介し、破傷風は土壌中の破傷風菌が傷口から侵入することで感染します。" },
+],
+"B.感染症の各論": [
+    { id: "test_kansensho_extra_kakuron_No25", text: "結核の主な感染経路は、患者の咳などによる飛沫核感染（空気感染）である。", source: "No.25", answer: true, exp: "正しい。結核は飛沫核感染が主な経路であり、有効なワクチンとしてBCGが存在します。" },
+    { id: "test_kansensho_extra_kakuron_No26", text: "腸管出血性大腸菌感染症の原因となる病原体は、O157ウイルスの一種類のみである。", source: "No.26", answer: false, exp: "誤り。病原体はウイルスではなく細菌であり、O157以外にもO26などの血清型が存在します。" },
+    { id: "test_kansensho_extra_kakuron_No27", text: "腸管出血性大腸菌感染症の潜伏期間は、感染後おおよそ1〜2ヵ月である。", source: "No.27", answer: false, exp: "誤り。腸管出血性大腸菌感染症の潜伏期間は通常4〜8日程度です。" },
+    { id: "test_kansensho_extra_kakuron_No28", text: "B型肝炎は、感染後に治癒する一過性感染と、ウイルスを保持し続ける持続性感染（キャリア）の二つの形態がある。", source: "No.28", answer: true, exp: "正しい。B型肝炎には一過性感染と、長期間ウイルスを保持し続ける持続性感染があります。" },
+    { id: "test_kansensho_extra_kakuron_No29", text: "B型肝炎の主な感染経路は、飲食物を介した経口感染である。", source: "No.29", answer: false, exp: "誤り。B型肝炎の主な経路は血液や体液を介した接触であり、経口感染ではありません。" },
+    { id: "test_kansensho_extra_kakuron_No30", text: "後天性免疫不全症候群（エイズ）の病原体はウイルスであり、世界的に患者が発生している。", source: "No.30", answer: true, exp: "正しい。エイズの病原体はHIV（ウイルス）であり、世界的に流行しています。" },
+    { id: "test_kansensho_extra_kakuron_No31", text: "後天性免疫不全症候群（エイズ）は、ウイルスによって起こる疾患である。", source: "No.31", answer: true, exp: "正しい。エイズの病原体はHIV（ヒト免疫不全ウイルス）である。" },
+    { id: "test_kansensho_extra_kakuron_No32", text: "麻しん（はしか）の潜伏期間は、感染後おおよそ2〜3日である。", source: "No.32", answer: false, exp: "誤り。麻しんの潜伏期間は通常10〜14日程度である。潜伏期が1〜3日と短いのはインフルエンザなどである。" },
+    { id: "test_kansensho_extra_kakuron_No33", text: "デング熱は、地球温暖化や人口増加により流行地の拡大が懸念されている。", source: "No.33", answer: true, exp: "正しい。温暖化による媒介蚊の生息域拡大が問題視されており、日本国内でも流行が確認されている。" },
+    { id: "test_kansensho_extra_kakuron_No34", text: "エイズは主に空気感染するため、使用後のかみそりを消毒しても予防効果はない。", source: "No.34", answer: false, exp: "誤り。エイズは性的接触や血液を介して感染するため、血液が付着する可能性のある器具の適切な消毒は予防に有効である。" },
+    { id: "test_kansensho_extra_kakuron_No35", text: "百日せきは、4〜5歳以下の乳幼児が多く罹患する感染症である。", source: "No.35", answer: true, exp: "正しい。百日せきは一般に乳幼児に多く発生し、年齢が進むにつれて少なくなる傾向がある。" },
+    { id: "test_kansensho_extra_kakuron_No36", text: "結核は我が国において完全に克服された病気であり、現在の年間新規登録患者数は100人以下である。", source: "No.36", answer: false, exp: "誤り。結核は現在も我が国で年間1万人以上の新規患者が発生している重大な感染症である。" }
+]
+        }
+    }
+}; 
+
+
+let currentSubjectKey = "test_kansensho_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_kansensho_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_kansensho_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_kansensho_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
