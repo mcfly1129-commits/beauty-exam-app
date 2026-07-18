@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『関係法規・制度』</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題(頻出抜粋)</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_kankehoki_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_kankehoki_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題(頻出抜粋)",  // ここを修正！
+        questionPool: {
+"No01.衛生行政を担う行政機関": [
+    { id: "test_kankehoki_original_No01_01", text: "保健所の設置や役割を定めている現在の根拠法は、かつての名称と同じ保健所法である。", source: "No01-01", answer: false, exp: "誤り。かつては保健所法でしたが、平成6年の改正により現在は地域保健法という名称に変更されています。" },
+    { id: "test_kankehoki_original_No01_02", text: "美容師免許証の交付事務は、都道府県知事が行う事務には含まれず、厚生労働大臣が行う事務である。", source: "No01-02", answer: true, exp: "正しい。開設届の受理や施設の検査、立入検査などは都道府県知事等の権限ですが、美容師の免許交付や名簿登録は厚生労働大臣の権限です。" },
+    { id: "test_kankehoki_original_No01_03", text: "保健所の設置、名称、所在地、管轄区域などの基本的な事項を定めている根拠法は、地域保健法である。", source: "No01-03", answer: true, exp: "正しい。保健所はかつて保健所法に基づいていましたが、平成6年の改正により現在は地域保健法がその設置や役割を定める法律となっています。" },
+    { id: "test_kankehoki_original_No01_04", text: "美容所の開設届の受理や、施設の構造設備の検査確認は、都道府県知事等が行う事務に含まれる。", source: "No01-04", answer: true, exp: "正しい。美容所の開設届の受理、構造設備の検査確認、立入検査などは、都道府県知事、保健所設置市長、または特別区長の事務として規定されています。" },
+    { id: "test_kankehoki_original_No01_05", text: "地域保健法に基づき設置されている保健所の事業には、美容所の経営指導が含まれている。", source: "No01-05", answer: false, exp: "誤り。保健所の事業には感染症の予防や環境衛生に関する事項が含まれますが、個別の美容所の経営を指導することは業務に含まれていません。" },
+],
+"No02.美容師法 目的・用語の定義": [
+    { id: "test_kankehoki_original_No02_01", text: "美容師法は、公衆衛生の向上に資することで国民全体の利益を図ることを目的としている。", source: "No02-01", answer: true, exp: "正しい。美容師法第1条において、美容師の資格を定め、業務を適正に行わせることで、公衆衛生の向上に資することが目的と明記されています。" },
+    { id: "test_kankehoki_original_No02_02", text: "美容所と理容所を同一の施設において重複開設することは、いかなる場合であっても認められない。", source: "No02-02", answer: false, exp: "誤り。施術者全員が理容師と美容師の両方の資格を持ち、必要な衛生要件を満たしている場合には、同一施設での重複開設が認められています。" },
+    { id: "test_kankehoki_original_No02_03", text: "美容師法は、美容業の経営の健全化を促進することにより、美容業の振興を図ることを目的としている。", source: "No02-03", answer: false, exp: "誤り。経営の健全化や振興について規定しているのは生活衛生関係営業の運営の適正化及び振興に関する法律であり、美容師法は公衆衛生の向上を目的としています。" },
+    { id: "test_kankehoki_original_No02_04", text: "美容師法は、美容の経営が適正に行われるように規律し、もって経営の安定と振興を図ることを目的としている。", source: "No02-04", answer: false, exp: "誤り。美容師法第1条の目的は「美容師の資格を定め、業務を適正に行わせることで公衆衛生の向上に資すること」であり、経営の振興は目的としていません。" },
+    { id: "test_kankehoki_original_No02_05", text: "美容師が理容所で理容の業を行うためには、美容師免許のほかに理容師の免許が必要である。", source: "No02-05", answer: true, exp: "正しい。美容師は美容所で、理容師は理容所で業を行う者と定義されており、他方の施設で施術を行うには該当する免許を取得しなければなりません。" },
+],
+"No03.美容師法 人に関する規定": [
+    { id: "test_kankehoki_original_No03_01", text: "美容師の免許を申請するときは、申請書に精神の機能の障害に関する医師の診断書を添付しなければならない。", source: "No03-01", answer: true, exp: "正しい。美容師の免許申請手続きにおいて、精神の機能の障害に関する医師の診断書を添付することが美容師法施行規則で義務付けられています。" },
+    { id: "test_kankehoki_original_No03_02", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められるときは、免許取消処分の対象となる。", source: "No03-02", answer: false, exp: "誤り。伝染性の疾病により就業が不適当と認められる場合の行政処分は、免許の取り消しではなく、期間を定めた業務の停止処分となります。" },
+    { id: "test_kankehoki_original_No03_03", text: "美容師が他の都道府県に住所を移転したときは、30日以内に美容師名簿の訂正を申請しなければならない。", source: "No03-03", answer: false, exp: "誤り。美容師名簿の登録事項には氏名や本籍地が含まれますが、現住所は含まれていないため、住所を変更しても名簿の訂正申請は不要です。" },
+    { id: "test_kankehoki_original_No03_04", text: "管理美容師の資格を得るためには、美容師の免許を受けた後、3年以上美容の業務に従事し、かつ、都道府県知事が指定する講習会の課程を修了しなければならない。", source: "No03-04", answer: true, exp: "正しい。管理美容師になるためには、単に「美容師免許取得後に3年以上実務に従事する」だけでなく、都道府県知事が指定する「管理美容師資格認定講習会」の課程を修了しなければなりません。この2つの要件が揃って初めて資格を取得できます。" },
+    { id: "test_kankehoki_original_No03_05", text: "美容師試験は、各都道府県の知事が直接実施することとなっている。", source: "No03-05", answer: false, exp: "誤り。美容師試験の実施主体は厚生労働大臣であり、現在は指定試験機関である理容師美容師試験研修センターがその事務を行っています。" },
+    { id: "test_kankehoki_original_No03_06", text: "美容師が氏名を変更したときは、30日以内に美容師名簿の訂正を申請しなければならない。", source: "No03-06", answer: true, exp: "正しい。氏名や本籍地の都道府県名に変更が生じたときは、30日以内に指定登録機関に対して名簿の訂正申請を行う義務があります。" },
+    { id: "test_kankehoki_original_No03_07", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められるときは、期間を定めた業務停止処分の対象となる。", source: "No03-07", answer: true, exp: "正しい。伝染性の疾病により就業が不適当と認められる場合は、都道府県知事等から期間を定めた業務の停止を命じられることがあります。" },
+    { id: "test_kankehoki_original_No03_08", text: "美容師が業務停止処分を受けたときは、速やかにその処分を行った者に免許証（免許証明書）を提出しなければならない。", source: "No03-08", answer: true, exp: "正しい。美容師法施行規則第7条第3項に基づき、業務停止処分を受けた者は速やかに、免許証または免許証明書を都道府県知事等に提出する必要があります。" },
+    { id: "test_kankehoki_original_No03_09", text: "美容師試験に合格した者であっても、伝染性の疾病にかかっている間は美容師の免許が与えられることはない。", source: "No03-09", answer: false, exp: "誤り。免許の欠格事由として規定されているのは精神の機能の障害であり、伝染性の疾病は免許を与えない理由（絶対的欠格事由）には含まれていません。" },
+    { id: "test_kankehoki_original_No03_10", text: "美容師が精神の機能の障害により業務を適正に行うことができないときは、免許を取り消されることがある。", source: "No03-10", answer: true, exp: "正しい。美容師法第10条第1項に基づき、精神の機能の障害によって業務の適正な遂行に支障がある場合には、厚生労働大臣が免許を取り消すことができます。" },
+    { id: "test_kankehoki_original_No03_11", text: "美容師の免許に関する事項を美容師名簿に登録する事務は、厚生労働大臣が指定する指定登録機関が行う。", source: "No03-11", answer: true, exp: "正しい。美容師名簿の登録事務は、厚生労働大臣から委任を受けた指定登録機関である理容師美容師試験研修センターが実施しています。" },
+    { id: "test_kankehoki_original_No03_12", text: "管理美容師の資格を持つ開設者であっても、同時に2か所以上の美容所において管理美容師となることはできない。", source: "No03-12", answer: true, exp: "正しい。管理美容師の設置が義務付けられている美容所では施設ごとに責任者を置く必要があり、同一の者が複数の美容所で管理美容師を兼ねることは禁止されています。" },
+    { id: "test_kankehoki_original_No03_13", text: "美容師が業務停止処分に違反して美容の業を行ったときは、30万円以下の罰金に処せられる。", source: "No03-13", answer: false, exp: "誤り。美容師が都道府県知事等から命じられた「業務停止処分」に違反して、その期間中に美容の業務を行った場合、まずは厚生労働大臣から行政処分として「免許取消処分」を受けることになります。なお、この免許取消処分を受けた後（＝免許がない状態）にさらに美容の業務を継続した場合は、「無免許営業（法第6条違反）」に該当し、司法処分として「30万円以下の罰金（法第18条第1号）」が科されます。処分のステップと適用される法律が異なる点に注意しましょう。" },
+    { id: "test_kankehoki_original_No03_14", text: "美容師が他の都道府県に住所を移転したときは、速やかに美容師名簿の訂正を申請しなければならない。", source: "No03-14", answer: false, exp: "誤り。美容師名簿の登録事項には住所が含まれていないため、住所を変更しても名簿の訂正申請を行う必要はありません。" },
+    { id: "test_kankehoki_original_No03_15", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められるときは、免許取消処分の対象となる。", source: "No03-15", answer: false, exp: "誤り。伝染性の疾病により就業が不適当と認められる場合は、免許の取り消しではなく、期間を定めた業務の停止処分の対象となります。" },
+    { id: "test_kankehoki_original_No03_16", text: "管理美容師の職務には、美容所の物的施設の衛生管理だけでなく、そこで行われる業務を衛生的に管理することも含まれる。", source: "No03-16", answer: true, exp: "正しい。管理美容師は施設の衛生責任者として、店舗の設備面と美容業務の両面において適切な衛生管理を行う責務を負っています。" },
+    { id: "test_kankehoki_original_No03_17", text: "美容師試験に合格しても、美容師名簿に登録されなければ美容師の免許は与えられない。", source: "No03-17", answer: true, exp: "正しい。美容師法に基づき、免許は試験合格後の申請により美容師名簿へ登録されることで厚生労働大臣から与えられ、免許証が交付されます。" },
+    { id: "test_kankehoki_original_No03_18", text: "美容師の免許申請にあたっては、添付書類として結核及び伝染性皮膚疾患の有無に関する医師の診断書が必要である。", source: "No03-18", answer: false, exp: "誤り。免許申請時に添付が義務付けられているのは、結核等の診断書ではなく、精神の機能の障害に関する医師の診断書です。" },
+    { id: "test_kankehoki_original_No03_19", text: "美容師が美容師法等で定める衛生上必要な措置を講じなかったときは、都道府県知事から業務停止処分を受けることがある。", source: "No03-19", answer: true, exp: "正しい。美容師法第10条により、美容師が法第8条に定める衛生措置義務に違反した場合は、期間を定めた業務の停止処分の対象となります。" },
+    { id: "test_kankehoki_original_No03_20", text: "美容師が免許証を紛失し再交付を受けた後、紛失した免許証を発見したときは、5日以内に指定登録機関に返納しなければならない。", source: "No03-20", answer: true, exp: "正しい。美容師法施行規則第6条第5項の規定に基づき、免許証の再交付を受けた者がのちに古い免許証等を発見したときは、発見した日から「5日以内」に、これを出荷元である指定登録機関（理容師美容師試験研修センター）に返納しなければなりません。" },
+    { id: "test_kankehoki_original_No03_21", text: "管理美容師の資格を持つ者であれば、同一の者が同時に複数の美容所の管理美容師を兼ねることができる。", source: "No03-21", answer: false, exp: "誤り。管理美容師は各施設において適切な衛生管理を行う責任者であるため、同一人が2か所以上の美容所で管理美容師を兼ねることは認められていません。" },
+    { id: "test_kankehoki_original_No03_22", text: "美容師の免許を受けた者でなければ、美容を業として行ってはならない。", source: "No03-22", answer: true, exp: "正しい。美容師法第6条において、無免許で美容を業とすることが禁止されており、これに違反した者は罰則の対象となります。" },
+    { id: "test_kankehoki_original_No03_23", text: "美容師が免許証を紛失したときは、遅滞なく住所地の都道府県知事に免許証の再交付を申請しなければならない。", source: "No03-23", answer: false, exp: "誤り。免許証の再交付申請先は都道府県知事ではなく、厚生労働大臣（指定登録機関）です。" },
+    { id: "test_kankehoki_original_No03_24", text: "美容師が精神の機能の障害により美容師の業務を適正に行うことができないと認められるときは、期間を定めて業務の停止を命じられることがある。", source: "No03-24", answer: true, exp: "正しい。美容師法第10条第1項第1号の規定により、美容師が精神の機能の障害により業務を適正に行うことができない状態（法第3条の相対的欠格事由）に該当するに至った場合、厚生労働大臣は、その免許を取り消すか、あるいは「期間を定めて業務の停止」を命じることができます。" },
+    { id: "test_kankehoki_original_No03_25", text: "美容師の免許を受けていても、美容師名簿に登録されなければ美容を業として行ってはならない。", source: "No03-25", answer: true, exp: "正しい。美容師法第6条により、美容を業とするためには免許を受け、美容師名簿に登録されていることが必須条件となります。" },
+    { id: "test_kankehoki_original_No03_26", text: "美容師が住所を変更したときは、30日以内に美容師名簿の訂正を申請しなければならない。", source: "No03-26", answer: false, exp: "誤り。美容師名簿の登録事項は氏名や本籍地等であり、住所は含まれていないため、住所を変更しても名簿の訂正申請を行う必要はありません。" },
+    { id: "test_kankehoki_original_No03_27", text: "業務停止処分を受けた美容師がその処分に違反して美容の業を行ったときは、30万円以下の罰金に処せられる。", source: "No03-27", answer: false, exp: "誤り。業務停止処分中に違反して美容の業務を行った場合、まず科される行政処分は「免許の取り消し（法第10条第3項）」です。なお、この処分によって免許が取り消された後（＝無免許の状態）でさらに営業を継続した場合には、初めて「無免許営業（法第6条違反）」として司法処分である「30万円以下の罰金（法第18条第1号）」が適用される段階に移ります。違反の直接の帰結と、その後の罰則ステップを明確に区別して理解しましょう。" },
+    { id: "test_kankehoki_original_No03_28", text: "美容師が1人だけであっても、美容師以外の従業者がいる美容所は管理美容師を置かなければならない。", source: "No03-28", answer: false, exp: "誤り。管理美容師の設置が義務付けられるのは、美容師である従業者が常時2人以上従事する美容所です。美容師が1人であれば補助者がいても設置義務はありません。" },
+],
+"No04.美容師法 施設に関する規定・立入検査と環境衛生監視員": [
+    { id: "test_kankehoki_original_No04_01", text: "管理美容師を置かなければならない美容所の開設を届け出るときは、管理美容師の氏名だけでなく、その住所も記載する必要がある。", source: "No04-01", answer: true, exp: "正しい。美容師法施行規則により、管理美容師の設置が義務付けられている美容所の開設届には、管理美容師の氏名及び住所を記載しなければならないと定められています。" },
+    { id: "test_kankehoki_original_No04_02", text: "美容所の名称を変更したときは、その名称が開設届の事項に含まれないため、変更の届出を行う必要はない。", source: "No04-02", answer: false, exp: "誤り。美容所の名称は開設届の必須事項であるため、名称を変更したときは速やかに都道府県知事等に変更の届出を行う必要があります。" },
+    { id: "test_kankehoki_original_No04_03", text: "出張美容を行うことができるのは、美容所に所属している美容師に限られており、所属のない美容師が行うことは禁じられている。", source: "No04-03", answer: false, exp: "誤り。美容所に所属していない美容師であっても、疾病や婚礼等の法令・条例で定められた特別な事情がある場合には、出張美容を行うことが可能です。" },
+    { id: "test_kankehoki_original_No04_04", text: "美容所の開設者が、施設の構造設備の検査確認を受けずに美容所を使用したときは、美容所の閉鎖命令を受けることがある。", source: "No04-04", answer: true, exp: "正しい。美容師法第12条の2の規定により、都道府県知事等は、構造設備の検査確認を受けずに美容所を使用した開設者に対して、期間を定めて美容所の閉鎖を命じることができます。なお、これとは別に、司法処分として30万円以下の罰金（法第18条第2号）が科されることもあります。" },
+    { id: "test_kankehoki_original_No04_05", text: "美容所の開設者となる者は、必ずしも美容師の免許を有する者である必要はない。", source: "No04-05", answer: true, exp: "正しい。美容所の開設者はあくまで経営の主体であり、法人を含め美容師免許を持たない者でも開設者になることができます。" },
+    { id: "test_kankehoki_original_No04_06", text: "美容所の開設の届出事項には、美容師の氏名だけでなく、美容師以外の従業者の氏名も含まれる。", source: "No04-06", answer: true, exp: "正しい。美容師法施行規則第19条第1項第5号により、開設届にはすべての美容師の氏名（および免許証番号等）に加えて、美容師以外の従業者についても、その「氏名」および「その者が行う業務の範囲」を記載して届け出ることが義務付けられています。" },
+    { id: "test_kankehoki_original_No04_07", text: "保健所に配置された環境衛生監視員は、美容所の衛生措置の実施状況を指導・監督するために立入検査を行うことができる。", source: "No04-07", answer: true, exp: "正しい。環境衛生監視員は保健所に配置され、美容所等への立入検査を行い、開設者が適切な衛生措置を講じているかなどの監視・指導にあたります。" },
+    { id: "test_kankehoki_original_No04_08", text: "美容所の開設者は、管理美容師を変更したときは、1か月以内に届け出なければならない。", source: "No04-08", answer: false, exp: "誤り。管理美容師は開設届の事項であるため、変更したときは1か月以内ではなく、速やかに都道府県知事等に届け出なければなりません。" },
+    { id: "test_kankehoki_original_No04_09", text: "相続により美容所の開設者の地位を承継した者は、新たに美容所の開設を届け出る必要はなく、承継の事実を届け出るだけでよい。", source: "No04-09", answer: true, exp: "正しい。相続、合併、分割によって開設者の地位を承継した場合は、改めて開設届を出す必要はなく、遅滞なく承継の事実を届け出ることとされています。" },
+    { id: "test_kankehoki_original_No04_10", text: "美容所の開設を届け出るときは、管理美容師の氏名のほかに、その者の住所も記載する必要がある。", source: "No04-10", answer: true, exp: "正しい。美容師法施行規則第19条により、管理美容師を置く美容所の開設届には、その氏名及び住所を記載しなければならないと定められています。" },
+    { id: "test_kankehoki_original_No04_11", text: "美容所の開設者となる者は、必ずしも美容師の免許を有している必要はない。", source: "No04-11", answer: true, exp: "正しい。開設者とは美容所を経営する主体のことであり、法人や美容師免許を持たない個人でも開設届を出すことができます。" },
+    { id: "test_kankehoki_original_No04_12", text: "美容師が美容所以外の場所で業務を行うことができる出張美容の規定は、各都道府県の条例のみによって定められている。", source: "No04-12", answer: false, exp: "誤り。出張美容の要件は美容師法施行令第4条で「疾病」や「婚礼」などのケースが全国共通で定められており、そのほかに各自治体が条例で詳細を定める仕組みになっています。" },
+    { id: "test_kankehoki_original_No04_13", text: "日本国内に住民票がある外国人であっても、法令の要件を満たせば美容所の開設者になることができる。", source: "No04-13", answer: true, exp: "正しい。美容所の開設者の国籍に制限はなく、外国人であっても住民票の写しなど必要な書類を添付して届け出れば開設者になれます。" },
+    { id: "test_kankehoki_original_No04_14", text: "美容所の開設者は、届出事項に変更が生じたときは、変更の日から30日以内にその旨を届け出なければならない。", source: "No04-14", answer: false, exp: "誤り。美容所の開設事項に変更が生じた場合の届出（法第11条第2項）については、「30日以内」といった期限ではなく、法律上で「すみやかに」届け出ることが義務付けられています。なお、相続等による「地位の承継届（法第11条の3第2項）」については「遅滞なく」となっており、法律上の文言が使い分けられているため注意が必要です。" },
+    { id: "test_kankehoki_original_No04_15", text: "美容所の開設者となる者は、会社などの法人であってもよく、必ずしも美容師免許を有している必要はない。", source: "No04-15", answer: true, exp: "正しい。開設者はあくまで経営の主体であり、個人か法人か、また美容師免許の有無にかかわらず開設届を出すことが可能です。" },
+    { id: "test_kankehoki_original_No04_16", text: "美容所を開設しようとする者は、あらかじめ都道府県知事等の許可を受けなければならない。", source: "No04-16", answer: false, exp: "誤り。美容所の開設に「許可」は必要ありませんが、あらかじめ施設の構造設備や従業員名などを記載した「届出」を行う義務があります。" },
+    { id: "test_kankehoki_original_No04_17", text: "美容所の開設者は、管理美容師を変更したときは、すみやかに都道府県知事等に変更の届出を行わなければならない。", source: "No04-17", answer: true, exp: "正しい。管理美容師の氏名や住所は美容所の開設届の記載事項です。これらに変更が生じた場合は、美容師法第11条第2項に基づき、開設者は「すみやかに」その旨を都道府県知事等に届け出る義務があります。" },
+    { id: "test_kankehoki_original_No04_18", text: "美容所の開設の届出をするときは、従業するすべての美容師について、精神の機能の障害に関する医師の診断書を添付しなければならない。", source: "No04-18", answer: false, exp: "誤り。開設届に添付が必要なのは「結核、皮膚疾患その他厚生労働大臣の指定する伝染性疾病」に関する診断書です。精神の機能の障害に関する診断書は免許申請時に提出します。" },
+    { id: "test_kankehoki_original_No04_19", text: "婚礼や葬儀などの儀式に参列する者に対して、その儀式の直前に美容を行う場合は、美容所以外の場所で業務を行うことが認められている。", source: "No04-19", answer: true, exp: "正しい。美容師法施行令において、婚礼その他の儀式に参列する者に対する直前の施術は、特別な事情として美容所以外の場所での業務が認められています。" },
+    { id: "test_kankehoki_original_No04_20", text: "美容所の開設の届出をするときは、美容師の氏名だけでなく、美容師以外の従業者についても、その氏名及び行う業務の範囲を記載して届け出なければならない。", source: "No04-20", answer: true, exp: "正しい。美容師法施行規則第19条第1項第5号により、開設届には、美容師の氏名や登録番号に加え、美容師以外の従業者についても、その「氏名」および「その者が行う業務の範囲（フロント受付、清掃など）」を記載して届け出ることが義務付けられています。" },
+    { id: "test_kankehoki_original_No04_21", text: "都道府県等は、美容師法で定めるもののほか、美容所の衛生を保つため必要があると認めるときは、条例でさらに必要な衛生上の措置を定めることができる。", source: "No04-21", answer: true, exp: "正しい。美容師法第12条および第13条の趣旨に基づき、各地方公共団体（都道府県、保健所を設置する市または特別区）は、地域の公衆衛生の実情に応じて、法律に定められている基準以外にも、条例によってさらに上乗せした「衛生上必要な措置」を具体的に規定することができます。" },
+    { id: "test_kankehoki_original_No04_22", text: "会社の福利厚生のために設ける美容所であれば、美容を業として行う場合であっても開設の届出は不要である。", source: "No04-22", answer: false, exp: "誤り。特定の会社が従業員のために設ける施設であっても、美容の業を行う場所である以上、美容師法に基づく美容所の開設届出が必要です。" },
+    { id: "test_kankehoki_original_No04_23", text: "美容所の開設者となる者は、その美容所において自ら美容の業務を行わない場合であっても、美容師の免許を有する者でなければならない。", source: "No04-23", answer: false, exp: "誤り。美容所の開設者はあくまで経営の主体であり、個人・法人を問わず、必ずしも美容師免許を持っている必要はありません。" },
+    { id: "test_kankehoki_original_No04_24", text: "美容師が美容所以外の場所で美容の業を行うことができる「特別の事情」については、政令で定めるもののほか、都道府県等の条例で定めることができる。", source: "No04-24", answer: true, exp: "正しい。美容師法施行令で定められた事由のほか、地域の事情等に応じて都道府県や保健所設置市等の条例で出張美容が認められるケースを規定することができます。" },
+],
+"No05.美容師法 違反者等に対する行政処分": [
+    { id: "test_kankehoki_original_No05_01", text: "美容所の開設者が届出事項の変更の届出を怠ったときは、美容所の閉鎖命令を命じられることがある。", source: "No05-01", answer: false, exp: "誤り。誤り。届出事項に変更が生じた場合の変更届（法第11条第2項）を怠った者に対しては、30万円以下の罰金（司法処分：法第18条第1号）に処せられることはありますが、行政処分としての「閉鎖命令（法第12条の2）」の対象には含まれていません。閉鎖命令は無届開設や未検査営業、衛生措置違反などの重篤な違反に対して下されます。" },
+    { id: "test_kankehoki_original_No05_02", text: "美容所の開設者が、施設の構造設備の検査確認を受けずに美容所を使用したときは、30万円以下の罰金に処せられることがある。", source: "No05-02", answer: true, exp: "正しい。開設届を提出した後であっても、構造設備の検査確認を受ける前に美容所を使用することは美容師法違反であり、罰金刑の対象となります。" },
+    { id: "test_kankehoki_original_No05_03", text: "美容師が法定の衛生上の措置を講じなかったときは、そのことにより直ちに免許取消処分の対象となる。", source: "No05-03", answer: false, exp: "誤り。衛生措置の義務違反に対しては、免許の取り消しではなく、期間を定めた業務の停止処分が規定されています。" },
+    { id: "test_kankehoki_original_No05_04", text: "美容所の開設者が、施設の構造設備についての検査確認を受けずに美容所を使用したときは、30万円以下の罰金に処せられることがある。", source: "No05-04", answer: true, exp: "正しい。美容師法第12条および第18条に基づき、都道府県知事等の検査確認を受ける前に美容所を使用した開設者には、罰則が規定されています。" },
+    { id: "test_kankehoki_original_No05_05", text: "美容所の開設者が、美容師法に基づく衛生上必要な措置を講じなかったときは、直ちに罰金刑に処せられる。", source: "No05-05", answer: false, exp: "誤り。開設者が衛生措置の義務（法第12条）に違反した場合、都道府県知事等から「美容所の閉鎖命令（法第12条の2）」を受けるほか、司法処分として「30万円以下の罰金（法第18条第3号）」に処せられることがあります。しかし、刑事罰である罰金刑は裁判手続き等を経て適用されるものであり、違反発覚と同時に「直ちに」処せられるわけではありません。" },
+    { id: "test_kankehoki_original_No05_06", text: "美容所の開設者が、施設の構造設備についての変更の届出を怠ったときは、30万円以下の罰金に処せられることがある。", source: "No05-06", answer: true, exp: "正しい。美容師法第18条に基づき、開設届の事項である施設の構造設備などに変更があった際の届出を怠った場合には、罰則の対象となります。" },
+    { id: "test_kankehoki_original_No05_07", text: "美容所の開設者が、行政処分である閉鎖命令に違反したときは、30万円以下の罰金に処せられることがある。", source: "No05-07", answer: true, exp: "正しい。美容所の閉鎖命令に違反して営業を続けた開設者に対しては、美容師法第18条により30万円以下の罰金に処せられることが規定されています。" },
+],
+"No05.関連法規": [
+    { id: "test_kankehoki_original_No06_01", text: "生活衛生同業組合は、同一の都道府県内において、業種ごとに1つに限って設立することができる。", source: "No05-08", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律により、組合は同一都道府県内に業種ごとに1つしか設立できないと規定されています。" },
+    { id: "test_kankehoki_original_No06_02", text: "生活衛生同業組合は、同業者の組織として営利を目的として設立されている。", source: "No05-09", answer: false, exp: "誤り。生活衛生同業組合は、振興指針に基づき自主的活動を行う組織であり、営利を目的とすることは法律で禁止されています。" },
+    { id: "test_kankehoki_original_No06_03", text: "生活衛生関係営業の振興指針は、生活衛生同業組合の組合員のみを対象として策定される。", source: "No05-10", answer: false, exp: "誤り。振興指針は組合員に限定されず、その業種全体を対象として厚生労働大臣が定めるものです。" },
+    { id: "test_kankehoki_original_No06_04", text: "生活衛生同業組合は、組合員の利益を最大化するため、営利を目的として設立・運営される組織である。", source: "No05-11", answer: false, exp: "誤り。生活衛生同業組合は組合員の経営の安定や振興を図るための組織であり、営利を目的とすることは法律で禁止されています。" },
+    { id: "test_kankehoki_original_No06_05", text: "生活衛生同業組合の設立は、同一の都道府県内において、同一の業種につき1つに限られている。", source: "No05-12", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律により、組合は同一都道府県内に業種ごとに1つしか設立できないと規定されています。" },
+    { id: "test_kankehoki_original_No06_06", text: "廃棄物の処理及び清掃に関する法律において、美容所から排出される毛髪は産業廃棄物に分類される。", source: "No05-13", answer: false, exp: "誤り。美容所から出される毛髪は、事業活動に伴って生じる事業系一般廃棄物に分類されます。産業廃棄物に分類されるのはプラスチック類やカミソリの替え刃などです。" },
+    { id: "test_kankehoki_original_No06_07", text: "全国生活衛生営業指導センターは、サービス内容の適正な表示等のため、適正化規程を定めることができる。", source: "No05-14", answer: false, exp: "誤り。指導センターが定めることができるのは標準営業約款です。適正化規程はかつて組合が定めていたものですが、現在は全廃されています。" },
+    { id: "test_kankehoki_original_No06_08", text: "生活衛生関係営業の振興を図るための振興指針は、業種ごとに厚生労働大臣が定めるものとされている。", source: "No05-15", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律により、振興の基本となる指針は厚生労働大臣が定めると規定されています。" },
+    { id: "test_kankehoki_original_No06_09", text: "生活衛生同業組合は、組合員の利益を最大化するため、営利を目的として設立された組織である。", source: "No05-16", answer: false, exp: "誤り。生活衛生同業組合は、振興指針に基づき自主的活動を行う組織であり、営利を目的とすることは法律で禁止されています。" },
+    { id: "test_kankehoki_original_No06_10", text: "医師法に基づき、美容師がレーザー光線を毛根部分に照射して毛乳頭などを破壊する行為（永久脱毛）を行うことは禁止されている。", source: "No05-17", answer: true, exp: "正しい。レーザー脱毛などの行為は医業（医療行為）とみなされるため、美容師免許を持っていても、医師でない者がこれを行うことは医師法違反となります。" },
+    { id: "test_kankehoki_original_No06_11", text: "美容業における料金や営業方法を制限するための「適正化規程」は、規制緩和の流れにより現在はすべて廃止されている。", source: "No05-18", answer: true, exp: "正しい。かつては組合が適正化規程を定めて料金等の制限を行っていましたが、平成9年3月末までにすべて廃止されました。" },
+    { id: "test_kankehoki_original_No06_12", text: "労働安全衛生法は、美容師が伝染性の疾病にかかった際、公衆衛生の観点からその就業を禁止することを直接規定している法律である。", source: "No05-19", answer: false, exp: "誤り。労働安全衛生法は職場の安全と健康を確保するための法律です。伝染性の疾病による就業制限については、感染症法や美容師法に規定があります。" },
+    { id: "test_kankehoki_original_No06_13", text: "生活衛生関係営業の運営の適正化及び振興に関する法律は、利用者又は消費者の利益の擁護を図ることも目的としている。", source: "No05-20", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律は、経営の健全化等を通じて公衆衛生の向上を図るとともに、利用者の利益の擁護を目的としています。" },
+    { id: "test_kankehoki_original_No06_14", text: "生活衛生同業組合の事業には、組合員に対する資金のあっせんや、技能の改善向上、経営の健全化に関する指導が含まれている。", source: "No05-21", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律に基づき、組合は組合員の経営の安定や振興を図るための様々な支援事業を行うものとされています。" },
+    { id: "test_kankehoki_original_No06_15", text: "労働基準法に基づき、美容所の使用者は、従業員の数が5人未満である場合に限り、法定の休憩時間や休日を与えなくてもよい。", source: "No05-22", answer: false, exp: "誤り。労働基準法は、同居の親族のみを使用する場合を除き、従業員を1人でも使用していれば適用されます。休憩時間や休日の付与は人数に関わらず義務付けられています。" }
+　　　　　　]
+        }
+    },
+    "test_kankehoki_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_kankehoki_past_2025_01", text: "美容師免許の申請に当たっては、免許申請書に精神の機能の障害に関する医師の診断書を添付しなければならない。", source: "52回 問題1", answer: true, exp: "正しい。美容師法および施行規則により、免許申請時には精神の機能の障害に関する医師の診断書を添える必要がある。" },
+    { id: "test_kankehoki_past_2025_02", text: "美容所の開設届を提出する際は、従事するすべての美容師について「精神の機能の障害」に関する医師の診断書を添付する必要がある。", source: "52回 問題2", answer: false, exp: "誤り。美容所の開設届に添付が必要なのは、精神の機能の障害に関する診断書ではなく、「結核、皮膚疾患その他厚生労働大臣の指定する伝染性疾病の有無」に関する医師の診断書である。" },
+    { id: "test_kankehoki_past_2025_03", text: "美容所の開設者は、美容所の定休日を変更した場合、美容師法に基づく変更の届出を行う必要はない。", source: "52回 問題3", answer: true, exp: "正しい。開設届の事項に含まれていない定休日などの変更については、届出を行う必要はない。" },
+    { id: "test_kankehoki_past_2025_04", text: "出張美容は、美容所に所属している美容師でなければ行うことができない。", source: "52回 問題4", answer: false, exp: "誤り。美容所に所属していない美容師であっても、特別な事情がある場合には出張美容を行うことができる。" },
+    { id: "test_kankehoki_past_2025_05", text: "業務停止処分を受けている美容師が、その処分に違反して美容の業を行った場合には、免許取消処分を受けることがある。", source: "52回 問題5", answer: true, exp: "正しい。業務停止処分に違反して業を行うことは免許取消処分の対象となる。" },
+    { id: "test_kankehoki_past_2025_06", text: "美容所の開設者が、届出事項の変更について届出を怠ったときは、美容所の閉鎖処分（閉鎖命令）を受けることがある。", source: "52回 問題6", answer: false, exp: "誤り。届出事項の変更について届出を怠った場合は、行政処分である閉鎖命令ではなく、30万円以下の罰金という司法処分の対象となる。" },
+    { id: "test_kankehoki_past_2025_07", text: "生活衛生同業組合は、美容業について、1つの都道府県に複数の組合を設立することができる。", source: "52回 問題7", answer: false, exp: "誤り。生活衛生関係営業の運営の適正化及び振興に関する法律に基づき、生活衛生同業組合は都道府県ごとに1つしか設立できない。" },
+    { id: "test_kankehoki_past_2025_08", text: "美容所の開設者は、美容師免許を持っていない者であってもなることができる。", source: "51回 問題1", answer: true, exp: "正しい。開設者は美容師である必要はなく、法人の場合はその代表者が美容師でなくてもよい。" },
+    { id: "test_kankehoki_past_2025_09", text: "美容師が他の都道府県に住所地を変更したときは、速やかに美容師名簿の訂正を申請しなければならない。", source: "51回 問題2", answer: false, exp: "誤り。住所地は美容師名簿の登録事項に含まれないため、住所を変更しても名簿の訂正を申請する必要はない。" },
+    { id: "test_kankehoki_past_2025_10", text: "管理美容師を置かなければならない美容所の開設届には、管理美容師の氏名のほかに、その者の住所も届け出なければならない。", source: "51回 問題3", answer: true, exp: "正しい。管理美容師を置くべき美容所の開設届出事項には、管理美容師の氏名及び住所が含まれる。" },
+    { id: "test_kankehoki_past_2025_11", text: "美容所の開設者は、届出事項に変更が生じたときは、30日以内に届け出なければならない。", source: "51回 問題4", answer: false, exp: "誤り。届出事項に変更が生じたときは、30日以内ではなく「速やかに」届け出なければならない。" },
+    { id: "test_kankehoki_past_2025_12", text: "美容師法に基づく衛生上必要な措置を講じなかったときは、美容所の閉鎖処分（閉鎖命令）を受けることがある。", source: "51回 問題5", answer: true, exp: "正しい。開設者が衛生上必要な措置を講じなかったときは、期間を定めて美容所の閉鎖を命じられることがある。" },
+    { id: "test_kankehoki_past_2025_13", text: "保健所に配置された環境衛生監視員は、美容所の立入検査を行うことができ、これを妨げたときは30万円以下の罰金に処せられることがある。", source: "51回 問題6", answer: true, exp: "正しい。環境衛生監視員は衛生措置の実施状況を検査するために立入検査を行う権限を持ち、これを拒み、妨げ、又は忌避した者は罰金の対象となる。" },
+    { id: "test_kankehoki_past_2025_14", text: "生活衛生同業組合は、同業者の組織として営利を目的としない自主的活動を促進するために設立されている。", source: "51回 問題7", answer: true, exp: "正しい。生活衛生同業組合は、同業者の組織として自主的活動を促進するものであり、営利を目的としてはならない。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_kankehoki_past_2024_01", text: "外国の美容師試験に合格した者については、日本の美容師試験が一部免除される。", source: "50回 問題1", answer: false, exp: "誤り。外国の美容師試験に合格していても、日本の美容師試験の免除対象にはならない。" },
+    { id: "test_kankehoki_past_2024_02", text: "美容師免許の申請に当たっては、免許申請書に精神の機能の障害に関する医師の診断書を添付しなければならない。", source: "50回 問題2", answer: true, exp: "正しい。美容師法施行規則により、免許申請時には精神の機能の障害に関する医師の診断書を添える必要がある。" },
+    { id: "test_kankehoki_past_2024_03", text: "管理美容師を置かなければならない美容所に管理美容師を置かなかったときは、美容所の閉鎖命令を受けることがある。", source: "50回 問題3", answer: true, exp: "正しい。管理美容師の設置義務に違反した開設者に対しては、期間を定めて美容所の閉鎖を命じられることがある。" },
+    { id: "test_kankehoki_past_2024_04", text: "美容所の開設者は、美容師を新たに雇用した場合や美容師が退職した場合には、速やかに届け出なければならない。", source: "50回 問題4", answer: true, exp: "正しい。美容師（従業者）の雇用や退職などの変更が生じた場合は、速やかに届け出る義務がある。" },
+    { id: "test_kankehoki_past_2024_05", text: "美容師が心身の障害により美容師の業務を適正に行うことができない者とされた場合は、業務停止処分の対象となる。", source: "50回 問題5", answer: false, exp: "誤り。心身の障害により業務を適正に行えないと認められる場合は、業務停止処分ではなく「免許取消処分」の対象となる。" },
+    { id: "test_kankehoki_past_2024_06", text: "美容所の開設者が、業務停止処分を受けている美容師に美容の業務を行わせたときは、30万円以下の罰金に処せられる。", source: "50回 問題6", answer: false, exp: "誤り。業務停止処分中の者に業務を行わせた場合は、罰金ではなく行政処分である「美容所の閉鎖命令」の対象となる。" },
+    { id: "test_kankehoki_past_2024_07", text: "生活衛生関係営業の振興指針は、厚生労働大臣が定めることができる。", source: "50回 問題7", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律に基づき、振興指針は厚生労働大臣が定める。" },
+    { id: "test_kankehoki_past_2024_08", text: "美容師法は、美容業の経営の健全化を促進し、美容業の振興を図ることを主な目的としている。", source: "49回 問題1", answer: false, exp: "誤り。美容業の振興や経営の健全化は「生活衛生関係営業の運営の適正化及び振興に関する法律」の目的であり、美容師法は美容の業務を規律し公衆衛生の向上を図ることを目的としている。" },
+    { id: "test_kankehoki_past_2024_09", text: "美容師が業務停止処分を受けたときは、速やかに処分を行った都道府県知事等に免許証（免許証明書）を提出しなければならない。", source: "49回 問題2", answer: true, exp: "正しい。業務停止処分を受けた者は、速やかに免許証等を処分者に提出する必要がある。" },
+    { id: "test_kankehoki_past_2024_10", text: "業務停止処分を受けている美容師が、その処分に違反して業務停止期間中に美容の業を行った場合には、免許取消処分を受けることがある。", source: "49回 問題3", answer: true, exp: "正しい。業務停止処分に違反して業を行うことは、免許取消処分の対象となる。" },
+    { id: "test_kankehoki_past_2024_11", text: "管理美容師を置かなければならない美容所の開設届には、管理美容師の氏名のほかに、その者の住所も届け出なければならない。", source: "49回 問題4", answer: true, exp: "正しい。管理美容師を置くべき美容所の開設届出事項には、管理美容師の氏名及び住所が含まれる。" },
+    { id: "test_kankehoki_past_2024_12", text: "理容所と美容所を同一の施設において重複開設することは、いかなる条件を満たしても認められない。", source: "49回 問題5", answer: false, exp: "誤り。必要な衛生上の要件を満たし、かつ従事者全員が理容師・美容師双方の資格を有している場合には、同一施設での重複開設が認められる。" },
+    { id: "test_kankehoki_past_2024_13", text: "環境衛生監視員による立入検査を妨げたときは、美容所の閉鎖処分（閉鎖命令）を受けることがある。", source: "49回 問題6", answer: false, exp: "誤り。立入検査を拒み、妨げ、又は忌避した者は、閉鎖命令ではなく「30万円以下の罰金」という司法処分の対象となる。" },
+    { id: "test_kankehoki_past_2024_14", text: "生活衛生同業組合は、振興指針に沿って、自主的に振興計画を定めることができる。", source: "49回 問題7", answer: true, exp: "正しい。生活衛生同業組合は、厚生労働大臣が定める振興指針に沿って、組合員を対象とした振興計画を策定する。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_kankehoki_past_2023_01", text: "外国で美容を業としていた者であっても、日本で美容師となるためには、美容師養成施設において必要な知識及び技能を修得しなければならない。", source: "48回 問題1", answer: true, exp: "正しい。外国での実務経験があっても、日本の美容師免許を取得するには、養成施設での教育、国家試験の合格、免許登録のプロセスが必要である。" },
+    { id: "test_kankehoki_past_2023_02", text: "業務停止処分を受けている美容師が、その処分に違反して美容の業務を行った場合、30万円以下の罰金に処せられる。", source: "48回 問題2", answer: false, exp: "誤り。業務停止処分に違反して業務を行った場合は、罰金ではなく「免許の取消処分」の対象となる。" },
+    { id: "test_kankehoki_past_2023_03", text: "美容所の開設者は、美容師法に基づき、必ず美容師の免許を有する者でなければならない。", source: "48回 問題3", answer: false, exp: "誤り。美容所の開設者は美容所を経営・運営する立場であり、必ずしも美容師免許を持っている必要はない。" },
+    { id: "test_kankehoki_past_2023_04", text: "美容師が疾病その他の理由で美容所に来ることができない者に対して出張美容を行う場合、美容師法に基づく衛生上の措置を講じる義務がある。", source: "48回 問題4", answer: true, exp: "正しい。出張美容を行う場合であっても、美容師法に基づき美容所と同等の衛生上の措置を講じなければならない。" },
+    { id: "test_kankehoki_past_2023_05", text: "美容所の開設者が、管理美容師を置かなければならない美容所に管理美容師を置かなかったときは、30万円以下の罰金に処せられる。", source: "48回 問題5", answer: false, exp: "誤り。管理美容師の設置義務違反に対しては、罰金ではなく「美容所の閉鎖命令」という行政処分の対象となる。" },
+    { id: "test_kankehoki_past_2023_06", text: "都道府県知事は、生活衛生関係営業の振興を図るため、業種ごとに振興指針を定めることができる。", source: "48回 問題6", answer: false, exp: "誤り。振興指針を定める権限を持つのは都道府県知事ではなく「厚生労働大臣」である。" },
+    { id: "test_kankehoki_past_2023_07", text: "医師法に基づき、医師でない者が針先に色素を付け、皮膚の表面に墨等の色素を入れる行為（アートメイク）を業として行うことは禁止されている。", source: "48回 問題7", answer: true, exp: "正しい。アートメイクは医療行為に該当するため、医師免許を持たない者が業として行うことは医師法で禁止されている。" },
+    { id: "test_kankehoki_past_2023_08", text: "保健所は現在、その設置や役割が「保健所法」という法律によって定められている。", source: "47回 問題1", answer: false, exp: "誤り。保健所に関する規定は、平成6年に保健所法から名称変更された「地域保健法」に定められている。" },
+    { id: "test_kankehoki_past_2023_09", text: "美容師が死亡したときは、戸籍法による届出義務者は、30日以内に美容師名簿の登録の消除を申請しなければならない。", source: "47回 問題2", answer: true, exp: "正しい。免許を受けた者が死亡または失踪宣告を受けた場合、届出義務者は30日以内に消除申請を行う義務がある。" },
+    { id: "test_kankehoki_past_2023_10", text: "管理美容師の資格を取得するには、美容師の免許を受けた後、3年以上美容の業務に従事した経験が必要である。", source: "47回 問題3", answer: true, exp: "正しい。美容師免許取得後、3年以上の実務経験を積み、さらに指定された講習会の課程を修了することで管理美容師の資格が得られる。" },
+    { id: "test_kankehoki_past_2023_11", text: "美容所の開設者が、美容師法に基づく衛生上の措置を怠ったときは、30万円以下の罰金に処せられる。", source: "47回 問題4", answer: false, exp: "誤り。衛生措置を怠った場合は、罰金ではなく「美容所の閉鎖命令」を受けることがある。罰金は、閉鎖命令に違反した場合などの司法処分として課されるものである。" },
+    { id: "test_kankehoki_past_2023_12", text: "管理美容師を置かなければならない美容所の開設届には、管理美容師の氏名のほかに、その者の住所も届け出なければならない。", source: "47回 問題5", answer: true, exp: "正しい。美容師法施行規則に基づき、管理美容師を置くべき美容所の開設届には、その氏名と住所の両方の記載が必要である。" },
+    { id: "test_kankehoki_past_2023_13", text: "美容師の免許を受けずに美容を業とした者は、30万円以下の罰金に処せられることがある。", source: "47回 問題6", answer: true, exp: "正しい。無免許で美容を業とすることは美容師法違反であり、30万円以下の罰金という罰則の対象となる。" },
+    { id: "test_kankehoki_past_2023_14", text: "生活衛生同業組合は、利用者又は消費者の選択の利便を図るため、自主的に標準営業約款を定めることができる。", source: "47回 問題7", answer: false, exp: "誤り。標準営業約款を定めることができるのは生活衛生同業組合ではなく、「全国生活衛生営業指導センター」である。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_kankehoki_past_2022_01", text: "美容師法は、美容業の経営の健全化を促進することにより、美容業の振興を図ることを主な目的としている。", source: "46回 問題1", answer: false, exp: "誤り。美容業の振興や経営の健全化については「生活衛生関係営業の運営の適正化及び振興に関する法律（生衛法）」で定められている。美容師法は、美容の業務を規律し、公衆衛生の向上に資することを目的としている。" },
+    { id: "test_kankehoki_past_2022_02", text: "美容師が氏名を変更したときは、30日以内に美容師名簿の訂正を申請しなければならない。", source: "46回 問題2", answer: true, exp: "正しい。氏名や本籍地に変更が生じた場合は、30日以内に名簿の訂正を申請する必要がある。なお、住所の変更は登録事項ではないため申請不要である。" },
+    { id: "test_kankehoki_past_2022_03", text: "法の規定による業務の停止処分に違反して、美容の業を行った美容師は、免許取消処分の対象となる。", source: "46回 問題3", answer: true, exp: "正しい。業務停止処分に違反して業を行うことは、免許取消処分の対象となる。また、精神の機能の障害により業務を適正に行えない場合も同様に免許取消の対象となり得る。" },
+    { id: "test_kankehoki_past_2022_04", text: "管理美容師の資格を取得するためには、美容師の免許を受けた後、2年以上美容の業務に従事した経験が必要である。", source: "46回 問題4", answer: false, exp: "誤り。管理美容師となるためには、免許取得後「3年以上」美容の業務に従事した経験が必要であり、さらに都道府県知事が指定した講習会の課程を修了しなければならない。" },
+    { id: "test_kankehoki_past_2022_05", text: "美容所の開設者の地位を承継した相続人は、その旨を都道府県知事等に届け出なければならない。", source: "46回 問題5", answer: true, exp: "正しい。開設者が死亡し、相続人がその地位を承継したときは、遅滞なくその旨を届け出る義務がある。" },
+    { id: "test_kankehoki_past_2022_06", text: "美容所の開設者が、美容師でない者に美容の業務を行わせたときは、美容所の閉鎖命令を受けることがある。", source: "46回 問題6", answer: true, exp: "正しい。無免許者に美容業務を行わせることは重大な違反であり、行政処分として期間を定めた美容所の閉鎖を命じられることがある。" },
+    { id: "test_kankehoki_past_2022_07", text: "生活衛生同業組合は、同業者の組織として営利を目的として設立された団体である。", source: "46回 問題7", answer: false, exp: "誤り。生活衛生同業組合は、営利を目的としてはならない。組合員の経営の安定や技能の改善向上など、自主的活動を促進することを目的としている。" },
+    { id: "test_kankehoki_past_2022_08", text: "美容所の開設届の受理や、施設の構造設備が基準に適合しているかの検査確認は、厚生労働大臣が行う事務である。", source: "45回 問題1", answer: false, exp: "誤り。美容所の開設届の受理や構造設備の検査確認は、美容所所在地の都道府県知事（保健所設置市長、特別区長を含む）が行う事務である。" },
+    { id: "test_kankehoki_past_2022_09", text: "外国で美容師の資格を持っている者であっても、日本の美容師免許がなければ日本国内で美容を業とすることはできない。", source: "45回 問題2", answer: true, exp: "正しい。日本国内で美容を業とするには、日本の美容師法に基づき厚生労働大臣から与えられた免許が必要である。" },
+    { id: "test_kankehoki_past_2022_10", text: "美容師免許の申請にあたっては、添付書類として結核及び伝染性皮膚疾患の有無に関する医師の診断書が必要である。", source: "45回 問題3", answer: false, exp: "誤り。免許申請時に必要なのは「精神の機能の障害に関する医師の診断書」である。結核や皮膚疾患の有無に関する診断書は、美容所の開設届の際に、従事する美容師について必要となるものである。" },
+    { id: "test_kankehoki_past_2022_11", text: "美容師が免許証を破り、汚し、または紛失したことは、業務停止処分の対象とはならない。", source: "45回 問題4", answer: true, exp: "正しい。免許証の汚損や紛失は、免許証の再交付を申請する理由にはなるが、行政処分である業務停止処分の対象には含まれない。" },
+    { id: "test_kankehoki_past_2022_12", text: "美容所を開設する者は、あらかじめ届け出れば、構造設備の検査確認を受ける前であっても施設を使用することができる。", source: "45回 問題5", answer: false, exp: "誤り。美容所は、都道府県知事等の検査を受け、その構造設備が衛生措置を講ずるのに適する旨の確認を受けた後でなければ、使用してはならない。" },
+    { id: "test_kankehoki_past_2022_13", text: "美容所の開設者は、美容所の営業日を変更したとしても、美容師法に基づく変更の届出を行う必要はない。", source: "45回 問題6", answer: true, exp: "正しい。営業日は開設届の届出事項に含まれていないため、変更しても届け出る必要はない。一方、美容師の雇用や退職などは届出が必要である。" },
+    { id: "test_kankehoki_past_2022_14", text: "生活衛生同業組合は、利用者や消費者の利便を図るため、自主的に標準営業約款を定めることができる。", source: "45回 問題7", answer: false, exp: "誤り。標準営業約款を定めることができるのは「全国生活衛生営業指導センター」であり、厚生労働大臣の認可を受けて定めるものである。" },
+],
+"第44-43回 (2021年)": [
+    { id: "kaehoki_past_2021_01", text: "地域保健法において、保健所の業務には人口動態統計などの統計に関する事項が含まれている。", source: "44回 問題1", answer: true, exp: "正しい。地域保健法に基づき定められた保健所の14の業務項目の中に、人口動態統計その他地域保健に係る統計に関する事項が明確に含まれている。" },
+    { id: "kaehoki_past_2021_02", text: "美容師法は、美容師の資格を定め、美容の業務が適正に行われるように規律することで、国民生活の向上に資することを目的としている。", source: "44回 問題2", answer: false, exp: "誤り。美容師法第1条において、美容の業務を規律することで向上を目指すのは「公衆衛生」であり、「国民生活」ではない。" },
+    { id: "kaehoki_past_2021_03", text: "美容師が氏名または本籍地（都道府県名）を変更したときは、30日以内に美容師名簿の訂正を申請しなければならない。", source: "44回 問題3", answer: true, exp: "正しい。美容師法施行規則第3条により、氏名や本籍地に変更が生じた際は、30日以内に厚生労働大臣に対し訂正申請を行う義務がある。" },
+    { id: "kaehoki_past_2021_04", text: "管理美容師の資格を有する者は、同一人が同時に2か所以上の美容所の管理美容師を務めることができる。", source: "44回 問題4", answer: false, exp: "誤り。美容師法第12条の3第1項により、管理美容師は各美容所ごとに置く必要があり、同一の者が同時に複数の店舗の責任者を兼ねることはできない。" },
+    { id: "kaehoki_past_2021_05", text: "美容所の開設の届出事項に変更が生じた際、その届出を怠った場合には、30万円以下の罰金に処されることがある。", source: "44回 問題5", answer: true, exp: "正しい。美容師法第11条第2項の規定に違反して届出を怠ったり虚偽の届出をした場合は、同法第18条第2号により罰金刑の対象となる。" },
+    { id: "kaehoki_past_2021_06", text: "美容師法に違反して出張美容が認められない場所で美容の業務を行った美容師には、30万円以下の罰金が科される。", source: "44回 問題6", answer: false, exp: "誤り。美容師法第10条第2項に基づき、適正な場所以外で業務を行った場合は「業務の停止」を命じられる対象となるが、罰金刑の規定ではない。" },
+    { id: "kaehoki_past_2021_07", text: "個人情報の保護に関する法律による規制は、美容事業者が保有する顧客データの件数にかかわらず、すべての事業者に適用される。", source: "44回 問題7", answer: true, exp: "正しい。個人情報の保護に関する法律は、取り扱う個人情報の件数にかかわらず、個人情報を取り扱うすべての事業者が規制の対象となる。" },
+    { id: "kaehoki_past_2021_08", text: "美容師法には、美容師の資格や業務の規律に加え、美容業の振興を図るための具体的な方策についても定められている。", source: "43回 問題1", answer: false, exp: "誤り。美容業の振興については「生活衛生関係営業の運営の適正化及び振興に関する法律」に定められており、美容師法には含まれない。" },
+    { id: "kaehoki_past_2021_09", text: "美容師が免許証を紛失したときは、遅滞なく住所地の都道府県知事に免許証の再交付を申請しなければならない。", source: "43回 問題2", answer: false, exp: "誤り。美容師法施行規則第6条により、免許証の再交付申請先は「厚生労働大臣」である。また、住所地の変更に伴う再交付申請の義務はない。" },
+    { id: "kaehoki_past_2021_10", text: "美容所の開設の届出事項には、美容師の氏名及び登録番号が含まれるが、美容師の労働時間は含まれない。", source: "43回 問題3", answer: true, exp: "正しい。美容所の開設届には美容師の氏名や登録番号等の情報は必要だが、労働時間は労働基準法の範疇であり届出事項には該当しない。" },
+    { id: "kaehoki_past_2021_11", text: "美容師が美容師法第8条に定める衛生上必要な措置を講じなかった場合、期間を定めて業務の停止を命じられることがある。", source: "43回 問題4", answer: true, exp: "正しい。美容師法第10条第2項において、美容師が第8条の衛生措置規定に違反した場合には、業務停止処分を下せることが明記されている。" },
+    { id: "kaehoki_past_2021_12", text: "美容所の開設者が環境衛生監視員の立入検査を正当な理由なく拒否した場合、期間を定めてその美容所の閉鎖を命じられることがある。", source: "43回 問題5", answer: false, exp: "誤り。美容師法第18条第4号により、立入検査を拒んだ場合は「30万円以下の罰金」に処される対象となるが、閉鎖命令の要件ではない。" },
+    { id: "kaehoki_past_2021_13", text: "美容業の振興を図るための振興指針は、厚生労働大臣が定めることとされている。", source: "43回 問題6", answer: true, exp: "正しい。生活衛生関係営業の運営の適正化及び振興に関する法律に基づき、振興指針は都道府県知事ではなく、厚生労働大臣が業種ごとに定める。" },
+    { id: "kaehoki_past_2021_14", text: "消費者基本法には、伝染性の疾病にかかった従業者に対して、美容の業務に従事することを禁止する規定が設けられている。", source: "43回 問題7", answer: false, exp: "誤り。消費者基本法は消費者利益の擁護や安定を目的とする法律であり、感染症患者に対する業務従事の禁止を規定するものではない。" }
+],
+"第42-41回 (2020年)": [
+    { id: "test_kankehoki_past_2020_01", text: "美容所の構造設備が基準に適合しているかの検査確認は、美容所を管轄する都道府県知事（保健所設置市長、特別区長を含む）が行う事務である。", source: "42回 問題1", answer: true, exp: "正しい。美容所の開設届の受理や、施設の構造設備が衛生措置を講ずるのに適する旨の検査確認は、都道府県知事等が行う事務に含まれる。" },
+    { id: "test_kankehoki_past_2020_02", text: "美容師が免許証（免許証明書）を紛失したときは、速やかに住所地の都道府県知事に再交付を申請しなければならない。", source: "42回 問題2", answer: false, exp: "誤り。免許証（免許証明書）は厚生労働大臣が発行するものであるため、紛失時の再交付申請は、厚生労働大臣（実際には指定登録機関である理容師美容師試験研修センター）に対して行う。" },
+    { id: "test_kankehoki_past_2020_03", text: "美容師が氏名を変更した場合は、30日以内に美容師名簿の訂正を申請しなければならない。", source: "42回 問題3", answer: true, exp: "正しい。氏名や本籍地（都道府県名）など、美容師名簿の登録事項に変更が生じた場合は、30日以内に訂正を申請する義務がある。" },
+    { id: "test_kankehoki_past_2020_04", text: "会社の福利厚生のために設置された美容所であっても、業として美容を行う施設であれば、美容師法に基づく開設の届出が必要である。", source: "42回 問題4", answer: true, exp: "正しい。利用者が限定される会社の福利厚生施設であっても、美容を業として行う以上、美容所として開設の届出を行わなければならない。" },
+    { id: "test_kankehoki_past_2020_05", text: "美容師が美容師名簿の登録事項について、30日以内に訂正申請を行わなかったときは、30万円以下の罰金に処せられる。", source: "42回 問題5", answer: false, exp: "誤り。名簿の訂正申請は法律上の義務であるが、申請を怠ったことに対する罰金などの罰則規定は設けられていない。" },
+    { id: "test_kankehoki_past_2020_06", text: "生活衛生関係営業の運営の適正化及び振興に関する法律に基づく標準営業約款は、利用者に対する施術料金の統一についても定めている。", source: "42回 問題6", answer: false, exp: "誤り。標準営業約款はサービスや技術の内容を明確にすることを目的としており、料金の統一については定めていない。なお、料金の統一を行うことは独占禁止法により禁止されている。" },
+    { id: "test_kankehoki_past_2020_07", text: "保健所を設置できる主体は、都道府県、指定都市、中核市、その他政令で定める市、または特別区に限られている。", source: "42回 問題7", answer: true, exp: "正しい。地域保健法に基づき、保健所を設置できる行政主体は厳格に定められている。" },
+    { id: "test_kankehoki_past_2020_08", text: "美容師の免許は、一度取得すれば取消処分を受けない限り、生涯有効であり更新の必要はない。", source: "41回 問題1", answer: true, exp: "正しい。美容師免許には有効期限の定めがなく、一定期間ごとの更新制度も存在しない。" },
+    { id: "test_kankehoki_past_2020_09", text: "環境衛生監視員による美容所への立入検査を拒んだり妨げたりした者は、30万円以下の罰金に処せられることがある。", source: "41回 問題2", answer: true, exp: "正しい。衛生措置の実施状況を確認するための立入検査を拒否・妨害することは、罰則（司法処分）の対象となる。" },
+    { id: "test_kankehoki_past_2020_10", text: "美容師が1人だけであっても、それ以外に従業者が1人でもいる美容所は、管理美容師を置かなければならない。", source: "41回 問題3", answer: false, exp: "誤り。管理美容師の設置が必要となるのは、美容師である従業者の数が「常時2人以上」である美容所である。美容師以外の従業者がいても、美容師が1人であれば設置義務はない。" },
+    { id: "test_kankehoki_past_2020_11", text: "美容所を開設しようとする者は、あらかじめ届け出れば、構造設備の検査確認を受ける前であっても施設を使用して営業を開始できる。", source: "41回 問題4", answer: false, exp: "誤り。美容所は、都道府県知事等の検査を受け、構造設備が基準に適合している旨の確認を受けた後でなければ、使用してはならない。" },
+    { id: "test_kankehoki_past_2020_12", text: "美容師法に基づき、各都道府県は条例によって、美容の施術に関する料金を制限することができる。", source: "41回 問題5", answer: false, exp: "誤り。美容師法は美容の業務を規律し公衆衛生を向上させるための法律であり、施術料金に関する規定や条例による制限の根拠は含まれていない。" },
+    { id: "test_kankehoki_past_2020_13", text: "生活衛生同業組合は、振興指針に沿って、組合員の営業施設の整備改善などのための資金のあっせんを行うことができる。", source: "41回 問題6", answer: true, exp: "正しい。生衛法に基づき、組合員の経営安定や施設の近代化を支援するための資金のあっせんは、組合の大切な事業の一つである。" },
+    { id: "test_kankehoki_past_2020_14", text: "労働基準法は、同居の親族以外の従業者を1人でも使用している美容所であれば、その規模にかかわらず適用される。", source: "41回 問題7", answer: true, exp: "正しい。同居の親族のみを使用する事業を除き、1人でも労働者を使用していれば労働基準法が適用される。" }
+]
+        }
+    },
+    "test_kankehoki_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.法制度の概要": [
+    { id: "test_kankehoki_extra_hosedonogaiyo_No01", text: "法は、人の良心に対する訴えであり、物理的な強制力をともなわない社会規範である。", source: "No.01", answer: false, exp: "誤り。法は国家権力を背景とした物理的な強制力を伴う社会規範です。良心に訴え、強制力を伴わないのは道徳の特色です。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No02", text: "我が国の法令の効力は、強い順に並べると、憲法、法律、政令、省令の順である。", source: "No.02", answer: true, exp: "正しい。法令には優先関係があり、上位の法令が優先されます。下位の法令は上位の法令に反することはできません。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No03", text: "条例とは、地方公共団体の執行機関である都道府県知事や市町村長が、その権限に属する事務に関して制定するものである。", source: "No.03", answer: false, exp: "誤り。条例は地方公共団体の議会の議決を経て制定されるものです。首長などの執行機関が議会の議決を経ずに制定するものは規則と呼ばれます。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No04", text: "美容師法は、国会の議決を経て制定された法律である。", source: "No.04", answer: true, exp: "正しい。美容師法は国会で成立した法律です。施行令は内閣が定める政令、施行規則は厚生労働大臣が定める省令として区別されます。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No05", text: "美容師法に関する施行規則（省令）は、内閣が制定したものである。", source: "No.05", answer: false, exp: "誤り。美容師法施行規則は、厚生労働大臣が定める省令です。内閣が制定するものは美容師法施行令（政令）です。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No06", text: "政令と省令は、法律の特別の委任がある場合を除いては、罰則を設けることができない。", source: "No.06", answer: true, exp: "正しい。憲法の原則として、国民に罰則（罰金や懲役など）を科すルールは、国会が作った「法律」で決めなければなりません。そのため、内閣が定める「政令」や各省の大臣が定める「省令」で罰則を設けるには、例外として「法律による特別の委任（あらかじめ法律でその内容を委ねること）」が必要であると定められています。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No07", text: "我が国の公衆衛生や社会保障など、衛生行政に関するあらゆる法令の基本理念は、日本国憲法第25条が定める「生存権」の規定に基づいている。", source: "No.07", answer: true, exp: "正しい。日本国憲法第25条第2項には「国は、すべての生活部面について、社会福祉、社会保障及び公衆衛生の向上及び増進に努めなければならない」と定められています。美容師法や理容師法などのすべての衛生法規は、この憲法上の「生存権」の理念を具体化するために制定されています（地域保健法は、その行政組織の枠組みを定める個別法の一つです）。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No08", text: "理容師法や美容師法は、営業施設を通じて公衆衛生を維持する「生活衛生法規」に該当する。", source: "No.08", answer: true, exp: "正しい。理容師法・美容師法は、生活環境を整備し公衆衛生の向上を図るための生活衛生法規に含まれます。" },
+    { id: "test_kankehoki_extra_hosedonogaiyo_No09", text: "国が制定する法律、政令、省令の効力が及ぶ範囲は、制定された特定の地域内に限られる。", source: "No.09", answer: false, exp: "誤り。国が制定する法律、政令、省令の効力は全国に及びます。効力の及ぶ範囲が特定の区域に限られるのは、地方公共団体が制定する条例や規則です。" },
+],
+"B.衛生行政の概要": [
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No10", text: "美容業や理容業の指導・取締りは、公衆衛生行政における生活衛生行政に分類される。", source: "No.10", answer: true, exp: "正しい。美容業、理容業、クリーニング業などの営業施設に関する行政は生活衛生行政に属します。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No11", text: "美容師法を所管する国の機関は、文部科学省である。", source: "No.11", answer: false, exp: "誤り。美容師法を所管する国の機関は厚生労働省です。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No12", text: "保健所の設置根拠となる法律は、地域保健法である。", source: "No.12", answer: true, exp: "正しい。以前の保健所法は廃止・統合され、現在は地域保健法が保健所の設置根拠となっています。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No13", text: "保健所には、美容所の立入検査を行う専門職員として、保健師が配置されている。", source: "No.13", answer: false, exp: "誤り。美容所の立入検査を行い、衛生措置の実施状況を指導・監督するのは環境衛生監視員です。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No14", text: "保健所を設置することができる主体は、都道府県、保健所設置市、東京都の特別区である。", source: "No.14", answer: true, exp: "正しい。設置主体は都道府県、政令指定都市や中核市（保健所設置市）、特別区です。国（厚生労働省）は設置しません。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No15", text: "保健所が行う業務（地域保健法第6条）には、健康保険に関する事項が含まれている。", source: "No.15", answer: false, exp: "誤り。健康保険に関する事務は主に保険者や市町村の窓口が行うものであり、保健所の業務には含まれません。" },
+    { id: "test_kankehoki_extra_eisegyosenogaiyo_No16", text: "保健所の業務のうち、美容師法の施行に関する業務は「住宅、水道、下水道、廃棄物の処理、清掃その他の環境の衛生に関する事項」に該当する。", source: "No.16", answer: true, exp: "正しい。地域保健法に規定される保健所の業務において、美容師法や理容師法などの施行（美容所の監視・指導など）は、「住宅、水道、下水道、廃棄物の処理、清掃その他の環境の衛生に関する事項」の中に含まれると明記されています。" },
+],
+"C.美容師法": [
+    { id: "test_kankehoki_extra_biyosiho_No17", text: "美容師法の目的には、美容業の振興を図ることが含まれている。", source: "No.17", answer: false, exp: "誤り。美容師法第1条に美容業の振興に関する規定はありません。法の目的は資格を定め、業務を適正化することで公衆衛生の向上を図ることです。" },
+    { id: "test_kankehoki_extra_biyosiho_No18", text: "美容師法は、美容師の資格を定めるとともに、美容の業務が適正に行われるように規律し、もって公衆衛生の向上に資することを目的としている。", source: "No.18", answer: true, exp: "正しい。美容師法第1条に規定されている、この法律の本来の目的です。" },
+    { id: "test_kankehoki_extra_biyosiho_No19", text: "美容とは、パーマネントウエーブ、顔そり、化粧等の方法により、容姿を美しくすることをいう。", source: "No.19", answer: false, exp: "誤り。顔そりは理容の定義に含まれます。美容の定義における三要素は、パーマネントウエーブ、結髪、化粧です。" },
+    { id: "test_kankehoki_extra_biyosiho_No20", text: "美容師法は国会の議決により制定された法律であり、公衆衛生の向上を図るための衛生法規の一つである。", source: "No.20", answer: true, exp: "正しい。美容師法は国会で成立した法律であり、憲法第25条に基づき公衆衛生の維持向上を目的とする衛生法規に分類されます。" },
+    { id: "test_kankehoki_extra_biyosiho_No21", text: "美容師法において美容とは、頭髪の刈込み、顔そり等の方法により容姿を美しくすることを指す。", source: "No.21", answer: false, exp: "誤り。頭髪の刈込みや顔そりは理容師法における「理容」の定義です。美容はパーマネントウエーブ、結髪、化粧などによる施術を指します。" },
+    { id: "test_kankehoki_extra_biyosiho_No22", text: "美容師法にいう「業とする」とは、美容の行為を社会生活上の役割として、反復継続の意思をもって行うことを意味する。", source: "No.22", answer: true, exp: "正しい。美容師法にいう「業とする」とは、「反復継続の意思をもって行うこと」、および「不特定の人、または特定多数の人を対象とすること」の2つの要件を満たすものを意味します（対価の有無は問いません）。したがって、社会生活上の役割としてこれらを行う意思がある場合を「業」とみなします。" },
+    { id: "test_kankehoki_extra_biyosiho_No23", text: "美容師国家試験に合格した者は、免許登録の手続きを行う前であっても、直ちに美容の業を行うことができる。", source: "No.23", answer: false, exp: "誤り。試験に合格するだけでなく、免許を申請して名簿に登録され、免許証の交付を受けた後でなければ美容を業とすることはできません。" },
+    { id: "test_kankehoki_extra_biyosiho_No24", text: "美容師試験の筆記試験または実技試験のいずれかに合格した者は、申請により、次回の試験に限りその合格した試験が免除される。", source: "No.24", answer: true, exp: "正しい。一部合格による免除制度は、次回の試験のときに限り有効です。" },
+    { id: "test_kankehoki_extra_biyosiho_No25", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められたときは、その免許が取り消される。", source: "No.25", answer: false, exp: "誤り。伝染性疾病にかかった場合は「業務停止」処分の対象となりますが、免許の「取消」事由ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No26", text: "美容師の免許は、美容師試験に合格した者からの申請に基づいて、適格者に与えられる。", source: "No.26", answer: true, exp: "正しい。免許は試験合格後に本人が申請を行うことで、欠格条項に該当しない適格者に対して厚生労働大臣から与えられます。" },
+    { id: "test_kankehoki_extra_biyosiho_No27", text: "美容師試験に合格した者であっても、過去に美容に関する法令規定に違反したことがある者には、免許が与えられないことがある。", source: "No.27", answer: true, exp: "正しい。美容師の免許は、一定の要件に該当する者には試験に合格していても「与えないことがある（相対的欠格事由）」と定められています。これには、①心身の障害により業務を適正に行えない者、②無免許で美容を業とした者（第6条違反）、③免許の取消処分を受けた者（第10条第3項）が該当します。過去にこれら美容師法上の重い違反がある場合、免許申請をしても拒否されることがあります。" },
+    { id: "test_kankehoki_extra_biyosiho_No28", text: "美容師の免許申請は、美容所の所在地を管轄する都道府県知事に対して行わなければならない。", source: "No.28", answer: false, exp: "誤り。免許の申請先は「厚生労働大臣（指定登録機関）」です。都道府県知事ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No29", text: "美容師試験に合格し、合格証書を所持している者であれば、免許申請の手続き期間中に限り美容を業としてもよい。", source: "No.29", answer: false, exp: "誤り。試験に合格していても、免許の申請を行い名簿に登録されるまでは、いかなる理由があっても美容を業とすることはできません。" },
+    { id: "test_kankehoki_extra_biyosiho_No30", text: "業務の停止処分を受けている美容師が、その停止期間中に業務に従事したときは、免許を取り消されることがある。", source: "No.30", answer: true, exp: "正しい。業務停止処分に違反して美容の業を行った場合は、より重い処分である免許取消の対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No31", text: "美容師法により、美容師の免許を受けた者でなければ美容を業としてはならないと規定されている。", source: "No.31", answer: true, exp: "正しい。美容師法第6条により無免許営業は禁止されており、違反した場合は30万円以下の罰金に処せられます。" },
+    { id: "test_kankehoki_extra_biyosiho_No32", text: "美容師免許は一度取得すれば、たとえ取消処分を受けた場合であっても、その資格は生涯有効である。", source: "No.32", answer: false, exp: "誤り。免許は一度与えられれば生涯有効ですが、法令違反等により取消処分を受けた場合はその効力を失います。" },
+    { id: "test_kankehoki_extra_biyosiho_No33", text: "婚姻等により氏名を変更したときは、遅滞なく免許証の再交付を申請しなければならない。", source: "No.33", answer: false, exp: "誤り。氏名や本籍地など名簿の登録事項に変更があった際に行うのは「書換え交付」の申請です。再交付は紛失や汚損の際に行います。" },
+    { id: "test_kankehoki_extra_biyosiho_No34", text: "美容師免許証の再交付を受けた後、失っていた元の免許証を発見したときは、5日以内に厚生労働大臣に返納しなければならない。", source: "No.34", answer: true, exp: "正しい。二重所持を防ぐため、再交付後に旧免許証を発見した場合は5日以内に返納する義務があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No35", text: "美容師が業務の停止処分を受けたときは、すみやかに免許証を厚生労働大臣へ返納しなければならない。", source: "No.35", answer: false, exp: "誤り。免許証の返納が必要なのは「免許の取消処分」を受けたときや「死亡・失踪宣告」の際であり、業務停止処分では返納の必要はありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No36", text: "美容師の免許取消処分を受けたときは、速やかに厚生労働大臣（指定登録機関）に免許証を返納しなければならない。", source: "No.36", answer: true, exp: "正しい。免許の効力を失う取消処分を受けた際は、速やかに免許証を返納する義務があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No37", text: "免許証の記載事項に変更を生じたときは、厚生労働大臣に再交付を申請しなければならない。", source: "No.37", answer: false, exp: "誤り。氏名や本籍地など記載事項に変更があった場合は「書換え交付」を申請します。再交付は紛失や汚損の際に行うものです。" },
+    { id: "test_kankehoki_extra_biyosiho_No38", text: "美容師が免許証の再交付を受けた後、失っていた元の免許証を発見したときは、5日以内に厚生労働大臣に返納しなければならない。", source: "No.38", answer: true, exp: "正しい。免許証の二重所持を防ぐため、再交付後に旧免許証を発見した場合は5日以内に返納する義務があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No39", text: "業務の停止処分を受けた場合は、速やかに厚生労働大臣に免許証を返納しなければならない。", source: "No.39", answer: false, exp: "誤り。免許証の返納が必要なのは「免許の取消処分」を受けたときや、死亡・失踪宣告の際です。業務停止処分では返納の必要はありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No40", text: "美容師が免許の取消処分を受けたときは、厚生労働大臣（指定登録機関）に免許証を返納しなければならない。", source: "No.40", answer: true, exp: "正しい。免許の効力を失う取消処分を受けた際は、速やかに免許証を返納する義務が法的に定められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No41", text: "免許の取消処分を受けた者が再び免許を受けるためには、改めて美容師試験に合格し直さなければならない。", source: "No.41", answer: false, exp: "誤り。美容師免許の取消処分を受けた者であっても、その後の事情により再び免許を与えるのが適当であると認められるに至ったときは、厚生労働大臣の判断により、試験を受け直すことなく「再免許」が与えられることがあります。したがって、再び免許を得るために試験を必ず合格し直さなければならないわけではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No42", text: "婚姻等により氏名を変更したときは、30日以内に厚生労働大臣に対し、免許証の書換え交付を申請しなければならない。", source: "No.42", answer: true, exp: "正しい。名簿の登録事項（氏名や本籍地）に変更が生じた場合は、30日以内に訂正および書換えの申請を行う必要があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No43", text: "美容師試験に合格し、免許の申請書が受理されれば、登録名簿に記載される前であっても美容の業務に従事できる。", source: "No.43", answer: false, exp: "誤り。業務に従事できるのは、免許の申請中や受理時ではなく、厚生労働大臣の「美容師名簿に登録された後」です。" },
+    { id: "test_kankehoki_extra_biyosiho_No44", text: "美容師の免許は、試験に合格しただけでは効力を持たず、美容師名簿に登録された時点から効力を生じる。", source: "No.44", answer: true, exp: "正しい。美容師法により、免許の効力は指定登録機関の名簿に登録された時点から発生すると規定されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No45", text: "美容師である従事者の数が常時2人以上である美容所の開設者は、その美容所に管理美容師を置かなければならない。", source: "No.45", answer: true, exp: "正しい。美容師法第12条の3により、2人以上の美容師が従事する施設には衛生管理の責任者として管理美容師の設置が義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No46", text: "管理美容師の資格を得るための講習会は、美容師免許を受けた後、1年以上の実務経験があれば受講できる。", source: "No.46", answer: false, exp: "誤り。管理美容師の資格取得（講習受講）には、美容師免許を受けた後「3年以上」の美容業務に従事した経験が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No47", text: "管理美容師の資格を得るためには、美容師免許を受けた後、2年以上の実務経験が必要である。", source: "No.47", answer: false, exp: "誤り。管理美容師の資格取得（講習受講）には、美容師免許を受けた後「3年以上」の美容業務に従事した経験が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No48", text: "美容所の開設者が管理美容師の資格を有しているときは、自らその美容所の管理美容師となることができる。", source: "No.48", answer: true, exp: "正しい。美容所の開設者が自ら管理美容師の資格を持っていれば、自ら管理美容師を兼ねることが認められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No49", text: "管理美容師の職務には、美容所の施設の衛生管理だけでなく、美容の業務を衛生的に管理することも含まれる。", source: "No.49", answer: true, exp: "正しい。管理美容師は、施設の構造設備の衛生維持に加え、従事者の作業が衛生的であるよう監督・指導する義務があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No50", text: "美容師法により、免許を持った美容師が1人のみの美容所であっても、管理美容師を置くことが義務付けられている。", source: "No.50", answer: false, exp: "誤り。管理美容師の設置が必要なのは、美容師である従業者の数が「常時2人以上」である美容所です。1人の場合は義務ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No51", text: "美容師である従業者の数が常時2人以上である美容所の開設者は、その美容所に管理美容師を置かなければならない。", source: "No.51", answer: true, exp: "正しい。美容師法第12条の3の規定により、2人以上の美容師が従事する施設には衛生管理の責任者として管理美容師の設置が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No52", text: "管理美容師は、美容師の免許を受けたのち5年以上美容の業務に従事し、厚生労働大臣が行う講習会を修了した者でなければならない。", source: "No.52", answer: false, exp: "誤り。必要な実務経験は「3年以上」です。また、受講するのは「都道府県知事が指定する講習会」の課程です。" },
+    { id: "test_kankehoki_extra_biyosiho_No53", text: "美容師の資格がある従業員1人と、美容師の資格がない従業員1人の計2人が従事する美容所では、管理美容師を置く必要はない。", source: "No.53", answer: true, exp: "正しい。管理美容師の設置基準は「美容師の免許を受けた者」が常時2人以上いる場合であり、無資格の補助者を含めて2人の場合は該当しません。" },
+    { id: "test_kankehoki_extra_biyosiho_No54", text: "美容の業を行う際に皮膚に接する布片（タオル等）は、汚れが目立たない場合は1日の終わりにまとめて取り替えればよい。", source: "No.54", answer: false, exp: "誤り。皮膚に接する布片は、汚れの有無に関わらず「客1人ごと」に取り替えなければならないと法律で規定されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No55", text: "美容師が美容の業を行うときは、皮膚に接する布片及び器具を常に清潔に保たなければならない。", source: "No.55", answer: true, exp: "正しい。美容師法第8条において、皮膚に接する布片や器具を清潔に維持することは美容師の義務として定められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No56", text: "美容の業を行う際に皮膚に接する器具を客1人ごとに消毒する義務は、美容所の開設者にのみ課せられており、美容師自身の義務ではない。", source: "No.56", answer: false, exp: "誤り。器具の消毒などの衛生措置を講じる義務は、実際に業務を行う「美容師」自身に法的に課せられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No57", text: "美容師が業務を行う際、皮膚に接する布片は客1人ごとに取り替え、器具は客1人ごとに消毒しなければならない。", source: "No.57", answer: true, exp: "正しい。美容師法第8条において、客1人ごとに布片の交換と器具の消毒を行うことが義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No58", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められる場合は、その免許を取り消さなければならない。", source: "No.58", answer: false, exp: "誤り。伝染性疾病にかかった場合は「業務停止」処分の対象となりますが、免許の「取消」事由ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No59", text: "美容所の開設届を提出する際は、従事する全美容師について、結核や皮膚疾患などの伝染性疾病の有無に関する医師の診断書を添付しなければならない。", source: "No.59", answer: true, exp: "正しい。法により、美容所の開設届には従事するすべての美容師の健康診断書を添えることが義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No60", text: "管理美容師になるためには、美容師免許を受けた後3年以上美容の業務に従事し、都道府県知事が指定した講習会の課程を修了する必要がある。", source: "No.60", answer: true, exp: "正しい。管理美容師の資格には、3年以上の実務経験と都道府県知事指定の講習修了の双方が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No61", text: "美容所の開設者が死亡し、その相続人が営業を承継したときは、相続人は遅滞なく新たな美容所の開設届を提出し直さなければならない。", source: "No.61", answer: false, exp: "誤り。相続人が営業を承継した場合は、承継の届出を行えばよく、新規に開設届を出し直す必要はありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No62", text: "美容所を開設しようとする者は、営業を開始した後に、遅滞なく都道府県知事等へ開設の届出をしなければならない。", source: "No.62", answer: false, exp: "誤り。美容所の開設は、営業を開始する前にあらかじめ届け出なければならない「事前届出制」です。" },
+    { id: "test_kankehoki_extra_biyosiho_No63", text: "会社が自社の従業員のみを対象とした福利厚生用の美容所を設置する場合であっても、美容師法に基づく開設届の提出が必要である。", source: "No.63", answer: true, exp: "正しい。美容の行為を反復継続して行う以上、福利厚生施設であっても美容所の開設届は省略できません。" },
+    { id: "test_kankehoki_extra_biyosiho_No64", text: "美容所の開設者は、届出を行った後、構造設備について都道府県知事等の検査確認を受けた後でなければ、その美容所を使用してはならない。", source: "No.64", answer: true, exp: "正しい。美容所は届出だけでなく、衛生基準に適合しているかの検査確認を受けた後でなければ営業を開始できません。" },
+    { id: "test_kankehoki_extra_biyosiho_No65", text: "美容所の開設届を提出する際、美容師の免許を持たない補助的従業員については、その氏名を届け出る必要はない。", source: "No.65", answer: false, exp: "誤り。開設届には、美容師であるか否かにかかわらず、その施設に従事するすべての従業者の氏名を記載しなければなりません。" },
+    { id: "test_kankehoki_extra_biyosiho_No66", text: "美容所開設届の記載事項として、開設者の氏名及び住所を届け出る必要があるが、開設者の本籍地まで届け出る必要はない。", source: "No.66", answer: true, exp: "正しい。開設者の住所・氏名は届出事項ですが、本籍地は美容所開設届の法定事項に含まれていません。" },
+    { id: "test_kankehoki_extra_biyosiho_No67", text: "美容所の開設届出事項には、施設の構造・設備の概要のほか、従業者のための就業規則が含まれる。", source: "No.67", answer: false, exp: "誤り。就業規則は美容師法上の開設届出事項には含まれていません。" },
+    { id: "test_kankehoki_extra_biyosiho_No68", text: "美容所の届出事項に変更を生じたときは、すみやかに都道府県知事（保健所を設置する市にあっては市長、特別区にあっては区長）に届け出なければならない。", source: "No.68", answer: true, exp: "正しい。美容師法第11条第2項の規定により、開設届の記載事項に変更があったとき、または美容所を廃止したときは、「すみやかに」届け出なければなりません。これに対し、譲渡・相続・合併等による「営業者の地位の承継」の届出期限は「遅滞なく」と規定されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No69", text: "既存の美容所とは別に新たに美容所を開設したときは、開設届ではなく「変更届」を提出しなければならない。", source: "No.69", answer: false, exp: "誤り。新たに美容所を開設する場合は、変更ではなく新規の「開設の届出」を行う必要があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No70", text: "美容所を開設しようとする者は、あらかじめ開設の届出をし、その構造設備について検査確認を受けなければならない。", source: "No.70", answer: true, exp: "正しい。美容所は事前届出制であり、使用前に知事等の検査確認を受ける義務があります。" },
+    { id: "test_kankehoki_extra_biyosiho_No71", text: "美容所の開設者は、1人で2か所以上の美容所の開設者になることはできない。", source: "No.71", answer: false, exp: "誤り。美容所の開設者の店舗数に制限はなく、1人で2か所以上の開設者になることが可能です。" },
+    { id: "test_kankehoki_extra_biyosiho_No72", text: "美容師が伝染性疾病にかかっていない場合であっても、美容所の開設届には美容師全員の医師の診断書を添付しなければならない。", source: "No.72", answer: true, exp: "正しい。疾病の有無に関わらず、従事する美容師全員の診断書を必ず添付することが義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No73", text: "美容師法において、美容師の資格を持たない者は美容所の開設者になることができない。", source: "No.73", answer: false, exp: "誤り。美容所の開設主体に資格要件はなく、美容師でない個人や法人であっても開設者になることができます。" },
+    { id: "test_kankehoki_extra_biyosiho_No74", text: "会社の福利厚生のために設けた社員専用の美容所であっても、開設にあたっては美容所の開設届を提出する必要がある。", source: "No.74", answer: true, exp: "正しい。特定の範囲の者（社員）のみが利用する施設であっても、美容を業として行う以上、美容所としての開設届が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No75", text: "美容所の開設者の地位について相続があった場合、相続人は遅滞なく新たな美容所の開設の届出をし直さなければならない。", source: "No.75", answer: false, exp: "誤り。開設者の地位を相続した場合は承継の手続きで済み、新規に開設届を出し直す必要はありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No76", text: "美容師法により、美容所の開設者は施設内に消毒設備を設け、採光、照明及び換気を充分にしなければならない。", source: "No.76", answer: true, exp: "正しい。美容師法第13条の規定に基づき、美容所の開設者は、施設内に消毒設備を設けること、および採光、照明、換気を充分に保つことなどの衛生上の措置を講じる義務があります。なお、法第12条は美容所の「検査確認（使用制限）」に関する規定です。" },
+    { id: "test_kankehoki_extra_biyosiho_No77", text: "美容所の開設者は、美容所内の空気1リットル中の一酸化炭素の量を5立方センチメートル以下に保たなければならない。", source: "No.77", answer: false, exp: "誤り。空気の基準として定められているのは「炭酸ガス」の量であり、一酸化炭素ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No78", text: "美容所の開設者が講じなければならない措置として、洗い場は流水装置としなければならない。", source: "No.78", answer: true, exp: "正しい。国の定める省令である「美容師法施行規則（第26条）」において、美容所の構造設備基準として「洗い場は流水装置とすること」が義務付けられています。各都道府県等の条例は、この国の基準をベースに、地域の実情に応じた独自の追加ルールを定めるものですので、国の一律基準（省令）と地方の基準（条例）の違いをしっかりと区別しておきましょう。" },
+    { id: "test_kankehoki_extra_biyosiho_No79", text: "美容所内の空気環境を維持するため、空気1リットル中の炭酸ガスの量は5立方センチメートル以下に保つ必要がある。", source: "No.79", answer: true, exp: "正しい。美容師法等の規定により、美容所内の炭酸ガス濃度は1リットル中5立方センチメートル（1,000ppm）以下に保つよう定められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No80", text: "美容師が美容のための直接の作業を行う場合の作業面の照度は、50ルクス以上であれば法的に十分である。", source: "No.80", answer: false, exp: "誤り。作業面の照度基準は「100ルクス以上」と定められており、50ルクスでは不十分です。" },
+    { id: "test_kankehoki_extra_biyosiho_No81", text: "美容所の開設者は、美容所の作業室の床面には、コンクリート、タイル、板などの不浸透性材料を使用しなければならない。", source: "No.81", answer: true, exp: "正しい。美容師法施行規則（省令）第26条により、美容所の「作業室の床面」には、コンクリート、タイル、板などの水や薬品が染み込まない不浸透性材料を使用することが義務付けられています。待合室など作業室以外の床面にはこの義務は適用されませんので、設置場所を正確に区別して覚えましょう。" },
+    { id: "test_kankehoki_extra_biyosiho_No82", text: "美容所内の換気の基準として、空気1リットル中の炭酸ガスの量を50立方センチメートル以下に保つことが規定されている。", source: "No.82", answer: false, exp: "誤り。炭酸ガスの基準値は、空気1リットル中「5立方センチメートル」以下であり、50立方センチメートルではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No83", text: "都道府県（保健所を設置する市や特別区にあっては市や特別区）は、地域の実情に応じて、美容所の開設者が講ずべき衛生上必要な措置を条例で定めることができる。", source: "No.83", answer: true, exp: "正しい。美容師法第13条第2項に基づき、法律や省令が定める基準のほかに、地域の特性や実情に合わせた具体的な衛生措置を「都道府県（保健所設置市や特別区にあっては市や区）の条例」で上乗せして定めることが認められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No84", text: "美容師は、業務で使用する皮膚に接する布片を、1日の作業が終わった際にまとめて取り替えればよい。", source: "No.84", answer: false, exp: "誤り。皮膚に接する布片は、汚れの有無に関わらず「客1人ごと」に取り替えなければならないと規定されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No85", text: "美容師法により、美容師は美容の業を行うときは、皮膚に接する器具を客1人ごとに消毒しなければならない。", source: "No.85", answer: true, exp: "正しい。美容師の義務として、皮膚に接する器具を客1人ごとに消毒することが厳格に定められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No86", text: "美容所を開設しようとする者は、必ず美容師の免許を有していなければならない。", source: "No.86", answer: false, exp: "誤り。美容所の開設主体に資格要件はなく、美容師でない個人や法人であっても開設者になることができます。" },
+    { id: "test_kankehoki_extra_biyosiho_No87", text: "美容所の開設者は、施設を常に清潔に保ち、消毒設備を設けることが義務づけられている。", source: "No.87", answer: true, exp: "正しい。美容師法において、美容所の開設者は施設の衛生維持や消毒設備の設置が義務として課せられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No88", text: "美容所を開設した者は、営業を開始した日から7日以内に、都道府県知事等へ開設届を提出しなければならない。", source: "No.88", answer: false, exp: "誤り。美容所の開設は、営業を開始する前に「あらかじめ」届け出なければならない事前届出制です。" },
+    { id: "test_kankehoki_extra_biyosiho_No89", text: "美容所の開設届を提出する際は、その施設に従事する美容師全員について、医師の診断書を添付しなければならない。", source: "No.89", answer: true, exp: "正しい。結核や皮膚疾患などの伝染性疾病の有無に関する医師の診断書を添えることが法的に義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No90", text: "美容所の開設者は、開設届が受理されれば、その構造設備についての検査確認を受ける前であっても業務を開始できる。", source: "No.90", answer: false, exp: "誤り。届出後、都道府県知事等の検査確認を受け、基準に適合している旨の確認を得た後でなければ施設を使用することはできません。" },
+    { id: "test_kankehoki_extra_biyosiho_No91", text: "美容師は、疾病その他の理由により美容所に来ることが困難な者に対して、美容所以外の場所で美容の業を行うことができる。", source: "No.91", answer: true, exp: "正しい。美容師法第7条により、疾病等で美容所に来られない者への出張美容は例外的に認められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No92", text: "婚礼に参列する者に対してその儀式の直前に美容を行う場合、美容師は美容所以外の場所に出張して業を行うことができる。", source: "No.92", answer: true, exp: "正しい。美容師法第7条（美容所以外の場所における業務の禁止）の例外として、「美容師法施行令第4条第2号」において、「婚礼その他の儀式に参列する者に対してその儀式の直前に美容を行うとき」は、美容主体の届出場所（美容所）以外で施術を行ってもよいと定められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No93", text: "会社が自社の従業員のみを対象とした福利厚生用の美容施設を設置する場合は、美容所としての開設届を出す必要はない。", source: "No.93", answer: false, exp: "誤り。特定の者のみを対象とした福利厚生施設であっても、美容を業として行う場所であれば美容所としての届出が必要です。" },
+    { id: "test_kankehoki_extra_biyosiho_No94", text: "美容所を改築する期間中に一時的に設けられた仮設店舗であっても、その店舗について開設の届出を行う必要がある。", source: "No.94", answer: true, exp: "正しい。たとえ改築期間中の仮設店舗であっても、美容の業を行う施設である以上、届出と検査確認の義務は免除されません。" },
+    { id: "test_kankehoki_extra_biyosiho_No95", text: "美容所の開設者が美容師法の規定に違反して衛生措置を怠った場合、その美容所は閉鎖を命じられることがある。", source: "No.95", answer: true, exp: "正しい。衛生措置の義務違反や管理美容師の設置義務違反などがあった場合、都道府県知事等は期間を定めて施設の閉鎖を命じることができます。" },
+    { id: "test_kankehoki_extra_biyosiho_No96", text: "アパートや団地の住民などの多数の者から申し出があった場合は、特別な理由がなくても出張美容として業を行うことができる。", source: "No.96", answer: false, exp: "誤り。出張美容が認められるのは「疾病等による来所困難」「婚礼等の儀式の直前」など、法律や条例で定められた特別な場合に限定されます。" },
+    { id: "test_kankehoki_extra_biyosiho_No97", text: "美容所の開設者が、環境衛生監視員による立入検査を拒んだり、妨げたりした場合には、30万円以下の罰金に処せられることがある。", source: "No.97", answer: true, exp: "正しい。美容師法に基づき、立入検査を拒絶、妨害、または忌避した者に対しては、30万円以下の罰則規定が設けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No98", text: "環境衛生監視員は、美容所への立入検査を行うにあたり、あらかじめ開設者に実施日時を通知する義務がある。", source: "No.98", answer: false, exp: "誤り。立入検査は衛生管理の実態を把握するために抜き打ちで行われることがあり、事前に実施日を通知する法的規定はありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No99", text: "立入検査の主な目的は、美容師や開設者が法に定められた適切な衛生措置を講じているかどうかを環境衛生監視員が確認することである。", source: "No.99", answer: true, exp: "正しい。立入検査は公衆衛生の維持を目的としており、施設の衛生措置の遵守状況を検査するために行われます。" },
+    { id: "test_kankehoki_extra_biyosiho_No100", text: "美容師が接客中で手が離せないなどの理由がある場合には、環境衛生監視員による立入検査を一時的に拒むことができる。", source: "No.100", answer: false, exp: "誤り。環境衛生監視員による立入検査（美容師法第14条）は、公衆衛生の維持を目的とした強制力のある行政調査です。接客中や混雑しているなどの営業上の都合は、検査を拒否できる「正当な理由」には一切該当しません。これを拒否、妨害、または忌避した場合は、30万円以下の罰金に処せられる対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No101", text: "立入検査を行う環境衛生監視員は、その身分を示す証明書を携帯し、開設者などの関係者から請求があったときはこれを提示しなければならない。", source: "No.101", answer: true, exp: "正しい。美容師法第14条第2項において準用する「第4条の13第2項」の規定により、立入検査を行う職員は身分を示す証明書を携帯し、関係者の請求があったときは提示する義務が課されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No102", text: "美容所への立入検査は、美容師法により、すべての施設に対して毎年2回以上定期的に実施することが義務付けられている。", source: "No.102", answer: false, exp: "誤り。美容師法において立入検査の実施頻度（年2回以上など）に関する具体的な回数の規定は示されていません。" },
+    { id: "test_kankehoki_extra_biyosiho_No103", text: "美容師に対する業務停止処分や美容所の開設者に対する閉鎖命令は、国の機関である厚生労働大臣が行う。", source: "No.103", answer: false, exp: "誤り。業務停止処分や施設の閉鎖命令を下す行政権限を持っているのは、都道府県知事（または保健所を設置する市の市長や特別区の区長）です。" },
+    { id: "test_kankehoki_extra_biyosiho_No104", text: "都道府県知事は、美容師が業務停止処分に違反して期間中に美容の業を行ったときは、その美容師の免許を取り消すことができる。", source: "No.104", answer: false, exp: "誤り。美容師免許の取り消しは免許を与えた厚生労働大臣の権限であり、都道府県知事が直接免許を取り消すことはできません。" },
+    { id: "test_kankehoki_extra_biyosiho_No105", text: "美容所を開設しようとする者が、開設の届出をせずに営業を開始した場合は、美容師法の規定に基づき罰金刑に処せられることがある。", source: "No.105", answer: true, exp: "正しい。無届けでの営業や虚偽の届出は美容師法違反となり、30万円以下の罰則（罰金）が適用される対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No106", text: "美容師法に違反した場合の行政処分のうち、開設者などの「施設」に対して行われる処分は、期間を定めての閉鎖命令である。", source: "No.106", answer: true, exp: "正しい。行政処分は区分されており、美容師個人には免許取消や業務停止、施設（開設者）には閉鎖命令が下されます。" },
+    { id: "test_kankehoki_extra_biyosiho_No107", text: "美容師が結核などの伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められたときは、業務の停止処分を受けることがある。", source: "No.107", answer: true, exp: "正しい。伝染性疾病にかかった美容師が業務を継続することは公衆衛生上不適当であるため、期間を定めた業務停止処分の対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No108", text: "美容師が氏名を変更した後、30日以内に美容師名簿の訂正申請を行わなかった場合は、美容の業務の停止処分を受ける。", source: "No.108", answer: false, exp: "誤り。本籍地や氏名の変更に伴う名簿の訂正申請（および免許証の書換え交付申請）を怠ることは義務違反ですが、業務停止処分の直接的な事由には該当しません。業務停止処分（都道府県知事等による処分）が下されるのは、「出張美容の制限違反」や「業務上の衛生措置違反」など、法第10条第2項に定められた重大な義務違反に限定されます。" },
+    { id: "test_kankehoki_extra_biyosiho_No109", text: "美容所の開設届を提出する際は、従事する全美容師について、結核や皮膚疾患などの伝染性疾病の有無に関する医師の診断書を添付しなければならない。", source: "No.109", answer: true, exp: "正しい。美容師法および施行規則により、開設届には従事者全員の伝染性疾病に関する医師の診断書の添付が法的に義務付けられています。" },
+    { id: "test_kankehoki_extra_biyosiho_No110", text: "美容師が業務停止処分に違反して、その停止期間中に美容の業を行ったときは、免許を取り消されることがある。", source: "No.110", answer: true, exp: "正しい。行政処分である業務停止命令に従わず、停止期間中に業務に従事した場合は、より重い処分である免許の取消対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No111", text: "美容師が特別な理由がないのに美容所以外の場所で美容の業を行ったときは、直ちに免許を取り消される。", source: "No.111", answer: false, exp: "誤り。営業場所の制限（出張美容の制限）に違反した場合は「業務停止処分」の対象となります。いきなり免許取消になるわけではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No112", text: "美容師が、政令で定める特別の事情がないにもかかわらず美容所以外の場所で美容の業務を行った場合、期間を定めて業務停止処分を受けることがある。", source: "No.112", answer: true, exp: "正しい。美容師法第7条の営業場所の制限に違反した美容師に対しては、都道府県知事等が業務の停止を命じることができます。" },
+    { id: "test_kankehoki_extra_biyosiho_No113", text: "美容師が結核や皮膚疾患などの伝染性疾病にかかったときは、公衆衛生上の観点から直ちに美容師免許が取り消される。", source: "No.113", answer: false, exp: "誤り。伝染性疾病にかかり就業が不適当と認められる場合の処分は「業務の停止」であり、免許の取消事由ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No114", text: "美容師である従業者の数が常時2人以上である美容所の開設者が、管理美容師を置かなかったときは、施設の閉鎖命令を受けることがある。", source: "No.114", answer: true, exp: "正しい。美容師法第12条の3により、「美容師である従業者」が常時2人以上従事する美容所には、管理美容師を置くことが義務付けられています。これに違反した場合、開設者は「美容師法第15条」に基づき、期間を定めて美容所の閉鎖を命じられる（閉鎖命令を受ける）ことがあります。無資格のスタッフは人数カウントに含まれない点を確認しておきましょう。" },
+    { id: "test_kankehoki_extra_biyosiho_No115", text: "美容師が衛生措置に関する環境衛生監視員の立入検査を拒んだときは、行政処分として業務停止を命じられる。", source: "No.115", answer: false, exp: "誤り。立入検査の拒絶、妨害、忌避に対する制裁は、行政処分（業務停止）ではなく、30万円以下の罰金という「罰則（刑事罰）」の対象です。" },
+    { id: "test_kankehoki_extra_biyosiho_No116", text: "美容所を開設しようとする者が、開設の届出をせずに営業を開始したときは、行政処分としてその施設の閉鎖を命じられる。", source: "No.116", answer: false, exp: "誤り。無届けでの営業（無届開設）に対して閉鎖命令を下す規定はありません。無届開設や無検査使用は「30万円以下の罰金（罰則）」の対象となります。" },
+    { id: "test_kankehoki_extra_biyosiho_No117", text: "業務の停止処分を受けている美容師が、その停止期間中に美容の業務を行ったとしても、免許を取り消されることはない。", source: "No.117", answer: false, exp: "誤り。業務停止処分に違反して美容の業を行った場合は、免許を取り消すことができます。" },
+    { id: "test_kankehoki_extra_biyosiho_No118", text: "美容師は、疾病等によって美容所に来ることができない者に対して美容を行う場合は、美容所以外でも美容の業を行うことができる。", source: "No.118", answer: true, exp: "正しい。美容の業は原則として美容所内で行う必要がありますが、疾病等により来所困難な者への施術などは例外的に認められています。" },
+    { id: "test_kankehoki_extra_biyosiho_No119", text: "美容師法施行規則に定められている器具の煮沸消毒とは、沸騰湯中に15分間以上浸すことをいう。", source: "No.119", answer: false, exp: "誤り。国の定める省令である「美容師法施行規則第25条第1号」において、煮沸消毒の基準は「沸騰湯中に2分間以上浸すこと」と義務付けられています。15分間ではありません。" },
+    { id: "test_kankehoki_extra_biyosiho_No120", text: "美容師が伝染性の疾病にかかり、その就業が公衆衛生上不適当と認められたときは、期間を定めてその業務の停止処分を受けることがある。", source: "No.120", answer: true, exp: "正しい。伝染性疾病にかかり就業が不適当な場合は、都道府県知事等から業務の停止を命じられることがあります。" },
+    { id: "test_kankehoki_extra_biyosiho_No121", text: "美容所の開設者は、環境衛生監視員による立入検査を求められた場合であっても、店舗が混雑しているなどの理由があれば罰則を受けることなく拒むことができる。", source: "No.121", answer: false, exp: "誤り。環境衛生監視員の立入検査を拒み、妨げ、又は忌避した者は、30万円以下の罰金に処せられると規定されています。" },
+    { id: "test_kankehoki_extra_biyosiho_No122", text: "美容所の開設者は、環境衛生監視員の立入検査の結果、衛生措置の基準が守られていない場合には、その美容所の閉鎖命令を受けることがある。", source: "No.122", answer: true, exp: "正しい。立入検査等で衛生措置の不備が認められた場合、開設者に対して期間を定めた施設の閉鎖を命じることができます。" }
+]
+        }
+    }
+}; 
+
+
+let currentSubjectKey = "test_kankehoki_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題(頻出抜粋)",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_kankehoki_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_kankehoki_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_kankehoki_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
