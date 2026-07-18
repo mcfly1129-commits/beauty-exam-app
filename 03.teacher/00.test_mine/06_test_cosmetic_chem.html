@@ -1,0 +1,1907 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『香粧品化学』</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+const CONFIG = {
+    SUBJECT_KEY: "test_koshohin_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_koshohin_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No01.香粧品総論、香粧品を使用する際に気を付けるべきこと": [
+    { id: "test_koshohin_original_No01_01", text: "ファンデーションは使用時にパフや手指を介することが少なく、微生物汚染の影響を受けることがない。", source: "No01-01", answer: false, exp: "誤り。ファンデーションは、使用時にパフや手指を介して微生物（細菌やカビ）が混入しやすいため、防腐剤の配合など微生物汚染への対策が不可欠です。" },
+    { id: "test_koshohin_original_No01_02", text: "染毛剤（酸化染毛剤等）やパーマネント・ウェーブ用剤は、人体への作用が化粧品より強く特定の目的を持つため、医薬部外品として規制されている。", source: "No01-02", answer: true, exp: "正しい。これらの薬剤は毛髪構造の変化や染毛といった特定の目的を持ち、化粧品よりも作用が強いため医薬部外品に分類されます。" },
+    { id: "test_koshohin_original_No01_03", text: "香粧品の効能の範囲として、「毛髪を再生する」ことが医薬品医療機器等法で認められている。", source: "No01-03", answer: false, exp: "誤り。「再生する」という表現は治療的・医学的な効果を意味し、化粧品の効能の範囲を逸脱しています。" },
+    { id: "test_koshohin_original_No01_04", text: "香粧品は、人の皮膚、爪や毛髪に直接かつ長期間継続して使用されるものであるため、十分な品質管理と安全性の保持が必要である。", source: "No01-04", answer: true, exp: "正しい。製造工程における厳格な品質管理はもちろん、皮膚刺激やアレルギー反応を起こさないといった高い安全性の確保が最も重要な要件となります。" },
+    { id: "test_koshohin_original_No01_05", text: "一般に、香粧品の品質はブランド価値や広告費などが反映される「販売価格」の高さによって決定される。", source: "No01-05", answer: false, exp: "誤り。品質は配合成分の純度、処方の安定性、安全性試験のデータなど科学的根拠に基づいて決まるものであり、販売価格で決まるものではありません。" },
+    { id: "test_koshohin_original_No01_06", text: "香粧品に求められる必要条件として、安全性、安定性、有用性、使用性の4つの条件があげられる。", source: "No01-06", answer: true, exp: "正しい。人体に害がないこと（安全性）、変質しないこと（安定性）、目的の効果があること（有用性）、使い心地が良いこと（使用性）が求められます。" },
+    { id: "test_koshohin_original_No01_07", text: "消費者が香粧品として日常的に使用している製品は、その多くが法的に『医薬品』に分類される。", source: "No01-07", answer: false, exp: "誤り。日常的に使用されるのは主に「化粧品」と「医薬部外品」の2種類です。医薬品は治療を目的としたものであり、一般的な香粧品の範疇には含まれません。" },
+    { id: "test_koshohin_original_No01_08", text: "医薬部外品は、化粧品よりも特定の目的（殺菌、薬用など）に対する作用が強く認められているものがある。", source: "No01-08", answer: true, exp: "正しい。医薬部外品は特定の目的に対する作用が化粧品よりも認められていますが、医薬品に比べればその作用は緩和です。" },
+    { id: "test_koshohin_original_No01_09", text: "酸化染毛剤に使用される成分には激しいアレルギー症状を引き起こすものはないため、パッチテストを行う必要がない。", source: "No01-09", answer: false, exp: "誤り。酸化染料（パラフェニレンジアミン等）は激しいアレルギー症状を引き起こす可能性があるため、使用48時間前のパッチテスト実施は実質的な義務に近い重要な確認事項です。" },
+    { id: "test_koshohin_original_No01_10", text: "化粧品基準に適合する製品であれば、個別の品目承認を受ける必要はなく、製造販売業者が製品ごとの製造販売届出を行うことで製造販売が可能である。", source: "No01-10", answer: true, exp: "正しい。化粧品は、製品ごとに厚生労働大臣の承認を受ける必要はないが、製造販売業者が製品ごとの製造販売届出を行うことで販売が可能となる。" },
+    { id: "test_koshohin_original_No01_11", text: "化粧品は原則として、配合成分の全成分表示が義務付けられている。", source: "No01-11", answer: true, exp: "正しい。2001年の法改正により、消費者がアレルギー等の原因物質を把握できるよう、化粧品は原則として、すべての配合成分を表示することが義務付けられました。" },
+    { id: "test_koshohin_original_No01_12", text: "染毛剤やパーマ剤、薬用歯磨き類などは、化粧品に分類され、厚生労働大臣が定める承認基準によって管理されている。", source: "No01-12", answer: false, exp: "誤り。染毛剤やパーマ剤、薬用歯磨き類などは化粧品ではなく「医薬部外品」に分類されます。これらには審査迅速化のための承認基準が定められています。" },
+    { id: "test_koshohin_original_No01_13", text: "化粧品基準においては、配合禁止成分や配合制限成分だけでなく、特定成分についての最大配合可能量なども定められている。", source: "No01-13", answer: true, exp: "正しい。化粧品基準では安全性を確保するために、配合禁止成分や制限がある成分、その最大配合量などが厳格に定められています。" },
+    { id: "test_koshohin_original_No01_14", text: "アスコルビン酸や酵素を含有する化粧品は、適切な保存条件のもとで「5年」以内に変質するおそれがある場合に使用期限を表示しなければならない。", source: "No01-14", answer: false, exp: "誤り。使用期限の表示が必要なのは、製造後「3年」以内に変質するおそれがある化粧品です。3年を超えて安定しているものに表示義務はありません。" },
+    { id: "test_koshohin_original_No01_15", text: "医薬部外品のうち、特定の成分を含有するものや、染毛剤・パーマ剤などには使用期限の表示が義務付けられている。", source: "No01-15", answer: true, exp: "正しい。変質しやすい特定の成分を含むものや、染毛剤・パーマ剤・除毛剤などの医薬部外品には使用期限の表示が義務付けられています。" },
+    { id: "test_koshohin_original_No01_16", text: "香粧品のパッケージや広告の表示において、法的に最も問題となり厳しく規制されているのは「販売価格」の表示である。", source: "No01-16", answer: false, exp: "誤り。香粧品の表示で特に問題になるのは「効能・効果」の表示です。法律で認められた範囲を超えた表現は、消費者に誤解を与えるため厳しく規制されています。" },
+    { id: "test_koshohin_original_No01_17", text: "製品が「安定している」とは、時間が経過しても製品の性状や品質が、製造直後の状態を維持していることを指す。", source: "No01-17", answer: true, exp: "正しい。安定性とは、色、香り、粘度などの性状や、成分量、微生物的品質が流通・保管期間を通じて一定の基準内に保たれている状態をいいます。" },
+    { id: "test_koshohin_original_No01_18", text: "香粧品の光による経時変化は太陽光が主因であり、室内の蛍光灯などの人工光源によって引き起こされることはない。", source: "No01-18", answer: false, exp: "誤り。変質を招く紫外線は蛍光灯の光にもわずかに含まれています。特に昼光色の蛍光灯の近くに放置すると劣化が起こることがあります。" }
+],
+"No02.香粧品の成り立ち(香粧品用原料)": [
+    { id: "test_koshohin_original_No02_01", text: "メチルポリシロキサンはシリコーン油の代表成分であり、香粧品によく用いられる。", source: "No02-01", answer: true, exp: "正しい。メチルポリシロキサンは代表的なシリコーン油であり、皮膚や毛髪への親和性が高く、コンディショニング効果を発揮します。" },
+    { id: "test_koshohin_original_No02_02", text: "炭化水素は、炭素原子と水素原子だけでできた化合物の総称であり、クリームや口紅などに配合される。", source: "No02-02", answer: true, exp: "正しい。炭化水素は炭素と水素から成る化合物で、香粧品の主要な油性原料として広く利用されています。" },
+    { id: "test_koshohin_original_No02_03", text: "ロウ類は、高級脂肪酸とグリセリンがエステル結合した物質であり、クリームや口紅に用いられる。", source: "No02-03", answer: false, exp: "誤り。ロウ類は高級脂肪酸と「高級アルコール」のエステルです。脂肪酸とグリセリンがエステル結合した物質は、一般的に『油脂』と呼ばれます。" },
+    { id: "test_koshohin_original_No02_04", text: "炭化水素には、石油から得られる流動パラフィンのほか、天然由来のスクワランなどの成分も含まれる。", source: "No02-04", answer: true, exp: "正しい。炭化水素には、石油由来の流動パラフィンやワセリンのほか、動植物由来の成分を飽和させたスクワランなどが含まれる。" },
+    { id: "test_koshohin_original_No02_05", text: "香粧品原料として用いられるセタノールは、20種類存在するアミノ酸の一種である。", source: "No02-05", answer: false, exp: "誤り。セタノールはアミノ酸ではなく「高級アルコール」に分類されます。" },
+    { id: "test_koshohin_original_No02_06", text: "エチレンジアミン四酢酸（エデト酸、EDTA）は、微量の金属イオンによる製品の変質を防ぐために配合される。", source: "No02-06", answer: true, exp: "正しい。エデト酸（EDTA）は金属イオン封鎖剤（キレート剤）の代表例であり、成分の酸化や変質を防ぎ製品の安定性を高めます。" },
+    { id: "test_koshohin_original_No02_07", text: "流動パラフィンは炭化水素の一種であり、皮膚を保護し柔らかくするエモリエント剤として配合される。", source: "No02-07", answer: true, exp: "正しい。流動パラフィンは石油由来の安定な炭化水素で、エモリエント剤としてクリームや乳液などに広く利用されています。" },
+    { id: "test_koshohin_original_No02_08", text: "ベンガラは無機顔料（着色顔料）であり、酸化鉄の一種として赤色の着色目的で用いられる。", source: "No02-08", answer: true, exp: "正しい。ベンガラは代表的な無機顔料であり、メイクアップ製品などに幅広く使用されています。" },
+    { id: "test_koshohin_original_No02_09", text: "メタノール（メチルアルコール）は、水に溶けない成分を溶かす力が強いため、化粧品基準で配合が認められている。", source: "No02-09", answer: false, exp: "誤り。メタノールは毒性が強く、失明や中毒症状を引き起こすおそれがあるため、化粧品への配合は固く禁止されています。" },
+    { id: "test_koshohin_original_No02_10", text: "界面活性剤の作用のうち、液体と液体を混合して乳濁液を作る作用を乳化、水に溶けない物質を透明に溶解させる作用を可溶化という。", source: "No02-10", answer: true, exp: "正しい。乳化はエマルジョン（白濁）を作り、可溶化はミセルに取り込むことで透明に溶解させる作用を指します。" },
+    { id: "test_koshohin_original_No02_11", text: "水の中に油滴が細かく分散している乳化型（エマルジョン）をO/W型（Oil in Water）という。", source: "No02-11", answer: true, exp: "正しい。水（Water）の中に油（Oil）が分散している状態をO/W型、油の中に水滴が分散している状態をW/O型と呼びます。" },
+    { id: "test_koshohin_original_No02_12", text: "非イオン（ノニオン）界面活性剤は、水に溶かしたときに親水基が陰イオンに電離する性質を持つ。", source: "No02-12", answer: false, exp: "誤り。非イオン界面活性剤は、水に溶かしてもイオン化（電離）しない界面活性剤のことです。" },
+    { id: "test_koshohin_original_No02_13", text: "W/O型（ウォーター・イン・オイル型）エマルジョンとは、水相の中に油の粒子が分散している状態を指す。", source: "No02-13", answer: false, exp: "誤り。W/O型は、油相の中に水滴が分散している状態です。記述にある「水相に油滴が分散している」ものはO/W型です。" },
+    { id: "test_koshohin_original_No02_14", text: "非イオン界面活性剤は、陽イオン界面活性剤と同様に、強い殺菌消毒作用を持っているのが特徴である。", source: "No02-14", answer: false, exp: "誤り。殺菌消毒作用が強いのは主に陽イオン（カチオン）界面活性剤です。非イオン界面活性剤には殺菌作用はほとんどありません。" },
+    { id: "test_koshohin_original_No02_15", text: "キトサンは、植物から抽出される天然高分子化合物である。", source: "No02-15", answer: false, exp: "誤り。キトサンは甲殻類の殻から得られる「動物系」の天然高分子化合物です。" },
+    { id: "test_koshohin_original_No02_16", text: "没食子酸プロピル（ぼっしょくしさんプロピル）は、製品中の微生物の増殖を抑えるための殺菌剤として配合される。", source: "No02-16", answer: false, exp: "誤り。没食子酸プロピルは、油性原料などの劣化を防ぐために配合される「酸化防止剤」です。" },
+    { id: "test_koshohin_original_No02_17", text: "油脂が空気中の酸素や日光、微生物などの作用により変質し、不快な臭いや刺激性を生じる現象を酸敗という。", source: "No02-17", answer: true, exp: "正しい。油脂は不飽和結合部分などが酸化されることで劣化し、この現象を酸敗と呼びます。" },
+    { id: "test_koshohin_original_No02_18", text: "ステアリン酸は高級脂肪酸の一種であり、ネイルエナメルなどの皮膜形成剤として広く用いられる。", source: "No02-18", answer: false, exp: "誤り。ステアリン酸は高級脂肪酸であり、石けんの原料やクリームの硬度を調整する基剤として用いられます。皮膜形成剤にはニトロセルロースなどが該当します。" },
+    { id: "test_koshohin_original_No02_19", text: "紫外線（UV）は、太陽の光のうち、人間の目に見える可視光線よりも波長が短い光線である。", source: "No02-19", answer: true, exp: "正しい。紫外線は可視光線より波長が短く、逆に可視光線より波長が長いものは赤外線です。" },
+    { id: "test_koshohin_original_No02_20", text: "流動パラフィンやワセリンは、石油から得られる代表的な鉱物油であり、炭化水素に分類される。", source: "No02-20", answer: true, exp: "正しい。これらは石油由来の炭化水素であり、安定性が高く安全な成分としてクレンジングやクリームなどに多用されます。" },
+    { id: "test_koshohin_original_No02_21", text: "ヒアルロン酸は保湿性に富む成分であり、生体内の皮膚（真皮）などでも産生される。", source: "No02-21", answer: true, exp: "正しい。ヒアルロン酸は生体内でも作られる優れた保水力を持つ高分子であり、香粧品にも広く利用されます。" },
+    { id: "test_koshohin_original_No02_22", text: "シリコーン油は親水性に非常に優れているため、多量の水を吸収して保持する保湿剤として配合される。", source: "No02-22", answer: false, exp: "誤り。シリコーン油は撥水性（水をはじく性質）に優れています。べたつきが少なくツヤを与えるため、スタイリング剤や保護剤として用いられます。" },
+    { id: "test_koshohin_original_No02_23", text: "キトサンは、カニやエビなどの甲殻類の殻から抽出される動物系の天然高分子化合物である。", source: "No02-23", answer: true, exp: "正しい。キトサンは甲殻類から得られる動物由来の成分であり、天然高分子化合物に分類されます。" },
+    { id: "test_koshohin_original_No02_24", text: "雲母（マイカ）の表面を酸化チタンで被覆した雲母チタンは、製品の展延性や被覆力を高める「体質顔料」に分類される。", source: "No02-24", answer: false, exp: "誤り。雲母チタンは真珠のような光沢を出す「光輝性顔料（パール顔料）」です。展延性を与えるタルクや被覆力を高める酸化チタンそのものとは区別されます。" },
+    { id: "test_koshohin_original_No02_25", text: "デンプンは、基本単位である果糖（フルクトース）が互いに多数結合した構造を持っている。", source: "No02-25", answer: false, exp: "誤り。デンプンは果糖ではなく「ブドウ糖（グルコース）」が多数重縮合した構造を持つ多糖類です。" },
+    { id: "test_koshohin_original_No02_26", text: "カルボキシメチルセルロース（CMC）は、天然のセルロースに化学的処理を施して作られる半合成高分子化合物である。", source: "No02-26", answer: true, exp: "正しい。天然のセルロースを原料とし、その一部を化学改変して得られるため半合成高分子に分類されます。" },
+    { id: "test_koshohin_original_No02_27", text: "有機溶媒は、水に溶けない油分や樹脂などを溶かす溶媒として用いられ、エタノールはその代表例である。", source: "No02-27", answer: true, exp: "正しい。有機溶媒は樹脂や油分を溶かす性質を持っており、香粧品ではエタノールなどが広く利用されています。" },
+    { id: "test_koshohin_original_No02_28", text: "カーボンブラックは、アイメイクアップ香粧品や眉墨などに広く用いられる代表的な着色顔料である。", source: "No02-28", answer: true, exp: "正しい。カーボンブラックは代表的な無機顔料であり、眉墨やアイライナーなどの黒色着色の目的で使用されます。" },
+    { id: "test_koshohin_original_No02_29", text: "タール色素は、動植物の天然成分から抽出して作られるため、別名「法定色素」とも呼ばれる。", source: "No02-29", answer: false, exp: "誤り。タール色素は石油から化学合成される有機色素です。厚生労働省令によって使用できる種類が厳格に定められているため、法定色素と呼ばれます。" },
+    { id: "test_koshohin_original_No02_30", text: "香粧品に用いられる色材の「耐光性・耐薬品性」は、一般にタール色素よりも天然色素のほうが優れている。", source: "No02-30", answer: false, exp: "誤り。色材の耐光性や耐薬品性は、一般に「無機顔料 ＞ タール色素 ＞ 天然色素」の順となります。天然色素はタール色素に比べてこれらの性能が劣るのが一般的です。" },
+    { id: "test_koshohin_original_No02_31", text: "高級アルコールの「高級」とは、非常に高価で希少なアルコール原料であることを意味している。", source: "No02-31", answer: false, exp: "誤り。ここでの「高級」とは価格や品質のランクではなく、分子中に含まれる「炭素数が多い」ことを指す化学用語です。" },
+    { id: "test_koshohin_original_No02_32", text: "両性界面活性剤は、溶かした液体の温度変化に応じて、陽イオン界面活性剤か陰イオン界面活性剤のどちらかの性質を示す。", source: "No02-32", answer: false, exp: "誤り。両性界面活性剤が性質を変える条件は温度ではなく「水溶液のpH（酸性・アルカリ性）」です。酸性では陽イオン、アルカリ性では陰イオンの性質を示します。" },
+    { id: "test_koshohin_original_No02_33", text: "コラーゲンは、高度な化学合成技術によって石油から製造される合成高分子化合物である。", source: "No02-33", answer: false, exp: "誤り。コラーゲンはブタやウシの皮膚などから得られる動物由来の「天然高分子化合物」です。" },
+    { id: "test_koshohin_original_No02_34", text: "タンパク質の構造に見られる、硫黄原子を含む-S-S-の結合をシスチン結合という。", source: "No02-34", answer: true, exp: "正しい。アミノ酸であるシスチンが2分子結合して作る架橋構造をシスチン結合と呼び、毛髪の強度に大きく関与します。" },
+    { id: "test_koshohin_original_No02_35", text: "コチニールは、エンジ虫という昆虫から抽出される天然色素の一種である。", source: "No02-35", answer: true, exp: "正しい。コチニールはエンジ虫から得られる赤色の天然色素であり、口紅や頬紅などに使用されることがあります。" },
+    { id: "test_test_koshohin_original_No02_36", text: "酸化チタンは優れた隠ぺい力を持つ白色顔料であるが、収れん・消炎作用も併せ持っているのが特徴である。", source: "No02-36", answer: false, exp: "誤り。白色顔料の中で収れん・消炎作用（和らげる作用）を持つのは「酸化亜鉛（亜鉛華）」です。酸化チタンにこれらの作用はありません。" },
+    { id: "test_koshohin_original_No02_37", text: "第四級アンモニウム塩は陽イオン界面活性剤であり、ヘアリンス剤に配合されると毛髪に対して帯電防止効果を発揮する。", source: "No02-37", answer: true, exp: "正しい。陽イオン界面活性剤である第四級アンモニウム塩は、毛髪への吸着性に優れ、帯電防止や柔軟効果を目的として使用されます。" },
+    { id: "test_koshohin_original_No02_38", text: "クロルヒドロキシアルミニウムは、皮膚のタンパク質を一時的に引き締める収れん剤として用いられる。", source: "No02-38", answer: true, exp: "正しい。アルミニウムの塩類は強力な収れん作用を発揮するため、制汗剤や化粧水などの収れん成分として利用されます。" },
+    { id: "test_koshohin_original_No02_39", text: "モクロウ（木蝋）は、ハゼノキの実から抽出される動物油脂の一種である。", source: "No02-39", answer: false, exp: "誤り。モクロウはハゼノキの実から得られる「植物油脂」です。" },
+    { id: "test_koshohin_original_No02_40", text: "ベンザルコニウム塩化物（塩化ベンザルコニウム）は、日光による成分の劣化を防ぐための紫外線吸収剤として配合される。", source: "No02-40", answer: false, exp: "誤り。ベンザルコニウム塩化物は陽イオン界面活性剤であり、香粧品には「殺菌剤」や「防腐剤」として配合されます。" },
+    { id: "test_koshohin_original_No02_41", text: "サンスクリーン製品（日焼け止め）は、紅斑を起こすUV-Bと、肌の黒化やシワの原因となるUV-Aの両方を防御することを目的としている。", source: "No02-41", answer: true, exp: "正しい。サンスクリーン製品は、急性の炎症を引き起こす中波長紫外線（UV-B）と、真皮まで届き老化を促進する長波長紫外線（UV-A）の両方を防ぐよう設計されています。" },
+    { id: "test_koshohin_original_No02_42", text: "紫外線による急性の炎症であるサンバーンを防御する指標は、PA（Protection Grade of UV-A）である。", source: "No02-42", answer: false, exp: "誤り。サンバーン（赤くなる日焼け）を防ぐ指標はSPFです。PAはサンタン（黒くなる日焼け）を引き起こすUV-Aの防御効果を示す指標です。" },
+    { id: "test_koshohin_original_No02_43", text: "アラントインは消炎剤（抗炎症剤）の一種であり、肌荒れを防ぐ効果がある。", source: "No02-43", answer: true, exp: "正しい。アラントインは炎症を抑える作用がある成分で、肌荒れ防止の目的で多くの香粧品に配合されています。" },
+    { id: "test_koshohin_original_No02_44", text: "パラオキシ安息香酸エステル（パラベン）は、皮膚を柔らかくし水分を保持するエモリエント剤として配合される。", source: "No02-44", answer: false, exp: "誤り。パラベンは製品の腐敗を防ぐための「防腐剤」です。エモリエント効果（保湿）を持つ成分にはスクワランやヒアルロン酸ナトリウムなどがあります。" },
+    { id: "test_koshohin_original_No02_45", text: "サンスクリーン製品のPA分類は、皮膚の深いところまで届く長波長紫外線（UV-A）の防御効果を表している。", source: "No02-45", answer: true, exp: "正しい。PAはUV-Aの防御力を「＋」の数で表す指標です。中波長紫外線（UV-B）の防御力を表すのはSPF値となります。" },
+    { id: "test_koshohin_original_No02_46", text: "香水などの芳香製品において、香料を溶解させる溶剤として主に用いられるのはエタノールである。", source: "No02-46", answer: true, exp: "正しい。香水には通常エタノールが用いられます。メタノールは毒性が強く、香粧品への配合は禁止されています。" },
+    { id: "test_koshohin_original_No02_47", text: "太陽の光に含まれる紫外線のうち、波長が短いのはUV-Aであり、波長が長いのはUV-Bである。", source: "No02-47", answer: false, exp: "誤り。波長はUV-Aの方がUV-Bよりも長いです。波長が長いUV-Aは真皮まで侵入し、波長が短いUV-Bは皮膚表面に急性の炎症を起こします。" },
+    { id: "test_koshohin_original_No02_48", text: "制汗・脱臭剤の体臭防止メカニズムとして、キレート剤を用いて金属イオンを封鎖する方法が最も一般的である。", source: "No02-48", answer: false, exp: "誤り。制汗・脱臭剤の主な方法は、殺菌剤による微生物の抑制、収れん剤による制汗、香料によるマスキングの3つです。キレート剤は製品の安定化目的で使われます。" }
+],
+"No03.スキンケア製品": [
+    { id: "test_koshohin_original_No03_01", text: "バニシングクリームは、水相の中に油が細かく分散しているO/W型のクリームである。", source: "No03-01", answer: true, exp: "正しい。バニシングクリームは水分量が多いO/W型（水中油型）で、肌に塗ると消える（vanish）ように馴染むのが特徴です。" },
+    { id: "test_koshohin_original_No03_02", text: "軟質石けんは、原料となる油脂に水酸化ナトリウムを反応させて製造される。", source: "No03-02", answer: false, exp: "誤り。軟質石けんは水酸化カリウムを用いて作られます。水酸化ナトリウムを用いるのは硬質石けんです。" },
+    { id: "test_koshohin_original_No03_03", text: "薬用石けんは、一般的な硬質石けんに抗生物質を添加することによって製造される。", source: "No03-03", answer: false, exp: "誤り。薬用石けんに添加されるのは殺菌剤（イソプロピルメチルフェノール等）や消炎剤であり、抗生物質を添加することはありません。" },
+    { id: "test_koshohin_original_No03_04", text: "石けんの製造において、油脂にアルカリ（水酸化ナトリウムや水酸化カリウム）を加えて加水分解することを「けん化」という。", source: "No03-04", answer: true, exp: "正しい。石けんは、油脂にアルカリを加えて加水分解する「けん化」という反応によって製造されます。" },
+    { id: "test_koshohin_original_No03_05", text: "コールドクリームは、一般に油分量が多く、水分が蒸発する際の気化熱で冷たく感じるW/O型のエマルジョンである。", source: "No03-05", answer: true, exp: "正しい。コールドクリームは油中水型（W/O型）であり、肌につけると水分が蒸発して冷たく感じる性質を持っています。" },
+    { id: "test_koshohin_original_No03_06", text: "石けんは、グリセリンに酸を加えて反応（けん化）させることで製造される。", source: "No03-06", answer: false, exp: "誤り。石けんは「油脂」に「アルカリ」を加えてけん化することで、脂肪酸ナトリウム（またはカリウム）とグリセリンに分解されて出来上がります。" },
+    { id: "test_koshohin_original_No03_07", text: "陰イオン（アニオン）界面活性剤を水に溶かすと、その親水基の部分は正電気を帯びる性質を持つ。", source: "No03-07", answer: false, exp: "誤り。陰イオン界面活性剤は、水に溶けた際に親水基の部分が「負（マイナス）電気」を帯びます。正電気を帯びるのは陽イオン界面活性剤です。" },
+    { id: "test_koshohin_original_No03_08", text: "第4級アンモニウム塩は陽イオン界面活性剤であり、負に帯電している毛髪のキューティクルに吸着して皮膜を形成する。", source: "No03-08", answer: true, exp: "正しい。第4級アンモニウム塩は毛髪表面に電気的に吸着し、柔軟性を与えたり静電気を防いだりする効果を発揮します。" },
+    { id: "test_koshohin_original_No03_09", text: "石けんは、水になじみやすい親水基と油になじみやすい親油基を一つの分子内に持つ、界面活性剤の一種である。", source: "No03-09", answer: true, exp: "正しい。石けんは界面活性剤の基本構造を持っており、代表的な陰イオン界面活性剤に分類されます。" },
+    { id: "test_koshohin_original_No03_10", text: "油脂を酸で加水分解すると、石けんの主成分である脂肪酸ナトリウムが生成される。", source: "No03-10", answer: false, exp: "誤り。油脂を酸で加水分解した場合は、石けんにならず「脂肪酸」と「グリセリン」に分かれます。石けんを作るにはアルカリによる反応が必要です。" },
+    { id: "test_koshohin_original_No03_11", text: "水酸化ナトリウムを用いて製造される石けんは、液体状やペースト状の軟質石けんとなる。", source: "No03-11", answer: false, exp: "誤り。水酸化ナトリウムを用いて作られるのは硬い「硬質石けん」です。液体状やペースト状の軟質石けんを作るには、水酸化カリウムが用いられます。" },
+    { id: "test_koshohin_original_No03_12", text: "透明石けんは、原料を枠に流し込んで長時間冷却・乾燥させる「枠練法」によって製造される。", source: "No03-12", answer: true, exp: "正しい。枠練法は透明度の高い石けんを作るための製法です。機械で練り固める機械練石けんは不透明な仕上がりになります。" },
+    { id: "test_koshohin_original_No03_13", text: "石けんは、油脂に強酸を加えて加水分解させる工程を経て製造される。", source: "No03-13", answer: false, exp: "誤り。石けんの製造（けん化）において、油脂に加えるのは酸ではなく「アルカリ」（水酸化ナトリウムや水酸化カリウム）です。" },
+    { id: "test_koshohin_original_No03_14", text: "市販されている多くの化粧石けんは、機械で練り上げて型に押し出す「機械練石けん」である。", source: "No03-14", answer: true, exp: "正しい。機械練りは大量生産に適しており、溶け崩れにくい硬い石けんになるのが特徴で、現在の化粧石けんの主流です。" },
+    { id: "test_koshohin_original_No03_15", text: "薬用石けんは、一般的な硬質石けんに抗生物質を配合することで医薬部外品として認められている。", source: "No03-15", answer: false, exp: "誤り。薬用石けんに添加されるのは「抗生物質」ではなく、殺菌剤や消炎剤などの有効成分です。" },
+    { id: "test_koshohin_original_No03_16", text: "石けんの製造工程において、純粋な石けん分だけを浮き上がらせて分離・精製する工程を「塩析」という。", source: "No03-16", answer: true, exp: "正しい。けん化後の液に食塩などを加えることで、不純物を取り除き、純粋な石けん分を分離させる重要な工程です。" },
+],
+"No04.メイクアップ製品:": [
+    { id: "test_koshohin_original_No04_01", text: "メイクアップ用香粧品のうち、肌の色や質感を整えて美しく見せるものをポイントメイクアップ香粧品という。", source: "No04-01", answer: false, exp: "誤り。肌全体の色や質感を整えるものはベースメイクアップ香粧品です。ポイントメイクアップは特定の部位を局所的に強調するために用いられます。" },
+    { id: "test_koshohin_original_No04_02", text: "メイクアップ用香粧品には、口唇や目もとなどを局所的・色彩的に強調し、魅力的な容貌を作るポイントメイクアップ香粧品がある。", source: "No04-02", answer: true, exp: "正しい。ポイントメイクアップ香粧品は、顔の特定のパーツに色彩や立体感を与えることで魅力を引き出す役割を持ちます。" },
+    { id: "test_koshohin_original_No04_03", text: "ベースメイクアップ香粧品の種類には、ファンデーションのほか、口紅やアイシャドーも含まれる。", source: "No04-03", answer: false, exp: "誤り。口紅やアイシャドーは特定の部位を強調するポイントメイクアップ香粧品です。ベースメイクアップにはおしろいやファンデーションが該当します。" },
+    { id: "test_koshohin_original_No04_04", text: "ポイントメイクアップ香粧品のうち、紅類には口紅や頬紅があげられる。", source: "No04-04", answer: true, exp: "正しい。口唇や頬に色彩を与える口紅や頬紅は、パーツを強調するポイントメイクアップ香粧品の代表的な種類です。" },
+    { id: "test_koshohin_original_No04_05", text: "アイメイクアップ香粧品の種類として、アイシャドー、アイライナー、マスカラ、眉墨（アイブロウペンシル）があげられる。", source: "No04-05", answer: true, exp: "正しい。これらはすべて目もとの印象を強調し、整えるためのアイメイクアップ用製品です。" },
+    { id: "test_koshohin_original_No04_06", text: "ネイル技術用香粧品（マニキュア製品）にはカラーエナメルが含まれるが、エナメルリムーバー（除光液）は洗浄用スキンケア製品に分類される。", source: "No04-06", answer: false, exp: "誤り。エナメルリムーバー（除光液）も、カラーエナメルやベースコート、トップコートなどと同様にネイル技術用香粧品に分類されます。" },
+    { id: "test_koshohin_original_No04_07", text: "カラーエナメルの主要な皮膜形成剤として用いられるニトロセルロースは、極めて燃えにくい性質を持っている。", source: "No04-07", answer: false, exp: "誤り。ニトロセルロースは非常に燃えやすい（易燃性）性質を持っています。そのため、カラーエナメルを取り扱う際は火気に十分注意しなければなりません。" },
+],
+"No05.ヘアケア、ヘアメイクアップ及びスキャルプケア製品(頭皮・毛髪用香粧品)": [
+    { id: "test_koshohin_original_No05_01", text: "臭素酸ナトリウムは、一般にパーマ剤第1剤の有効成分として配合される。", source: "No05-01", answer: false, exp: "誤り。臭素酸ナトリウムは第2剤に配合される「酸化剤」です。第1剤にはチオグリコール酸などの還元剤が配合されます。" },
+    { id: "test_koshohin_original_No05_02", text: "パーマ剤第1剤に使用されるアルカリ剤の作用により毛髪は膨潤するが、pHが高いほどその膨潤度は大きくなる。", source: "No05-02", answer: true, exp: "正しい。アルカリ剤は毛髪を膨潤させる作用を持っており、薬剤のpHが高くなるほど膨潤の程度も大きくなります。" },
+    { id: "test_koshohin_original_No05_03", text: "パーマ剤第2剤に用いられる酸化剤のうち、臭素酸ナトリウムは過酸化水素よりも強い酸化力を持っている。", source: "No05-03", answer: false, exp: "誤り。酸化力は過酸化水素の方が臭素酸ナトリウムよりも強いのが特徴です。そのため、作用時間や毛髪への影響に違いが生じます。" },
+    { id: "test_koshohin_original_No05_04", text: "二浴式のパーマ剤において、第1剤は酸化剤、第2剤は還元剤をそれぞれ有効成分としている。", source: "No05-04", answer: false, exp: "誤り。正しくは第1剤が「還元剤（チオグリコール酸等）」、第2剤が「酸化剤（臭素酸ナトリウム等）」です。この順序で作用させることでウェーブを形成します。" },
+    { id: "test_koshohin_original_No05_05", text: "パーマの工程において、第1剤で切断されたシスチン結合を第2剤の働きによって再結合させることで、ウェーブが固定される。", source: "No05-05", answer: true, exp: "正しい。還元剤で結合を切り、ロッドの形状に合わせた後に酸化剤で結合を元に戻すのがパーマの基本的な原理です。" },
+    { id: "test_koshohin_original_No05_06", text: "酸化染毛剤（永久染毛剤）は、染料が毛髪の内部で酸化重合して巨大化するため、1回のシャンプーで簡単に色落ちすることはない。", source: "No05-06", answer: true, exp: "正しい。酸化染毛剤は染料分子が毛髪内部で結合して大きくなるため、一時染毛料や半永久染毛料（酸性染料）と異なり、洗髪による流出が起こりにくい性質があります。" },
+    { id: "test_koshohin_original_No05_07", text: "パーマ剤の第1剤に含まれるチオグリコール酸は、毛髪の結合を元に戻してウェーブを固定するための酸化剤として配合されている。", source: "No05-07", answer: false, exp: "誤り。チオグリコール酸はパーマ第1剤の代表的な「還元剤」です。毛髪のシスチン結合を切断する役割を持ちます。酸化剤は第2剤に配合される成分です。" },
+    { id: "test_koshohin_original_No05_08", text: "酸化染毛剤に配合されている過酸化水素は、染料中間体を酸化重合させるためのアルカリ剤として働く。", source: "No05-08", answer: false, exp: "誤り。過酸化水素は「酸化剤」です。酸化染毛剤におけるアルカリ剤としては、主にアンモニア水などが用いられます。" },
+    { id: "test_koshohin_original_No05_09", text: "ヘアマニキュアに使用される酸性染料は、水に溶かすとプラス（正）の電気を帯びる性質を持っている。", source: "No05-09", answer: false, exp: "誤り。酸性染料は、水に溶かすと「マイナス（負）」の電気を帯びます。酸性条件下でプラスに帯電した毛髪のケラチンと電気的に引き合う（イオン結合）ことで染まります。" },
+    { id: "test_koshohin_original_No05_10", text: "脱色剤（ブリーチ）は、アルカリ剤と過酸化水素を混合することで酸素を発生させ、毛髪内のメラニン色素を酸化分解することで髪を明るくする。", source: "No05-10", answer: true, exp: "正しい。アルカリ剤の影響で第2剤の過酸化水素が分解して放出される活性酸素が、毛髪内のメラニン色素を酸化・分解することで脱色が行われます。" },
+    { id: "test_koshohin_original_No05_11", text: "酸化染毛剤のパッチテスト（皮膚アレルギー試験）を行う際は、テスト液を塗布した部分を絆創膏などで覆わず、自然乾燥させる必要がある。", source: "No05-11", answer: true, exp: "正しい。パッチテストの際は、テスト液を塗った部分を絆創膏や包帯等で覆ってはいけません。塗布後30分と48時間後の2回、状態を確認します。" },
+    { id: "test_koshohin_original_No05_12", text: "酸化染毛剤の第2剤には、染料を酸化重合させると同時にメラニンを脱色するための酸化剤として、過酸化水素水が用いられる。", source: "No05-12", answer: true, exp: "正しい。酸化染毛剤の第2剤の主成分は過酸化水素水であり、染料の発色と地毛の脱色という2つの重要な役割を担います。" },
+    { id: "test_koshohin_original_No05_13", text: "ヘアスタイリング剤のセット力の強弱は、主に配合されている皮膜形成剤の量や種類によって決まる。", source: "No05-13", answer: true, exp: "正しい。ヘアスプレーやジェルなどのセット剤のセット力は、乾燥して皮膜を作る成分（皮膜形成剤）の性質や配合量に左右されます。" },
+    { id: "test_koshohin_original_No05_14", text: "育毛剤のうち、治療を目的としたフィナステリドやミノキシジルを含む製品は「医薬品」に分類される。", source: "No05-14", answer: true, exp: "正しい。これらの成分は人体への作用が強いため、化粧品や医薬部外品ではなく「医薬品」として扱われます。" },
+    { id: "test_koshohin_original_No05_15", text: "パーマ剤の成分であるシステインは、切断されたシスチン結合を再結合させるための有効成分として第2剤に配合される。", source: "No05-15", answer: false, exp: "誤り。システインは、チオグリコール酸と同様にパーマ剤の「第1剤」に配合される「還元剤」です。毛髪の結合を切断する働きをします。" },
+    { id: "test_koshohin_original_No05_16", text: "酸化染毛剤に配合される染料のうち、ニトロパラフェニレンジアミンは、酸化される前からそれ自体が色を有している直接染料である。", source: "No05-16", answer: true, exp: "正しい。ニトロパラフェニレンジアミンは直接染料であり、本来無色である染料中間体とは異なり、もともと色を持っています。" },
+    { id: "test_koshohin_original_No05_17", text: "酸化染毛剤の第2剤に含まれる過酸化水素には、メラニンに作用して毛髪を黒く染め上げる働きがある。", source: "No05-17", answer: false, exp: "誤り。第2剤の過酸化水素は、メラニンを「脱色」して髪を明るくする働きをします。髪が黒く染まるのは、第1剤の染料中間体が酸化されて発色するためです。" },
+    { id: "test_koshohin_original_No05_18", text: "永久染毛剤（酸化染毛剤）やヘアブリーチ剤（脱色剤）は、法律により医薬部外品に分類されている。", source: "No05-18", answer: true, exp: "正しい。永久染毛剤や脱色剤は、人体に対する作用が緩和な「化粧品」ではなく、医薬部外品として管理されます。" },
+    { id: "test_koshohin_original_No05_19", text: "ヘアブリーチ剤の主な有効成分として、毛髪のシスチン結合を切断するためのアセチルシステインが配合されている。", source: "No05-19", answer: false, exp: "誤り。アセチルシステイン（またはシステイン）は、パーマ剤の「還元剤」として用いられる成分です。ヘアブリーチ剤の主成分は過酸化水素などの酸化剤やアルカリ剤です。" },
+    { id: "test_koshohin_original_No05_20", text: "酸化染毛剤は、染料が毛髪の内部で酸化重合して巨大化するため、シャンプーのたびに染料が流出しやすい性質を持つ。", source: "No05-20", answer: false, exp: "誤り。酸化染毛剤は染料分子が毛髪内部で結合して大きくなるため、シャンプーで流出しにくいのが特徴です。シャンプーのたびに流出するのはヘアマニキュアなどの半永久染毛料です。" },
+    { id: "test_koshohin_original_No05_21", text: "ヘアリンス剤に用いられている第四級アンモニウム塩は、代表的な陰イオン界面活性剤である。", source: "No05-21", answer: false, exp: "誤り。第四級アンモニウム塩は「陽イオン（カチオン）界面活性剤」です。毛髪表面に吸着して静電気を防ぐ帯電防止効果を発揮します。" },
+    { id: "test_koshohin_original_No05_22", text: "毛髪の主要成分であるタンパク質のケラチンは、構成元素として硫黄（S）を多く含んでいる。", source: "No05-22", answer: true, exp: "正しい。ケラチンはシスチンというアミノ酸を多く含んでいるため、他のタンパク質と比較して硫黄の含有量が多いのが特徴です。" },
+    { id: "test_koshohin_original_No05_23", text: "ヘンナ（ヘナ）は、硝酸銀や酢酸鉛などの金属塩を有効成分として用いる「金属性染毛剤」に分類される。", source: "No05-23", answer: false, exp: "誤り。ヘンナ（ヘナ）は植物から抽出される色素を用いる「植物性染毛料」です。金属性染毛剤は、硝酸銀などの金属塩を利用するものを指します。" },
+    { id: "test_koshohin_original_No05_24", text: "カラーエナメル（ネイルエナメル）の主要な皮膜形成剤として、高分子化合物のニトロセルロースが用いられる。", source: "No05-24", answer: true, exp: "正しい。ニトロセルロースはネイルエナメルの代表的な皮膜形成剤ですが、非常に燃えやすい性質があるため取り扱いには注意が必要です。" },
+],
+"その他.香粧品化学を理解するための基礎化学": [
+    { id: "test_koshohin_original_sonota_01", text: "ケラチンは、タンパク質どうしが強固に結合した繊維状の硬タンパク質である。", source: "その他-01", answer: true, exp: "正しい。ケラチンは毛髪や爪の主成分であり、ポリペプチド鎖が強固に結合した繊維状の硬タンパク質です。" },
+    { id: "test_koshohin_original_sonota_02", text: "分子間に働く化学結合の強さを比較すると、水素結合は共有結合よりも強い。", source: "その他-02", answer: false, exp: "誤り。一般的に化学結合の強さは、共有結合 ＞ イオン結合 ＞ 水素結合 の順になります。水素結合は分子間の弱い引き合いであり、共有結合は原子同士が電子を共有する非常に強い結合です。" },
+    { id: "test_koshohin_original_sonota_03", text: "塩酸は、分子中に炭素を含まない無機酸に分類される。", source: "その他-03", answer: true, exp: "正しい。塩酸（HCl）は炭素を含まないため無機酸です。一方、クエン酸や乳酸などは炭素を含むため有機酸に分類されます。" },
+    { id: "test_koshohin_original_sonota_04", text: "弱酸と弱塩基の組み合わせとして、酢酸と水酸化ナトリウムがあげられる。", source: "その他-04", answer: false, exp: "誤り。酢酸は代表的な弱酸ですが、水酸化ナトリウムは強塩基です。弱酸と弱塩基の組み合わせは、酢酸とアンモニア水などです。" },
+    { id: "test_koshohin_original_sonota_05", text: "エタノール、デンプン、タンパク質は、炭素を骨格に持たないため無機化合物に分類される。", source: "その他-05", answer: false, exp: "誤り。エタノール、デンプン、タンパク質はいずれも炭素（C）を骨格とする「有機化合物」です。水や食塩、金属などが無機化合物に該当します。" },
+    { id: "test_koshohin_original_sonota_06", text: "pH指示薬であるフェノールフタレインは、酸性溶液中では無色を示す。", source: "その他-06", answer: true, exp: "正しい。フェノールフタレインは酸性から中性では無色ですが、アルカリ性（塩基性）溶液中では赤紫色に変化します。" },
+    { id: "test_koshohin_original_sonota_07", text: "乳酸は、香粧品において主に乳化剤の目的で配合される。", source: "その他-07", answer: false, exp: "誤り。乳酸は「収れん剤」やpH調整剤として用いられます。乳化剤の役割を担うのは界面活性剤です。" },
+    { id: "test_koshohin_original_sonota_08", text: "酸素原子に水素原子2個が結合した水分子内で生じている電気の偏りを極性という。", source: "その他-08", answer: true, exp: "正しい。水分子のように分子内で電気的な偏りが生じているものを極性分子といい、この偏りそのものを極性と呼びます。" }
+]
+        }
+    },
+    "test_koshohin_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"[第52-51回 (2025年)]": [
+    { id: "test_koshohin_past_2025_01", text: "ロウ類は、高級アルコールと高級脂肪酸が結合したエステルである。", source: "52回 問題36", answer: true, exp: "正しい。ロウ類は、高級脂肪酸と高級アルコールのエステルであると定義されている。" },
+    { id: "test_koshohin_past_2025_02", text: "陽イオン界面活性剤である第四級アンモニウム塩は、帯電防止効果に優れている。", source: "52回 問題37", answer: true, exp: "正しい。第四級アンモニウム塩は陽イオン界面活性剤であり、毛髪への吸着性に優れ、帯電防止や柔軟効果を発揮する。" },
+    { id: "test_koshohin_past_2025_03", text: "酸化染毛剤の成分であるパラフェニレンジアミンは、第2剤に配合される酸化剤である。", source: "52回 問題38", answer: false, exp: "誤り。パラフェニレンジアミンは酸化剤ではなく、第1剤に配合される「酸化染料（染料中間体）」である。酸化剤は第2剤に配合される過酸化水素水や臭素酸塩などを指す。" },
+    { id: "test_koshohin_past_2025_04", text: "二浴式のパーマ剤において、臭素酸ナトリウムは酸化剤として第2剤に配合される。", source: "52回 問題39", answer: true, exp: "正しい。二浴式パーマ剤の第2剤には、酸化剤として臭素酸ナトリウムや過酸化水素水が配合される。" },
+    { id: "test_koshohin_past_2025_05", text: "ヘアマニキュアは、着色料を毛髪表面に一時的に付着させる一時染毛料に分類される。", source: "52回 問題40", answer: false, exp: "誤り。ヘアマニキュア（酸性染料）は一時染毛料ではなく、半永久染毛料に分類される。" },
+    { id: "test_koshohin_past_2025_06", text: "香粧品化学において、炭素を含む化合物は有機化合物と呼ばれる。", source: "51回 問題36", answer: true, exp: "正しい。化合物のうち、炭素を含むものを「有機化合物」（例：エタノールなど）、炭素を含まないものを「無機化合物」（例：水など）と呼んで区別します。" },
+    { id: "test_koshohin_past_2025_07", text: "植物（オリーブやツバキなど）から得られるスクワランは、油脂に分類される油性原料である。", source: "51回 問題37", answer: false, exp: "誤り。スクワランは油脂ではなく、炭化水素に分類される。植物性スクワランも同様に炭化水素である。" },
+    { id: "test_koshohin_past_2025_08", text: "界面活性剤の乳化作用によって得られた乳濁液のことを、エマルション（エマルジョン）と呼ぶ。", source: "51回 問題38", answer: true, exp: "正しい。互いに混ざり合わない液体の一方を微粒子状に分散させることを乳化といい、その生成物をエマルションという。" },
+    { id: "test_koshohin_past_2025_09", text: "パラアミノ安息香酸エステルは、金属イオンの悪影響を防ぐ金属イオン封鎖剤（キレート剤）として配合される。", source: "51回 問題39", answer: false, exp: "誤り。パラアミノ安息香酸エステルは金属イオン封鎖剤ではなく、紫外線吸収剤である。金属イオン封鎖剤にはエデト酸（EDTA）などが用いられる。" },
+    { id: "test_koshohin_past_2025_10", text: "直接染料であるニトロパラフェニレンジアミンは、酸化剤の助けがなくても発色する無色の成分である。", source: "51回 問題40", answer: false, exp: "誤り。ニトロパラフェニレンジアミンはもともと色を有している直接染料であり、無色ではない。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_koshohin_past_2024_01", text: "高級アルコールの「高級」とは、分子中の炭素数が多いことを意味している。", source: "50回 問題36", answer: true, exp: "正しい。香粧品化学における「高級」とは価格のことではなく、分子を構成する炭素の数が多いことを指します。" },
+    { id: "test_koshohin_past_2024_02", text: "アルキル硫酸ナトリウムは非イオン（ノニオン）界面活性剤に分類され、帯電防止効果に優れている。", source: "50回 問題37", answer: false, exp: "誤り。アルキル硫酸ナトリウムは「陰イオン（アニオン）界面活性剤」であり、主にシャンプーなどの洗浄剤として用いられます。帯電防止効果を持つのは陽イオン界面活性剤です。" },
+    { id: "test_koshohin_past_2024_03", text: "バニシングクリームは、水分量が多く、肌に塗ると消えるように馴染むO/W型（水中油型）のクリームである。", source: "50回 問題38", answer: true, exp: "正しい。バニシングクリームは親水性成分が多く、使用感がさっぱりとしたO/W型のエマルジョンです。" },
+    { id: "test_koshohin_past_2024_04", text: "二浴式のパーマ剤において、第1剤に配合されるモノエタノールアミンは還元剤として働く。", source: "50回 問題39", answer: false, exp: "誤り。モノエタノールアミンは「アルカリ剤」として配合されます。第1剤における還元剤は、チオグリコール酸やシステインなどです。" },
+    { id: "test_koshohin_past_2024_05", text: "酸化染毛剤の第2剤に含まれる過酸化水素は、メラニンを分解（脱色）すると同時に、染料を酸化重合させて発色させる役割を持つ。", source: "50回 問題40", answer: true, exp: "正しい。過酸化水素は酸化剤として、地毛の脱色と染料の発色という2つの重要な作用を担っています。" },
+    { id: "test_koshohin_past_2024_06", text: "界面活性剤が水中で形成するミセルは、疎水性（親油性）の部分を外側に向けて集合したものである。", source: "49回 問題36", answer: false, exp: "誤り。水中のミセルは、水になじまない「疎水基」を内側に向け、水になじみやすい「親水基」を外側に向けて形成されます。" },
+    { id: "test_koshohin_past_2024_07", text: "有機合成色素（タール色素）は、日光や照明などの光による経時変化を受けることはない。", source: "49回 問題37", answer: false, exp: "誤り。タール色素は光の影響を受けやすく、変色や退色などの経時変化を起こすことがあります。そのため、製品は光を避けて保管する必要があります。" },
+    { id: "test_koshohin_past_2024_08", text: "パラオキシ安息香酸エステル（パラベン）は、微生物による製品の変質を防ぐために配合される防腐剤である。", source: "49回 問題38", answer: true, exp: "正しい。パラベンは香粧品で最も広く利用されている防腐剤の一つであり、製品の品質を長期間維持するために重要です。" },
+    { id: "test_koshohin_past_2024_09", text: "エアゾールタイプのヘアスプレーにおいて、ジメチルエーテル（DME）は主に保湿剤として用いられる。", source: "49回 問題39", answer: false, exp: "誤り。ジメチルエーテル（DME）は保湿剤ではなく、内容物を霧状に噴射させるための「噴射剤」として用いられます。" },
+    { id: "test_koshohin_past_2024_10", text: "二浴式のパーマ剤では、一般に第1剤の有効成分としてチオグリコール酸（還元剤）、第2剤に臭素酸ナトリウム（酸化剤）が用いられる。", source: "49回 問題40", answer: true, exp: "正しい。還元剤でシスチン結合を切り、酸化剤で再結合させるのが二浴式パーマの基本的な構成です。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_koshohin_past_2023_01", text: "メタノール（メチルアルコール）は、消毒・殺菌作用があるため、多くのスキンケア製品に配合される。", source: "48回 問題36", answer: false, exp: "誤り。消毒・殺菌作用を持ち化粧品に配合されるのはエタノールです。メタノールは人体に有害であり、化粧品には使用されません。" },
+    { id: "test_koshohin_past_2023_02", text: "陽イオン界面活性剤は、毛髪への吸着性に優れており、ヘアリンス剤などに利用される。", source: "48回 問題37", answer: true, exp: "正しい。陽イオン界面活性剤は、負に帯電しやすい毛髪表面に電気的に吸着しやすいため、柔軟性を与えたり静電気を防いだりする効果があります。" },
+    { id: "test_koshohin_past_2023_03", text: "香料のうち、じゃ香（ムスク）は植物の花から抽出される代表的な植物性香料である。", source: "48回 問題38", answer: false, exp: "誤り。じゃ香（ムスク）は、ジャコウジカから得られる動物性香料に分類されます。" },
+    { id: "test_koshohin_past_2023_04", text: "パラオキシ安息香酸エステル（パラベン）は、微生物による製品の変質を防ぐために配合される防腐剤である。", source: "48回 問題39", answer: true, exp: "正しい。パラベンは香粧品に広く用いられる代表的な防腐剤の一つです。" },
+    { id: "test_koshohin_past_2023_05", text: "パーマ剤第1剤に配合されるチオグリコール酸は、毛髪のシスチン結合に水素を与える還元剤として働く。", source: "48回 問題40", answer: true, exp: "正しい。第1剤には還元剤が配合され、毛髪の結合を切断する役割を担います。" },
+    { id: "test_koshohin_past_2023_06", text: "エタノールは溶媒としての働きのほかに、皮膚組織を引き締める「収れん作用」を持っている。", source: "47回 問題36", answer: true, exp: "正しい。エタノールは蒸発する際に皮膚の熱を奪って冷感を与え、皮膚組織を引き締める効果があります。" },
+    { id: "test_koshohin_past_2023_07", text: "ワセリンはシリコーン油に分類される油性原料であり、化学的に極めて安定している。", source: "47回 問題37", answer: false, exp: "誤り。ワセリンは「炭化水素」に分類されます。シリコーン油とは異なるカテゴリーの原料です。" },
+    { id: "test_koshohin_past_2023_08", text: "レシチンは、大豆や卵黄から得られる代表的な両性界面活性剤である。", source: "47回 問題38", answer: true, exp: "正しい。レシチンは天然由来の両性界面活性剤として、乳化などの目的で配合されます。" },
+    { id: "test_koshohin_past_2023_09", text: "過酸化水素は、染毛剤やパーマ剤の第2剤において、還元剤としてメラニンや結合に作用する。", source: "47回 問題39", answer: false, exp: "誤り。過酸化水素は、染毛剤やパーマ第2剤において「酸化剤」として作用します。" },
+    { id: "test_koshohin_past_2023_10", text: "酸化染料は、一般に化粧品に分類されるヘアマニキュアに配合される主要な成分である。", source: "47回 問題40", answer: false, exp: "誤り。酸化染料は医薬部外品の永久染毛剤に用いられます。化粧品であるヘアマニキュア（半永久染毛料）には酸性染料が用いられます。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_koshohin_past_2022_01", text: "メタノール（メチルアルコール）は、殺菌作用があるため化粧水の溶媒として広く用いられる。", source: "46回 問題36", answer: false, exp: "誤り。メタノールは毒性が強いため、化粧品への配合は禁止されています。化粧水の溶媒や殺菌目的で用いられるのはエタノールです。" },
+    { id: "test_koshohin_past_2022_02", text: "香粧品原料の分類において、システインはアミノ酸に該当する。", source: "46回 問題37", answer: true, exp: "正しい。システインはアミノ酸の一種であり、パーマ剤においては還元剤として利用されます。" },
+    { id: "test_koshohin_past_2022_03", text: "化粧品に配合されるパラフィンは、代表的な水性原料の一つである。", source: "46回 問題38", answer: false, exp: "誤り。パラフィンは炭化水素に分類される油性原料です。" },
+    { id: "test_koshohin_past_2022_04", text: "パーマ剤第1剤に配合されるチオグリコール酸は、毛髪のシスチン結合を切断する還元剤として働く。", source: "46回 問題39", answer: true, exp: "正しい。第1剤の主成分である還元剤（チオグリコール酸やシステイン）が、毛髪の結合を切断することでウェーブ形成を可能にします。" },
+    { id: "test_koshohin_past_2022_05", text: "酸化染毛剤に配合されるパラフェニレンジアミンは、酸化される前からそれ自体が色を有している直接染料である。", source: "46回 問題40", answer: false, exp: "誤り。パラフェニレンジアミンは、酸化剤と反応して初めて発色する「染料中間体」です。もともと色を持っているのはニトロパラフェニレンジアミンなどの直接染料です。" },
+    { id: "test_koshohin_past_2022_06", text: "高級アルコールの「高級」という名称は、分子中の炭素数が多いことを意味している。", source: "45回 問題36", answer: true, exp: "正しい。化学用語における高級とは、分子を構成する炭素の数が多いことを指し、価格が高いという意味ではありません。" },
+    { id: "test_koshohin_past_2022_07", text: "ヘアリンス剤に用いられ、毛髪に対して帯電防止効果を発揮する界面活性剤は、第一級アンモニウム塩である。", source: "45回 問題37", answer: false, exp: "誤り。ヘアリンス剤などで帯電防止効果を目的として用いられるのは、第四級アンモニウム塩（陽イオン界面活性剤）です。" },
+    { id: "test_koshohin_past_2022_08", text: "パラオキシ安息香酸エステル（パラベン）は、微生物による製品の変質を防ぐ防腐剤として配合される。", source: "45回 問題38", answer: true, exp: "正しい。パラベンは香粧品において最も一般的に使用される防腐剤の一つです。" },
+    { id: "test_koshohin_past_2022_09", text: "臭素酸ナトリウムは、パーマ剤第1剤の主要な有効成分として配合される。", source: "45回 問題39", answer: false, exp: "誤り。臭素酸ナトリウムは、第1剤で切断された結合を再結合させるための「酸化剤」であり、第2剤に配合される成分です。" },
+    { id: "test_koshohin_past_2022_10", text: "サンケア製品に配合される酸化チタンは、紫外線を反射・散乱させる効果を持つ。", source: "45回 問題40", answer: true, exp: "正しい。酸化チタンは紫外線散乱剤として機能し、物理的に紫外線をブロックすることで日焼けを防ぎます。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_koshohin_past_2021_01", text: "メチルポリシロキサンは、香粧品原料の分類においてシリコーン油に該当する。", source: "44回 問題36", answer: true, exp: "正しい。メチルポリシロキサンは代表的なシリコーン油であり、撥水性や滑り性を与えるために配合されます。" },
+    { id: "test_koshohin_past_2021_02", text: "油相の中に水滴が細かく分散している乳化型（エマルジョン）を、O/W型という。", source: "44回 問題37", answer: false, exp: "誤り。油相の中に水滴が分散しているタイプはW/O（油中水）型です。O/W（水中油）型は、水の中に油が分散している状態を指します。" },
+    { id: "test_koshohin_past_2021_03", text: "香粧品に配合されるパラフィンは、主に金属イオン封鎖剤（キレート剤）としての目的で用いられる。", source: "44回 問題38", answer: false, exp: "誤り。パラフィンは炭化水素の一種であり、主に油性原料として用いられます。金属イオン封鎖剤ではありません。" },
+    { id: "test_koshohin_past_2021_04", text: "パーマ剤第1剤に使用されるアルカリ剤のうち、アンモニア水はモノエタノールアミンと比較して揮発性が高い。", source: "44回 問題39", answer: true, exp: "正しい。アンモニア水は揮発性が高く特有の刺激臭がありますが、モノエタノールアミンは揮発性がなく作用が持続する特徴があります。" },
+    { id: "test_koshohin_past_2021_05", text: "酸化染毛剤は、染料が毛髪表面に物理的に付着するだけなので、1回のシャンプーで簡単に色落ちする。", source: "44回 問題40", answer: false, exp: "誤り。酸化染毛剤は毛髪内部で染料が結合して巨大化するため、1回のシャンプーでは色落ちしません。1回で落ちるのは一時染毛料です。" },
+    { id: "test_koshohin_past_2021_06", text: "メタノール（メチルアルコール）は毒性が低いため、化粧品基準において広く配合が認められている。", source: "43回 問題36", answer: false, exp: "誤り。メタノールは毒性が強いため、化粧品への配合は認められていません。配合が認められているのはエタノールなどです。" },
+    { id: "test_koshohin_past_2021_07", text: "スクワランは、動植物から得られる不飽和炭化水素であるスクワレンに水素を添加したもので、安定性に優れている。", source: "43回 問題37", answer: true, exp: "正しい。スクワレンを水素添加（飽和）させてスクワランにすることで、酸化されにくい安定した油性原料となります。" },
+    { id: "test_koshohin_past_2021_08", text: "両性界面活性剤は、水溶液の性質によって、酸性では陽イオンに、アルカリ性では陰イオンになる性質を持つ。", source: "43回 問題38", answer: true, exp: "正しい。液のpHによって帯びる電気が変化するのが両性界面活性剤の大きな特徴です。" },
+    { id: "test_koshohin_past_2021_09", text: "パーマ剤第2剤に用いられる酸化剤のうち、臭素酸ナトリウムは過酸化水素よりも酸化力が強い。", source: "43回 問題39", answer: false, exp: "誤り。酸化力は過酸化水素の方が臭素酸ナトリウムよりも強いのが特徴です。" },
+    { id: "test_koshohin_past_2021_10", text: "チオグリコール酸は、パーマ剤において毛髪の結合を切断するための還元剤として配合される。", source: "43回 問題40", answer: true, exp: "正しい。チオグリコール酸やシステインは、パーマ第1剤の有効成分である代表的な還元剤です。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_koshohin_past_2020_01", text: "界面活性剤は、1分子中に親油基（疎水基）と親水基の両方の性質を併せ持つ物質である。", source: "42回 問題36", answer: true, exp: "正しい。界面活性剤は水になじみやすい部分と油になじみやすい部分を一つの分子内に持っているのが特徴です。" },
+    { id: "test_koshohin_past_2020_02", text: "香粧品原料の分類において、ワセリンはデンプンなどと同じ多糖類に属している。", source: "42回 問題37", answer: false, exp: "誤り。ワセリンは炭化水素に分類される油性原料です。多糖類ではありません。" },
+    { id: "test_koshohin_past_2020_03", text: "紫外線による急性の炎症であるサンバーンを防ぐ指標として、一般にPAが用いられる。", source: "42回 問題38", answer: false, exp: "誤り。サンバーンの防御指標はSPFです。PAはUV-Aによるサンタン（肌が黒くなる日焼け）の防御効果を示す指標です。" },
+    { id: "test_koshohin_past_2020_04", text: "二浴式のパーマ剤は、チオグリコール酸のような還元剤を有効成分とする第1剤と、臭素酸ナトリウムのような酸化剤を有効成分とする第2剤からなる。", source: "42回 問題39", answer: true, exp: "正しい。還元剤で髪の結合を切り、酸化剤で再結合させるのが二浴式パーマ剤の基本構成です。" },
+    { id: "test_koshohin_past_2020_05", text: "酸化染毛剤に配合される過酸化水素は、メラニンを分解したり染料を重合させたりするためのアルカリ剤として働く。", source: "42回 問題40", answer: false, exp: "誤り。過酸化水素はアルカリ剤ではなく、酸化剤として機能します。" },
+    { id: "test_koshohin_past_2020_06", text: "界面活性剤のうち、非イオン界面活性剤は陽イオン界面活性剤よりも殺菌消毒作用が強い。", source: "41回 問題36", answer: false, exp: "誤り。殺菌作用が強いのは陽イオン界面活性剤や両性界面活性剤です。非イオン界面活性剤には殺菌作用はほとんどありません。" },
+    { id: "test_koshohin_past_2020_07", text: "油性原料の炭化水素には、石油から得られるもののほか、動植物から得られるスクワレンやスクワランなども存在する。", source: "41回 問題37", answer: true, exp: "正しい。炭化水素は石油由来のものだけでなく、動植物から得られるものも香粧品原料として用いられます。" },
+    { id: "test_koshohin_past_2020_08", text: "香粧品に用いられる色材のうち、ベンガラ（赤色酸化鉄）は植物から抽出される天然色素に分類される。", source: "41回 問題38", answer: false, exp: "誤り。ベンガラは無機顔料の着色顔料であり、植物性色素ではありません。" },
+    { id: "test_koshohin_past_2020_09", text: "パーマの原理は、第1剤に含まれる還元剤が毛髪のシスチン結合を切断し、第2剤に含まれる酸化剤がその結合を再結合させることでウェーブを固定するものである。", source: "41回 問題39", answer: true, exp: "正しい。化学的な還元と酸化の反応を利用して、毛髪の形状を変化・固定させます。" },
+    { id: "test_koshohin_past_2020_10", text: "ヘアマニキュアに使用される酸性染料は、マイナスの電気を帯びており、プラスに帯電した毛髪と電気的に引き合って吸着する。", source: "41回 問題40", answer: true, exp: "正しい。酸性条件下でプラスに帯電した毛髪に、マイナスの電気を持つ酸性染料が静電引力で吸着することで染まります。" }
+]
+        }
+    },
+    "test_koshohin_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.香粧品を使用する際に気をつけるべきこと": [
+    { id: "test_koshohin_extra_kiotukerubekikoto_01", text: "医薬品医療機器等法における化粧品の定義には、皮膚や毛髪に栄養を与え、その衰えを防ぐという目的も含まれている。", source: "No.01", answer: false, exp: "誤り。人の皮膚若しくは毛髪に栄養をあたえ衰えを防ぐという表現は、化粧品ではなく医薬部外品の範囲に該当します。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_02", text: "香粧品として日常的に使用している製品には、医薬品医療機器等法によって「化粧品」と「医薬部外品」の2つの区分がある。", source: "No.02", answer: true, exp: "正しい。法律上の正式な区分は「化粧品」と「医薬部外品」であり、これらを総称して一般に香粧品と呼んでいます。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_03", text: "殺菌・消毒などの有効成分を含有する薬用石けんは、化粧品に分類される。", source: "No.03", answer: false, exp: "誤り。薬用石けんは有効成分を含有するため「医薬部外品」に分類されます。化粧品に分類される石けんの効能は皮膚の清浄です。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_04", text: "化粧品には、人の身体を清潔にし、美化し、魅力を増し、容貌を変えるといった、人体に対する作用が緩和であるという定義がある。", source: "No.04", answer: true, exp: "正しい。化粧品は、身体を健やかに保つなどの目的で使用されるものであり、人体に対する作用が緩和なものと定義されています。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_05", text: "医薬部外品は化粧品よりも作用が強いため、処方箋なしで一般のコンビニエンスストアなどで販売することは禁止されている。", source: "No.05", answer: false, exp: "誤り。医薬部外品は、特定の効能に対して一定の有効性が認められた成分が配合されていますが、処方箋は不要であり、コンビニエンスストア等でも販売可能です。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_06", text: "香粧品を使用する際に、一度容器から出しすぎてしまった中身は、清潔な手指であればもとの容器に戻しても良い。", source: "No.06", answer: false, exp: "誤り。一度出した中身を容器に戻すことは、微生物による二次汚染の原因となるため厳禁です。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_07", text: "香粧品の品質を維持する目的で、製品には防腐剤や酸化防止剤などの配合原料が使用されている。", source: "No.07", answer: true, exp: "正しい。製品の安定性を保ち、微生物汚染や酸化による劣化を防ぐために、防腐剤や酸化防止剤が配合されています。" },
+    { id: "test_koshohin_extra_kiotukerubekikoto_08", text: "日光による香粧品の経時変化として、化粧水に沈殿が生じたり、色が変化（変退色）したりすることがある。", source: "No.08", answer: true, exp: "正しい。日光（紫外線）や蛍光灯の光によって成分が変質し、変色や沈殿、濁りなどが発生する場合があります。" },
+],
+"B.香粧品の成り立ち(香粧品用原料)": [
+    { id: "test_koshohin_extra_naritachi_09", text: "メタノールは、香粧品の代表的な溶媒として化粧水やヘアトニックに広く用いられる。", source: "No.09", answer: false, exp: "誤り。化粧水などの溶媒に用いられるのはエタノールです。メタノールは毒性が強いため、香粧品には使用されません。" },
+    { id: "test_koshohin_extra_naritachi_10", text: "デンプンは、炭素を骨格に持つ複雑な構造の有機化合物に該当する。", source: "No.10", answer: true, exp: "正しい。デンプンは生体に関連し、炭素を含む複雑な構造を持つため、有機化合物に分類されます。" },
+    { id: "test_koshohin_extra_naritachi_11", text: "酢酸は、構造が単純なため無機化合物に分類される", source: "No.11", answer: false, exp: "誤り。酢酸は有機化合物である。二酸化炭素や炭酸塩などの例外を除き、炭素を含む化合物は有機化合物に分類される。" },
+    { id: "test_koshohin_extra_naritachi_12", text: "香粧品に広く用いられる流動パラフィンやワセリンは、石油から得られる鉱物油といわれる炭化水素である。", source: "No.12", answer: true, exp: "正しい。流動パラフィンやワセリンは石油由来の安定した成分であり、炭化水素に分類されます。" },
+    { id: "test_koshohin_extra_naritachi_13", text: "水素イオン指数（pH）において、pH10の水溶液はアルカリ性を示し、pH5の水溶液は酸性を示す。", source: "No.13", answer: true, exp: "正しい。pH7を中性とし、7より大きい数値はアルカリ性、7より小さい数値は酸性を示します。" },
+    { id: "test_koshohin_extra_naritachi_14", text: "ベンザルコニウム塩化物は、非イオン界面活性剤であり、主に乳化剤として用いられる。", source: "No.14", answer: false, exp: "誤り。ベンザルコニウム塩化物は「陽イオン（カチオン）界面活性剤」であり、主に殺菌剤として用いられます。" },
+    { id: "test_koshohin_extra_naritachi_15", text: "キトサンは、天然高分子であるキチンを化学修飾したものであるが、分類上は『合成高分子化合物』に該当する", source: "No.15", answer: false, exp: "誤り。キトサンは天然高分子の誘導体であり、一般的に天然系高分子として扱われる」" },
+    { id: "test_koshohin_extra_naritachi_16", text: "白色顔料である酸化チタンは、屈折率が高く、皮膚への付着性にも優れている。", source: "No.16", answer: true, exp: "正しい。酸化チタンは代表的な白色顔料であり、被覆力が大きく、屈折率が高いといった特徴を持っています。" },
+    { id: "test_koshohin_extra_naritachi_17", text: "顔料は、機能によって白色顔料、体質顔料、着色顔料に分類される。酸化亜鉛は、その分類において酸化鉄（ベンガラ）と同様の『着色顔料』に属する。", source: "No.17", answer: false, exp: "誤り。酸化亜鉛は、酸化チタンと同様に「白色顔料」に分類されます。着色顔料の代表例は酸化鉄（ベンガラ等）です。" },
+    { id: "test_koshohin_extra_naritachi_18", text: "有機合成色素であるタール色素は、性質によって水や溶媒に溶ける「染料」と、溶けない「有機顔料」に大別される。", source: "No.18", answer: true, exp: "正しい。タール色素は溶解性の有無によって、染料と有機顔料に分けられます。" },
+    { id: "test_koshohin_extra_naritachi_19", text: "霊猫香（シベット）は、ジャコウネコから得られる代表的な動物性香料である。", source: "No.19", answer: true, exp: "正しい。動物性香料には、ジャコウネコの霊猫香（シベット）のほか、ジャコウジカのじゃ香（ムスク）などがあります。" },
+    { id: "test_koshohin_extra_naritachi_20", text: "香粧品の配合成分のうち、クエン酸は代表的な紫外線吸収剤として用いられる。", source: "No.20", answer: false, exp: "誤り。クエン酸は収れん剤やpH調整剤として用いられます。紫外線吸収剤にはパラアミノ安息香酸エステルなどがあります。" },
+    { id: "test_koshohin_extra_naritachi_21", text: "ブチルヒドロキシアニソール(BHA)は、油脂などの変質を防ぐ酸化防止剤として配合される。", source: "No.21", answer: true, exp: "正しい。ブチルヒドロキシアニソール(BHA)は、香粧品の品質を安定させるための代表的な酸化防止剤（抗酸化剤）です。" },
+    { id: "test_koshohin_extra_naritachi_22", text: "クロルヘキシジンは、香粧品において製品の質感や付着性を調整する『体質顔料』として配合される。", source: "No.22", answer: false, exp: "誤り。クロルヘキシジンは殺菌剤（防腐・殺菌剤）です。体質顔料にはタルクなどがあります。" },
+    { id: "test_koshohin_extra_naritachi_23", text: "グリセリンは、皮膚や毛髪に水分を保持させる目的で用いられる保湿剤である。", source: "No.23", answer: true, exp: "正しい。グリセリンやプロピレングリコールは、高い吸湿性を持ち水分を保持する役割を担う保湿剤です。" },
+    { id: "test_koshohin_extra_naritachi_24", text: "パラフェノールスルホン酸亜鉛は、製品の酸化による変質を防ぐ酸化防止剤の役割を持つ。", source: "No.24", answer: false, exp: "誤り。パラフェノールスルホン酸亜鉛は収れん剤です。酸化防止剤にはブチルヒドロキシアニソールなどがあります。" },
+    { id: "test_koshohin_extra_naritachi_25", text: "パラオキシ安息香酸エステル（パラベン）は、微生物による製品の変質を防ぐために配合される防腐剤である。", source: "No.25", answer: true, exp: "正しい。パラベンは香粧品に広く用いられる代表的な防腐剤です。" },
+    { id: "test_koshohin_extra_naritachi_26", text: "水やエタノールは、香粧品の品質に悪影響を及ぼすため、製品の製造には一切用いられない。", source: "No.26", answer: false, exp: "誤り。水やエタノールは、化粧水などのベースとなる水性原料（溶媒）として不可欠な成分です。" },
+    { id: "test_koshohin_extra_naritachi_27", text: "化粧水のpHを調整するために、クエン酸や乳酸などがpH調整剤として用いられることがある。", source: "No.27", answer: true, exp: "正しい。製品の安定性を保つため、クエン酸や乳酸などを用いて溶液の酸性・アルカリ性の度合い（pH）を調整します。" },
+    { id: "test_koshohin_extra_naritachi_28", text: "つけ爪（アーティフィシャルネイル）の原料であるABS樹脂やアクリル樹脂は、熱硬化性樹脂に分類される。", source: "No.28", answer: false, exp: "誤り。つけ爪に使用されるABS樹脂やアクリル樹脂、まつ毛エクステンション用の合成樹脂はすべて、加熱により軟化する熱可塑性樹脂です。" },
+],
+"C. スキンケア製品": [
+    { id: "test_koshohin_extra_skincare_29", text: "透明石けんには、透明化剤としてエタノール、砂糖、多価アルコールなどが添加されている。", source: "No.29", answer: true, exp: "正しい。透明石けんは枠練り石けんで作られ、透明にするための成分としてエタノールや砂糖などが配合されます。" },
+    { id: "test_koshohin_extra_skincare_30", text: "アストリンゼントローションは、収れん剤が配合された弱アルカリ性の化粧水であり、皮膚を一時的に引き締める目的で用いられる。", source: "No.30", answer: false, exp: "誤り。アストリンゼントローションは、収れん剤を配合した「弱酸性」の化粧水です。皮膚面を一時的に引き締める効果があります。" },
+    { id: "test_koshohin_extra_skincare_31", text: "多層式化粧水であるカラミンローションは、緩和な収れん作用や消炎作用があるため、日焼け後の皮膚のほてりを鎮めるのに効果的である。", source: "No.31", answer: true, exp: "正しい。カラミンローションは粉末が含まれているため使用時に振り混ぜる必要があります。酸化亜鉛などの働きにより日焼け後の炎症を和らげます。" },
+    { id: "test_koshohin_extra_skincare_32", text: "アフターシェービングローションは、主に髭剃り後の肌を引き締める目的で使用される収れん化粧水である。", source: "No.32", answer: true, exp: "正しい。アフターシェービングローションは「収れん性化粧水」に分類されます。髭剃り後の肌のpHを整え、引き締める目的で使用されます。" },
+],
+"D.ヘアケア、ヘアメイクアップ及びスキャルプケア製品(頭皮・毛髪用香粧品)": [
+    { id: "test_koshohin_extra_haircare_33", text: "第四級アンモニウム塩は、シャンプー剤の主成分である洗浄剤として広く用いられる。", source: "No.33", answer: false, exp: "誤り。第四級アンモニウム塩は「陽イオン界面活性剤」であり、殺菌剤やヘアリンス、柔軟剤として用いられます。シャンプーの洗浄成分（洗浄剤）には陰イオン界面活性剤が主に用いられます。" },
+    { id: "test_koshohin_extra_haircare_34", text: "ヘアリンス剤に用いられる第四級アンモニウム塩には、毛髪の静電気の発生を抑える帯電防止効果がある。", source: "No.34", answer: true, exp: "正しい。第四級アンモニウム塩は負に帯電した毛髪表面に吸着し、電荷の偏りを少なくすることで帯電防止効果を発揮します。" },
+    { id: "test_koshohin_extra_haircare_35", text: "ヘアスタイリング剤に配合されるポリビニルピロリドン(PVP)は、乾燥して透明な皮膜を作る性質を持つ皮膜形成剤である。", source: "No.35", answer: true, exp: "正しい。ポリビニルピロリドン(PVP)などは、そのセット力によってヘアスタイルを保持するために用いられる合成高分子化合物です。" },
+    { id: "test_koshohin_extra_haircare_36", text: "現在のエアゾールタイプのヘアスプレーにおいて、噴射剤として広く使用されているのはフロンガスである。", source: "No.36", answer: false, exp: "誤り。オゾン層保護対策により現在はフロンの使用が規制されており、可燃性の液化石油ガス(LPG)やジメチルエーテル(DME)が主に用いられています。" },
+    { id: "test_koshohin_extra_haircare_37", text: "脱色剤や脱染剤において、メラニン色素を酸化・分解して毛髪を脱色するために用いられるのは、主に過酸化水素である。", source: "No.37", answer: true, exp: "正しい。過酸化水素は酸化剤として働き、アルカリ剤の影響で分解して酸素を放出することでメラニンを脱色します。" },
+    { id: "test_koshohin_extra_haircare_38", text: "システインを有効成分とするパーマネントウエーブ用剤は、チオグリコール酸を使用するものに比べてウエーブ形成力が強い。", source: "No.38", answer: false, exp: "誤り。システインはチオグリコール酸に比べて反応が穏やかであるため、ウエーブ形成力は「弱い」のが特徴です。" },
+    { id: "test_koshohin_extra_haircare_39", text: "パーマネントウエーブ用剤の第1剤は、多くの場合、還元剤を有効成分とするアルカリ性溶液である。", source: "No.39", answer: true, exp: "正しい。第1剤にはチオグリコール酸やシステインなどの還元剤と、反応を助けるアンモニア水などのアルカリ剤が配合されています。" },
+    { id: "test_koshohin_extra_haircare_40", text: "酸化染毛剤を使用する際のパッチテスト（皮膚アレルギー試験）は、染毛の36時間前に行うことが義務付けられている。", source: "No.40", answer: false, exp: "誤り。パッチテストは、染毛の「48時間前」に毎回必ず行う必要があります。" },
+    { id: "test_koshohin_extra_haircare_41", text: "一時染毛料（一時着色料）は、着色成分を毛髪の表面に物理的に付着させるだけであり、1回のシャンプーで落とすことができる。", source: "No.41", answer: true, exp: "正しい。毛髪内部まで浸透する永久染毛剤とは異なり、表面に付着させるだけなので効果は一時的です。" },
+    { id: "test_koshohin_extra_haircare_42", text: "酸化染毛剤は、染料が毛髪表面に物理的に付着するだけなので、還元反応を利用して色を定着させる。", source: "No.42", answer: false, exp: "誤り。酸化染毛剤は、本来無色の酸化染料を毛髪内部まで浸透させ、酸化剤によって「酸化重合」させて巨大な有色染料にすることで定着させます。" },
+    { id: "test_koshohin_extra_haircare_43", text: "一時染毛料は、法定色素や顔料などの着色成分をアルコールやロウ類などと混合し、毛髪表面に付着しやすくしたものである。", source: "No.43", answer: true, exp: "正しい。一時染毛料は、着色成分を物理的に毛髪の表面に付着させることで色を付ける製品です。" },
+    { id: "test_koshohin_extra_haircare_44", text: "パーマネントウエーブ用剤の第1剤は、毛髪を構成するケラチンの化学構造の一部を酸化させる働きを持つ。", source: "No.44", answer: false, exp: "誤り。パーマ第1剤の役割は「還元」であり、ケラチンのシスチン結合を切断します。酸化作用を持つのは第2剤です。" },
+    { id: "test_koshohin_extra_haircare_45", text: "香粧品に用いられる酸化剤のうち、過硫酸塩よりも過酸化水素のほうが強い酸化作用を持っている。", source: "No.45", answer: false, exp: "誤り。ブリーチ力を高めるために添加される「過硫酸塩」のほうが、過酸化水素よりも強い酸化作用を持ちます。" },
+    { id: "test_koshohin_extra_haircare_46", text: "頭皮・毛髪用香粧品の配合成分において、育毛剤にはセンブリエキスが用いられることがある。", source: "No.46", answer: true, exp: "正しい。育毛剤の代表的な有効成分として、センブリエキスを配合する組み合わせは適切です。" },
+],
+"E.総合問題": [
+    { id: "test_koshohin_extra_sogomondai_47", text: "SPF値は、中波長紫外線(UV-B)を防御する程度を示す指標である。", source: "No.47", answer: true, exp: "正しい。SPFはUV-Bによるサンバーン（紅斑）を防ぐ指標であり、PAは長波長紫外線(UV-A)によるサンタン（皮膚の黒化）を防ぐ指標です。" },
+    { id: "test_koshohin_extra_sogomondai_48", text: "香粧品の微生物汚染のうち、消費者が使用・保管している状況で起こる汚染を一次汚染という。", source: "No.48", answer: false, exp: "誤り。消費者の使用・保管状況で起こる汚染は「二次汚染」です。製造工程などでメーカー側で生じるものを一次汚染といいます。" },
+    { id: "test_koshohin_extra_sogomondai_49", text: "カラーエナメルにおいて重要な性質は、光沢があることと密着性がよいことである。", source: "No.49", answer: true, exp: "正しい。爪を美しく見せるカラーエナメルには、優れた光沢感と、日常の動作で容易に剥離しない高い密着性が求められます。" },
+    { id: "test_koshohin_extra_sogomondai_50", text: "固形ファンデーションのうち、ケーキタイプは、油脂分が少なく、乾燥しやすい冬季の保湿メイクに最も適している。", source: "No.50", answer: false, exp: "誤り。ケーキタイプは耐水性に優れ、化粧崩れが少ないという特徴があるため、汗をかきやすい「夏季」の使用に適しています。" },
+    { id: "test_koshohin_extra_sogomondai_51", text: "界面活性剤のうち、非イオン界面活性剤は陰イオン界面活性剤よりも起泡性（泡立ち）に優れている。", source: "No.51", answer: false, exp: "誤り。非イオン界面活性剤は一般に泡立ちが少ないのが特徴です。起泡性や洗浄性に優れているのは「陰イオン界面活性剤」です。" },
+    { id: "test_koshohin_extra_sogomondai_52", text: "薬用石けんのように、配合されている有効成分によっては、同じ石けんでも「化粧品」と「医薬部外品」の差異が生じることがある。", source: "No.52", answer: true, exp: "正しい。特定の効能（殺菌・消毒など）を目的とした有効成分が配合されているものは医薬部外品に分類されます。" },
+    { id: "test_koshohin_extra_sogomondai_53", text: "香粧品原料としての乳酸は、主に油と水を混ぜ合わせるための乳化剤の目的で配合される。", source: "No.53", answer: false, exp: "誤り。乳酸は「収れん剤」やpH調整剤として用いられます。乳化剤としての役割を担うのは界面活性剤です。" },
+    { id: "test_koshohin_extra_sogomondai_54", text: "過酸化水素水は、酸化染毛剤や脱色剤において酸化剤として用いられる。", source: "No.54", answer: true, exp: "正しい。過酸化水素水は酸化剤として働き、メラニン色素の分解（脱色）や酸化染料の発色を助ける役割を担います。" },
+],
+"F.その他": [
+    { id: "test_koshohin_extra_sonota_01", text: "香水は、一般的にエタノールを基剤として、15〜30％程度の調合香料を溶解・熟成させたものである。", source: "その他-01", answer: true, exp: "正しい。香水の基剤（溶媒）にはエタノールが用いられ、賦香率は15〜30％(もしくは15～25％)程度と、オードトワレなどと比較して高く設定されています。" },
+    { id: "test_koshohin_extra_sonota_02", text: "体臭などの独特な強い臭気の原因は、主に全身に分布し体温調節を司るエクリン腺からの分泌物である。", source: "その他-02", answer: false, exp: "誤り。独特の強い臭気の原因となるのは「アポクリン腺」からの分泌物です。エクリン腺の汗は主に体温調節用であり、本来は無臭に近いものです。" },
+    { id: "test_koshohin_extra_sonota_03", text: "毛髪の3層構造は、外側から毛小皮（キューティクル）、毛髄質（メデュラ）、毛皮質（コルテックス）の順で並んでいる。", source: "その他-03", answer: false, exp: "誤り。外側からの正しい順番は、毛小皮（キューティクル）→ 毛皮質（コルテックス）→ 毛髄質（メデュラ）です。" },
+    { id: "test_koshohin_extra_sonota_04", text: "カラーエナメルに使用されるニトロセルロースは、天然のセルロースを原料として化学処理を施した半合成高分子化合物である。", source: "その他-04", answer: true, exp: "正しい。ニトロセルロースは天然の物質をベースに化学的な加工を加えているため、半合成高分子化合物に分類されます。" }
+]
+        }
+    },
+    "test_koshohin_ingredients_2026": {  // ここを修正！
+        title: "重要成分",  // ここを修正！
+        questionPool: {
+"No02.重要成分": [
+    { id: "test_koshohin_important_ingredients_01", text: "エタノールは、香粧品において溶剤や溶媒として非常によく用いられる成分である。", source: "重要成分No.01", answer: true, exp: "正しい。エタノール（エチルアルコール）は溶剤・溶媒としての出題頻度が高く、多くの製品に利用されます。" },
+    { id: "test_koshohin_important_ingredients_02", text: "セタノールは、水に溶けやすい性質を持つ低級アルコールに分類される。", source: "重要成分No.02", answer: false, exp: "誤り。セタノールは乳化助剤や粘度付与を目的として用いられる「高級アルコール」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_03", text: "ワセリンは、ハゼノキの実から抽出されるモクロウと同様の植物性油脂の一種である。", source: "重要成分No.03", answer: false, exp: "誤り。ワセリンは石油から得られる「炭化水素（鉱物油）」であり、化学的に極めて安定した成分です。" },
+    { id: "test_koshohin_important_ingredients_04", text: "グリセリンは、水になじみやすい親水基と油になじみやすい親油基を併せ持つ界面活性剤である。", source: "重要成分No.04", answer: false, exp: "誤り。グリセリンは3価の「多価アルコール」であり、吸湿性を利用した保湿剤として機能します。" },
+    { id: "test_koshohin_important_ingredients_05", text: "メタノール（メチルアルコール）は、毒性が強いため化粧品基準において配合が禁止されている。", source: "重要成分No.05", answer: true, exp: "正しい。メタノールは視神経障害や中毒症状を起こすおそれがあるため、香粧品への配合は禁じられています。" },
+    { id: "test_koshohin_important_ingredients_06", text: "イソプロパノール（イソプロピルアルコール）は、殺菌力や防腐作用を持つ成分として知られるアルコールの一種である。", source: "重要成分No.06", answer: true, exp: "正しい。イソプロパノールは溶剤としての働きのほか、殺菌・防腐目的でも香粧品に利用されます。" },
+    { id: "test_koshohin_important_ingredients_07", text: "スクワランは、不飽和炭化水素であるスクワレンに水素を添加して安定させた「飽和炭化水素」に該当する。", source: "重要成分No.07", answer: true, exp: "正しい。水素を添加することで酸化されにくく安定した油性原料となり、広く利用されています。" },
+    { id: "test_koshohin_important_ingredients_08", text: "パラフィンは、石油から得られる鉱物油であり、香粧品原料の分類では炭化水素に属している。", source: "重要成分No.08", answer: true, exp: "正しい。パラフィンや流動パラフィンは石油由来の安定した炭化水素（油性原料）です。" },
+    { id: "test_koshohin_important_ingredients_09", text: "ホホバ油は、化学的な構造が油脂（トリグリセリド）と同様であるため、植物性油脂の一種として分類される。", source: "重要成分No.09", answer: false, exp: "誤り。ホホバ油は語尾に「油」と付きますが、構造上は高級脂肪酸と高級アルコールが結合した「植物性ロウ」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_10", text: "ラノリンは、羊の毛から得られる分泌物を精製して得られる代表的な「動物性ロウ」である。", source: "重要成分No.10", answer: true, exp: "正しい。ラノリンはヒトの皮脂に似た性質を持ち、クリーム等の保湿剤（ロウ類）として用いられます。" },
+    { id: "test_koshohin_important_ingredients_11", text: "アセトンは、ヘアスプレーの内容物を霧状に噴射させるための噴射剤として配合される。", source: "重要成分No.11", answer: false, exp: "誤り。アセトンはネイルエナメルを落とすための「除光液（エナメルリムーバー）」に用いられる溶媒です。" },
+    { id: "test_koshohin_important_ingredients_12", text: "オリーブ油は、ネイルエナメルの主要な皮膜形成剤として用いられる合成樹脂の一種である。", source: "重要成分No.12", answer: false, exp: "誤り。オリーブ油は植物から得られる「油脂」に分類される代表的な油性原料です。" },
+    { id: "test_koshohin_important_ingredients_13", text: "カルナウバロウは、水に溶けない油分を溶かすための代表的な有機溶媒である。", source: "重要成分No.13", answer: false, exp: "誤り。カルナウバロウは植物から得られる「ロウ類」であり、固形製品の硬度調整や光沢付与に用いられます。" },
+    { id: "test_koshohin_important_ingredients_14", text: "スクワレンは、動植物から得られる飽和炭化水素であり、化学的に非常に安定しているのが特徴である。", source: "重要成分No.14", answer: false, exp: "誤り。スクワレンは「不飽和炭化水素」です。これに水素を添加して安定させたものが、飽和炭化水素のスクワランです。" },
+    { id: "test_koshohin_important_ingredients_15", text: "ヒマシ油は、香粧品原料の分類において植物性油脂に該当する代表的な油性原料である。", source: "重要成分No.15", answer: true, exp: "正しい。ヒマシ油はトウゴマの種子から得られる代表的な植物性油脂です。" },
+    { id: "test_koshohin_important_ingredients_16", text: "マイクロクリスタリンワックスは、天然の動植物から得られるロウ類に分類される成分である。", source: "重要成分No.16", answer: false, exp: "誤り。マイクロクリスタリンワックスは石油から得られる「炭化水素」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_17", text: "レシチンは、大豆や卵黄などから得られる代表的な両性界面活性剤である。", source: "重要成分No.17", answer: true, exp: "正しい。レシチンは天然由来の両性界面活性剤であり、乳化剤や顔料の分散剤として用いられます。" },
+    { id: "test_koshohin_important_ingredients_18", text: "アルキル硫酸ナトリウムは、起泡性や洗浄性に優れた陰イオン（アニオン）界面活性剤である。", source: "重要成分No.18", answer: true, exp: "正しい。洗浄力が高いため、シャンプー等の洗浄用香粧品の主成分として広く利用されています。" },
+    { id: "test_koshohin_important_ingredients_19", text: "アミノ変性シリコーンは、毛髪への親和性が高く、優れたコンディショニング効果を発揮する成分である。", source: "重要成分No.19", answer: true, exp: "正しい。シリコーンの中でもアミノ変性タイプは毛髪に吸着しやすく、指通りを良くする効果があります。" },
+    { id: "test_koshohin_important_ingredients_20", text: "塩化アルキルトリメチルアンモニウムは、静電気を防ぐ効果を持つ陽イオン界面活性剤である。", source: "重要成分No.20", answer: true, exp: "正しい。ヘアリンス剤などに配合され、毛髪の帯電を防止する効果を持つ第四級アンモニウム塩です。" },
+    { id: "test_koshohin_important_ingredients_21", text: "ステアリン酸は高級脂肪酸に分類され、クリームなどの基剤原料として広く用いられる成分である。", source: "重要成分No.21", answer: true, exp: "正しい。ステアリン酸は代表的な高級脂肪酸であり、多くの製品のベースとして利用されます。" },
+    { id: "test_koshohin_important_ingredients_22", text: "メチルポリシロキサンは、高級アルコールに分類される成分であり、水に非常によく溶ける性質を持つ。", source: "重要成分No.22", answer: false, exp: "誤り。メチルポリシロキサンは「シリコーン油」に分類される油性成分です。" },
+    { id: "test_koshohin_important_ingredients_23", text: "酸化チタンは、被覆力（隠ぺい力）が大きく屈折率が高い白色顔料に分類される成分である。", source: "重要成分No.23", answer: true, exp: "正しい。酸化チタンは代表的な白色顔料であり、ファンデーションやおしろい類に用いられます。" },
+    { id: "test_koshohin_important_ingredients_24", text: "雲母（マイカ）の表面を酸化チタンで覆った雲母チタンは、製品に光沢を与える「光輝性顔料」に分類される。", source: "重要成分No.24", answer: true, exp: "正しい。雲母チタンはパールのような光沢を出すための代表的なパール顔料です。" },
+    { id: "test_koshohin_important_ingredients_25", text: "酸化鉄は、黄色・黒色・赤色などの色彩を有しており、光沢を出すための「パール顔料」として主に用いられる。", source: "重要成分No.25", answer: false, exp: "誤り。酸化鉄（ベンガラ等）は、製品に色彩を与えるための「着色顔料」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_26", text: "天然色素の一種であるβ-カロチンは、ニンジンなどの植物に多く含まれる成分である。", source: "重要成分No.26", answer: true, exp: "正しい。β-カロチンは代表的な天然色素であり、ニンジン等の有色野菜に含まれています。" },
+    { id: "test_koshohin_important_ingredients_27", text: "イソプロピルメチルフェノールは、製品に真珠のような光沢を与えるための光輝性顔料として配合される。", source: "重要成分No.27", answer: false, exp: "誤り。イソプロピルメチルフェノールは、製品を微生物から守ったり殺菌したりするための「殺菌剤」です。" },
+    { id: "test_koshohin_important_ingredients_28", text: "キトサンは、カニの甲羅などに含まれるキチンから得られる動物系の天然高分子化合物である。", source: "重要成分No.28", answer: true, exp: "正しい。甲殻類の殻から抽出・加工して得られる動物由来の天然高分子化合物です。" },
+    { id: "test_koshohin_important_ingredients_29", text: "ベンガラ（赤色酸化鉄）は、植物から抽出される赤色の天然色素に分類される。", source: "重要成分No.29", answer: false, exp: "誤り。ベンガラは、無機顔料の「着色顔料」に分類される成分です。" },
+    { id: "test_koshohin_important_ingredients_30", text: "パラオキシ安息香酸エステルは、主に紫外線から皮膚を保護するための紫外線吸収剤として配合される。", source: "重要成分No.30", answer: false, exp: "誤り。パラオキシ安息香酸エステル（パラベン）は、微生物による製品の変質を防ぐために配合される「防腐剤」です。" },
+    { id: "test_koshohin_important_ingredients_31", text: "パラアミノ安息香酸エステルは、紫外線吸収剤に分類される成分である。", source: "重要成分No.31", answer: true, exp: "正しい。名称が似ている防腐剤（パラオキシ安息香酸エステル）と混同されやすいですが、こちらは紫外線吸収剤です。" },
+    { id: "test_koshohin_important_ingredients_32", text: "ジブチルヒドロキシトルエン（BHT）は、製品中の微生物の増殖を抑えるための殺菌剤として配合される。", source: "重要成分No.32", answer: false, exp: "誤り。ジブチルヒドロキシトルエン（BHT）は、油脂などの油性成分が酸化して変質するのを防ぐ「酸化防止剤」です。" },
+    { id: "test_koshohin_important_ingredients_33", text: "エチレンジアミン四酢酸（EDTA）は、酸化防止剤としての働きのほか、金属イオン封鎖剤（キレート剤）とも呼ばれる。", source: "重要成分No.33", answer: true, exp: "正しい。別名をエデト酸といい、微量の金属イオンによる製品の変質を防ぐために配合されます。" },
+    { id: "test_koshohin_important_ingredients_34", text: "パラフェノールスルホン酸亜鉛は、製品中の油脂の酸化による変質を防ぐ「酸化防止剤」として配合される。", source: "重要成分No.34", answer: false, exp: "誤り。パラフェノールスルホン酸亜鉛は、皮膚を引き締める効果を持つ「収れん剤」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_35", text: "じゃ香（ムスク）は、ジャコウジカから得られる代表的な動物性香料である。", source: "重要成分No.35", answer: true, exp: "正しい。じゃ香はムスクとも呼ばれる代表的な動物性香料です。" },
+    { id: "test_koshohin_important_ingredients_36", text: "トコフェロールはビタミンEの一種であり、香粧品において油脂の酸化を防ぐ酸化防止剤として配合される。", source: "重要成分No.36", answer: true, exp: "正しい。トコフェロールは製品の安定性を高めるための代表的な酸化防止剤です。" },
+    { id: "test_koshohin_Description_of_ingredients_01", text: "エタノールは、水に溶けない油分などを溶かす性質を持つ代表的な無機溶媒である。", source: "成分説明No.01", answer: false, exp: "誤り。エタノールは炭素を構造に含む「有機溶媒」に分類される成分です。" },
+    { id: "test_koshohin_Description_of_ingredients_02", text: "セタノールは、水に溶けやすい性質を持つ低級アルコールの一種である。", source: "成分説明No.02", answer: false, exp: "誤り。セタノールは乳化を助けたり製品に粘度を与えたりするために用いられる「高級アルコール」に分類されます。" },
+    { id: "test_koshohin_Description_of_ingredients_03", text: "ワセリンは石油から得られる炭化水素であり、別名で鉱物油とも表現される。", source: "成分説明No.03", answer: true, exp: "正しい。ワセリンは化学的に極めて安定した炭化水素であり、油性原料として広く利用されています。" },
+    { id: "test_koshohin_Description_of_ingredients_04", text: "グリセリンは代表的な油性原料であり、皮膚表面を油膜で覆うことで水分蒸発を防ぐエモリエント剤として働く。", source: "成分説明No.04", answer: false, exp: "誤り。グリセリンは「アルコール（多価アルコール）」に分類される水性原料であり、その吸湿性を利用した「保湿剤」として機能します。" },
+    { id: "test_koshohin_Description_of_ingredients_05", text: "メタノールは毒性が強いため、化粧品基準において配合が禁止されている成分である。", source: "成分説明No.05", answer: true, exp: "正しい。メタノール（メチルアルコール）は人体への有害性が高く、香粧品への配合は固く禁じられています。" },
+    { id: "test_koshohin_Description_of_ingredients_06", text: "イソプロパノール（イソプロピルアルコール）は、殺菌力があり防腐作用を持つ成分である。", source: "成分説明No.06", answer: true, exp: "正しい。イソプロパノールは溶剤としての働きのほか、殺菌・防腐目的でも香粧品に利用されます。" },
+    { id: "test_koshohin_Description_of_ingredients_07", text: "炭化水素に分類されるスクワレンは、不飽和炭化水素に該当する成分である。", source: "成分説明No.07", answer: true, exp: "正しい。不飽和炭化水素であるスクワレンに水素を添加して安定させたものが、飽和炭化水素のスクワランです。" },
+    { id: "test_koshohin_Description_of_ingredients_08", text: "流動パラフィンやワセリンは石油から得られる炭化水素であり、これらは「鉱物油」とも表現される。", source: "成分説明No.08", answer: true, exp: "正しい。石油から得られる炭化水素類は、一般に鉱物油と呼ばれ、安定した油性原料として広く用いられます。" },
+    { id: "test_koshohin_Description_of_ingredients_09", text: "ホホバ油は、化学的な構造が油脂（トリグリセリド）と同様であるため、植物性油脂の一種として分類される。", source: "成分説明No.09", answer: false, exp: "誤り。ホホバ油は構造上、高級脂肪酸と高級アルコールが結合した「植物性ロウ」に分類される原料です。" },
+    { id: "test_koshohin_Description_of_ingredients_10", text: "ラノリンは、羊の毛から得られる分泌物を精製して得られる代表的な動物性ロウである。", source: "成分説明No.10", answer: true, exp: "正しい。ラノリンはヒトの皮脂に似た性質を持ち、クリームなどの保湿・保護を目的としたロウ類として配合されます。" },
+    { id: "test_koshohin_Description_of_ingredients_17", text: "大豆や卵黄などから得ることができるレシチンは、両性界面活性剤に分類される成分である。", source: "成分説明No.17", answer: true, exp: "正しい。レシチンは天然由来の両性界面活性剤であり、乳化剤や顔料の分散剤として用いられます。" },
+    { id: "test_koshohin_Description_of_ingredients_18", text: "アルキル硫酸ナトリウムは、洗浄力や起泡性に優れた陰イオン界面活性剤（アニオン界面活性剤）である。", source: "成分説明No.18", answer: true, exp: "正しい。シャンプーなどの洗浄用香粧品の主成分としてよく用いられる成分です。" },
+    { id: "test_koshohin_Description_of_ingredients_23", text: "酸化チタンは無機顔料に分類され、屈折率が高く被覆力に優れた白色顔料である。", source: "成分説明No.23", answer: true, exp: "正しい。酸化チタンはおしろいやファンデーションなどのベースメイク製品に欠かせない白色顔料です。" },
+    { id: "test_koshohin_Description_of_ingredients_24", text: "雲母チタンは、製品に色彩を与えるための「着色顔料」に分類される成分である。", source: "成分説明No.24", answer: false, exp: "誤り。雲母チタンは、製品に真珠のような光沢を与える「光輝性顔料（パール顔料）」に分類されます。" },
+    { id: "test_koshohin_Description_of_ingredients_25", text: "酸化鉄は、黄色・赤色・黒色などの色彩を有しており、光沢を出すためのパール顔料として主に用いられる。", source: "成分説明No.25", answer: false, exp: "誤り。酸化鉄（ベンガラ等）は、製品に色彩を与えるための「着色顔料」に分類されます。" },
+    { id: "test_koshohin_Description_of_ingredients_30", text: "パラオキシ安息香酸エステルは、微生物による製品の変質を防ぐために配合される防腐剤である。", source: "成分説明No.30", answer: true, exp: "正しい。パラベンとも呼ばれる代表的な防腐剤であり、製品の品質保持に不可欠な成分です。" },
+    { id: "test_koshohin_Description_of_ingredients_31", text: "パラアミノ安息香酸エステルは、主に製品を微生物汚染から守るための防腐剤として配合される。", source: "成分説明No.31", answer: false, exp: "誤り。パラアミノ安息香酸エステルは、紫外線を吸収して皮膚を保護する「紫外線吸収剤」です。" },
+    { id: "test_koshohin_Description_of_ingredients_32", text: "ジブチルヒドロキシトルエンは、製品中の微生物の増殖を抑えて腐敗を防ぐための防腐剤である。", source: "成分説明No.32", answer: false, exp: "誤り。ジブチルヒドロキシトルエン（BHT）は、油脂などの油性成分が酸化して変質するのを防ぐための「酸化防止剤」です。" },
+    { id: "test_koshohin_Description_of_ingredients_33", text: "エチレンジアミン四酢酸は、金属イオン封鎖剤（キレート剤）であり、酸化の進行を抑制する効果がある。", source: "成分説明No.33", answer: true, exp: "正しい。金属イオンを封鎖することで、製品の酸化や変質を防ぎ安定性を高める役割を担います。" },
+    { id: "test_koshohin_Description_of_ingredients_34", text: "パラフェノールスルホン酸亜鉛は、油脂などの油性成分が酸化して変質するのを防ぐ酸化防止剤である。", source: "成分説明No.34", answer: false, exp: "誤り。パラフェノールスルホン酸亜鉛は、皮膚を引き締める効果を持つ「収れん剤」に分類されます。" },
+],
+"No05.重要成分": [
+    { id: "test_koshohin_important_ingredients_37", text: "ポリビニルピロリドン（PVP）は、シャンプーの主成分として汚れを落とす役割を担う界面活性剤である。", source: "重要成分No.37", answer: false, exp: "誤り。ポリビニルピロリドン（PVP）は、ヘアスプレーなどのセット剤に配合される「皮膜形成剤」に分類されます。" },
+    { id: "test_koshohin_important_ingredients_38", text: "ジメチルエーテル（DME）は、汚れを落とす作用が強い陰イオン界面活性剤の主成分である。", source: "重要成分No.38", answer: false, exp: "誤り。ジメチルエーテル（DME）は、エアゾール製品において内容物を噴射させるための「噴射剤」です。" },
+    { id: "test_koshohin_important_ingredients_39", text: "パーマ剤の第2剤に配合される臭素酸ナトリウムは、過酸化水素水よりも酸化作用が強い。", source: "重要成分No.39", answer: false, exp: "誤り。臭素酸ナトリウム（または臭素酸カリウム）は、過酸化水素水よりも酸化作用が「弱い（穏やか）」のが特徴です。" },
+    { id: "test_koshohin_important_ingredients_40", text: "還元剤であるチオグリコール酸は、同じ還元剤であるシステインよりもウエーブ形成力が強い。", source: "重要成分No.40", answer: true, exp: "正しい。チオグリコール酸はシステインよりも還元作用が強く、しっかりとしたウエーブを作るのに適しています。" },
+    { id: "test_koshohin_important_ingredients_41", text: "アンモニア水は不揮発性のアルカリ剤であるため、長時間毛髪に残留して作用し続ける特徴がある。", source: "重要成分No.41", answer: false, exp: "誤り。アンモニア水は「揮発する」性質を持つため、毛髪に残留しにくく過剰作用のおそれが比較的少ないアルカリ剤です。" },
+    { id: "test_koshohin_important_ingredients_42", text: "過酸化水素水はパーマ剤の第2剤に配合される酸化剤であり、臭素酸塩よりも強い酸化力を持つ。", source: "重要成分No.42", answer: true, exp: "正しい。過酸化水素水は、同じ酸化剤である臭素酸ナトリウムや臭素酸カリウムよりも酸化力が強い成分です。" },
+    { id: "test_koshohin_important_ingredients_43", text: "システインは、パーマ剤において第2剤に配合される代表的な酸化剤である。", source: "重要成分No.43", answer: false, exp: "誤り。システインは「還元剤」に分類され、第1剤に配合されます。チオグリコール酸に比べて反応が穏やかです。" },
+    { id: "test_koshohin_important_ingredients_44", text: "パラフェニレンジアミンは、酸化されることで初めて発色する「染料中間体」である。", source: "重要成分No.44", answer: true, exp: "正しい。パラフェニレンジアミンは代表的な酸化染料（染料中間体）であり、酸化剤の働きによって発色します。" },
+    { id: "test_koshohin_important_ingredients_45", text: "モノエタノールアミンは、アンモニア水と同様に揮発性が高いため、特有の強い刺激臭がある。", source: "重要成分No.45", answer: false, exp: "誤り。モノエタノールアミンは「揮発しない」アルカリ剤であるため、刺激臭は少ないですが、毛髪に残留しやすく過剰作用に注意が必要です。" },
+    { id: "test_koshohin_important_ingredients_46", text: "レゾルシンは酸化染料の一種であり、単独で酸化されてもほとんど発色しない調色剤（カップラー）として用いられる。", source: "重要成分No.46", answer: true, exp: "正しい。レゾルシンは他の酸化染料中間体と組み合わせて様々な色調を作るために使用されます。" },
+    { id: "test_koshohin_important_ingredients_47", text: "脱染剤などに含まれる過硫酸塩は、過酸化水素水よりも強い酸化作用を持っている。", source: "重要成分No.47", answer: true, exp: "正しい。過硫酸塩は強力な酸化剤であり、ブリーチ力を高める目的で配合されます。" },
+    { id: "test_koshohin_important_ingredients_48", text: "炭酸水素アンモニウムは、少量の配合でpHを大きく上昇させることができるため、強い作用を持つパーマ剤を得るのに適している。", source: "重要成分No.48", answer: false, exp: "誤り。炭酸水素アンモニウムはpHを大きく上昇させることができないため、強い作用のパーマ剤を得ることはできません。" },
+    { id: "test_koshohin_important_ingredients_49", text: "ニトロパラフェニレンジアミンは、酸化される前からそれ自体が色を有している直接染料である。", source: "重要成分No.49", answer: true, exp: "正しい。酸化染料の中でも、もともと色を持っている成分を直接染料と呼びます。" },
+    { id: "test_koshohin_important_ingredients_50", text: "メタフェニレンジアミンは酸化染料の一種であり、単独で酸化されてもほとんど発色しない調色剤（カップラー）である。", source: "重要成分No.50", answer: true, exp: "正しい。調色剤は他の染料中間体と組み合わせて使用される成分です。" },
+    { id: "test_koshohin_Description_of_ingredients_37", text: "ポリビニルピロリドンは、汚れを落とす作用が強い洗浄剤の一種である。", source: "成分説明No.37", answer: false, exp: "誤り。ポリビニルピロリドン（PVP）は、ヘアスプレーなどのセット剤において、乾燥して透明な皮膜を作る「皮膜形成剤」として用いられます。" },
+    { id: "test_koshohin_Description_of_ingredients_39", text: "臭素酸ナトリウムは酸化剤に分類され、パーマ第2剤においてシスチン結合を再結合させる働きを持つ。", source: "成分説明No.39", answer: true, exp: "正しい。臭素酸ナトリウムは第2剤に配合され、切断された結合を酸化によって再結合させます。" },
+    { id: "test_koshohin_Description_of_ingredients_40", text: "パーマ剤に用いられる還元剤のチオグリコール酸は、システインよりもウエーブ形成力が弱い。", source: "成分説明No.40", answer: false, exp: "誤り。チオグリコール酸はシステインよりも還元作用が強く、ウエーブ形成力が「強い」のが特徴です。" },
+    { id: "test_koshohin_Description_of_ingredients_41", text: "アルカリ剤であるアンモニア水は、不揮発性の成分であるため毛髪に長時間残留して作用し続ける。", source: "成分説明No.41", answer: false, exp: "誤り。アンモニア水は「揮発する」性質を持つため、毛髪に残留しにくく過剰作用のおそれが比較的少ない成分です。" },
+    { id: "test_koshohin_Description_of_ingredients_42", text: "一般的なパーマ剤として配合される濃度において、過酸化水素水は臭素酸塩よりも強い酸化力を持つ。", source: "成分説明No.42", answer: true, exp: "正しい。過酸化水素水は臭素酸塩よりも酸化力が強く、短時間で再結合反応を進行させます。" },
+    { id: "test_koshohin_Description_of_ingredients_43", text: "システインは主に第2剤の有効成分として配合される酸化剤である。", source: "成分説明No.43", answer: false, exp: "誤り。システインは「還元剤」に分類され、パーマ第1剤に配合されてシスチン結合を切断する役割を担います。" },
+    { id: "test_koshohin_Description_of_ingredients_44", text: "パラフェニレンジアミンは、酸化されることで初めて色素を形成し発色する染料中間体である。", source: "成分説明No.44", answer: true, exp: "正しい。酸化染毛剤の主成分であり、第2剤の酸化剤と反応して巨大な有色染料となります。" },
+    { id: "test_koshohin_Description_of_ingredients_45", text: "モノエタノールアミンは揮発しないアルカリ剤であるが、少量配合でpHを大きく上昇させるため強いパーマ剤が得られる。", source: "成分説明No.45", answer: true, exp: "正しい。アンモニア水と同様にpH上昇能力が高い不揮発性アルカリ剤であり、強いウエーブ形成に寄与します。" },
+    { id: "test_koshohin_Description_of_ingredients_46", text: "酸化染料に分類されるレゾルシンは、単独で酸化されると鮮やかな赤色に発色する染料中間体である。", source: "成分説明No.46", answer: false, exp: "誤り。レゾルシンは「調色剤（カップラー）」であり、単独で酸化されてもほとんど発色しないのが特徴です。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_koshohin_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_koshohin_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_koshohin_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_koshohin_extra_2026" // ここを修正！
+    },
+    { 
+        id: "important_ingredients", 
+        label: "重要成分",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_koshohin_ingredients_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
