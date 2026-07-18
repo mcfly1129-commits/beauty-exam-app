@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『美容技術理論』</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題(頻出抜粋)</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_gijuturiron_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_gijuturiron_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題(頻出抜粋)",  // ここを修正！
+        questionPool: {
+"①No01.学ぶにあたって": [
+    { id: "unekanri_original_1_No01_01", text: "立位作業を行うときは、技術者の重心から下した垂線が両足に囲まれた領域内にあると姿勢が安定する。", source: "①No01-01", answer: true, exp: "正しい。安定した作業姿勢をとるためには、重心の位置を両足で囲む領域内に収めることが、身体のバランスを保つ上で重要です。" },
+    { id: "unekanri_original_1_No01_02", text: "前頭部の生え際と正中線の交わった点をトップポイントという。", source: "①No01-02", answer: false, exp: "誤り。前頭部の生え際と正中線の交わった点はフロントポイントです。トップポイントは頭部の頂点（正中線上）の点を指します。" },
+    { id: "unekanri_original_1_No01_03", text: "頭部の基準となるポイントにおいて、正中線上で後頭部の一番凸の部分をネープポイントという。", source: "①No01-03", answer: false, exp: "誤り。後頭部で最も突出した点はバックポイントです。ネープポイントは、正中線と裾際（襟足）の生え際が交差した点を指します。" },
+    { id: "unekanri_original_1_No01_04", text: "頭部の基準点において、頭部の頂点で正中線上にある点をトップポイント、耳のつけ根の上の部分をイヤーポイントという。", source: "①No01-04", answer: true, exp: "正しい。頭部の頂点はトップポイント、耳の付け根の真上はイヤーポイントと呼ばれ、カッティングやブロッキングの際の重要な目印となります。" },
+],
+"①No02.美容用具": [
+    { id: "unekanri_original_1_No02_01", text: "コームの歯先は、頭皮に接して毛髪を引き起こし、カッティングやセッティングの手引きをする働きがある。", source: "①No02-01", answer: true, exp: "正しい。コームの各部位において、歯先は頭皮に直接触れることで毛髪を立たせ、その後の操作をスムーズにする役割を担っています。" },
+    { id: "unekanri_original_1_No02_02", text: "コームの各部位のうち、歯元（はもと）はコーム全体の支えとなり、操作時のバランスをとる働きがある。", source: "①No02-02", answer: false, exp: "誤り。全体の支えとなりバランスをとるのは「胴」の部分です。歯元は、コームの目に入った毛髪を一線にそろえる働きをします。" },
+    { id: "unekanri_original_1_No02_03", text: "コーム各部の名称のうち「肩」は、コームの目に入った毛髪を一線にそろえるはたらきをする。", source: "①No02-03", answer: false, exp: "誤り。コームの目に入った毛髪を一線にそろえるのは「歯元」のはたらきです。肩は、胴から歯に続く湾曲した部分を指します。" },
+    { id: "unekanri_original_1_No02_04", text: "シザーズの支点となる鋏要（はさみかなめ）から遠い側では、力の調整がしやすく繊細な作業がしやすい。", source: "①No02-04", answer: true, exp: "正しい。シザーズは支点から遠い刃先側のほうが、より細かな力の制御が可能なため、精密なカッティング作業に向いています。" },
+    { id: "unekanri_original_1_No02_05", text: "シザーズが応用しているてこの原理において、指を差し込んで操作し力を加える部分は作用点と呼ばれる。", source: "①No02-05", answer: false, exp: "誤り。指を差し込んで力を加える部分は力点です。ネジの部分が支点、毛髪を切る刃先の部分が作用点となります。" },
+    { id: "unekanri_original_1_No02_06", text: "ヘアカッティングに用いるシザーズは、力学的には「てこの原理」を応用して毛髪を切断する構造になっている。", source: "①No02-06", answer: true, exp: "正しい。シザーズは指を差し込む環の部分を力点、ネジを支点、刃先を作用点とする、てこの原理を利用した美容道具です。" },
+    { id: "unekanri_original_1_No02_07", text: "シザーズの基本操作においては、薬指側の刃（静刃）を安定させて固定し、母指（親指）で操作する側の刃（動刃）を開閉させる。", source: "①No02-07", answer: true, exp: "正しい。カッティングの精度を高めるため、薬指で静刃をしっかりと固定し、親指だけを動かして動刃を操作するのがシザーズの正しい扱い方です。" },
+    { id: "unekanri_original_1_No02_08", text: "シザーズの基本操作において、母指（親指）を差し込んで開閉操作を行う側の刃を静刃という。", source: "①No02-08", answer: false, exp: "誤り。母指で操作する側の刃は動刃です。静刃は薬指を入れ、動かさずに固定して支えとなる方の刃を指します。" },
+    { id: "unekanri_original_1_No02_09", text: "シザーズの基本操作では、薬指を差し込んで固定する側の刃を動刃、母指（親指）を差し込んで開閉させる側の刃を静刃という。", source: "①No02-09", answer: false, exp: "誤り。母指で操作する側の刃が動刃、薬指を差し込んで固定する側の刃が静刃です。" },
+    { id: "unekanri_original_1_No02_10", text: "ヘアカッティングに用いる本レザーの刃線の形態は、毛髪を切る際の力の配分を均等にするため、直線状ないしは外曲線状につくられている。", source: "①No02-10", answer: true, exp: "正しい。本レザーの刃が内曲線状になっていると、カッティングの際に力の配分が均等にならず正しく操作できないため、直線または外側に膨らんだ形状が採用されています。" },
+    { id: "unekanri_original_1_No02_11", text: "電気ヘアアイロンのロッド表面には、ヘアローションなどが焦げつかないように、アクリル樹脂による加工が施されている。", source: "①No02-11", answer: false, exp: "誤り。ヘアアイロンのロッド表面に施されているのはフッ素樹脂加工です。アクリル樹脂ではありません。" },
+    { id: "unekanri_original_1_No02_12", text: "ヘアアイロンには、設定された温度を一定に維持するための安全装置として、サーモスタットが内蔵されている。", source: "①No02-12", answer: true, exp: "正しい。ヘアアイロンは過加熱を防ぎ設定温度を一定に保つ安全装置として「サーモスタット」が内蔵されています。ドライヤーの構造では「ファン」「モーター」「発熱器」の3要素が重要視されます。" },
+    { id: "unekanri_original_1_No02_13", text: "ヘアドライヤーの構造において中心をなす三要素は、発熱器、モーター、およびスイッチである。", source: "①No02-13", answer: false, exp: "誤り。ヘアドライヤーの構造で中心となるのは、ファン、発熱器、モーターの3つです。" },
+    { id: "unekanri_original_1_No02_14", text: "ヘアドライヤーの内部構造において中心をなす要素は、風を起こすファン、ファンを回すためのモーター、および空気を温める発熱器である。", source: "①No02-14", answer: true, exp: "正しい。ドライヤーはモーターでファンを回転させて風を起こし、その風を発熱器（ニクロム線など）に通して熱せられた空気を送風する仕組みの美容用具です。" },
+    { id: "unekanri_original_1_No02_15", text: "美容で一般的に用いられるハンドドライヤーは、内部のファンによって風が旋回して送り出されるタービネートタイプである。", source: "①No02-15", answer: false, exp: "誤り。ハンドドライヤーは風を直接毛髪に吹き付けるブロータイプです。タービネートタイプは、風が旋回して送り出される方式で、主にスタンドドライヤーに採用されています。" },
+    { id: "unekanri_original_1_No02_16", text: "美容用電気器具の中には、遠赤外線の乾熱を利用することで、ヘアカラーやヘアトリートメントの技術効果を高める目的で使用される機器が存在する。", source: "①No02-16", answer: true, exp: "正しい。遠赤外線機は薬剤の浸透や定着を促進するために用いられる機器であり、毛髪に熱刺激を与える物理的な方法の一つとして教科書に記載されています。" },
+],
+"①No03.シャンプーイング": [
+    { id: "unekanri_original_1_No03_01", text: "シャンプーイングを行う際のお湯の温度は、頭皮の頑固な皮脂汚れを効率よく浮かせて落とすために、45〜48℃程度の高めに設定するのが適温である。", source: "①No03-01", answer: false, exp: "誤り。シャンプーの適温は38〜40℃です。高温すぎると皮膚や毛髪にダメージを与えたり、必要な脂分を奪いすぎて乾燥の原因となったりするため注意が必要です。" },
+    { id: "unekanri_original_1_No03_02", text: "セカンドシャンプーでは、ファーストシャンプーで落としきれなかった汚れをとるため、大きめの動きで時間をかけずに行うのが適切である。", source: "①No03-02", answer: false, exp: "誤り。セカンドシャンプーでは、汚れを完全に取り除くとともにマッサージ効果を意識するため、手の動きをやや細かくし、ファーストシャンプーよりも時間をかけて丁寧に行います。" },
+    { id: "unekanri_original_1_No03_03", text: "パーマネントウェーブやヘアカラーの施術後は、アルカリ性に傾いた毛髪のpHを整えるため、酸性効果のあるリンス剤を用いるのが適切である。", source: "①No03-03", answer: true, exp: "正しい。化学的な施術によってアルカリ性に寄った毛髪を、健康な状態である弱酸性に戻すために、酸性リンシングが行われます。" },
+    { id: "unekanri_original_1_No03_04", text: "トリートメント剤は、塗布した後に加温して用いることにより、薬剤の毛髪内部への浸透が促進される効果がある。", source: "①No03-04", answer: true, exp: "正しい。熱を加えることで毛髪の分子運動が活発になり、トリートメント成分がキューティクルの隙間から内部へより効率的に浸透しやすくなります。" },
+    { id: "unekanri_original_1_No03_05", text: "スキャルプトリートメントにおいて、ブラシを用いて頭皮に刺激を与える方法は化学的な方法に該当する。", source: "①No03-05", answer: false, exp: "誤り。ブラシの使用やマッサージは、物理的な力を用いるため物理的方法に分類されます。化学的な方法はヘアトニックなどの薬剤を用いる手法です。" },
+    { id: "unekanri_original_1_No03_06", text: "スキャルプトリートメントにおいて、指先や掌を用いて頭皮にもみほぐし等の刺激を与えるマッサージは、物理的方法に分類される。", source: "①No03-06", answer: true, exp: "正しい。ブラッシングやマッサージ、スチーマーの熱などは物理的な刺激を用いる物理的方法です。薬剤を用いるものは化学的方法に分類されます。" },
+    { id: "unekanri_original_1_No03_07", text: "スキャルプマッサージの基本手技のうち、母指を除く4指の指の腹を頭皮に軽く滑らせる方法は揉撚法（じゅうねんほう）である。", source: "①No03-07", answer: false, exp: "誤り。指の腹を頭皮に軽く滑らせる手技は軽擦法（けいさつほう）です。揉撚法は、指先全体で円を描くように頭皮を揉んでいく手技を指します。" },
+    { id: "unekanri_original_1_No03_08", text: "ニーディング（揉撚法）は、毛髪にトリートメント剤を浸透させる際の手技として用いられるヘアトリートメント技術である。", source: "①No03-08", answer: true, exp: "正しい。ニーディングは指先で揉むように薬剤をなじませる技法であり、ヘアトリートメントやスキャルプケアにおいて有効な手技の一つです。" },
+    { id: "unekanri_original_1_No03_09", text: "スキャルプマッサージの基本手技において、皮膚を押さえつけながら強く擦る方法は、揉捏法（ペトリサージュ）に該当する。", source: "①No03-09", answer: false, exp: "誤り。皮膚を押さえつけながら強く擦る手技は強擦法（フリクション）です。揉捏法は、4指と母指を用いてもみほぐす手技を指します。" },
+    { id: "unekanri_original_1_No03_10", text: "スキャルプマッサージの基本手技において、振動法は指先を頭皮に強く押し当て、手から急に力を抜く勢いで強くこする手技である。", source: "①No03-10", answer: false, exp: "誤り。設問の記述は「強擦法」に関する説明です。振動法は、腕全体を使って両手掌に振動を与えながら頭皮を圧迫していく手技を指します。" },
+    { id: "unekanri_original_1_No03_11", text: "スキャルプマッサージの基本手技のうち、打法（パーカッション）には、タッピング、ハッキング、カッピングなどが含まれる。", source: "①No03-11", answer: true, exp: "正しい。打法は指先や手のひらを用いてリズムカルに叩く技法であり、その手法によってタッピング、ハッキング、カッピングなどの種類があります。" },
+    { id: "unekanri_original_1_No03_12", text: "ヘッドスパの目的は、シャンプーだけでは取り除けない毛穴の老廃物を取り除き、頭皮の正常化を図ることである。", source: "①No03-12", answer: true, exp: "正しい。ヘッドスパは頭皮ケアを主眼としており、クレンジングによる汚れの除去やマッサージによる血行促進を通じて、健やかな頭皮環境を維持します。" },
+],
+"①No04.ヘアデザイン": [
+    { id: "unekanri_original_1_No04_01", text: "垂直線と水平線の長さが同じでも、水平線のほうが長く、垂直線のほうが短く見える現象を、距離・大きさの錯視という。", source: "①No04-01", answer: false, exp: "誤り。距離・大きさの錯視（フィリップ錯視等）では、実際には垂直線のほうが水平線よりも長く、水平線は短く感じられるのが一般的です。" },
+    { id: "unekanri_original_1_No04_02", text: "ポンゾ錯視とは、上下に並んだ同じ長さの2本の線分において、上方にある線分のほうが物理的な長さよりも長く見える現象をいう。", source: "①No04-02", answer: true, exp: "正しい。ポンゾ錯視は幾何学的錯視の一つであり、背景などの視覚的な条件によって、実際には同じ長さの図形が異なる長さに見えてしまう現象を指します。" },
+    { id: "unekanri_original_1_No04_03", text: "美容デザインの幾何学的錯視には、距離・大きさに関する錯視と、角度・方向に関する錯視の2つの分類がある。", source: "①No04-03", answer: true, exp: "正しい。幾何学的錯視は、線の配置や形によって生じる視覚的な錯覚であり、長さや大きさの見え方が変わるものと、角度や方向が歪んで見えるものに大別されます。" },
+    { id: "unekanri_original_1_No04_04", text: "ドンディスによる形の3つの基本形は、正方形・円・正三角形である。", source: "①No04-04", answer: true, exp: "正しい。デザインにおける視覚言語の基本要素として、ドンディスは正方形、円、正三角形の3つを基本形として定義しています。" },
+    { id: "unekanri_original_1_No04_05", text: "ヘアデザインにおける視覚言語の基本要素として、ドンディスによる形の3つの基本形は、正方形、円、正五角形である。", source: "①No04-05", answer: false, exp: "誤り。ドンディスによる形の3つの基本形は、正方形、円、正三角形です。正五角形は基本形には含まれません。" },
+    { id: "unekanri_original_1_No04_06", text: "デザインの原理において、斜線は平衡や均衡、あるいは強力な支柱を暗示する効果がある。", source: "①No04-06", answer: false, exp: "誤り。平衡・均衡・強力な支柱を暗示するのは垂直線です。斜線は、不安定感や運動感、緊張感を生じさせる効果があります。" },
+    { id: "unekanri_original_1_No04_07", text: "ロングのソバージュヘアは、大きなウェーブを付けた髪が曲線的に広がることで、ソフトで弱い印象を与えるスタイルである。", source: "①No04-07", answer: false, exp: "誤り。ソバージュヘアは細かいウェーブを付けた髪が直線的に広がるのが特徴であり、ワイルドで強い印象をあたえるスタイルです。" },
+    { id: "unekanri_original_1_No04_08", text: "プライマリーカラー（色の三原色）は、赤、黄、青の3色を基本としており、これらを混ぜ合わせることで様々な色を作ることができる。", source: "①No04-08", answer: true, exp: "正しい。色彩学における三原色は赤（マゼンタ系）、黄、青（シアン系）であり、これらは他の色を混ぜて作ることはできない独立した基本の色です。" },
+    { id: "unekanri_original_1_No04_09", text: "デザインの比率において、パルテノン神殿などの歴史的な建造物にも見られる黄金比は、最も安定した比率であるとされる。", source: "①No04-09", answer: true, exp: "正しい。黄金比は古くから最も美しく安定した比率として、建築や美術、人体のプロポーションの基準などに用いられてきました。" },
+    { id: "unekanri_original_1_No04_10", text: "ヘアデザインにおけるアシンメトリーとは、左右の形やボリュームが同一で、中心から対称に配置された安定感のある状態をいう。", source: "①No04-10", answer: false, exp: "誤り。設問の記述はシンメトリー（対称）の説明です。アシンメトリーは左右が非対称であることを指し、動きや活動的な変化を与える効果があります。" },
+    { id: "unekanri_original_1_No04_11", text: "ヘアデザインにおける調和（ハーモニー）とは、2つ以上の要素が響きあい融合することをいう。", source: "①No04-11", answer: true, exp: "正しい。調和は要素が溶け合う状態を指し、反対に色や形のぶつかりあいを強調する手法は対比（コントラスト）と呼びます。" },
+    { id: "unekanri_original_1_No04_12", text: "ヘアデザインにおいて、ストレートの質感とウェーブの質感を組み合わせる手法は、リズムの表現である。", source: "①No04-12", answer: false, exp: "誤り。異なる質感を組み合わせる手法は「対比（コントラスト）」です。リズムは、三つ編みのような周期的なパターンの繰り返しによって表現されます。" },
+],
+"①No05.ヘアカッティング": [
+    { id: "unekanri_original_1_No05_01", text: "シザーズなどの美容刃物に用いられるステンレス鋼には、クロムが約3〜6%含まれている。", source: "①No05-01", answer: false, exp: "誤り。ステンレス鋼に含まれるクロムの割合は約12〜18%です。3〜6%ではさびにくさを維持するのに不十分です。" },
+    { id: "unekanri_original_1_No05_02", text: "美容用のシザーズなどに用いられるステンレス鋼には、さびに強い性質を持たせるためにクロムが約12〜18%含まれている。", source: "①No05-02", answer: true, exp: "正しい。ステンレス鋼は一定量以上のクロムを含有することで表面に不動態被膜を形成し、優れた耐食性（さびにくさ）を発揮します。" },
+    { id: "unekanri_original_1_No05_03", text: "カッティングを行う際に目線の高さを調節する場合は、背筋を曲げて対応するのがよい。", source: "①No05-03", answer: false, exp: "誤り。目線の高さを調節する場合は、背筋を曲げずに膝の屈伸で対応するのが正しい姿勢です。無理な姿勢は技術の正確性を損なう原因となります。" },
+    { id: "unekanri_original_1_No05_04", text: "ヘアセッティングにおけるダウンステムとは、パネルの面を頭皮に対して90度より下の角度で引き出して構成することをいう。", source: "①No05-04", answer: true, exp: "正しい。引き出す角度が頭皮に対して90度より低い場合をダウンステムと呼び、仕上がりのボリュームを抑えたい場合に用いられます。" },
+    { id: "unekanri_original_1_No05_05", text: "ヘアカットにおいてパネルを右側に集めて切った場合、出来上がるカットラインは左側より右側のほうが長くなる。", source: "①No05-05", answer: false, exp: "誤り。右側にパネルを集めて切ると、集めた位置から最も遠い左側の毛が一番長く残るため、左に向かって徐々に長いカットラインになります。" },
+    { id: "unekanri_original_1_No05_06", text: "カッティングにおいてパネルの幅が同じ場合、パネルの長さが短いほうがカットラインの長さの誤差が小さくなる。", source: "①No05-06", answer: false, exp: "誤り。パネルの幅が同じ場合は、パネルの長さが短いほうが、カットラインの長さの誤差は大きくなります。" },
+    { id: "unekanri_original_1_No05_07", text: "すべてのパネルを頭皮に対して垂直（オンベース）に引き出してカットすると、シルエットは骨格に沿った均等なものになる。", source: "①No05-07", answer: true, exp: "正しい。オンベースでシェープすると、すべての毛髪が頭皮から同じ長さで切られるため、頭の形がそのままシルエットとして現れます。" },
+    { id: "unekanri_original_1_No05_08", text: "ヘアカッティングにおいて、ダウンステムでシェープしてカットした場合、仕上がりのシルエットは骨格に沿ったほぼ均等なものになる。", source: "①No05-08", answer: false, exp: "誤り。シルエットが骨格に沿った均等なものになるのは、オンベースにシェープしてカットした場合です。ダウンステムでは、引き出した角度により最も長い毛髪の部分がボリュームの頂点になります。" },
+    { id: "unekanri_original_1_No05_09", text: "ワンレングスカットとは、すべてのパネルを頭皮に対して垂直（オンベース）に引き出し、全体を同じ長さに切り揃えるカット技法である。", source: "①No05-09", answer: false, exp: "誤り。パネルを垂直に引き出して同じ長さに切るのはセイムレングスカットです。ワンレングスは毛髪が自然に落ちる位置でシェープし、すべてを同一線上で切る技法です。" },
+    { id: "unekanri_original_1_No05_10", text: "ワンレングススタイルは、パネルを頭皮に対して上方向（アップステム）に引き出してカットすることで、段差をつける技法である。", source: "①No05-10", answer: false, exp: "誤り。ワンレングスは毛髪が自然に落ちる位置で同一線上に切り揃えるブラントカットの技法です。アップステムでカットするのはレイヤースタイルなどです。" },
+    { id: "unekanri_original_1_No05_11", text: "グラデーションカットは、長さの異なる毛髪の層を重ね合わせるカット技法であり、レイヤーカットとも呼ばれている。", source: "①No05-11", answer: false, exp: "誤り。グラデーションカットは上部の層ほど毛髪が長くなるように段差（ステップ）をつける技法です。レイヤーカットは逆に上部ほど短く切る技法であり、両者は明確に区別されます。" },
+    { id: "unekanri_original_1_No05_12", text: "セニングカットは、セニングシザーズを用いてパネルの毛髪を間引くようにカットし、ヘアスタイルの毛量や質感を調整する技法である。", source: "①No05-12", answer: true, exp: "正しい。毛髪の上でシザーズを滑らせながら切るスライドカットとは異なり、セニングシザーズの櫛刃を利用して、特定の箇所の毛量を減らす調整技法を指します。" },
+    { id: "unekanri_original_1_No05_13", text: "ワンレングススタイルにおいてレイヤー状に毛量調節を行うと、ヘアスタイルにフラット感をあたえることができる。", source: "①No05-13", answer: true, exp: "正しい。ワンレングスの重みを調整するためにレイヤー状にセニングを施すことで、丸みを抑えて平面的なフラット感を出すことが可能です。" },
+    { id: "unekanri_original_1_No05_14", text: "セニングシザーズを用いてグラデーション状に毛量調整を行うことで、ヘアスタイルに丸みを出しながら量感を減らすことが可能である。", source: "①No05-14", answer: true, exp: "正しい。セニングでパネルの切り口にグラデーション状の段差をつけることにより、フォルムの丸みをコントロールしつつ、必要な箇所のボリュームを適切に抑えることができます。" },
+    { id: "unekanri_original_1_No05_15", text: "ブラントカットとは、すでにカッティングされたラインをさらにカットして修整し、仕上げる技法のことである。", source: "①No05-15", answer: false, exp: "誤り。ブラントカットは毛髪を直線的にブツ切りにする技法です。カットされたラインを修整して仕上げる技法はトリミングカットです。" },
+    { id: "unekanri_original_1_No05_16", text: "レザーカットにおいて、毛髪の根元近くからテーパーを行って毛量を調節する技法を、ディープテーパーカットという。", source: "①No05-16", answer: true, exp: "正しい。削る深さによる分類において、根元近くから行うものをディープ、中間からをノーマル、毛先のみをエンドテーパーと呼びます。" },
+    { id: "unekanri_original_1_No05_17", text: "レザーカットにおけるアウトサイドテーパーカットは、毛髪を削る深さによって分類されるカット技法である。", source: "①No05-17", answer: false, exp: "誤り。アウトサイドテーパーは、毛束のどの「面」を削るかによる分類です。深さによる分類は、エンド、ノーマル、ディープテーパーの3種類です。" },
+    { id: "unekanri_original_1_No05_18", text: "レザーカットの技法のうち、毛髪の根元近くからテーパーを行う方法をディープテーパーカットという。", source: "①No05-18", answer: true, exp: "正しい。レザーによるテーパーカットにおいて、根元近くから削るものをディープ、中間からをノーマル、毛先のみをエンドテーパーと呼びます。" },
+    { id: "unekanri_original_1_No05_19", text: "レザーによるディープテーパーカットは、毛量の多い場合や大きな動きを出したいときに、毛髪の根元近くから削る技法である。", source: "①No05-19", answer: true, exp: "正しい。削る深さによるテーパーの分類において、根元近くから行うものをディープ、中間からをノーマル、毛先からをエンドテーパーと呼びます。" },
+    { id: "unekanri_original_1_No05_20", text: "レザーによるエンドテーパーカットは、生え際やパート際、あるいは毛量が多い場合に用いられる。", source: "①No05-20", answer: false, exp: "誤り。エンドテーパーカットは、生え際やパート際、あるいは毛量が少ない場合に、毛先の重なりを薄くするために用いられる技法です。" },
+],
+"①No06.パーマネントウエービング": [
+    { id: "unekanri_original_1_No06_01", text: "毛髪の性質において、水分を吸い込みにくい「はっ水性毛」は、パーマネントウェーブ用剤が浸透しやすいためパーマがかかりやすい。", source: "①No06-01", answer: false, exp: "誤り。はっ水性毛は薬剤をはじきやすく、毛髪内部への浸透が悪いため、一般的にパーマネントウェーブがかかりにくい毛質です。" },
+    { id: "unekanri_original_1_No06_02", text: "パーマネントウェーブ技術において、はっ水性毛は薬剤をはじく性質があるため、吸水性毛に比べてパーマがかかりにくい。", source: "①No06-02", answer: true, exp: "正しい。はっ水性毛は水分（薬剤）を吸い込みにくい性質を持つため、パーマネントウェーブ用剤の浸透が妨げられ、かかりが悪くなります。" },
+    { id: "unekanri_original_1_No06_03", text: "パーマネントウェーブ技術において、フルウェーブを形成するには使用するロッドの2回転分の毛髪の長さが必要である。", source: "①No06-03", answer: false, exp: "誤り。フルウェーブ（1Ｓ型ウェーブ）を形成するために必要な毛髪の長さは、使用するロッドの「円周の3倍（3回転分）」の長さが必要であると定義されています。" },
+    { id: "unekanri_original_1_No06_04", text: "ワインディングにおいて、巻いたロッドが動かないようにゴムの張力で毛束を固定する力を「ゴムの弾力」という。", source: "①No06-04", answer: true, exp: "正しい。ロッドにかかる力には、毛の弾力やロッドの重みのほかに、輪ゴムによって毛束を止めておく「ゴムの弾力（張力）」があります。" },
+    { id: "unekanri_original_1_No06_05", text: "パーマネントウェーブ技術において、直径12mmのロッドでフルウェーブを形成する場合、必要となる毛髪の長さは約11.3cmである。", source: "①No06-05", answer: true, exp: "正しい。フルウェーブを形成するには使用するロッドの直径の約3倍の毛髪の長さが必要であり、直径12mmの場合は約11.3cmとなります。" },
+    { id: "unekanri_original_1_No06_06", text: "ワインディングにおいて、髪につやと美しいウェーブをもたせるために毛束を引く力を「テンション」という。", source: "①No06-06", answer: true, exp: "正しい。テンション（緊張力）は、毛束に適切な張力を与えることで毛髪の表面を整え、つややかで均一なウェーブを形成するために重要な役割を果たします。" },
+    { id: "unekanri_original_1_No06_07", text: "毛髪をウェットの状態でワインディングした後に第1剤を塗布する技法を、つけ巻きという。", source: "①No06-07", answer: false, exp: "誤り。毛髪を濡らした状態で巻いた後に薬剤を塗布するのは水巻きです。つけ巻きは、あらかじめ第1剤を塗布してからワインディングを行う方法を指します。" },
+    { id: "unekanri_original_1_No06_08", text: "毛髪の毛先部分は、根元部分に比べてパーマネントウェーブ用剤が浸透しやすいため、パーマがかかりやすい性質がある。", source: "①No06-08", answer: true, exp: "正しい。毛先は根元に比べて損傷が進んでいることが多く、薬剤の吸収が良いため、一般的にパーマがかかりやすい傾向にあります。" },
+    { id: "unekanri_original_1_No06_09", text: "パーマネントウェーブ技術において、一般的に根元の新生部は毛先に比べて薬剤が浸透しにくいため、パーマがかかりにくい性質を持つ。", source: "①No06-09", answer: true, exp: "正しい。毛先は損傷により薬剤の吸収が良いのに対し、根元付近の健康な新生毛は薬剤をはじきやすく、相対的にパーマがかかりにくい傾向があります。" },
+    { id: "unekanri_original_1_No06_10", text: "ワインディングのダウンスタイルは、サイドのスライスを縦に取り、後方に強い方向性をつけるスタイルである。", source: "①No06-10", answer: false, exp: "誤り。後方に強い方向性をつけるのはリーゼントスタイルです。ダウンスタイルは、頭頂部を中心に下方にロッドを配列していく方式を指します。" },
+    { id: "unekanri_original_1_No06_11", text: "ワインディングにおけるダウンスタイルは、頭頂部を中心に、ロッドを下方向に向かって順に配列していくスタイルである。", source: "①No06-11", answer: true, exp: "正しい。ダウンスタイルはトップからネープにかけて下向きにロッドを並べる最も基本的な配列の一つであり、落ち着いたシルエットのウェーブを作るのに適しています。" },
+    { id: "unekanri_original_1_No06_12", text: "パーマネントウェーブのテストカールにおいて、適正とされるカールの直径は、使用したロッドの直径の約1.5倍である。", source: "①No06-12", answer: false, exp: "誤り。適正カールの直径はロッドの直径の約2.5倍です。1.5倍ではパーマがかかりすぎた状態であるオーバータイムと判断されます。" },
+    { id: "unekanri_original_1_No06_13", text: "パーマネントウェーブの工程において、中間リンスは役割を終えた第2剤を毛髪から完全に洗い流すために行う作業である。", source: "①No06-13", answer: false, exp: "誤り。中間リンスは、役割を終えた第1剤を洗い流すために行う工程です。これにより第2剤の作用を確実かつ均一に働かせることができます。" },
+    { id: "unekanri_original_1_No06_14", text: "パーマネントウェーブのテストカールは、還元剤である第1剤がどの程度毛髪に作用しているかをチェックするために行う。", source: "①No06-14", answer: true, exp: "正しい。テストカールは第1剤による還元（軟化）の状態を確認し、適切な放置時間を判断するために不可欠な工程です。" },
+    { id: "unekanri_original_1_No06_15", text: "縮毛矯正の施術を行う際は、薬剤の反応を均一にするため、根元部分から毛先まで隙間なく第1剤を塗布する。", source: "①No06-15", answer: false, exp: "誤り。根元付近に第1剤を付けると断毛や根元折れの原因となるため、根元数センチを開けて塗布しなければなりません。" },
+],
+"①No07.ヘアセッティング": [
+    { id: "unekanri_original_1_No07_01", text: "カールステムの定義において、ステムとはカールの中心であるピボットポイントからループ（カールの輪）の先端までの部分をいう。", source: "①No07-01", answer: false, exp: "誤り。カールステムとは、カールの根元である「ベース」から、巻き始めの点である「ピボットポイント（P.P）」までの間の部分を指します。" },
+    { id: "unekanri_original_1_No07_02", text: "ピンカールの種類において、ループをベース（底辺）の位置から横にずらして渦巻き状に巻くものを「スカルプチュアカール」という。", source: "①No07-02", answer: false, exp: "誤り。ループをベースの位置からずらして巻くのは「メイポールカール」です。スカルプチュアカールは、ベースの底辺だけをスライスして巻くカールです。" },
+    { id: "unekanri_original_1_No07_03", text: "スカルプチュアカールは、カールのベースの底辺だけをスライスして、渦巻き状に巻くシェーピングカールの一種である。", source: "①No07-03", answer: true, exp: "正しい。スカルプチュアカールは、ベースを完全にとらず、シェーピングされた毛髪の底辺のみをスライスして作るため、隣り合うカールの間にスライス線（分け目）が出ないという特徴を持っています。" },
+    { id: "unekanri_original_1_No07_04", text: "カールの構成要素において、ステムの角度が0度に近い状態で巻かれたものをフラットカールという。", source: "①No07-04", answer: true, exp: "正しい。ステムの角度が頭皮に対して水平（0度）に近くなるほど、カールは平面的に仕上がり、これをフラットカールと呼びます。" },
+    { id: "unekanri_original_1_No07_05", text: "メイポールカールは、カールを巻く際にベースの周囲を一定の形や大きさにスライスしてつくるシェーピングカールに分類される。", source: "①No07-05", answer: false, exp: "誤り。メイポールカールはシェーピングカールではなく、ベースの周囲をスライスしてつくるストランドカールに分類されます。" },
+    { id: "unekanri_original_1_No07_06", text: "ピンカールの種類においてスカルプチュアカールは、ベースの底辺だけをスライスして渦巻き状に巻くシェーピングカールの一種である。", source: "①No07-06", answer: true, exp: "正しい。スカルプチュアカールはあらかじめ形作られたシェーピングの毛流れを利用し、その底辺部分のみを掬い取って巻くことで、ベースの割れ目を目立たせない特徴があります。" },
+    { id: "unekanri_original_1_No07_07", text: "スカルプチュアカールは、カールの根元付近はシェープのみを行い、中ほどからループをつくるため、中間部分に最も強い弾力が得られる。", source: "①No07-07", answer: true, exp: "正しい。スカルプチュアカールは根元にループをつくらない特殊な巻き方であり、その構造上、カールの中間部に最大の弾力が生まれます。" },
+    { id: "unekanri_original_1_No07_08", text: "ピンカールの種類の一つであるクロッキノールカールは、カールの中心から巻く中巻き方式に分類される。", source: "①No07-08", answer: false, exp: "誤り。クロッキノールカールは、毛先から根元に向かって巻き収める毛先巻き方式に分類されます。" },
+    { id: "unekanri_original_1_No07_09", text: "ストランドカールのベースのうち、三角形のトライアンギュラーベースは、コームアウトした際に割れ目ができにくい。", source: "①No07-09", answer: true, exp: "正しい。トライアンギュラーベースは、隣り合うカールのステムが重なりやすいため、仕上げた際にベースの境目が目立たず、割れ目を防ぐことができます。" },
+    { id: "unekanri_original_1_No07_10", text: "ストランドカールのベースのうち、三角形のトライアンギュラーベースは、コームアウトした際に割れ目ができにくい特徴がある。", source: "①No07-10", answer: true, exp: "正しい。トライアンギュラーベースはベースの境目が目立たないため、額の生え際など割れ目を作りたくない部位に適しています。" },
+    { id: "unekanri_original_1_No07_11", text: "メイポールカールは、毛先から巻くことで毛先が内側になり、毛先のウェーブ幅が狭く、根元になるほど広くなる特徴がある。", source: "①No07-11", answer: false, exp: "誤り。毛先が内側になり、根元に向かって幅が広くなるのはクロッキノールカールです。メイポールカールは根元から巻く方式（根元巻き）に分類されます。" },
+    { id: "unekanri_original_1_No07_12", text: "ヘアウェーブの構成要素において、波の凸の部分である「山」をリッジ、凹の部分である「谷」をトローと呼ぶ。", source: "①No07-12", answer: true, exp: "正しい。ウェーブはリッジ（隆起線）とトロー（谷）が交互に連なることで形成されており、これらがはっきりしているほどメリハリのあるウェーブになります。" },
+    { id: "unekanri_original_1_No07_13", text: "スキップウェーブの構成において、ループの直径はウェーブ幅の2/3とし、カールスペースはループの直径の1/2となるように構成する。", source: "①No07-13", answer: true, exp: "正しい。スキップウェーブはウェーブとカールを交互に組み合わせる技法であり、設問の比率が美しく均一なウェーブを作るための基本基準となります。" },
+    { id: "unekanri_original_1_No07_14", text: "ヘアウェービングの基準において、ループの直径はウェーブ幅の2/3とし、カールスペースはウェーブ幅の1/3となるように構成する。", source: "①No07-14", answer: true, exp: "正しい。教科書に示された標準的な比率では、ウェーブ幅に対してループの直径は2/3、カールスペース（カールの中心）は1/3の割合で構成されます。" },
+    { id: "unekanri_original_1_No07_15", text: "ローラーカーリングにおいて、ストランドの中心が頭皮面に対して135度の角度になるようにシェープして巻くと、最もボリュームが出る。", source: "①No07-15", answer: true, exp: "正しい。135度の角度でシェープして巻くとローラーがベースの中央におさまるオンベースの状態となり、毛髪が最も立ち上がるため最大のボリュームが得られます。" },
+],
+"①No08.ヘアセッティング": [
+    { id: "unekanri_original_1_No08_01", text: "ヘアマニキュアに代表される酸性染毛料は、染料が毛髪内部に深く定着するため、永久染毛剤に分類される。", source: "①No08-01", answer: false, exp: "誤り。ヘアマニキュアは染料が主に毛髪の表層に吸着・浸透するものであり、永久染毛剤ではなく半永久染毛料に分類されます。" },
+    { id: "unekanri_original_1_No08_02", text: "酸化染毛剤（ヘアカラー）による染毛の効果は、一般的に約2週間から4週間程度持続する。", source: "①No08-02", answer: false, exp: "誤り。酸化染毛剤は毛髪内部で定着するため色持ちが良く、通常は2ヶ月から3か月程度持続します。2週間から4週間なのは半永久染毛料（ヘアマニキュア等）です。" },
+    { id: "unekanri_original_1_No08_03", text: "ヘアカラー製品のうち、一時染毛料は毛髪内部に染料が浸透するため、1回のシャンプーでは色落ちしない特徴がある。", source: "①No08-03", answer: false, exp: "誤り。一時染毛料は毛髪の表面に色素を付着させるだけなので、1回のシャンプーで容易に色落ちします。" },
+    { id: "unekanri_original_1_No08_04", text: "色の性質を表す用語において、明度とは色の鮮やかさの度合いを指し、彩度とは色の明るさの度合いを指す概念である。", source: "①No08-04", answer: false, exp: "誤り。明度は色の明るさの度合いであり、彩度は色の鮮やかさの度合いを指します。設問の記述は、明度と彩度の定義が逆になっています。" },
+    { id: "unekanri_original_1_No08_05", text: "黄色系に明るくなりすぎた毛髪の色を消して、ナチュラルな毛髪の色に近づけたいときには、紫系のヘアカラーが適している。", source: "①No08-05", answer: true, exp: "正しい。黄色と紫は色相環において補色の関係にあり、紫系の色を用いることで黄みを打ち消し、ナチュラルな色味に整えることができます。" },
+    { id: "unekanri_original_1_No08_06", text: "黄色く退色した毛髪の色味を消してナチュラルに仕上げたい場合は、青色の色素をもつヘアカラーを使用するのが適切である。", source: "①No08-06", answer: false, exp: "誤り。黄色を打ち消す補色は紫系です。青色はオレンジ系の赤みを消してナチュラルな色味にする際に用いられます。" },
+    { id: "unekanri_original_1_No08_07", text: "酸化染毛剤のパッチテストを行う際は、テスト液を綿棒にとり、腕の外側に10円硬貨大に薄く塗って自然乾燥させる。", source: "①No08-07", answer: false, exp: "誤り。パッチテストの液は、皮膚が敏感で反応を確認しやすい腕の内側に塗布します。外側ではありません。" },
+    { id: "unekanri_original_1_No08_08", text: "酸化染毛剤を用いて全体を明るく染める場合、損傷のある部分の毛髪の色は暗く出やすい。", source: "①No08-08", answer: true, exp: "正しい。毛髪に損傷がある部分は、酸化染毛剤による発色が沈み込みやすく、全体を明るく染めようとしても暗く仕上がる傾向があります。" },
+    { id: "unekanri_original_1_No08_09", text: "太くて硬く黒い毛髪に酸化染毛剤を使用する場合、一般的に黄み系の色が出やすい傾向がある。", source: "①No08-09", answer: false, exp: "誤り。太くて硬い黒髪の場合、メラニン色素の影響で赤み系の色が出やすく、また明るさも出にくい傾向があります。" },
+    { id: "unekanri_original_1_No08_10", text: "酸化染毛剤によるヘアカラーにおいて、もみ上げやフロントなどの染まりやすい部分は、薬剤の作用を抑えるために最後に塗布する。", source: "①No08-10", answer: false, exp: "誤り。もみ上げやフロントは体温の影響を受けにくく、実は他の部位に比べて「染まりにくい」箇所であるため、優先的に先に薬剤を塗布して放置時間を長く確保するのが一般的です。" },
+    { id: "unekanri_original_1_No08_11", text: "酸化染毛剤を用いたおしゃれ染め（トーンアップ）の塗布は、まず根元部分に塗布し、希望の色に近づいてから中間・毛先へと進む。", source: "①No08-11", answer: false, exp: "誤り。体温の影響を受けやすく染まりやすい根元部分は後に塗布します。先に薬剤が反応しにくい中間から毛先にかけて塗布するのが正しい手順です。" },
+    { id: "unekanri_original_1_No08_12", text: "酸化染毛剤による白髪染めを行う場合、白髪は染まりにくいため、一般的に白髪の多い部分から優先的に薬剤を塗布する。", source: "①No08-12", answer: true, exp: "正しい。白髪は健康な毛髪が多く薬剤が浸透しにくいため、放置時間を十分に確保して染まりを良くできるよう、白髪の密集している部分から順に塗布していきます。" },
+],
+"②No01.エステティック・ネイル技術": [
+    { id: "unekanri_original_2_No01_01", text: "乾燥肌（ドライスキン）は、皮脂の分泌が過剰であるため毛穴が大きく開いており、吹き出物ができやすいのが特徴である。", source: "②No01-01", answer: false, exp: "誤り。皮脂分泌が多く毛穴が開いているのは脂性肌（オイリースキン）の特徴です。乾燥肌は皮脂や水分が不足してカサついており、きめは細かいですが皮膚が薄い状態を指します。" },
+    { id: "unekanri_original_2_No01_02", text: "アーティフィシャルネイルにおいて、スカルプチュアは、人工爪の土台となるフォームを使用して、ジェルやアクリルで長さを出すテクニックである。", source: "②No01-02", answer: true, exp: "正しい。スカルプチュアは、自爪の上にフォームという型を装着し、その上に材料をのせて人工的に長さを形成する技術です。" },
+    { id: "unekanri_original_2_No01_03", text: "ネイル技術におけるアートチップとは、自爪（ナチュラルネイル）に直接ラインストーンやシールを貼り付けて装飾を施すテクニックである。", source: "②No01-03", answer: false, exp: "誤り。アートチップは、すでにかわいいアートが施されているつけ爪（チップ）を、両面テープ等で自爪に一時的に装着する技術です。自爪に直接描くのはネイルアートに分類されます。" },
+    { id: "unekanri_original_2_No01_04", text: "ヒトの爪において、ネイルプレートの両サイドをつなぐ横方向のカーブをCカーブと呼ぶ。", source: "②No01-04", answer: true, exp: "正しい。爪のカーブには、爪の基部から先端までの縦方向の「アーチ」と、左右の両端をつなぐ横方向の「Cカーブ」の2種類があります。" },
+    { id: "unekanri_original_2_No01_05", text: "爪のカット形状のうちスクエアは、サイドとトップがストレートで、フリーエッジの角が直角な四角形である。", source: "②No01-05", answer: true, exp: "正しい。スクエアはサイドと先端（トップ）を直線的に整えた形であり、5つの基本的なネイルシェイプの一つです。" },
+    { id: "unekanri_original_2_No01_06", text: "ネイルのカット形状においてスクエアとは、サイドとトップがストレートで、フリーエッジの角が直角な四角形をいう。", source: "②No01-06", answer: true, exp: "正しい。スクエアは、サイドも先端（トップ）も直線的に整えた形状であり、強度は高いですが、角が鋭いため衣服などに引っかかりやすい面もあります。" },
+    { id: "unekanri_original_2_No01_07", text: "マニキュア技術の手順は、カウンセリングの後にファイリング、キューティクル処理、マッサージの順で行うのが一般的である。", source: "②No01-07", answer: true, exp: "正しい。ネイルケアの標準的な工程では、カウンセリング後に爪の形を整えるファイリングを行い、その後に甘皮を整えるキューティクル処理やマッサージへと進みます。" },
+    { id: "unekanri_original_2_No01_08", text: "爪が非常に長い場合は、キューティクルニッパーを使用して爪を短くカットしてから、ファイルで形を整えるのが正しい手順である。", source: "②No01-08", answer: false, exp: "誤り。爪が長い場合にカットするのはネイルニッパーです。キューティクルニッパーは、甘皮の処理やささくれをカットするために使用する用具です。" },
+    { id: "unekanri_original_2_No01_09", text: "ネイルケアに使用するキューティクルプッシャーは、爪の表面に張り付いた不要な甘皮（キューティクル）を押し上げるための道具である。", source: "②No01-09", answer: true, exp: "正しい。キューティクルプッシャーは甘皮の処理を丁寧に行うために用いられます。爪やまわりの乾燥を防ぐものはキューティクルクリームです。" },
+    { id: "unekanri_original_2_No01_10", text: "アーティフィシャルネイル技術において、フィラーは主に爪の長さや形を整えるために使用する用具である。", source: "②No01-10", answer: false, exp: "誤り。爪の長さや形を整えるのはエメリーボードです。フィラーは、グルーと合わせて爪の修復や補強に使用するためのアクリルパウダーです。" },
+    { id: "unekanri_original_2_No01_11", text: "手掌の部位名称において、母指（親指）の付け根にある筋肉の盛り上がりを「小指球」という。", source: "②No01-11", answer: false, exp: "誤り。母指の付け根にある盛り上がりは「母指球」です。小指球は小指の付け根にある筋肉の盛り上がりを指します。" },
+],
+"②No02.メイクアップ": [
+    { id: "unekanri_original_2_No02_01", text: "顔の各部の名称において、下あごの先端にある突出した部分を「オトガイ」という。", source: "②No02-01", answer: true, exp: "正しい。顔の正面図において、下唇の下にある溝をオトガイ唇溝といい、そのさらに下にあるあごの先端部分をオトガイと呼びます。" },
+    { id: "unekanri_original_2_No02_02", text: "アイブロウメイクアップにおいて、眉山の位置は、黒目の外側から目尻の延長線の間を基本のバランスとする。", source: "②No02-02", answer: true, exp: "正しい。眉山の標準的な位置は、黒目の外側の端から目尻の延長線上の範囲内に設定すると、顔立ちに馴染むバランスの良い仕上がりになります。" },
+    { id: "unekanri_original_2_No02_03", text: "アイブロウメイクアップにおいて、標準的な眉（基本形）の眉山は、眉頭から約3分の2の位置に設定する。", source: "②No02-03", answer: true, exp: "正しい。アイブロウの基本形において、眉の全長を3等分したとき、眉頭からおよそ3分の2（または黒目の外側の端と目尻の延長線の間）の位置に眉山を設定するのが標準的なバランスです。" },
+    { id: "unekanri_original_2_No02_04", text: "まつ毛エクステンションを装着する際は、皮膚への刺激や接着トラブルを避けるため、地肌から3mm以上離して装着するのが適切である。", source: "②No02-04", answer: false, exp: "誤り。まつ毛エクステンションは、地肌から1〜2mmほど離して装着するのが適切です。離しすぎると、成長に伴いデザインが崩れやすくなったり、地まつ毛の根元に負担がかかったりします。" },
+    { id: "unekanri_original_2_No02_05", text: "まつ毛エクステンションの施術において、過去にトラブルがなかった物質であれば、その後に接触皮膚炎を発症することはない。", source: "②No02-05", answer: false, exp: "誤り。過去に発症しなかった物質であっても、施術を繰り返すうちに体内で抗体が作られ、ある時突然アレルギー性の接触皮膚炎を発症することがあります。" },
+    { id: "unekanri_original_2_No02_06", text: "まつ毛の毛周期は、頭髪の毛周期に比べて短い。", source: "②No02-06", answer: true, exp: "正しい。まつ毛の毛周期は3週間から4か月程度であり、数年単位である頭髪の毛周期と比較して極めて短いのが特徴です。" },
+    { id: "unekanri_original_2_No02_07", text: "まつ毛の毛周期は、頭髪の毛周期に比べて極めて長いのが特徴である。", source: "②No02-07", answer: false, exp: "誤り。まつ毛の毛周期は3週間から4か月程度であり、数年単位である頭髪の毛周期に比べて非常に短いのが特徴です。" },
+    { id: "unekanri_original_2_No02_08", text: "ヒトのまつ毛の毛周期（生え変わるサイクル）は、頭髪の周期と同様に、通常1年から2年程度である。", source: "②No02-08", answer: false, exp: "誤り。まつ毛の毛周期は3週間から4か月程度であり、数年単位である頭髪の毛周期と比較して極めて短いのが特徴です。" },
+    { id: "unekanri_original_2_No02_09", text: "まつ毛エクステンションで使用する精製水は、すべての器具や道具を消毒するために使用される。", source: "②No02-09", answer: false, exp: "誤り。精製水は主に地まつ毛の洗浄などに用いられます。道具の消毒には、法に定められた濃度での煮沸消毒、薬液消毒、紫外線消毒などを行う必要があります。" },
+    { id: "unekanri_original_2_No02_10", text: "まつ毛エクステンションの施術において、グルーが乾くまではコンタクトレンズが使用できないため、クライアントには眼鏡の使用を勧める。", source: "②No02-10", answer: true, exp: "正しい。施術後、接着剤（グルー）が完全に硬化するまではコンタクトレンズの装着を控える必要があるため、事前のカウンセリングで眼鏡の持参や使用を促します。" },
+    { id: "unekanri_original_2_No02_11", text: "まつ毛エクステンションの施術を行う際は、正確な技術提供のためにアイメイクアップを完全に落としてから施術する必要がある。", source: "②No02-11", answer: true, exp: "正しい。地まつ毛を清潔な状態にして接着剤の定着を良くするため、施術前には必ずアイメイクアップを落とさなければなりません。" },
+    { id: "unekanri_original_2_No02_12", text: "まつ毛エクステンションの施術におけるカウンセリングは、不必要なトラブルを避けるため、初回の施術前に一度だけ行えばよい。", source: "②No02-12", answer: false, exp: "誤り。まつ毛エクステンションのカウンセリングは、来店前の確認時、施術前、施術後の計3回、毎回の施術ごとにしっかりと行うことが重要です。" },
+    { id: "unekanri_original_2_No02_13", text: "まつ毛エクステンションのリペアは、個人差はあるものの、一般的に5〜6週間ごとに行うのが適切である。", source: "②No02-13", answer: false, exp: "誤り。まつ毛エクステンションのリペアは、一般的に2〜3週間ごとに行うのが適切とされています。5〜6週間では自まつ毛の成長や脱落によりデザインを保つことが困難です。" },
+    { id: "unekanri_original_2_No02_14", text: "まつ毛エクステンションの持続力には個人差があるが、デザインを維持するためのリペア（付け足し）は通常6〜7週間ごとに行うのが適切である。", source: "②No02-14", answer: false, exp: "誤り。まつ毛の毛周期や接着の状態を考慮すると、リペアはおおむね2〜3週間ごとに行うのが適切です。" },
+    { id: "unekanri_original_2_No02_15", text: "まつ毛エクステンションのグルーやリムーバーによるアレルギー反応は、すべて即時型であり、施術後数分以内に必ず症状が現れる。", source: "②No02-15", answer: false, exp: "誤り。アレルギーには即時型と遅延型があり、施術中だけでなく、施術後しばらくしてから違和感や症状が現れることもあります。" },
+],
+"②No03.日本髪": [
+    { id: "unekanri_original_2_No03_01", text: "日本髪の各部の名称において、髷（まげ）の根もとの部分を「髱（たぼ）」と呼ぶ。", source: "②No03-01", answer: false, exp: "誤り。髷の根もとの部分は「根（ね）」です。髱は、後頭部の毛を後ろへ張り出して結った部分を指します。" },
+    { id: "unekanri_original_2_No03_02", text: "日本髪の主要な構成部位は、前髪、左右の鬢（びん）、髷（まげ）、および後頭部の髱（たぼ）の5つの部分からなる。", source: "②No03-02", answer: true, exp: "正しい。日本髪は基本的に前髪、鬢（左右）、髷、髱という5つの主要なパートを組み合わせて様々な形に結い上げられます。" },
+    { id: "unekanri_original_2_No03_03", text: "花嫁の文金高島田に用いる装飾品のうち、髷の根元部分に巻き付ける赤い布状の飾りを「手絡（かけもの）」という。", source: "②No03-03", answer: true, exp: "正しい。日本髪の装飾品において、髷の根元に巻き付ける赤い布状の飾りを「手絡（てがら、別名：かけもの）」と呼びます。「根がけ」は髷の根元を結び留めるための紐や丈長などを指します。" },
+    { id: "unekanri_original_2_No03_04", text: "日本髪結髪用の櫛である「鬢出し（びんだし）」は、前髷（まえまげ）などを横に広げるために使用される用具である。", source: "②No03-04", answer: false, exp: "誤り。前髷などを広げるのは「毛筋の抜き歯」という櫛です。鬢出しは、髪を裏からふくらませたり形を整えたりするために使われます。" },
+],
+"②No04.着付けの理論と技術": [
+    { id: "unekanri_original_2_No04_01", text: "名古屋帯は、幅約34cm、丈約4.7m前後の帯地を、幅約30cm、丈約3.5m前後に仕立てた帯である。", source: "②No04-01", answer: true, exp: "正しい。名古屋帯は丸帯を簡略化したものとして考案され、現在では幅広い装いに用いられる一般的な帯となっています。" },
+    { id: "unekanri_original_2_No04_02", text: "着物の部位名称において、袖の付け根（袖付）から袖先（袖口の端）までの水平方向の長さを袖幅（そではば）という。", source: "②No04-02", answer: true, exp: "正しい。和装の部位定義において、袖付（身頃と袖の縫い合わせ線）から袖先（袖の最外端）までの水平な長さを「袖幅」と呼びます。※なお、肩幅と袖幅を足した長さは「裄（ゆき）」と呼ばれます。" },
+    { id: "unekanri_original_2_No04_03", text: "和装において、袖の付け根の下にある開口部である「身八つ口」は、男物と女物の両方の着物に共通して備わっている部位である。", source: "②No04-03", answer: false, exp: "誤り。身八つ口があるのは女物のみです。男物の着物には身八つ口は存在せず、その部分は「人形（ひとぎ）」として閉じられています。" },
+    { id: "unekanri_original_2_No04_04", text: "着物の部位名称において、袖の付け根（袖付）から袖先までの水平方向の長さを「袖幅」という。", source: "②No04-04", answer: true, exp: "正しい。袖幅は袖付（身頃と袖の縫い合わせ部分）から袖先（袖の先端の端）までの水平方向の長さを指します。なお、肩幅と袖幅を足した（背中心から袖先までの）長さは「裄（ゆき）」と呼ばれます。" },
+    { id: "unekanri_original_2_No04_05", text: "女性の和装において、第一礼装である留袖を着用する場合、帯締めや帯揚げ、半襟、足袋などの小物は必ず白のものを用いる。", source: "②No04-05", answer: true, exp: "正しい。祝儀用の正式な礼装である留袖（黒留袖・色留袖）の着付けでは、小物を白で統一するのが決まりとなっています。" },
+    { id: "unekanri_original_2_No04_06", text: "黒留袖や色留袖を祝儀用の礼装として着用する場合、帯締めや帯揚げ、半襟などの小物は白を用いるのが正式である。", source: "②No04-06", answer: true, exp: "正しい。留袖の着付けにおける小物のルールとして、帯締め、帯揚げ、半襟、足袋などは白で統一することが規定されています。" },
+    { id: "unekanri_original_2_No04_07", text: "振袖の着付けにおける体型補整では、落ち着いた印象を与えるために胸のふくらみの位置を低めにする。", source: "②No04-07", answer: false, exp: "誤り。振袖の着付けでは、若々しさを表現するために、胸のふくらみの位置を通常よりも高めに補整するのが一般的です。" },
+    { id: "unekanri_original_2_No04_08", text: "ウエディングドレスの基本シルエットの一つであるマーメイドラインは、胸から膝までが体にフィットし、膝下から裾が人魚の尾のように広がった形である。", source: "②No04-08", answer: true, exp: "正しい。マーメイドラインは体のラインを強調するエレガントなスタイルであり、ウエディングドレスの代表的な基本シルエットとして定義されています。" },
+　　　　　　]
+        }
+    },
+    "test_gijuturiron_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_gijuturiron_past_2025_01", text: "頭部の生え際と正中線の交わった点をトップポイントという。", source: "52回 問題44", answer: false, exp: "誤り。前頭部の生え際と正中線の交わった点は、フロントポイントという。トップポイントは頭部の頂点で正中線上の点である。" },
+    { id: "test_gijuturiron_past_2025_02", text: "シザーズにおける美容技術の操作では、支点となる鋏要（ねじ）に近い側ではなく、遠い側を用いることで力の調整がしやすく繊細な作業が可能となる。", source: "52回 問題45", answer: true, exp: "正しい。鋏要から遠い側（刃先側）を用いることで、細かな力のコントロールが容易になり、繊細なカットが可能になる。" },
+    { id: "test_gijuturiron_past_2025_03", text: "スキャルプマッサージの基本手技である揉撚法は、指の腹を頭皮に軽く滑らせる手技のことを指す。", source: "52回 問題46", answer: false, exp: "誤り。揉撚法は、指先全体で円を描くように揉んでいく手技であり、指の腹を軽く滑らせる手技は軽擦法である。" },
+    { id: "test_gijuturiron_past_2025_04", text: "デザイン理論における調和（ハーモニー）とは、2つ以上の要素が響きあい融合して、1つの「美」の単位をつくり出すことをいう。", source: "52回 問題47", answer: true, exp: "正しい。異なる要素が互いに干渉しあいながらも、まとまりのある美しさを生み出す状態を指す。" },
+    { id: "test_gijuturiron_past_2025_05", text: "ヘアカッティングにおいてパネルを右に集めて切った場合は、左よりも右のほうが長いカットラインになる。", source: "52回 問題48", answer: false, exp: "誤り。パネルを右に集めて切った場合は、右側が最短となり、左に向かって徐々に長くなるカットラインが形成される。" },
+    { id: "test_gijuturiron_past_2025_06", text: "ワンレングススタイルに対してセニングシザーズをレイヤー状に入れて毛量調整を行うと、形態にフラット感をあたえることができる。", source: "52回 問題49", answer: true, exp: "正しい。レイヤー状にセニングを入れることで、髪の重なりを均一に減らし、表面の質感を平坦に整えることができる。" },
+    { id: "test_gijuturiron_past_2025_07", text: "縮毛矯正の第1剤塗布工程では、根元部分から毛先まで均一に薬剤を塗布して軟化させる必要がある。", source: "52回 問題50", answer: false, exp: "誤り。縮毛矯正では、断毛や根元の折れを防ぐため、根元部分には第1剤を付けないように塗布しなければならない。" },
+    { id: "test_gijuturiron_past_2025_08", text: "ストランドカールのベースのうち、パラレログラムベースはステムをオーバーラップさせやすいため、コームアウトした際に仕上がりが割れにくい。", source: "52回 問題51", answer: true, exp: "正しい。平行四辺形の形状を活かしてステムを重ねることで、分け目が出にくく自然なつながりを表現できる。" },
+    { id: "test_gijuturiron_past_2025_09", text: "酸化染毛剤の中には、ヘナなどの植物の色素を有効成分として配合している種類が存在する。", source: "52回 問題52", answer: false, exp: "誤り。酸化染毛剤は酸化染料を有効成分とするものであり、植物の色素を有効成分としたものは酸化染毛剤には該当しない。" },
+    { id: "test_gijuturiron_past_2025_10", text: "ヒトの爪の構造において、ネイルプレートの爪の基部から爪先まで続く縦方向のカーブを「アーチ」と呼ぶ。", source: "52回 問題53", answer: true, exp: "正しい。爪の縦方向の曲線をアーチ、ネイルプレートの両サイドをつなぐ横方向の曲線をCカーブと呼ぶ。" },
+    { id: "test_gijuturiron_past_2025_11", text: "まつ毛の毛周期は、頭髪の毛周期（4〜6年）に比べて非常に長いのが特徴である。", source: "52回 問題54", answer: false, exp: "誤り。まつ毛の毛周期は3週間から4か月程度であり、頭髪の毛周期に比べて非常に短い。" },
+    { id: "test_gijuturiron_past_2025_12", text: "日本髪の基本的な部位の名称において、頭頂部で結い上げた髪を「髷（まげ）」、左右の側面部分を「鬢（びん）」という。", source: "52回 問題55", answer: true, exp: "正しい。日本髪は、前髪、鬢（左右）、髱（後方）、髷（中央上部）、根の各部位で構成される。" },
+    { id: "test_gijuturiron_past_2025_13", text: "顔面の名称において、鼻の下にある縦の溝をオトガイ唇溝という。", source: "51回 問題44", answer: false, exp: "誤り。鼻の下にある溝は人中（じんちゅう）である。オトガイ唇溝は、下唇とオトガイ（あご）の間の溝を指す。" },
+    { id: "test_gijuturiron_past_2025_14", text: "スキャルプトリートメントにおいて、ヘアトニックやスキャルプトリートメント剤を使用する方法は化学的な方法に該当する。", source: "51回 問題45", answer: true, exp: "正しい。薬剤の成分を利用して生理機能を保持・促進する方法は化学的な方法である。" },
+    { id: "test_gijuturiron_past_2025_15", text: "ヘアデザインにおいて、三つ編みを取り入れることで周期的なパターンをつくり、リズム感を演出することができる。", source: "51回 問題46", answer: true, exp: "正しい。デザインにおけるリズムとは、要素の周期的な繰り返しによって生じる動きや躍動感のことを指す。" },
+    { id: "test_gijuturiron_past_2025_16", text: "カッティングにおいて、パネルをアップステムでシェープしてカットした場合、最も長い毛髪の部分がボリュームの頂点になる。", source: "51回 問題47", answer: false, exp: "誤り。最も長い毛髪の部分がボリュームの頂点になるのは、ダウンステムでシェープした場合である。アップステムは上部が短くなるレイヤーカットになる。" },
+    { id: "test_gijuturiron_past_2025_17", text: "レザーによるノーマルテーパーカットは、毛先から1/3ほどを削いで先細りにする技法である。", source: "51回 問題48", answer: true, exp: "正しい。毛先を削いでテーパー（先細り）にする標準的な技法で、1/3程度を削るのが一般的である。" },
+    { id: "test_gijuturiron_past_2025_18", text: "パーマネントウェーブの施術前に行うシャンプーには、オイル分の強いシャンプー剤を用いるのが適している。", source: "51回 問題49", answer: false, exp: "誤り。オイル分の強いシャンプー剤は、毛髪表面をコーティングして薬剤の作用を妨げるため、パーマ施術前には適さない。" },
+    { id: "test_gijuturiron_past_2025_19", text: "ロッドに巻かれた毛髪には、その弾力によってロッドを逆方向に回転させて元に戻そうとする力が働く。", source: "51回 問題50", answer: true, exp: "正しい。毛髪の復元力（弾力）により、巻かれた方向とは逆にロッドを押し戻そうとする力が生じる。" },
+    { id: "test_gijuturiron_past_2025_20", text: "ピンカールのうち、毛先がループの一番内側におさめられる巻き方を、メイポールカールという。", source: "51回 問題51", answer: false, exp: "誤り。毛先をループの内側に巻き込むのはクロッキノールカールである。メイポールカールは根元から巻く方式で、毛先は外側に出る。" },
+    { id: "test_gijuturiron_past_2025_21", text: "白髪に対し酸化染毛剤を用いて髪全体を暗く染める場合は、新生部の色が明るい部分から薬剤を塗布するのが正しい手順である。", source: "51回 問題52", answer: true, exp: "正しい。白髪に対し新生部の明るい部分は暗く染まるのに時間を要するため、先に塗布して放置時間を長く確保する必要がある。" },
+    { id: "test_gijuturiron_past_2025_22", text: "爪のカット形状のうち、サイドがストレートで先端が丸くカットされた最も自然な形状をラウンドという。", source: "51回 問題53", answer: true, exp: "正しい。サイドの直線と先端の曲線を組み合わせた形状で、指の形に馴染む最も一般的な形である。" },
+    { id: "test_gijuturiron_past_2025_23", text: "まつ毛エクステンションの装着は、毛をより長く保つため、まつ毛の成長初期に行うのが最適である。", source: "51回 問題54", answer: false, exp: "誤り。まつ毛エクステンションは、成長初期は避け、成長期の終わりから退行期が始まる時期に装着するのが最適とされる。" },
+    { id: "test_gijuturiron_past_2025_24", text: "振袖の着付けにおいて、着物に締める伊達巻は、帯を安定させるため帯幅より広くなるように締める必要がある。", source: "51回 問題55", answer: false, exp: "誤り。着物に締める伊達巻は、帯の下から露出しないよう、帯幅よりも狭くなるように締めなければならない。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_gijuturiron_past_2024_01", text: "頭部の頂点で正中線上の点をゴールデンポイントという。", source: "50回 問題44", answer: false, exp: "誤り。頭部の頂点で正中線上の点はトップポイントである。ゴールデンポイントは、トップポイントをさらに後方に進んだ点である。" },
+    { id: "test_gijuturiron_past_2024_02", text: "ヘアドライヤーの構造において、ファンを動かすためのモーターにより風が起こされる。", source: "50回 問題45", answer: true, exp: "正しい。モーターによってファンが回転することで風が発生し、それが発熱器で熱せられて送風される仕組みとなっている。" },
+    { id: "test_gijuturiron_past_2024_03", text: "ハッキングは、毛髪を修復し保護するためのヘアトリートメント技術の基本手技に含まれる。", source: "50回 問題46", answer: false, exp: "誤り。ハッキングはスキャルプマッサージにおける打法（タポートマン）の1つであり、ヘアトリートメント技術には該当しない。" },
+    { id: "test_gijuturiron_past_2024_04", text: "ヘアデザインの原理において、水平線は見る人に安定感を与える効果がある。", source: "50回 問題47", answer: true, exp: "正しい。水平線は安定感を、垂直線は平衡や強力な支柱を、斜線は不安定感や運動感をそれぞれ暗示する。" },
+    { id: "test_gijuturiron_past_2024_05", text: "アウトサイドテーパーカットは、毛髪を削ぐ深さ（量）によって分類されるテーパーカットの技法である。", source: "50回 問題48", answer: false, exp: "誤り。深さによる分類はノーマル・ディープ・エンドテーパーである。アウトサイドテーパーは、テーパーする「面」による分類に該当する。" },
+    { id: "test_gijuturiron_past_2024_06", text: "パーマネントウェーブのテストカールにおいて、適正な状態のカールの直径は、使用したロッドの直径の約2.5倍である。", source: "50回 問題49", answer: true, exp: "正しい。ロッドの直径の約2.5倍のウェーブが形成されている状態が、パーマの適正なかかり具合の目安となる。" },
+    { id: "test_gijuturiron_past_2024_07", text: "クロッキノールカールは、毛先から根元に向かって巻く技法で、ウェーブの幅は根元になるほど狭くなるのが特徴である。", source: "50回 問題50", answer: false, exp: "誤り。クロッキノールカールは毛先が内側に収まる巻き方で、ウェーブの幅は毛先が狭く、根元になるほど広くなる。" },
+    { id: "test_gijuturiron_past_2024_08", text: "毛髪の赤みを消して、よりナチュラルなブラウン系の色に仕上げたい場合には、緑系のヘアカラーを用いるのが効果的である。", source: "50回 問題51", answer: true, exp: "正しい。赤の補色（反対色）である緑を用いることで、赤みを打ち消して自然な色味に整えることができる。" },
+    { id: "test_gijuturiron_past_2024_09", text: "アーティフィシャルネイルで使用するプライマーは、塗布したグルーの硬化を早めるための促進剤として用いられる。", source: "50回 問題52", answer: false, exp: "誤り。グルーの硬化を促進させるのはアクティベーターである。プライマーは、アーティフィシャルネイルを自爪に密着しやすくさせるためのものである。" },
+    { id: "test_gijuturiron_past_2024_10", text: "まつ毛エクステンションの施術において、エアブロアは装着したまつ毛やグルーを乾燥させる目的で使用される。", source: "50回 問題53", answer: true, exp: "正しい。グルーを素早く乾燥させ、揮発成分による刺激を和らげるためにエアブロア（送風機）を用いる。" },
+    { id: "test_gijuturiron_past_2024_11", text: "文金高島田の装飾品において、髷（まげ）の中央部分に垂直に挿す髪飾りを前挿しという。", source: "50回 問題54", answer: false, exp: "誤り。髷の中央に挿すものは「中挿し（なかざし）」である。前挿しは、前髪の付け根付近に飾るものを指す。" },
+    { id: "test_gijuturiron_past_2024_12", text: "丸帯は、幅が約30cm、丈が約4.2mあり、女性の帯の中で最も格調高い正礼装用の帯とされる。", source: "50回 問題55", answer: true, exp: "正しい。丸帯は広布の帯地を二つ折りにして仕立てたもので、厚手で豪華なため花嫁衣裳や礼装に用いられる。" },
+    { id: "test_gijuturiron_past_2024_13", text: "手掌の親指の付け根にある膨らんだ部分を小指球という。", source: "49回 問題44", answer: false, exp: "誤り。手掌の親指の付け根にある膨らんだ部分は母指球（ぼしきゅう）である。小指の付け根側は小指球と呼ぶ。" },
+    { id: "test_gijuturiron_past_2024_14", text: "コームの部位のうち、コームの目に入った毛髪を一線にそろえる働きをするのは歯元である。", source: "49回 問題45", answer: true, exp: "正しい。歯元（はもと）は毛髪を一線にそろえる役割を持ち、歯は垂直に立てて支える役割、歯先は頭皮に接して毛髪を引き起こす役割を持つ。" },
+    { id: "test_gijuturiron_past_2024_15", text: "ヘッドスパは頭皮環境の改善が目的なので、髪質改善のためのトリートメントは同時に行わない。", source: "49回 問題46", answer: false, exp: "誤り。ヘッドスパでは毛髪診断を行い、その結果に合わせたトリートメントを施して髪質改善に努めることも含まれる。" },
+    { id: "test_gijuturiron_past_2024_16", text: "ツェルナー錯視は、2本の平行な線分が鋭角に交差する別の線分の影響により、平行には見えなくなる角度・方向の錯視である。", source: "49回 問題47", answer: true, exp: "正しい。見かけの交差角が実際の交差角よりも広く見えてしまうことによって生じる幾何学的錯視の一種である。" },
+    { id: "test_gijuturiron_past_2024_17", text: "パネルの面を頭皮面に対して45度の角度で引くことをオンベースという。", source: "49回 問題48", answer: false, exp: "誤り。オンベースとは、パネルの面を頭皮に対して90度に引くことを指す。" },
+    { id: "test_gijuturiron_past_2024_18", text: "パーマネントウェーブにおいて直径10mmのロッドでフルウェーブを形成する場合、約9.4cmの毛髪の長さが必要である。", source: "49回 問題49", answer: true, exp: "正しい。フルウェーブを形成するにはロッドの直径の約3回分の毛髪の長さが必要であり、10mmロッドの場合は約9.4cm（10mm×3.14）となる。" },
+    { id: "test_gijuturiron_past_2024_19", text: "パーマネントウェーブのテストカールにおいて、適正なカールの直径は使用したロッドの直径の約3.5倍である。", source: "49回 問題50", answer: false, exp: "誤り。テストカールにおける適正なカールの直径は、使用したロッドの直径の約2.5倍である。" },
+    { id: "test_gijuturiron_past_2024_20", text: "ローラーカーリングにおいてダウンステムでボリュームを抑える場合は、ベースを厚めにするとローラーのおさまりがよい。", source: "49回 問題51", answer: true, exp: "正しい。ボリュームを抑えるダウンステム（45度以下）では、少し厚めのベースにすることでローラーが安定しておさまる。" },
+    { id: "test_gijuturiron_past_2024_21", text: "一時染毛料は毛髪の表面に色素を付着させる製品であり、シャンプーイングしても色落ちしない特徴がある。", source: "49回 問題52", answer: false, exp: "誤り。一時染毛料は、1度のシャンプーイングで簡単に色落ちする染毛料である。" },
+    { id: "test_gijuturiron_past_2024_22", text: "まつ毛エクステンションの施術中にグルーが目に入った場合は、流水で流し、直ちに眼科医の診察を受けるべきである。", source: "49回 問題53", answer: true, exp: "正しい。薬剤が目に入った場合は自己判断で処置せず、速やかに専門医（眼科医）を受診することが鉄則である。" },
+    { id: "test_gijuturiron_past_2024_23", text: "日本髪結髪用の櫛である鬼歯は、前髷（まえまげ）などを広げるために用いられる道具である。", source: "49回 問題54", answer: false, exp: "誤り。鬼歯は仕上げに表面の毛の流れを整えるために使う。前髷などを広げるのは「毛筋の抜き歯」の役割である。" },
+    { id: "test_gijuturiron_past_2024_24", text: "和装着付けにおいて、若い人の帯幅は全体のバランスを考慮して広めにするのが一般的である。", source: "49回 問題55", answer: true, exp: "正しい。帯幅は全体の調和を見て調整するが、一般的に若い人は広めに、年配の方は狭めに折ることが多い。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_gijuturiron_past_2023_01", text: "コームの部位のうち、『胴』は毛髪を引き起こし垂直に立てて両側から支え、そろえる働きをする。", source: "48回 問題44", answer: false, exp: "誤り。胴はコーム全体の支えとなり、バランスをとる働きをする。毛髪を引き起こし垂直に立てて支えるのは『歯』の役割である。" },
+    { id: "test_gijuturiron_past_2023_02", text: "シザーズの操作においては、薬指で操作する方の鋏身を安定させ、母指で操作する方の刃を動刃とするのが正しい。", source: "48回 問題45", answer: true, exp: "正しい。シザーズは、薬指を静刃側に固定し、母指を動かすことで動刃を操作してカットを行うのが基本である。" },
+    { id: "test_gijuturiron_past_2023_03", text: "スキャルプマッサージの基本手技である揉捏法（ペトリサージュ）とは、皮膚を押さえつけながら強く擦る手技を指す。", source: "48回 問題46", answer: false, exp: "誤り。皮膚を押さえつけながら強く擦る手技は強擦法（フリクション）である。揉捏法は、4指と母指を用いてもみほぐす手技である。" },
+    { id: "test_gijuturiron_past_2023_04", text: "主観的輪郭線とは、実際には輪郭線が存在しない場所に、あたかも輪郭線があるかのように見える現象のことをいう。", source: "48回 問題47", answer: true, exp: "正しい。脳が欠けた情報を補完して形を認識することによって生じる幾何学的錯視の一種である。" },
+    { id: "test_gijuturiron_past_2023_05", text: "刃物の材料において、ステンレス鋼は炭素鋼に比べてさびに弱く、もろいという欠点がある。", source: "48回 問題48", answer: false, exp: "誤り。ステンレス鋼は炭素鋼に比べてさびに強い。また、鉄に炭素を加えることで加工性を向上させることができる。" },
+    { id: "test_gijuturiron_past_2023_06", text: "レザーによるボスサイドテーパーカットは、パネルの外側と内側の両面をテーパーする技法である。", source: "48回 問題49", answer: true, exp: "正しい。パネルの両面から削ぐことで、毛先に自由な動きと軽さを生み出すことができる。" },
+    { id: "test_gijuturiron_past_2023_07", text: "パーマネントウェービングにおいて『つけ巻き』とは、毛髪をウェットの状態でワインディングした後に第1剤を塗布する方法である。", source: "48回 問題50", answer: false, exp: "誤り。つけ巻きは、あらかじめ毛髪に第1剤を塗布してから巻く方法である。ウェット状態で巻いた後に塗布するのは『水巻き』である。" },
+    { id: "test_gijuturiron_past_2023_08", text: "メイポールカールのピンを外すと、根元から巻かれているため、ウェーブの幅が根元ほど狭い仕上がりになる。", source: "48回 問題51", answer: true, exp: "正しい。メイポールカールは根元巻き方式のため、根元に最も強いカールが現れ、ウェーブ幅も根元が狭くなるのが特徴である。" },
+    { id: "test_gijuturiron_past_2023_09", text: "太くて硬く黒い毛髪をヘアカラーリングする場合、赤みが出やすいため、希望色より明度の低い染毛剤を選択するのが適している。", source: "48回 問題52", answer: false, exp: "誤り。このような毛髪は赤みが出やすく明るくなりにくいため、希望色より明度の『高い』染毛剤を選択するのが正しい。" },
+    { id: "test_gijuturiron_past_2023_10", text: "マニキュア技術の手順において、カウンセリングを終えた後は、ファイリング、カラーリング、バッフィングの順で進行する。", source: "48回 問題53", answer: false, exp: "誤り。マニキュア（ネイルケア＆カラー）の正しい手順は、まずカウンセリング後に爪の形と長さを整える「ファイリング」を行い、次に爪表面の凹凸を滑らかに磨く「バッフィング」を行い、最後にポリッシュを塗る「カラーリング」の順で進行します。カラーリングの後にバッフィングを行うと塗膜が剥がれてしまうため、本記述の順序は誤りです。" },
+    { id: "test_gijuturiron_past_2023_11", text: "まつ毛エクステンションのリペア（付け足し）は、個人差があるが通常6〜7週間を目安に行うのが一般的である。", source: "48回 問題54", answer: false, exp: "誤り。リペアの目安は、まつ毛の健康状態や持続力を考慮し、通常2〜3週間で行うのが一般的である。" },
+    { id: "test_gijuturiron_past_2023_12", text: "着物の各部の名称において、首の付け根から裾までの長さを『身丈（みたけ）』という。", source: "48回 問題55", answer: true, exp: "正しい。身丈は着物の全長を指し、女性の場合は着付の際に「お端折（おはしょり）」で長さを調整する。" },
+    { id: "test_gijuturiron_past_2023_13", text: "パーマネントウェーブでロッドを巻く際、お客さまの頭部は技術者の目の高さに合わせるのが正しい姿勢である。", source: "47回 問題44", answer: false, exp: "誤り。パーマネントウェーブ技術でロッドを巻くときは、お客さまの頭部が技術者の「心臓の高さ」となるように調節するのが正しい。" },
+    { id: "test_gijuturiron_past_2023_14", text: "良質なシザーズの条件として、動刃と静刃の間に正確な凸レンズ状のあきがつくられていることがあげられる。", source: "47回 問題45", answer: true, exp: "正しい。この適度なあき（ひねり）があることで、刃同士が適切な接点で交差し、毛髪を確実に切ることができる。" },
+    { id: "test_gijuturiron_past_2023_15", text: "ヘアアイロンのロッド表面にフッ素樹脂加工を施す目的は、ヘアローションなどが焦げ付くのを防ぐためである。", source: "47回 問題46", answer: true, exp: "正しい。フッ素樹脂加工により、薬剤の付着や焦げ付きを抑え、毛髪の滑りを良くして損傷を軽減させることができる。" },
+    { id: "test_gijuturiron_past_2023_16", text: "スキャルプトリートメントにおいて、ブラッシングやマッサージを行う方法は「化学的方法」に分類される。", source: "47回 問題47", answer: false, exp: "誤り。ブラッシングやマッサージによる方法は「物理的方法」に分類される。化学的方法は、ヘアトニック等の薬剤を用いる方法を指す。" },
+    { id: "test_gijuturiron_past_2023_17", text: "デザイン理論において、身体に対して頭が相対的に大きいと、全体的に大人っぽい成熟した印象を与える効果がある。", source: "47回 問題48", answer: false, exp: "誤り。身体に対して頭が相対的に大きいと、全体的に「子どもっぽい、未成熟な」印象を与える。" },
+    { id: "test_gijuturiron_past_2023_18", text: "シザーズによるスライドカットは、毛先を穂先のような状態にして、長さと毛量の調節を同時に行う技法である。", source: "47回 問題49", answer: true, exp: "正しい。シザーズを滑らせるように動かすことで、毛先に表情豊かな質感と軽さを生み出すことができる。" },
+    { id: "test_gijuturiron_past_2023_19", text: "パーマネントウェーブのテストカールにおける適正なカールの直径は、使用したロッドの直径の約1.5倍である。", source: "47回 問題50", answer: false, exp: "誤り。テストカールにおける適正なカールの直径は、使用したロッドの直径の「約2.5倍」である。" },
+    { id: "test_gijuturiron_past_2023_20", text: "ストランドカールのパラレログラムベースは、ステムをオーバーラップさせやすいため、仕上がりが割れにくい特徴を持つ。", source: "47回 問題51", answer: true, exp: "正しい。平行四辺形のベース形状によりステムが重なり合い、コームアウトした際に自然なつながりが得られる。" },
+    { id: "test_gijuturiron_past_2023_21", text: "酸化染毛剤の施術におけるカラーチェックは、効率を上げるため頭髪の特定の1か所を選んで行うべきである。", source: "47回 問題52", answer: false, exp: "誤り。カラーチェックは1か所ではなく、必ず「数か所」を調べて染まり具合を正確に判断しなければならない。" },
+    { id: "test_gijuturiron_past_2023_22", text: "アーティフィシャルネイルの「チップ」とは、弱い爪の補強や修復を主な目的として装着するテクニックである。", source: "47回 問題53", answer: false, exp: "誤り。チップは爪の先に装着し、人工的に「爪の長さを出す」ことを目的としたテクニックである。" },
+    { id: "test_gijuturiron_past_2023_23", text: "まつ毛エクステンションの施術後、グルーが硬化するまでの最低5〜6時間は、洗顔や入浴など高温・多湿の環境を避ける。", source: "47回 問題54", answer: true, exp: "正しい。グルーが完全に硬化する前に水分や熱を与えると、持続性が低下したりトラブルの原因となるため注意が必要である。" },
+    { id: "test_gijuturiron_past_2023_24", text: "日本髪の基本的な部位は、前髪、鬢（左右）、髱（後方）、髷（中央上部）、根の5つで構成されている。", source: "47回 問題55", answer: true, exp: "正しい。これらの部位の組み合わせとバランスによって、さまざまな日本髪の造形美が表現される。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_gijuturiron_past_2022_01", text: "頭部の基準となる点のうち、耳のつけ根の真上の部分をトップポイントという。", source: "46回 問題44", answer: false, exp: "誤り。耳のつけ根の真上の部分はイヤーポイントである。トップポイントは頭部の頂点で正中線上の点を指す。" },
+    { id: "test_gijuturiron_past_2022_02", text: "シザーズにおけるてこの原理では、母指孔などの力を加える部分を力点、ねじ（要）の部分を支点、毛髪を切る刃の部分を作用点と呼ぶ。", source: "46回 問題45", answer: true, exp: "正しい。シザーズはこれら3つの点の相互作用によって毛髪をカットする構造になっている。" },
+    { id: "test_gijuturiron_past_2022_03", text: "スキャルプマッサージの基本手技のうち、ストローキングは打法（タポートマン）の一種である。", source: "46回 問題46", answer: false, exp: "誤り。ストローキングは軽擦法（エフルラージュ）のことであり、手のひらや指の腹で軽く擦る手技を指す。" },
+    { id: "test_gijuturiron_past_2022_04", text: "ドンデイスが提唱した形の3つの基本形は、正方形、円、正三角形である。", source: "46回 問題47", answer: true, exp: "正しい。これらの基本形を組み合わせたり変形させたりすることで、さまざまなデザインが構成される。" },
+    { id: "test_gijuturiron_past_2022_05", text: "ヘアカッティングにおいて、パネルの面を頭皮に対して90度より上の角度で引いて保持することをダウンステムという。", source: "46回 問題48", answer: false, exp: "誤り。ダウンステムはパネルの面を頭皮に対して90度より「下」の角度で引くことである。90度より上はアップステムと呼ぶ。" },
+    { id: "test_gijuturiron_past_2022_06", text: "パーマネントウェーブ技術におけるアフターリンスの目的の1つは、施術中に脱脂された油分を補うことである。", source: "46回 問題49", answer: true, exp: "正しい。薬剤の影響で失われた油分をヘアトリートメント剤などで補い、毛髪を保護し質感を整える必要がある。" },
+    { id: "test_gijuturiron_past_2022_07", text: "ピンカールのうちメイポールカールは、ストランドの根元から巻きはじめ、根元に最も強いカールが現れる特徴を持つ。", source: "46回 問題50", answer: true, exp: "正しい。根元巻き方式を採用しているため、仕上がり時に根元部分の弾力が最も強くなる。" },
+    { id: "test_gijuturiron_past_2022_08", text: "色の三原色（第1次色）と、それらを混合して得られる第2次色・第3次色などの色相を、体系的に円環状に配置したものをカラーサークル（色相環）という。", source: "46回 問題51", answer: true, exp: "正しい。三原色（赤・黄・青）を混ぜてできるのは「緑・橙・紫（セコンダリーカラー）」の3色であり、これら計6色のさらに中間にある「赤橙・黄橙・黄緑・青緑・青紫・赤紫（インターミディエイトカラー）」の6色を足すことで、初めて一般的な「12色の色相環（カラーサークル）」が完成します。" },
+    { id: "test_gijuturiron_past_2022_09", text: "マニキュアのカラーリングにおいて、皮膚にはみ出したエナメルはコットンスティックにリムーバーを含ませて拭き取るのが適切である。", source: "46回 問題52", answer: true, exp: "正しい。細かい部分の修正には、オレンジスティックにコットンを巻き付けたコットンスティックを使用する。" },
+    { id: "test_gijuturiron_past_2022_10", text: "アイブロウメイクアップにおける眉山の位置は、黒目の中央と外側の延長線の間を基準に設定する。", source: "46回 問題53", answer: false, exp: "誤り。眉山の位置は、黒目の「外側」と目尻の延長線の間を基準とするのが基本である。" },
+    { id: "test_gijuturiron_past_2022_11", text: "まつ毛エクステンションの装着後の持続期間は、個人差があるが通常2～3週間程度が目安とされる。", source: "46回 問題54", answer: true, exp: "正しい。自毛の毛周期やグルーの接着強度により、数週間ごとにメンテナンス（リペア）を行うのが一般的である。" },
+    { id: "test_gijuturiron_past_2022_12", text: "和装の仕立てにおいて、男物の着物には脇の部分に通気のための身八つ口が作られている。", source: "46回 問題55", answer: false, exp: "誤り。身八つ口（みやつぐち）があるのは女物および子供物の着物であり、男物の着物には存在しない。" },
+    { id: "test_gijuturiron_past_2022_13", text: "ヘアドライヤーは、内部のモーターでファンを回転させて風を起こし、それをニクロム線などの発熱器で熱して送風する美容用具である。", source: "45回 問題44", answer: true, exp: "正しい。ヘアドライヤーの基本構造は、ファン、モーター、発熱器の組み合わせによって構成されている。" },
+    { id: "test_gijuturiron_past_2022_14", text: "ヘアカッティングに用いる本レザーの刃線の形態は、力の配分を均等にするため内曲線状につくられている。", source: "45回 問題45", answer: false, exp: "誤り。本レザーの刃線は直線状または外曲線状である。内曲線状では毛髪を切る力の配分が均等にならず、正しく操作できない。" },
+    { id: "test_gijuturiron_past_2022_15", text: "シャンプーイングにおいて、お湯の温度は45〜48℃に設定するのが毛髪と頭皮にとって最も適している。", source: "45回 問題46", answer: false, exp: "誤り。シャンプーイングにおけるお湯の適温は38〜40℃である。高すぎる温度は頭皮や毛髪に過度な刺激を与える可能性がある。" },
+    { id: "test_gijuturiron_past_2022_16", text: "幾何学的錯視の一種である大きさの対比現象により、ボリュームの大きいヘアスタイルに囲まれた顔は実際より小さく感じられる。", source: "45回 問題47", answer: true, exp: "正しい。周囲の要素の大きさが、中心にある対象物の大きさの判断に影響を与える対比現象の効果である。" },
+    { id: "test_gijuturiron_past_2022_17", text: "グラデーションカットをダウンステムでシェープしてカットした場合、最も長い毛髪の部分がボリュームの頂点（ウェイト）となる。", source: "45回 問題48", answer: true, exp: "正しい。グラデーションカット特有の形態であり、パネルを引き出す角度（ステム）によってシルエットが形成される。" },
+    { id: "test_gijuturiron_past_2022_18", text: "セニングカットとは、毛髪の上でシザーズをスライド（開閉しながら滑らす）させることで長さと毛量を調節する技法である。", source: "45回 問題49", answer: false, exp: "誤り。それはスライドカットの説明である。セニングカットは、セニングシザーズを用いてパネルを間引きするように毛量を減らす技法を指す。" },
+    { id: "test_gijuturiron_past_2022_19", text: "パーマネントウェービングにおいてフルウェーブを形成するためには、使用するロッドの直径に対して3回転分の毛髪の長さが必要である。", source: "45回 問題50", answer: true, exp: "正しい。フルウェーブにはロッド3回転分、ハーフウェーブには1.5回転分の長さが基準として求められる。" },
+    { id: "test_gijuturiron_past_2022_20", text: "カールのステムの「方向」は、仕上がり時のカールのボリュームを調節するために最も重要な要素である。", source: "45回 問題51", answer: false, exp: "誤り。ステムの「方向」は毛髪の流れを左右し、仕上がり時のボリュームに関係するのはステムの「角度」である。" },
+    { id: "test_gijuturiron_past_2022_21", text: "ピンカールの分類において、リフトカールはベースの周囲をスライスしてつくる「ストランドカール」の一種である。", source: "45回 問題52", answer: true, exp: "正しい。メイポールカールやリフトカールはストランドカール、スカルプチュアカールはシェーピングカールに分類される。" },
+    { id: "test_gijuturiron_past_2022_22", text: "赤みのある毛髪の色を消してナチュラルな色に仕上げたいときは、補色（反対色）であるオレンジ系のヘアカラーを用いるのがよい。", source: "45回 問題53", answer: false, exp: "誤り。赤の補色は緑系である。赤みを打ち消すには緑系の色素を持つカラーを用い、黄みを打ち消すには紫（青）系を用いるのが正しい。" },
+    { id: "test_gijuturiron_past_2022_23", text: "アイブロウメイクアップにおける眉山の位置は、黒目の外側と目尻の延長線の間を基準とするのが標準的なプロポーションである。", source: "45回 問題54", answer: true, exp: "正しい。この位置に眉山を設定することで、顔全体のバランスが整い、美しい眉のラインを表現できる。" },
+    { id: "test_gijuturiron_past_2022_24", text: "まつ毛エクステンションの装着をより長く持続させるためには、まつ毛の生え始めである「成長期初期」に装着するのが最適である。", source: "45回 問題55", answer: false, exp: "誤り。成長期初期のまつ毛への装着は避け、成長期の終わりから退行期が始まる時期に装着するのが最適とされる。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_gijuturiron_past_2021_01", text: "良質なシザーズの条件として、動刃と静刃の間に凸レンズ状のあきが正確につくられているものがよい。", source: "44回 問題44", answer: true, exp: "正しい。シザーズには適度な「ひねり」が必要であり、刃の間に正確な凸レンズ状のあきがあることで毛髪を確実に切ることができる。" },
+    { id: "test_gijuturiron_past_2021_02", text: "石けんを主剤としたシャンプー剤を使用した後は、アルカリ性に傾いた毛髪のpHを整えるためにアルカリ性のリンス剤を用いるのが適している。", source: "44回 問題45", answer: false, exp: "誤り。石けんシャンプー後は髪がアルカリ性に傾くため、pHを元に戻すには酸性のリンス剤（クエン酸など）を用いる必要がある。" },
+    { id: "test_gijuturiron_past_2021_03", text: "ロングのソバージュヘアは、細かいウェーブを付けた髪が直線的に広がり、強い印象を与えるのが特徴である。", source: "44回 問題46", answer: true, exp: "正しい。デザイン理論において、細かいウェーブと直線的な広がりは、野性的で強いイメージを演出する効果がある。" },
+    { id: "test_gijuturiron_past_2021_04", text: "グラデーションスタイルは、パネルをアップステムでシェープしてカットすることで形成される。", source: "44回 問題47", answer: false, exp: "誤り。グラデーションスタイルは「ダウンステム」でシェープしてカットしたものである。アップステムはレイヤースタイルに用いられる。" },
+    { id: "test_gijuturiron_past_2021_05", text: "レザーカットにおけるエンドテーパーカットは、毛先をテーパーする技法であり、生え際やパート際などの毛量が少ない部位に用いられる。", source: "44回 問題48", answer: true, exp: "正しい。毛先のわずかな部分を削いで先細りにする技法であり、デリケートな部分の質感調整に適している。" },
+    { id: "test_gijuturiron_past_2021_06", text: "ワインディングにおいて、毛の弾力でロッドが逆の回転で元に戻ろうとする力が、髪につやと美しいウェーブをあたえる働きをする。", source: "44回 問題49", answer: false, exp: "誤り。髪につやと美しいウェーブを持たせるのは「毛束を引く力（テンション）」である。逆回転しようとする力は、毛髪の復元力によるものである。" },
+    { id: "test_gijuturiron_past_2021_07", text: "リーゼントスタイルのワインディングでは、サイドのスライスを縦に取り、後方に強い方向性をつけるようにロッドを配列する。", source: "44回 問題50", answer: true, exp: "正しい。縦スライスを用いることで、毛流れを後ろ方向（バック）へ強く誘導する仕上がりとなる。" },
+    { id: "test_gijuturiron_past_2021_08", text: "ヘアウェーブの各部の名称において、凹んでいる部分をリッジ、凸状に盛り上がっている部分をトローという。", source: "44回 問題51", answer: false, exp: "誤り。凸状に盛り上がった部分は「リッジ（隆起線）」、凹んでいる部分は「トロー（谷）」である。" },
+    { id: "test_gijuturiron_past_2021_09", text: "染毛剤のパッチテストを行う際、テスト液は第1剤と第2剤を指定された割合で適切に混ぜ合わせて調製する。", source: "44回 問題52", answer: true, exp: "正しい。実際に使用する薬剤と同じ条件にするため、指定の混合比率でテスト液を作成し、皮膚の反応を確認する。" },
+    { id: "test_gijuturiron_past_2021_10", text: "爪のカット形状のうち、サイドがストレートで先端がアーモンドのように細くなった形状をラウンドという。", source: "44回 問題53", answer: false, exp: "誤り。それは「ポイント」の説明である。ラウンドは、サイドがストレートで先端が丸くカットされた最も自然な形状を指す。" },
+    { id: "test_gijuturiron_past_2021_11", text: "まつ毛エクステンションの施術において、過去にアレルギー等のトラブルがなかった物質であっても、体調や環境の変化によりかぶれることがある。", source: "44回 問題54", answer: true, exp: "正しい。接触皮膚炎は、累積的な刺激やアレルギー反応の獲得により、ある日突然発症するリスクがあるため注意が必要である。" },
+    { id: "test_gijuturiron_past_2021_12", text: "和装の各部の名称において、左右の肩幅と袖幅をすべて合わせた長さを袖付という。", source: "44回 問題55", answer: false, exp: "誤り。左右の肩幅と袖幅を合わせた全長は「裄（ゆき）」である。袖付は、袖を身頃に縫い合わせる部分を指す。" },
+    { id: "test_gijuturiron_past_2021_13", text: "ハンドドライヤーには、風が旋回して送り出されるタービネートタイプのものが多い。", source: "43回 問題44", answer: false, exp: "誤り。ハンドドライヤーは一般にブロータイプであり、風を直接毛髪に吹き付ける。タービネートタイプは主にスタンドドライヤーに用いられる。" },
+    { id: "test_gijuturiron_past_2021_14", text: "トリートメント剤は、加温して用いることにより、薬剤の毛髪への浸透を促進させることができる。", source: "43回 問題45", answer: true, exp: "正しい。加温することで毛髪へのなじみが良くなり、有効成分がより効率的に内部へ浸透する。" },
+    { id: "test_gijuturiron_past_2021_15", text: "ヘアカッティングにおいて、左サイドの前上がりラインを切る場合は、右肘を上げるとよい。", source: "43回 問題46", answer: false, exp: "誤り。左サイドの前上がりラインを切る場合は、右肘を「下げて」操作するのが正しい姿勢である。" },
+    { id: "test_gijuturiron_past_2021_16", text: "パーマネントウェーブにおいて、形成されるウェーブの大小は、主に使用するロッドの太さによって決まる。", source: "43回 問題47", answer: true, exp: "正しい。ロッドの直径がウェーブの大きさを決定する主要な要因であり、放置時間等だけで強弱を調整するのは避けるべきである。" },
+    { id: "test_gijuturiron_past_2021_17", text: "メイポールカールは、ストランドの毛先から巻きはじめ、カールを巻く際にベースをとらないシェーピングカールに分類される。", source: "43回 問題48", answer: false, exp: "誤り。メイポールカールはストランドの「根元」から巻く技法であり、ベースの周囲をスライスしてつくる「ストランドカール」に分類される。" },
+    { id: "test_gijuturiron_past_2021_18", text: "スキップウェーブにおいて、ウェーブ幅が3cmの場合、ループの直径は2cm、カールスペースは1cmとなる。", source: "43回 問題49", answer: true, exp: "正しい。ループの直径はウェーブ幅の2/3（2cm）、カールスペースはループ直径の1/2（1cm）という比率で構成される。" },
+    { id: "test_gijuturiron_past_2021_19", text: "ヘアカラー製品のうち、ヘアマニキュアなどの酸性染毛料は、永久染毛剤に分類される。", source: "43回 問題50", answer: false, exp: "誤り。ヘアマニキュアは「半永久染毛料」に分類される。永久染毛剤は、酸化染毛剤や脱色剤・脱染剤を指す。" },
+    { id: "test_gijuturiron_past_2021_20", text: "ネイルケアにおいて、自爪の長さや形を整えるために使用する板状のヤスリはエメリーボードである。", source: "43回 問題51", answer: true, exp: "正しい。エメリーボードは自爪をファイリングする際に用いる専用の道具である。" },
+    { id: "test_gijuturiron_past_2021_21", text: "まつ毛エクステンションの施術において、リペア（付け足し）は、個人差があるが通常6〜7週間を目安に行う。", source: "43回 問題52", answer: false, exp: "誤り。まつ毛の健康状態や持続力を考慮し、リペアはおおむね「2〜3週間」で行うのが一般的である。" },
+    { id: "test_gijuturiron_past_2021_22", text: "ウエディングドレスのプリンセスラインは、ウエストに切り替えがなく、縦の切り替え線を利用して裾を広げたシルエットである。", source: "43回 問題53", answer: true, exp: "正しい。上半身はフィットし、裾に向かってフレアーに広がるエレガントなラインが特徴である。" },
+    { id: "test_gijuturiron_past_2021_23", text: "ヘアデザインにおけるシンメトリーとは、左右の形が非対称でありながら、釣り合いがとれていて動きを感じさせる状態をいう。", source: "43回 問題54", answer: false, exp: "誤り。それはアシンメトリーの説明である。シンメトリーは左右対称であり、整然とした安定感や快感をあたえる状態を指す。" },
+    { id: "test_gijuturiron_past_2021_24", text: "炭素鋼は、コバルト鋼に比べて加工性がよく、刃を研ぎ直しやすいという利点がある。", source: "43回 問題55", answer: true, exp: "正しい。炭素鋼は鉄に炭素を加えたもので、美容刃物としての適度な硬さと加工のしやすさを併せ持っている。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_gijuturiron_past_2020_01", text: "コームの肩は、コームの目に入った毛髪を一線にそろえるはたらきをする。", source: "42回 問題44", answer: false, exp: "誤り。毛髪を一線にそろえるのは歯元のはたらきであり、肩はコーム全体の支えとなりバランスをとる胴の一部を指す。" },
+    { id: "test_gijuturiron_past_2020_02", text: "シャンプーイングは、汚れを取り除き、その後のカットやブローなどヘアデザインを容易にする土台をつくる目的で行われる。", source: "42回 問題45", answer: true, exp: "正しい。シャンプーイングはヘアデザインを容易にする土台づくりとしての役割を持つ。" },
+    { id: "test_gijuturiron_past_2020_03", text: "アップステムでシェープしてカットした場合、トップショートのロングエンドとなり、スタイルに立体感を与える。", source: "42回 問題46", answer: true, exp: "正しい。アップステムによるカットは、上部が短く下部が長いトップショートのロングエンドとなり、立体感が生まれる。" },
+    { id: "test_gijuturiron_past_2020_04", text: "ディープテーパーカットは、毛先から1/3ほどをテーパーするカット技法である。", source: "42回 問題47", answer: false, exp: "誤り。毛先から1/3を削るのはノーマルテーパーカットであり、ディープテーパーカットは根元近くから削る技法である。" },
+    { id: "test_gijuturiron_past_2020_05", text: "パーマネントウェーブ技術において、カラーリングや残存ウェーブがある部分には、トリートメント剤を塗布して第1剤の作用をセーブする。", source: "42回 問題48", answer: true, exp: "正しい。損傷や既染部に対してトリートメント剤を用いて薬剤の過剰な作用を抑える方法はトリートメント巻きと呼ばれる。" },
+    { id: "test_gijuturiron_past_2020_06", text: "ヘアウェービングにおいて、ループの直径（外径）はウェーブ幅の1/2となる。", source: "42回 問題49", answer: false, exp: "誤り。ウェーブ幅とループの関係は、ループの直径がウェーブ幅の2/3、カールスペースが1/3となるのが標準である。" },
+    { id: "test_gijuturiron_past_2020_07", text: "アルカリ性タイプの酸化染毛剤によるカラーリングでは、細毛や軟毛などは黄み系が出やすいので、希望色より明度の低い染毛剤を用いるとよい。", source: "42回 問題50", answer: true, exp: "正しい。髪質によって色の出方が異なるため、細毛等の場合は明度の低い薬剤を選択することで希望色に近づける。" },
+    { id: "test_gijuturiron_past_2020_08", text: "アートチップは、ナチュラルネイル（自爪）に直接ラインストーンやシールなどでアートを施すテクニックである。", source: "42回 問題51", answer: false, exp: "誤り。アートチップは、すでにあらかじめアートが施されている人工のチップを、両面テープなどで自爪に装着する技術である。" },
+    { id: "test_gijuturiron_past_2020_09", text: "まつ毛エクステンションのカウンセリングでは、安全な施術のために施術のリスクについても正しく説明する必要がある。", source: "42回 問題52", answer: true, exp: "正しい。説明責任を果たすため、メリットだけでなくデメリットやアレルギー等のリスクについても事前に伝える。" },
+    { id: "test_gijuturiron_past_2020_10", text: "ヘアドライヤーの温度を一定に保つためには、着脱式のアタッチメントを交換して調節する。", source: "42回 問題53", answer: false, exp: "誤り。ドライヤーの温度を一定に保つのは、本体に内蔵されているサーモスタットの機能である。" },
+    { id: "test_gijuturiron_past_2020_11", text: "線をさまざまな形に配置して、意図的に錯覚を生じさせるものを化学的錯視という。", source: "42回 問題54", answer: false, exp: "誤り。線を配置して起こる錯覚現象は、幾何学的錯視と呼ばれる。" },
+    { id: "test_gijuturiron_past_2020_12", text: "エステティックにおける肌質は、水分や皮脂のバランスによって分類することができる。", source: "42回 問題55", answer: true, exp: "正しい。水分と皮脂の分泌量やバランスにより、普通肌、乾燥肌、脂性肌、混合肌に分けられる。" },
+    { id: "test_gijuturiron_past_2020_13", text: "スキャルプマッサージの揉撚法は、指先が頭皮に触れる瞬間に力を入れてつまみ上げ、円を描くようにもんでいく手技である。", source: "41回 問題44", answer: true, exp: "正しい。揉撚法は筋肉組織を意識してもみほぐし、血液やリンパ液の循環を高める効果がある。" },
+    { id: "test_gijuturiron_past_2020_14", text: "グラデーションカットは、長さの異なる毛髪の層を重ね合わせ、ボリュームを調節して立体感をあたえるカット技法である。", source: "41回 問題45", answer: false, exp: "誤り。記述の内容はレイヤーカットの説明である。グラデーションカットは上部の層ほど毛髪が長くなるよう段差をつける技法である。" },
+    { id: "test_gijuturiron_past_2020_15", text: "セニングカットを行う際、横パネルに対しては直角にシザーズを入れないように注意する。", source: "41回 問題46", answer: true, exp: "正しい。横パネルに対して直角にシザーズを入れると、不自然な切り口やラインが目立ちやすくなるため避ける。" },
+    { id: "test_gijuturiron_past_2020_16", text: "ワインディングのフォワードスタイルは、サイドから見ると斜め前方向に顔を包みこむようにロッドを配列する。", source: "41回 問題47", answer: true, exp: "正しい。顔の方向に包み込む流れをつくるのがフォワード配列の特徴である。" },
+    { id: "test_gijuturiron_past_2020_17", text: "メイポールカールは、ステムの角度を垂直に立ち上げたスタンドアップカールの一種である。", source: "41回 問題48", answer: false, exp: "誤り。メイポールカールはステムの角度が0度に近いフラットカール（平巻き）に分類される。" },
+    { id: "test_gijuturiron_past_2020_18", text: "スカルプチュアカールは、ベースの底辺だけをスライスしながら巻くシェーピングカールの一種で、ピンをとるとリッジの高いウエーブになる。", source: "41回 問題49", answer: true, exp: "正しい。スカルプチュアカールは指で巻いてつくるシェーピングカールであり、ウエーブのリッジを強調するのに適している。" },
+    { id: "test_gijuturiron_past_2020_19", text: "色の彩度とは鮮やかさのことであり、彩度が低いといえば「くすんだ色」を指す。", source: "41回 問題50", answer: true, exp: "正しい。彩度が高いほど鮮やかで、低くなるにつれて無彩色に近づき、くすんだ印象になる。" },
+    { id: "test_gijuturiron_past_2020_20", text: "酸化染毛剤で全体を暗く染める場合は、染まりにくいネープ（襟足）の部分から塗布を始める。", source: "41回 問題51", answer: false, exp: "誤り。全体を暗く染める場合は、毛髪が最も明るいフロント部分から塗布を始めるのが原則である。" },
+    { id: "test_gijuturiron_past_2020_21", text: "まつ毛エクステンションで使用するグルーによるアレルギー反応は、施術後数分以内に必ず現れる。", source: "41回 問題52", answer: false, exp: "誤り。アレルギーには即時型のほか遅延型もあり、施術後しばらくしてから症状が現れることもある。" },
+    { id: "test_gijuturiron_past_2020_22", text: "留袖の着付けにおいて、衣紋の抜きの基本は、にぎりこぶし1個が入る程度あけるのが適当である。", source: "41回 問題53", answer: true, exp: "正しい。留袖のような礼装では衣紋をしっかり抜き、品格と美しさを表現する。" },
+    { id: "test_gijuturiron_past_2020_23", text: "シザーズを操作する際、薬指孔にある鉄身を安定させ、母指で操作する方の刃を静刃という。", source: "41回 問題54", answer: false, exp: "誤り。母指で操作して動かす方の刃は動刃（どうば）であり、薬指で固定される方が静刃（せいば）である。" },
+    { id: "test_gijuturiron_past_2020_24", text: "タービネートタイプのヘアドライヤーは、吸い込んだ風を循環・旋回させて送り出す仕組みで、ドライイングの効率を高める特徴がある。", source: "41回 問題55", answer: true, exp: "正しい。タービネートタイプは風の循環を利用しており、ブロータイプに比べて速乾性に優れている。" }
+]
+        }
+    },
+    "test_gijuturiron_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.学ぶにあたって": [
+    { id: "test_gijuturiron_extra_manabuniatatte_No01", text: "肩の関節を固定させて手を動かす作業を行うときは、肘を真っ直ぐ伸ばして作業すると精密な作業が容易になる。", source: "No.01", answer: false, exp: "誤り。肘を軽く曲げて作業するほうが、筋肉の緊張が少なく精密な作業が容易になります。" },
+    { id: "test_gijuturiron_extra_manabuniatatte_No02", text: "頭部の名称において、鼻の下にある溝を「人中」、唇の両端を「口角」、顎の先端を「オトガイ」と呼ぶ。", source: "No.02", answer: true, exp: "正しい。人中は鼻下の溝、口角は唇の両端、オトガイは顎先を指す正確な名称です。" },
+    { id: "test_gijuturiron_extra_manabuniatatte_No03", text: "美容技術において手指の関節を数える際、指先側から順に第1関節、第2関節、第3関節（付け根）と呼ぶ。", source: "No.03", answer: false, exp: "誤り。美容技術の教科書における解説では、一般解剖学の数え方とは異なり、体の中心に近い「付け根（基節）」のほうから順に第1関節、第2関節、第3関節（指先側）と数えるのが正しい定義とされています。" },
+    { id: "test_gijuturiron_extra_manabuniatatte_No04", text: "頭部の基準点のうち、ゴールデンポイントとは前頭部の生え際と正中線の交わった点のことである。", source: "No.04", answer: false, exp: "誤り。前頭部の生え際と正中線の交点はフロントポイントです。ゴールデンポイントはトップとバックの中間に位置します。" },
+    { id: "test_gijuturiron_extra_manabuniatatte_No05", text: "頭部の基準点のうち、頭部の頂点で正中上の点（最上部）をトップポイントと呼ぶ。", source: "No.05", answer: true, exp: "正しい。頭部の頂点に位置する正中線上の点は、技術の基準となるトップポイントと呼ばれます。" },
+],
+"B.美容用具": [
+    { id: "test_gijuturiron_extra_biyoyogu_No06", text: "美容用具に付着した水分や薬剤は、材質の変質を防ぐために1日に1回まとめてふき取ればよい。", source: "No.06", answer: false, exp: "誤り。用具に付着した汚れや水分は、1日に1回ではなく、使用の都度、速やかにふき取る必要があります。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No07", text: "コームの部位名称において、コームの端にある角の部分を「肩」と呼ぶ。", source: "No.07", answer: true, exp: "正しい。コームの端の角は「肩」、歯の隙間は「目」、歯の根元は「歯元」と呼ばれます。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No08", text: "コームの「胴」は、コーム全体の支えとなり、バランスをとるはたらきをしている。", source: "No.08", answer: true, exp: "正しい。胴はコームの骨組みとして全体の支えとなり、操作時のバランスを保つ役割を担っています。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No09", text: "コームを選定する際、直接皮膚に接触する歯先は、作業効率を高めるために鋭くとがっているものがよい。", source: "No.09", answer: false, exp: "誤り。歯先がとがっていると頭皮を傷つける恐れがあるため、歯先には丸みのあるものを選ぶのが適切です。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No10", text: "メイクアップ用ブラシは、主に毛髪を整えたり、頭皮のふけを取り除いたりするために使用される。", source: "No.10", answer: false, exp: "誤り。メイクアップ用ブラシは化粧料の塗布に用いるものであり、毛髪の整列やふけ取りにはヘアブラシを用います。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No11", text: "洗浄したブラシを乾かすときは、毛の変形や根元への水分の停滞を防ぐため、毛を下に向けて乾かすのがよい。", source: "No.11", answer: true, exp: "正しい。毛を上に向けると根元に水分が溜まり劣化の原因となるため、下に向けて乾燥させます。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No12", text: "シザーズは「てこ」の原理を応用しており、支点となる鋏要に近いほど力が強く、遠いほど力の調整がしやすい。", source: "No.12", answer: true, exp: "正しい。支点（鋏要）に近い部分は力が伝わりやすく、先端にいくほど繊細な操作が可能になります。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No13", text: "シザーズの指を入れる孔のうち、指かけ（静止を助ける突起）がついている側の孔を「母指孔」と呼ぶ。", source: "No.13", answer: false, exp: "誤り。指かけがついている側の孔は「薬指孔」です。もう一方の、親指を入れて操作する側の孔を「母指孔」と呼びます。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No14", text: "シザーズの構造において、母指（親指）で操作する側の刃は「静刃」である。", source: "No.14", answer: false, exp: "誤り。母指で操作して動かす方の刃は「動刃」であり、薬指を固定して支える方の刃が「静刃」です。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No15", text: "ヘアブラッシングに用いるブラシは、頭皮に適度な刺激を与え、毛髪を捉えやすくするために弾力があるものがよい。", source: "No.15", answer: true, exp: "正しい。ナイロン製やビニール製であっても、適度な柔らかさと弾力性があるものがブラッシングには適しています。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No16", text: "美容用具に使用されるピンは、パーマネントウエーブ用剤の影響を受けやすいため、主に合成樹脂でつくられている。", source: "No.16", answer: false, exp: "誤り。ピンには、熱に強く、薬品に侵されない鋼、ステンレス、アルミニウムなどが用いられます。主に合成樹脂が用いられるのはロッドです。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No17", text: "ヘアアイロンの構造において、毛髪を挟む側の溝状の部分を「グルーブ」、熱源となる柱状の部分を「ロッド」と呼ぶ。", source: "No.17", answer: true, exp: "正しい。毛髪を挟む側のパーツをグルーブ、熱を伝える柱状のパーツをロッド、操作レバーをグルーブハンドルと呼びます。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No18", text: "現在の美容室で一般的に使用されているヘアアイロンは、炭火などで直接加熱して使用する火熱式アイロンが主流である。", source: "No.18", answer: false, exp: "誤り。加熱方法には火熱式と電熱式がありますが、現在主流として使われているのは、温度調節が可能な電熱式アイロンです。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No19", text: "フード型のスタンドドライヤーにおいて、風を直接吹きつけるブロータイプは、風の循環を利用するタービネートタイプに比べて乾燥が早い。", source: "No.19", answer: false, exp: "誤り。熱風の循環・旋回を利用して放散を防ぐ「タービネートタイプ」のほうがドライイングの能率が高く（乾燥が早い）特徴を持ちます。直接風を吹きつける「ブロータイプ」は、タービネートタイプに比べて乾燥にやや時間を要するとされています。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No20", text: "美容室で使用されるハンドドライヤーは、一般的に風の循環と旋回を利用したタービネートタイプに分類される。", source: "No.20", answer: false, exp: "誤り。ハンドドライヤーは毛髪に風を直接吹きつけるブロータイプです。タービネートタイプは主にフード式のスタンドドライヤーに見られる構造です。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No21", text: "ヘアスチーマーは、スチーム（蒸気）の湿熱を利用して、ヘアトリートメントやスキャルプトリートメントなどの効果を高めるために用いられる。", source: "No.21", answer: true, exp: "正しい。スチーマーは蒸気を利用して薬液の浸透を促したり、頭皮の代謝を高めたりする役割を持ちます。" },
+    { id: "test_gijuturiron_extra_biyoyogu_No22", text: "ヘアスチーマーを選定する際は、薬剤の浸透や頭皮への効果を高めるため、放出される蒸気の粒子ができるだけ大きいものを選ぶのがよい。", source: "No.22", answer: false, exp: "誤り。ヘアスチーマーは、毛髪内部への薬剤の浸透性を高めるために、放出される蒸気の粒子がより小さい（微細な）ものを選ぶのが適切です。" },
+],
+"C.シャンプーイング": [
+    { id: "test_gijuturiron_extra_shanpuingu_No23", text: "シャンプーイングの主な目的の一つは、傷んだ毛髪を人工的に補強し、保護することである。", source: "No.23", answer: false, exp: "誤り。毛髪の人工的な補強や保護は「ヘアトリートメント」の目的であり、シャンプーの主な目的は頭皮や毛髪の汚れを落として清潔にすることです。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No24", text: "コンディショニング効果のあるシャンプー剤は、洗浄力を多少抑えてコンディションを整えるため、乾性の頭皮や毛髪に適している。", source: "No.24", answer: true, exp: "正しい。油分を含み洗浄力がマイルドなため、乾燥した髪や頭皮を整えるのに向いています。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No25", text: "洗浄効果を主としたシャンプー剤は、油成分の配合が少なく洗浄力が強いため、脂性の頭皮や毛髪に用いるのが適切である。", source: "No.25", answer: true, exp: "正しい。皮脂汚れをしっかり落とす必要がある脂性の状態に適したシャンプー剤です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No26", text: "シャンプーを行う際は、頭皮の汚れを効率よく落とすために爪を立てて洗うのがよい。", source: "No.26", answer: false, exp: "誤り。爪を立てると頭皮を傷つける原因となるため、指の腹（指頭）を使って洗うのが正しい方法です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No27", text: "シャンプー剤を適量以上に使用しても、それに比例して洗浄力が増加するわけではない。", source: "No.27", answer: true, exp: "正しい。多量のシャンプー剤は効果の増加につながらないばかりか、すすぎ残しによるトラブルの原因となります。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No28", text: "水分を吸収して膨潤した毛髪を強くこすり合わせると、表面のキューティクルを傷める原因となる。", source: "No.28", answer: true, exp: "正しい。濡れた髪はキューティクルが剥がれやすい状態にあるため、摩擦によるダメージに注意が必要です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No29", text: "パーマネントウエーブの前に行うシャンプーでは、薬剤の浸透をよくするために頭皮をこすって刺激を与えるのがよい。", source: "No.29", answer: false, exp: "誤り。パーマ等の施術前は、頭皮への薬剤刺激を避けるため、頭皮をこすらないように優しく洗うのが適切です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No30", text: "ヘアトリートメントは、傷んだ毛髪を人工的に補強し、毛髪を正常な状態に近づけ保護することを目的としている。", source: "No.30", answer: true, exp: "正しい。毛髪の内部補修や外部の保護を主目的とする技術です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No31", text: "パーマネントウエーブ施術後、アルカリ性に傾いた毛髪を本来の弱酸性の状態に戻すには、酸性効果のあるリンス剤が有効である。", source: "No.31", answer: true, exp: "正しい。酸性リンスを用いることで、施術後の毛髪のpHを整えることができます。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No32", text: "リンス剤に含まれるカチオン界面活性剤の主な役割は、毛髪の内部に浸透して失われたタンパク質を補うことである。", source: "No.32", answer: false, exp: "誤り。カチオン界面活性剤は毛髪の表面に吸着して被膜をつくり、静電気を防止したりブラシの通りをよくしたりする役割を担います。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No33", text: "毛髪が物理的なダメージ（傷み）を受けることによって生じる障害の一つに、白髪の発生が挙げられる。", source: "No.33", answer: false, exp: "誤り。白髪は色素細胞（メラノサイト）の機能低下などによる現象であり、毛髪が物理的に傷むこととは直接関係しません。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No34", text: "スキャルプトリートメントの主な目的は、シャンプー剤を用いて毛髪の汚れをきれいに洗い落とすことである。", source: "No.34", answer: false, exp: "誤り。シャンプー剤による洗浄はシャンプーイングの目的です。スキャルプトリートメントは頭皮の健康維持や改善を主目的とします。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No35", text: "ヘアトニックなどの薬剤を使用して、頭皮および毛髪の生理機能を健康に保持する方法は、化学的なスキャルプトリートメントに分類される。", source: "No.35", answer: true, exp: "正しい。薬剤の使用は化学的な方法に分類され、マッサージや温熱、ブラシなどを利用する方法は物理的な方法に分類されます。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No36", text: "健康な頭皮は、常に適当な皮脂膜に覆われ、細胞の入れ替わりである角化作用（ターンオーバー）が正常に行われているのが特徴である。", source: "No.36", answer: true, exp: "正しい。適度な皮脂と正常な角化サイクルが保たれているのが、健康な頭皮の状態です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No37", text: "ダンドラフスキャルプトリートメントは、皮脂が不足して頭皮が乾燥している場合に行われる技術である。", source: "No.37", answer: false, exp: "誤り。皮脂不足で乾燥している場合はドライスキャルプトリートメントを行います。ダンドラフは「ふけ」を意味し、ふけが多い場合に行うものです。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No38", text: "ノーマルスキャルプトリートメントは、皮脂の分泌が不足している状態のときに、その不足分を補うために行う技術である。", source: "No.38", answer: false, exp: "誤り。ノーマルスキャルプトリートメントは頭皮が正常（健康）な状態を維持するために行うものです。皮脂不足の場合はドライスキャルプトリートメントを行います。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No39", text: "オイリースキャルプトリートメントは、頭皮の皮脂の分泌が過多な場合に行われる技術である。", source: "No.39", answer: true, exp: "正しい。オイリーは脂性を意味し、過剰な皮脂を取り除き、分泌を抑える目的で行われます。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No40", text: "スキャルプケアで使用される育毛成分であるグリチルリチン酸ジカリウムは、主に頭皮の血行を促進する効果がある。", source: "No.40", answer: false, exp: "誤り。グリチルリチン酸ジカリウムは抗炎症作用などを目的として配合されます。血行促進は主にセンブリエキスなどの役割です。" },
+    { id: "test_gijuturiron_extra_shanpuingu_No41", text: "スキャルプマッサージにおける揉撚法は、指頭（指の腹）で頭皮をつまむようにつかみ、円を描くようにもみほぐしていく手技である。", source: "No.41", answer: true, exp: "正しい。揉撚法（じゅうねんほう）は、指頭（指の腹）を使って頭皮をつまむようにつかみ、円を描きながらもみほぐすことで、血行を促進し組織を和らげる手技です。爪を立てたり、髪をこすったりしないように行うのが技術上の重要なポイントです。" },
+],
+"D.ヘアデザイン": [
+    { id: "test_gijuturiron_extra_hdezain_No42", text: "実際には存在しないのに、輪郭線がそこにあるように見える現象を「客観制輪郭線」と呼ぶ。", source: "No.42", answer: false, exp: "誤り。実際には存在しない輪郭が見える現象は「主観的輪郭線」と呼びます。" },
+    { id: "test_gijuturiron_extra_hdezain_No43", text: "ヘアデザインにおいて直線は、見る人に繊細さや優美さを感じさせる役割を持つ。", source: "No.43", answer: false, exp: "誤り。直線は「強さ・厳格・静止」などの印象をあたえ、「繊細・優美」は曲線の印象です。" },
+    { id: "test_gijuturiron_extra_hdezain_No44", text: "平行な垂直線が、周囲にある斜線の影響などで傾いて見える現象を「角度・方向の錯視」という。", source: "No.44", answer: true, exp: "正しい。平行な線が周りの図形の影響を受けて、角度や方向がずれて見える現象を指します。" },
+    { id: "test_gijuturiron_extra_hdezain_No45", text: "直線をジグザグに描いたり、鋭角的に交差させたりすると、鋭く神経質な感じをあたえることができる。", source: "No.45", answer: true, exp: "正しい。直線の描き方や交差のさせ方などの造形要素によって、鋭い印象をあたえることが可能です。" },
+    { id: "test_gijuturiron_extra_hdezain_No46", text: "人間のプロポーションでは、体に対して頭が相対的に大きいと、全体的に大人っぽい成熟した印象になる。", source: "No.46", answer: false, exp: "誤り。頭が相対的に大きいと子供っぽく（幼く）見え、頭が相対的に小さいほうが大人っぽい成熟した印象をあたえます。" },
+],
+"E.ヘアカッティング": [
+    { id: "test_gijuturiron_extra__katthingu_No47", text: "正確にラインを修整するために行うチェックカッティングは、基本的に毛髪をぬらした状態で行うのがよい。", source: "No.47", answer: false, exp: "誤り。正確な仕上がりラインを確認し、修整を行うチェックカッティングは、基本的に乾燥（ドライ）状態で行います。" },
+    { id: "test_gijuturiron_extra__katthingu_No48", text: "カッティングに用いられる炭素鋼は、鉄に2%以下の炭素を含むものであり、さびに弱いという欠点がある。", source: "No.48", answer: true, exp: "正しい。炭素鋼はさびに弱い性質を持っており、その弱点を克服して開発されたのがステンレス鋼です。" },
+    { id: "test_gijuturiron_extra__katthingu_No49", text: "ヘアカッティングにおいて、スライス線に対して直角に対称に引き出すパネルの操作を、オンザベース（オンベース）と呼ぶ。", source: "No.49", answer: true, exp: "正しい。オンザベース（オンベース）は、頭面の分割されたベース（スライス線）に対して、パネルを「直角にかつ対称に（中央へ）」引き出す操作を指します。これにより、左右の髪の長さが対称になり、収まりの良い均一な長さにカットすることができます。" },
+    { id: "test_gijuturiron_extra__katthingu_No50", text: "顔のポイントによるライン設定において、ネープポイントとノーズポイントを結ぶラインが最も角度のある前下がりとなる。", source: "No.50", answer: false, exp: "誤り。ネープポイント（後ろ）とノーズポイント（前・上）を結ぶラインは、前方に向かってラインが上がるため「前下がり」ではなく「前上がり」のラインになります。最も角度のある急な「前下がり」のラインは、ネープ（後ろ）とチンポイント（顎先・前・下）を結ぶラインです。" },
+    { id: "test_gijuturiron_extra__katthingu_No51", text: "セイムレングスカットは、すべてのパネルを頭皮に対して直角（90度）に引き出し、全体をほぼ同じ長さに切りそろえる技法である。", source: "No.51", answer: true, exp: "正しい。セイムレングスカットは、頭面のあらゆる位置（どのセクション）においても、パネルを頭皮に対して直角（90度）に引き出し、すべて同一の長さにカットする技法です。これにより、頭の丸みに沿った球体状の均一なヘアスタイル（ショートスタイルなど）が形成されます。" },
+    { id: "test_gijuturiron_extra__katthingu_No52", text: "グラデーションカットは、上部の層ほど毛髪を短く設定し、バリエーション豊富な段差をつける技法である。", source: "No.52", answer: false, exp: "誤り。上部を短くし粗い段差をつけるのはレイヤーカットです。グラデーションは上部の毛が下の毛より長く、裾に厚み（密な段差）が出るのが特徴です。" },
+    { id: "test_gijuturiron_extra__katthingu_No53", text: "ワンレングスカットは、毛髪が自然に落ちる位置ですべてを同一線上で切りそろえる技法である。", source: "No.53", answer: true, exp: "正しい。水平や前下がりなどのバリエーションがありますが、一つの同じ線上で切るのが基本です。" },
+    { id: "test_gijuturiron_extra__katthingu_No54", text: "グラデーションカットは、上部の層ほど毛髪を長く残し、密な段差をつける技法である。", source: "No.54", answer: true, exp: "正しい。上の毛Bが下の毛Aより長く重なることで、ヘアスタイルの裾に厚みが生まれます。" },
+    { id: "test_gijuturiron_extra__katthingu_No55", text: "セニングカットは、主に毛髪を間引くようにして毛量を減らし、調節することを目的としたカット技法である。", source: "No.55", answer: true, exp: "正しい。毛先を尖らせたり軽くしたりするのはテーパーやポインティングであり、セニングは量を減らすのが主目的です。" },
+    { id: "test_gijuturiron_extra__katthingu_No56", text: "ポインティングカットは、シザーズを滑らせながら開閉することで、長さと毛量の調節を同時に行う技法である。", source: "No.56", answer: false, exp: "誤り。シザーズをスライド（滑らせる）させて長さと毛量を同時に調節するのは「スライドカット」です。ポインティングは毛先をギザギザに調整する技法を指します。" },
+    { id: "test_gijuturiron_extra__katthingu_No57", text: "ブラントカットとは、シザーズをスライドさせ毛先を穂先のような状態にして、長さと毛量の調節を同時に行う技法である。", source: "No.57", answer: false, exp: "誤り。シザーズをスライドさせて長さと毛量を同時に調節するのはスライドカットです。ブラントカットは毛髪を直線でブツ切りにする技法を指します。" },
+    { id: "test_gijuturiron_extra__katthingu_No58", text: "レザーによるノーマルテーパーカットは、毛先から約1/3の部分を削いでいく技法である。", source: "No.58", answer: true, exp: "正しい。毛先から1/3程度をテーパーするのがノーマルです。根元近くから行うのはディープテーパー、毛先1〜2cmはエンドテーパーと呼びます。" },
+    { id: "test_gijuturiron_extra__katthingu_No59", text: "レザーカットにおいて、パネルの片面のみを削いで毛先を尖らせる技法を、ボスサイドテーパーと呼ぶ。", source: "No.59", answer: false, exp: "誤り。パネルの片面のみを削ぐのはシングルテーパーです。ボスサイドテーパーは、パネルの外側と内側の「両面」を削ぐ技法を指します。" },
+],
+"F.パーマネントウエービング": [
+    { id: "test_gijuturiron_extra_pama_No60", text: "パーマネントウエーブは、1剤（還元剤）でシスチン結合を切断し、2剤（酸化剤）で再結合させることにより形状を固定する技術である。", source: "No.60", answer: true, exp: "正しい。還元作用による結合の切断と、酸化作用による再結合がパーマの基本的な仕組みです。" },
+    { id: "test_gijuturiron_extra_pama_No61", text: "パーマ剤の2剤には、毛髪内部のシスチン結合を切断するために、主にシステインが用いられる。", source: "No.61", answer: false, exp: "誤り。システインは1剤に用いられる還元剤です。2剤には酸化剤（過酸化水素や臭素酸ナトリウム）が用いられます。" },
+    { id: "test_gijuturiron_extra_pama_No62", text: "1剤に含まれるアルカリ剤には、毛髪を膨潤させて還元剤を浸透しやすくし、薬剤の力を高めるはたらきがある。", source: "No.62", answer: true, exp: "正しい。アルカリ剤によって毛髪を広げることで、還元剤が内部まで作用しやすくなります。" },
+    { id: "test_gijuturiron_extra_pama_No63", text: "ワインディングにおいて、髪につやと美しいウエーブを持たせるために必要な力は、輪ゴムによる適度な圧力を指す。", source: "No.63", answer: false, exp: "誤り。髪につやと美しさを与えるのは、毛束を垂直方向に引く「テンション」の力です。" },
+    { id: "test_gijuturiron_extra_pama_No64", text: "パーマ剤の2剤は、酸化反応によって、還元剤で切断されたシスチン結合を再結合させる役割を担っている。", source: "No.64", answer: true, exp: "正しい。2剤の酸化作用によって、ズレが生じた状態でシスチン結合を再びつなぎ合わせ、形を固定します。" },
+    { id: "test_gijuturiron_extra_pama_No65", text: "加温式パーマネントウエーブは、遠赤外線促進機などを用いて、一般的に70℃〜80℃の高温で加温して施術を行う。", source: "No.65", answer: false, exp: "誤り。加温式は、薬剤の反応を促進させるために「60℃以下」で加温して用いるものを指します。" },
+    { id: "test_gijuturiron_extra_pama_No66", text: "コールド式のパーマネントウエーブは、加温装置を使用せず、室温で薬剤を作用させる方式である。", source: "No.66", answer: true, exp: "正しい。室温（コールド）で化学反応を進行させるため、このように呼ばれます。" },
+    { id: "test_gijuturiron_extra_pama_No67", text: "パーマ剤は、成分が似ていれば、経済性を考慮して1剤と2剤を異なるメーカーの製品と組み合わせて使用してもよい。", source: "No.67", answer: false, exp: "誤り。1剤と2剤は同一メーカーの同一セットで設計されているため、他製品と混ぜたり組み合わせて使用してはいけません。" },
+    { id: "test_gijuturiron_extra_pama_No68", text: "施術前のプレシャンプーにおいて、オイル分の強いものを使用すると薬剤の浸透を妨げる原因となる。", source: "No.68", answer: true, exp: "正しい。油分が毛髪に残ると薬剤をはじいてしまうため、プレシャンプーにはオイル分の少ないものが適しています。" },
+    { id: "test_gijuturiron_extra_pama_No69", text: "1剤塗布後の放置タイムの目安は、確実にウエーブを定着させるために、通常30分前後が適切である。", source: "No.69", answer: false, exp: "誤り。放置タイムの目安は一般的に10〜15分程度であり、過度な放置は毛髪に大きな損傷を招く恐れがあります。" },
+],
+"G.ヘアセッティング": [
+    { id: "test_gijuturiron_extra_setthingu_No70", text: "ヘアシェーピングは、毛流を整え、カールやウエーブをつくるための基礎となる技術である。", source: "No.70", answer: true, exp: "正しい。ヘアセッティングにおける「ヘアシェーピング（毛流を整える技術）」は、毛束の方向性をコントロールし、その後のカールやウエーブを美しく仕上げるための最も重要な基礎工程です。※刃物で毛を剃る「シェービング」との言葉の響きに惑わされないよう注意しましょう。" },
+    { id: "test_gijuturiron_extra_setthingu_No71", text: "カールの部位名称において、カールが巻き始められる起点のことを「ループ」と呼ぶ。", source: "No.71", answer: false, exp: "誤り。カールが巻き始められる起点は「ピボットポイント」です。ループは円形に巻かれた輪の部分を指します。" },
+    { id: "test_gijuturiron_extra_setthingu_No72", text: "カールストランドの根元から、カールの巻き始めの起点であるピボットポイントまでを「カールステム」という。", source: "No.72", answer: true, exp: "正しい。ベース（根元）とピボットポイント（起点）を繋ぐ、カールの方向性を決める部分をステムと呼びます。" },
+    { id: "test_gijuturiron_extra_setthingu_No73", text: "ヘアカーリングの主な目的は、技術の土台を築くために毛流を整えることにある。", source: "No.73", answer: false, exp: "誤り。毛流を整えて技術の土台を築くのは「ヘアシェーピング」の目的です。ヘアカーリング（カールをつくること）の主な目的は、毛髪にウエーブ、ボリューム（ふくらみ）、動き（方向性）をあたえることにあります。それぞれの技術目的の違いを明確に区別しておきましょう。" },
+    { id: "test_gijuturiron_extra_setthingu_No74", text: "カールの構成要素には、スライシング、ベース、ステムの方向と角度、テンションなどが含まれる。", source: "No.74", answer: true, exp: "正しい。カールの仕上がりを決定づける基本要素として、スライシングやステム、テンション、ループの大きさなどが挙げられます。" },
+    { id: "test_gijuturiron_extra_setthingu_No75", text: "ベースの底辺だけをスライスしながら巻くタイプのカールのことを、シェーピングカールという。", source: "No.75", answer: true, exp: "正しい。カールのスライシング（毛束の取り方）による分類において、ベースの底辺のみをスライスしてそのまま形を整えながら巻くカールを「シェーピングカール」と呼びます。※これに対し、ベースの周囲を一定の形にきちんとスライスしてつくるカールを「スカルプチュアカール（またはベースカール）」と呼び、両者は明確に区別されています。" },
+    { id: "test_gijuturiron_extra_setthingu_No76", text: "トライアンギュラーベース（三角形のベース）は、頂点が重なり合う構成のため、コームアウトした際に割れ目ができにくい。", source: "No.76", answer: true, exp: "正しい。三角形ベースは髪が重なりやすく、仕上げた際に不自然な分け目（割れ目）が出るのを防ぐのに適しています。" },
+    { id: "test_gijuturiron_extra_setthingu_No77", text: "スクエアベースはベースの形が長方形であり、平均したカールやウエーブを出すときに最も多用される。", source: "No.77", answer: false, exp: "誤り。平均したウエーブを出す長方形のベースは「オブロングベース」です。スクエアベースは正方形の形状をしています。" },
+    { id: "test_gijuturiron_extra_setthingu_No78", text: "カールピニングにおける「両面打ち」とは、一つのピンで隣り合う二つのカールの重なりを同時に固定する技法である。", source: "No.78", answer: true, exp: "正しい。二つのカールの重なった部分を一つのピンで留めることで、効率的にカールの形を安定させることができます。" },
+    { id: "test_gijuturiron_extra_setthingu_No79", text: "クロックワイズワインドカールとは、毛髪を反時計回り（左巻き）に巻いたカールの名称である。", source: "No.79", answer: false, exp: "誤り。クロックワイズは時計と同じ方向の「右巻き」を指します。反時計回りはカウンタクロックワイズと呼ばれます。" },
+    { id: "test_gijuturiron_extra_setthingu_No80", text: "フラットカール（頭皮に平らに収まるカール）には、スカルプチュアカール、ラリアットカール、メイポールカール、ジェリーロールが含まれる。", source: "No.80", answer: true, exp: "正しい。これらはすべて、頭皮に対して平らに構成されるフラットカールの種類に分類されます。" },
+    { id: "test_gijuturiron_extra_setthingu_No81", text: "ヘアセッティングにおいて、襟足など後方の方向（耳介の後ろ側）に向かって巻かれるカールのことをフォワードカールと呼ぶ。", source: "No.81", answer: false, exp: "誤り。襟足など後方に向かうのはリバースカールです。顔の前面に向かって巻かれるのがフォワードカールです。" },
+    { id: "test_gijuturiron_extra_setthingu_No82", text: "カールピニングを行う際は、カールの形を安定させるために、ピンやクリップの奥（根元）の方でしっかりとはさんでとめるのがよい。", source: "No.82", answer: false, exp: "誤り。カールの形を崩さないようにするため、ピンやクリップの先（先端に近い方）で軽く止めるのが正しい方法です。" },
+    { id: "test_gijuturiron_extra_setthingu_No83", text: "メイポールカールのピニングでは、アメリカピンでステムとループの下の面をとめ、オニピンでループの形を固定する。", source: "No.83", answer: true, exp: "正しい。アメリカピンでカールの土台を支え、オニピンで上部のループの形を整えて固定します。" },
+    { id: "test_gijuturiron_extra_setthingu_No84", text: "メイポールカールのピニングにおいて、ピンはステムの方向に対して平行に打つのが正しい手法である。", source: "No.84", answer: false, exp: "誤り。メイポールカールは、ピンをステムの方向に対して「直角」に打ち、ループの根元を横切るように固定するのが特徴です。" },
+    { id: "test_gijuturiron_extra_setthingu_No85", text: "カールピニングの技法の一つである「水平打ち」とは、ピンをベースの底辺と並行に打つ方法を指す。", source: "No.85", answer: true, exp: "正しい。ベースの底辺に対して水平にピンを打つことで、カールを安定させる技法です。" },
+    { id: "test_gijuturiron_extra_setthingu_No86", text: "鈍角的ウエーブとは、シェープする角度を鈍角にすることで、リッジを強調しはっきりと立たせたウエーブのことである。", source: "No.86", answer: false, exp: "誤り。鈍角的ウエーブは、リッジが目立たないなだらかな仕上がりになるのが特徴です。リッジを強調するのは鋭角的ウエーブなどの説明です。" },
+    { id: "test_gijuturiron_extra_setthingu_No87", text: "スカルプチュアカールの基本構成比において、ベースをとるためのスライス線はウエーブ幅の1/2、ループの直径は2/3となる。", source: "No.87", answer: true, exp: "正しい。スライス線は1/2、ループ直径は2/3、カールスペースは1/3の割合で構成されます。" },
+    { id: "test_gijuturiron_extra_setthingu_No88", text: "ハーフウエーブの幅が3cmの場合、スカルプチュアカールで構成されるループの直径は1.5cmとなる。", source: "No.88", answer: false, exp: "誤り。ループの直径はウエーブ幅の2/3であるため、3cmの場合は2.0cmとなります。1.5cmはウエーブ幅の1/2の数値です。" },
+    { id: "test_gijuturiron_extra_setthingu_No89", text: "スキップウエーブにおいてウエーブ幅を3cmとした場合、下のフィンガーウエーブ（カールのない段）の幅はちょうどカール2個分の幅（4cm）になる。", source: "No.89", answer: true, exp: "正しい。教科書のスキップウエーブ理論に基づき、ウエーブ幅を3cmとした場合、カールのない段（フィンガーウエーブ段）の幅は、カールスペース分（1.0cm）が加算されて「4cm（カール2個分の直径）」になります。スキップウエーブ特有の変則的な寸法ルールとして確実に暗記しておきましょう。" },
+    { id: "test_gijuturiron_extra_setthingu_No90", text: "ブロードライスタイリングを行う際は、形を固定しやすくするために、毛髪を滴るほど十分に湿らせた状態から操作を始めるのが最も効率的である。", source: "No.90", answer: false, exp: "誤り。ブロードライは毛髪から水分が抜ける瞬間に形が固定されるため、滴るほど濡れた状態ではなく、半乾きの状態から操作するのが効率的です。" },
+    { id: "test_gijuturiron_extra_setthingu_No91", text: "ハンドドライヤーを用いてストレートな毛流をつくる場合は、毛先の動きを意識するよりも、毛髪の根元からしっかりテンションを加えて伸ばすのが正しい。", source: "No.91", answer: true, exp: "正しい。ストレートな毛流を形成するためには、根元から適切なテンションをかけてブローを行う必要があります。" },
+    { id: "test_gijuturiron_extra_setthingu_No92", text: "バックコーミングを行う際は、シルエットを大きく見せデザインを保つために、できるだけ大きなストロークで一気に逆毛を立てるのがよい。", source: "No.92", answer: false, exp: "誤り。大きなストロークで行うと表面に逆毛が出やすく仕上がりが汚くなるため、小さく小刻みなストロークで逆毛を立てるのが適切です。" },
+],
+"H.ヘアカラーリング": [
+    { id: "test_gijuturiron_extra_kararingu_No93", text: "一般的に「ヘアマニキュア」と呼ばれている薬剤は、永久染毛剤に分類される。", source: "No.93", answer: false, exp: "誤り。ヘアマニキュアは「半永久染毛料」に分類されます。永久染毛剤はヘアカラー（酸化染毛剤）などを指します。" },
+    { id: "test_gijuturiron_extra_kararingu_No94", text: "永久染毛剤は、一度の使用で毛髪内部に染料が定着するため、シャンプーをしても色落ちしにくいという特徴がある。", source: "No.94", answer: true, exp: "正しい。永久染毛剤は毛髪内部で染料が酸化重合して固着するため、一時染毛料などと異なり高い持続性を持ちます。" },
+    { id: "test_gijuturiron_extra_kararingu_No95", text: "永久染毛剤による染毛では、染毛成分がキューティクルを通過し、主に毛髄質の奥深くまで浸透して作用する。", source: "No.95", answer: false, exp: "誤り。永久染毛剤が浸透して作用するのは、毛髪の主成分である「毛皮質（コルテックス）」です。" },
+    { id: "test_gijuturiron_extra_kararingu_No96", text: "酸性染料を用いる半永久染毛料は、毛髪のメラニン色素を脱色する作用を持たない。", source: "No.96", answer: true, exp: "正しい。半永久染毛料（ヘアマニキュア等）は脱色作用を持たないため、元の髪色より明るくすることはできません。" },
+    { id: "test_gijuturiron_extra_kararingu_No97", text: "黄色系に明るくなった毛髪の黄を生かして、赤い色素をもったヘアカラーを重ねると、だいだい（オレンジ）系の色に仕上がる。", source: "No.97", answer: true, exp: "正しい。黄色系の下地に赤系の染料を重ねることで、色相環上の混合色であるだいだい系を表現できます。" },
+    { id: "test_gijuturiron_extra_kararingu_No98", text: "ヘアカラーリングにおいて、酸化染毛剤によるアレルギー反応の有無を確認するための皮膚試験を「レベルチェック」と呼ぶ。", source: "No.98", answer: false, exp: "誤り。アレルギーの有無を確認するのは「パッチテスト（皮膚アレルギー試験）」です。レベルチェックは毛髪の明るさを確認することを指します。" },
+    { id: "test_gijuturiron_extra_kararingu_No99", text: "パッチテストに使用するテスト液は、実際に使用する染毛剤の1剤と2剤を指定された割合で混合して作る必要がある。", source: "No.99", answer: true, exp: "正しい。実際に施術で使用する配合で反応を確認する必要があるため、規定の割合で混合したテスト液を使用します。" },
+    { id: "test_gijuturiron_extra_kararingu_No100", text: "過去に何度も同じ酸化染毛剤を使用して問題がなかった場合、リタッチ技術の際にはパッチテストを行う必要はない。", source: "No.100", answer: false, exp: "誤り。酸化染毛剤を使用する際は、体調の変化やアレルギーの蓄積を考慮し、リタッチであっても毎回必ずパッチテストを行わなければなりません。" },
+    { id: "test_gijuturiron_extra_kararingu_No101", text: "染毛剤は混合した瞬間から酸化反応が始まるため、ヘアカラーリングの作業を行う直前に調合するのが正しい。", source: "No.101", answer: true, exp: "正しい。1剤と2剤を混合するとすぐに反応が開始され効力が変化していくため、作り置きをせず直前に調合します。" },
+],
+"I.エステティック": [
+    { id: "test_gijuturiron_extra_esutethikku_No102", text: "軽擦法は、皮膚をなでたり、さすったりする方法であり、面積の広い部位には手掌、狭い部位には指腹を用いるのが適切である。", source: "No.102", answer: true, exp: "正しい。軽擦法はなでる手技であり、部位の広さに応じて手掌と指腹を使い分けます。" },
+    { id: "test_gijuturiron_extra_esutethikku_No103", text: "揉撚法は、主に筋肉組織を意識してもみほぐす方法であり、手掌や小指側面などで皮膚をリズミカルに叩く技術を指す。", source: "No.103", answer: false, exp: "誤り。筋肉をもみほぐすのは揉撚法ですが、リズミカルに叩く技術は「打法」に分類されます。" },
+    { id: "test_gijuturiron_extra_esutethikku_No104", text: "打法とは、手掌や小指側面、こぶしなどを用いて皮膚を軽くリズミカルに叩くマッサージ手技のことである。", source: "No.104", answer: true, exp: "正しい。打法にはタッピング、ハッキング、カッピング、ビーティングといった種類があります。" },
+    { id: "test_gijuturiron_extra_esutethikku_No105", text: "打法の一つであるビーティングは、指の腹（指頭）でパッティングするように軽くたたく手技である。", source: "No.105", answer: false, exp: "誤り。指の腹（指頭）でパッティングするように優しくたたく手技は「タッピング」です。設問の「ビーティング」は、軽く握ったこぶしの小指側で交互にトントンとリズミカルにたたく手技を指します。" },
+    { id: "test_gijuturiron_extra_esutethikku_No106", text: "収れん性化粧水は、皮脂分泌を抑制する効果があるため、皮脂分泌が不足している乾性肌に用いるのが最も適切である。", source: "No.106", answer: false, exp: "誤り。収れん性化粧水は毛穴を引き締め皮脂を抑えるため、脂性肌（オイリースキン）に用いるのが適切です。" },
+    { id: "test_gijuturiron_extra_esutethikku_No107", text: "フェイシャルケアには、電気や刺激を与える物理的な方法と、化粧料により健康な皮膚を維持しようとする化学的な方法がある。", source: "No.107", answer: true, exp: "正しい。マッサージや機器を用いる物理的方法と、薬剤を用いる化学的方法の相乗効果で成り立っています。" },
+    { id: "test_gijuturiron_extra_esutethikku_No108", text: "フェイシャルマッサージは、血液とリンパの循環を活発にすることで、皮膚の新陳代謝（ターンオーバー）を遅らせる効果がある。", source: "No.108", answer: false, exp: "誤り。マッサージは新陳代謝を「遅らせる」のではなく、活発にして「促進させる」効果があります。" },
+    { id: "test_gijuturiron_extra_esutethikku_No109", text: "ウォッシュオフタイプのパック剤は、皮膚に塗布した後に必要時間放置し、水やぬるま湯で洗い流すものであり、紫外線の照射は行わない。", source: "No.109", answer: true, exp: "正しい。ウォッシュオフタイプは洗い流す形状のパックであり、乾燥のために紫外線を照射することはありません。" },
+    { id: "test_gijuturiron_extra_esutethikku_No110", text: "クレンジングの主な目的は、皮膚の深部や表面に付着しているファンデーションなどの汚れを浮かし、スポンジなどで除去することである。", source: "No.110", answer: true, exp: "正しい。クレンジング剤によってメイクや油性の汚れを浮き上がらせて取り除きます。" },
+    { id: "test_gijuturiron_extra_esutethikku_No111", text: "フェイシャルパックの形状は、乾燥させて形成された皮膜をはがし取る「ピールオフタイプ」の1種類のみである。", source: "No.111", answer: false, exp: "誤り。パックにはピールオフのほかに、洗い流す「ウォッシュオフ」や「拭き取り」など複数のタイプがあります。" },
+    { id: "test_gijuturiron_extra_esutethikku_No112", text: "フェイシャルケアの基本的な手順として、まず肌の状態を整える「整肌」を行ってから、マッサージやパックの工程に進むのがよい。", source: "No.112", answer: false, exp: "誤り。整肌（化粧水などで整えること）は、マッサージやパックなどのすべてのトリートメントが終わった最後に行うのが正解です。" },
+],
+"J.ネイル技術": [
+    { id: "test_gijuturiron_extra_neiru_No113", text: "ネイルアートの技法には、爪にアクリルやジェルを用いて、欠けた爪の補強や修復を行うことも含まれる。", source: "No.113", answer: false, exp: "誤り。アクリルやジェルでの補強・修復は「リペア」や「イクステンション」に該当し、装飾を目的とするネイルアートとは区別されます。" },
+    { id: "test_gijuturiron_extra_neiru_No114", text: "ネイルアートとは、カラーエナメルやラインストーンなどを用いて爪にデザインを施す技術のことである。", source: "No.114", answer: true, exp: "正しい。爪に装飾を行いデザインすることをネイルアートと呼びます。" },
+    { id: "test_gijuturiron_extra_neiru_No115", text: "マニキュア技術においてトップコートは、エナメルの付きをよくするために、カラーエナメルを塗る前に使用する。", source: "No.115", answer: false, exp: "誤り。カラーの前に塗るのはベースコートです。トップコートはエナメルの保護と輝きのために、最後に塗るものです。" },
+    { id: "test_gijuturiron_extra_neiru_No116", text: "マニキュアにおけるトップコートの主な役割は、エナメルを保護し、爪に輝きをあたえることである。", source: "No.116", answer: true, exp: "正しい。トップコートは仕上がりの保護と光沢付与を目的として使用されます。" },
+    { id: "test_gijuturiron_extra_neiru_No117", text: "ネイルケアで使用されるエナメルリムーバーは、爪に塗布されたエナメルを除去する際に用いられるものである。", source: "No.117", answer: true, exp: "正しい。エナメルを溶かして落とすためにリムーバーを使用します。" },
+    { id: "test_gijuturiron_extra_neiru_No118", text: "マニキュア技術において、キューティクルを柔らかくして取り除きやすくするためには、ベースコートを塗布するのが適切である。", source: "No.118", answer: false, exp: "誤り。キューティクルを柔らかくするために用いるのは「キューティクルリムーバー」です。ベースコートはカラーの定着や保護のために用います。" },
+    { id: "test_gijuturiron_extra_neiru_No119", text: "爪の形を整える際、エメリーボードは爪の左右から何度も往復させるようにかけるのが正しい使用法である。", source: "No.119", answer: false, exp: "誤り。爪の損傷を防ぐため、エメリーボードは「往復」させず、常に「一定方向」に動かして使用するのが鉄則です。" },
+    { id: "test_gijuturiron_extra_neiru_No120", text: "爪が長い場合には、まずネイルニッパーを使用して長さをカットしてからファイリングを行うのが適切である。", source: "No.120", answer: true, exp: "正しい。長い爪を無理に削るのではなく、ニッパーで長さを調節してからヤスリ（ファイリング）で整えます。" },
+    { id: "test_gijuturiron_extra_neiru_No121", text: "マニキュアの仕上げは、爪表面の油分処理をした後、ベースコート、カラーエナメル、トップコートの順で塗布する。", source: "No.121", answer: true, exp: "正しい。この順番で塗布することで、爪の保護から仕上がりの美しさ、持続性を高めることができます。" },
+    { id: "test_gijuturiron_extra_neiru_No122", text: "アーティフィシャルネイル技術において、フィラーとは爪表面に貼るファブリック（布）やファイバーグラスを指す言葉である。", source: "No.122", answer: false, exp: "誤り。フィラーは補強に用いる「粉末」のことです。爪表面に貼るファブリックは「シルク」などを指します。" },
+],
+"K.メイクアップ": [
+    { id: "test_gijuturiron_extra_meikuappu_No123", text: "色彩学において、赤・青・黄の3色は「色の三原色」と呼ばれ、色は無彩色と有彩色の2つに大きく分けられる。", source: "No.123", answer: true, exp: "正しい。無彩色は白・黒・グレー、有彩色はそれ以外の色を指し、赤・青・黄が基本の三原色となります。" },
+    { id: "test_gijuturiron_extra_meikuappu_No124", text: "パーソナルカラーにおいて、イエローベースの肌（Springタイプ）には、深みのある中間色やセピアカラー、アースカラーがよく似合う。", source: "No.124", answer: false, exp: "誤り。アースカラーやセピアカラーが似合うのはイエローベースのAutumnタイプです。Springタイプには、明るく澄んだ色が似合います。" },
+    { id: "test_gijuturiron_extra_meikuappu_No125", text: "化粧水の一種である「スキンソフトナー」は、角質を硬化させて肌のキメを細かく整える役割がある。", source: "No.125", answer: false, exp: "誤り。スキンソフトナーは、その名の通り角質を「柔軟にする（やわらかくする）」役割を持つ化粧水です。" },
+    { id: "test_gijuturiron_extra_meikuappu_No126", text: "アイブロウの道具のうち、ペンシルタイプは1本1本くっきりしたラインを描くのに適し、パウダータイプはソフトに描くのに適している。", source: "No.126", answer: true, exp: "正しい。求める眉のデザインや印象に合わせて、それぞれの特性を持つ道具を使い分けます。" },
+    { id: "test_gijuturiron_extra_meikuappu_No127", text: "マスカラを塗布する際は、仕上がりを美しくするために、まつ毛の上側に毛先から根元へと付けていくのが基本である。", source: "No.127", answer: false, exp: "誤り。マスカラの塗布は、まつ毛の「根元から毛先へ」向かって行うのが正しい手順です。" },
+    { id: "test_gijuturiron_extra_meikuappu_No128", text: "ブライダルにおける男性のメイクでは、男性は女性に比べて皮脂の分泌が少ないため、油分の多いクリームでスキンケアを行うのがよい。", source: "No.128", answer: false, exp: "誤り。一般的に男性は女性よりも皮脂の分泌量が多いため、テカリを抑えるなどの肌タイプに合わせたスキンケアが重要です。" },
+    { id: "test_gijuturiron_extra_meikuappu_No129", text: "まつ毛エクステンションの装着は、自毛への負担を減らすため成長初期は避け、成長期の終わりから退行期が始まる時期に行うのが最適である。", source: "No.129", answer: true, exp: "正しい。まつ毛の毛周期を考慮して、装着に最も適した時期の毛を選定して施術を行います。" },
+    { id: "test_gijuturiron_extra_meikuappu_No130", text: "まつ毛エクステンションの接触皮膚炎は、過去に発症しなかった物質であっても、体調の変化や蓄積によって突然発症する可能性がある。", source: "No.130", answer: true, exp: "正しい。身体状況やアレルゲンの蓄積により、それまで問題のなかったグルーなどで突然かぶれることがあります。" },
+    { id: "test_gijuturiron_extra_meikuappu_No131", text: "まつ毛エクステンションのカウンセリングにおいて、過去の施術経験やトラブルの有無については、特に注意して確認する必要はない。", source: "No.131", answer: false, exp: "誤り。アレルギーやトラブルを未然に防ぐため、過去の経験や現在の体調を詳細に把握することは極めて重要です。" },
+],
+"L.日本髪": [
+    { id: "test_gijuturiron_extra_hinongami_No132", text: "現代の日本髪の最初の型とされるのは、江戸時代の寛永年間に現れたといわれる兵庫髷である。", source: "No.132", answer: true, exp: "正しい。兵庫髷は現代の日本髪のルーツとされており、寛永年間に登場したといわれています。" },
+    { id: "test_gijuturiron_extra_hinongami_No133", text: "日本髪の各部名称において、頭頂部のふくらみを「髱（たぼ）」、後頭部のふくらみを「髷（まげ）」と呼ぶ。", source: "No.133", answer: false, exp: "誤り。日本髪の名称において、頭頂部のふくらみは「髷（まげ）」、後頭部のふくらみは「髱（たぼ）」、左右の両側は「鬢（びん）」と呼びます。" },
+    { id: "test_gijuturiron_extra_hinongami_No134", text: "「銀杏返し」は主に少女の髪型として用いられ、「桃割れ」は既婚女性が結う代表的な日本髪である。", source: "No.134", answer: false, exp: "誤り。桃割れは少女の代表的な髪型であり、銀杏返しは町家の若い女性などが結う髪型です。既婚女性の代表的な髪型は丸髷です。" },
+    { id: "test_gijuturiron_extra_hinongami_No135", text: "日本髪の主要な装飾品には、櫛（くし）、簪（かんざし）、手絡（てがら）のほかに「筥迫（はこせこ）」が含まれる。", source: "No.135", answer: false, exp: "誤り。筥迫（はこせこ）は和装の際に懐に入れる小物入れの一種であり、髪に付ける装飾品ではありません。主な装飾品は櫛、簪、笄、手絡などです。" },
+    { id: "test_gijuturiron_extra_hinongami_No136", text: "日本髪の結髪は、土台となる「根」を起点にして、髱（たぼ）、鬢（びん）、前髪の順にまとめ、最後に髷（まげ）をつくる手順で進められる。", source: "No.136", answer: true, exp: "正しい。日本髪を結う際は、根、髱、鬢、前髪の順で形を整え、最後に余った髪で髷をつくるのが基本的な技術の進め方です。" },
+],
+"M.着付けの理論と技術": [
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No137", text: "未婚女性が着用する最も格調高い礼装は本振袖であり、地色が黒のものを黒振袖、黒以外のものを色振袖と呼ぶ。", source: "No.137", answer: true, exp: "正しい。未婚女性の第一礼装は本振袖であり、その地色によって黒振袖と色振袖に分類されます。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No138", text: "留袖は第一礼装であるため、マナーとして帯締め・帯揚げ・半襟・足袋はすべて黒で統一しなければならない。", source: "No.138", answer: false, exp: "誤り。留袖を着用する際、帯締め・帯揚げ・半襟・足袋などの小物は「白」を用いるのが正式なマナーです。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No139", text: "和服の種類において、裏地のついていない着物のことを「袷（あわせ）」と呼ぶ。", source: "No.139", answer: false, exp: "誤り。裏地がついている着物が「袷」であり、裏地のない着物は「単衣（ひとえ）」と呼ばれます。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No140", text: "着付けに用いる小物のうち、帯がほどけないように帯の上から締めるひもを「帯締め」という。", source: "No.140", answer: true, exp: "正しい。帯締めは帯を固定する実用的な役割と、装飾としての役割を兼ね備えています。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No141", text: "女性の着物において、脇の部分にある開口部の名称は「身八つ口」である。", source: "No.141", answer: true, exp: "正しい。脇にある開口部を身八つ口、袖側の開口部をふりと呼びます。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No142", text: "小柄な人が着物を着る際は、全体のバランスをよく見せるために帯の幅を広くし、お太鼓を大きめに結ぶのが適切である。", source: "No.142", answer: false, exp: "誤り。小柄な人の場合は、帯の幅を少し狭くし、お太鼓も小さめに結ぶことで全体のバランスが整います。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No143", text: "着付けにおいて腰ひもを結ぶ際、圧迫感を与えないようにミズオチ（みぞおち）の位置で結ぶのが正しい方法である。", source: "No.143", answer: false, exp: "誤り。ミズオチで結ぶと苦しくなるため、ひもを結ぶ位置は体の中心（ミズオチ）を避けるのが一般的です。" },
+    { id: "test_gijuturiron_extra_kitukenorirontogijutu_No144", text: "袴の種類において、ズボンのように左右の足が分かれている構造のものを「馬乗り袴」と呼ぶ。", source: "No.144", answer: true, exp: "正しい。足が分かれているのが馬乗り袴、分かれていない筒状のものが行燈（あんどん）袴です。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_gijuturiron_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題(頻出抜粋)",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_gijuturiron_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_gijuturiron_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_gijuturiron_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
