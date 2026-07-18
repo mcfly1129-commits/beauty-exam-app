@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『保健』<br>【皮膚科学ver】</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_hifukagaku_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_hifukagaku_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題",  // ここを修正！
+        questionPool: {
+"No01.皮膚の構造": [
+    { id: "test_hifukagaku_original_No01_01", text: "角質層は、摩擦の多い手掌（手のひら）や足底（足のうら）で最も厚く、顔面や手足の屈曲部では薄くなっている。", source: "No01-01", answer: true, exp: "正しい。角質層は外部の刺激から肌を保護するため、摩擦の多い部位で特に厚く発達しています。" },
+    { id: "test_hifukagaku_original_No01_02", text: "色素細胞（メラノサイト）の数は、同一の部位であれば、白色人種や黒色人種などの人種によって大きく異なる。", source: "No01-02", answer: false, exp: "誤り。色素細胞の数は人種による差はほとんどありません。肌の色の違いは、メラノサイトが作るメラニン色素の量や質、およびその分散状態によって決まります。" },
+    { id: "test_hifukagaku_original_No01_03", text: "表皮は皮膚の一番外側にあり、基本構造として表面より角質層、顆粒層、有棘層、基底層の細胞層から構成されている。", source: "No01-03", answer: true, exp: "正しい。表皮は一般的に外側から角質層、顆粒層、有棘層、基底層の4層で構成されています。なお、摩擦の多い手掌（手のひら）や足底（足のうら）では、角質層と顆粒層の間に「淡明層（透明層）」が加わり5層構造になりますが、表皮の基本構造としてはこの4つの細胞層を指します。" },
+    { id: "test_hifukagaku_original_No01_04", text: "表皮の角化細胞（ケラチノサイト）は、真皮の弾性線維を構成するエラスチンというタンパク質をつくる細胞系列である。", source: "No01-04", answer: false, exp: "誤り。角化細胞はケラチンというタンパク質をつくる細胞です。エラスチンは真皮の弾性線維を構成するタンパク質です。" },
+    { id: "test_hifukagaku_original_No01_05", text: "皮膚の表面には無数の細い溝である皮溝（皮膚小溝）と、その間の盛り上がりである皮丘（皮膚小稜）があり、これらがキメ（肌理）を作っている。", source: "No01-05", answer: true, exp: "正しい。皮溝と皮丘が規則正しく並んでいる状態が、キメの整った美しい肌の条件となります。" },
+    { id: "test_hifukagaku_original_No01_06", text: "表皮の細胞は「有棘層（ゆうきょくそう）」で活発に分裂し、その後順次上方に移動して最後は角質細胞になる。", source: "No01-06", answer: false, exp: "誤り。表皮において細胞分裂が行われるのは、最下層にある基底層です。分裂した細胞が順次押し上げられ、変化していきます。" },
+    { id: "test_hifukagaku_original_No01_07", text: "皮下組織にある皮下脂肪は、機械的な外力に対するクッションのはたらきと、温度変化に対する断熱材としてのはたらきを持つ。", source: "No01-07", answer: true, exp: "正しい。皮下脂肪は外部からの衝撃を和らげて内部組織を保護し、体温が外に逃げるのを防ぐ断熱材の役割を担っています。" },
+    { id: "test_hifukagaku_original_No01_08", text: "真皮を構成する細胞のうち、顆粒細胞、有棘細胞、基底細胞は、いずれも皮膚の角化に関係する細胞である。", source: "No01-08", answer: false, exp: "誤り。これらの細胞は真皮ではなく、表皮を構成する細胞です。表皮の基底層で生まれた細胞が上層へ向かう過程で角化に関与します。" },
+],
+"No02.皮膚付属器官の構造(毛)": [
+    { id: "test_hifukagaku_original_No02_01", text: "毛は中心から外に向かって順に、毛髄質、毛皮質、毛小皮（キューティクル）の3層から構成されている。", source: "No02-01", answer: true, exp: "正しい。毛は中心の「毛髄質（メデュラ）」、中間の「毛皮質（コルテックス）」、最外層の「毛小皮」の3層構造です。" },
+    { id: "test_hifukagaku_original_No02_02", text: "毛の成分であるケラチンは、全体として横軸の方向に鎖状に結合しているため、横に裂けやすい性質を持つ。", source: "No02-02", answer: false, exp: "誤り。毛のケラチンは「長軸（縦）方向」に鎖状（ポリペプチド鎖）に結合しているため、縦に裂けやすい性質を持っています。" },
+    { id: "test_hifukagaku_original_No02_03", text: "頭毛の根元にある「毛母」では、細胞分裂が盛んに行われて毛の細胞が作られている。", source: "No02-03", answer: true, exp: "正しい。毛球の毛乳頭に接する毛母細胞が分裂・増殖を繰り返すことで、新しい毛が作られます。" },
+    { id: "test_hifukagaku_original_No02_04", text: "1本の毛の太さは、体調や栄養状態、環境などの影響を受けないため、毛根から一定の速度で伸びた毛の部位ごとの太さは常に一定である。", source: "No02-04", answer: false, exp: "誤り。1本の毛であっても、その時々の栄養状態、体調、ストレス、あるいは外部環境の変化などの影響を強く受けるため、時期によって作られる毛の太さは変動します（必ずしも一定ではありません）。" },
+    { id: "test_hifukagaku_original_No02_05", text: "毛の最外層にある毛小皮（キューティクル）は、角化した透明な「核のない」細胞がウロコ状に重なり合っている。", source: "No02-05", answer: true, exp: "正しい。毛小皮は毛の内部を保護する役割を持ち、この細胞には通常、核が存在しません。" },
+    { id: "test_hifukagaku_original_No02_06", text: "毛は絶えず無限に成長を続ける器官であり、寿命によって自然に抜け落ちることはない。", source: "No02-06", answer: false, exp: "誤り。毛には成長期、退行期、休止期という「毛周期（ヘアサイクル）」があり、一定期間成長した後は自然に抜け落ち、再び新しい毛が生えてきます。" },
+    { id: "test_hifukagaku_original_No02_07", text: "成長期にある毛は、毛母細胞の細胞分裂が極めて乏しく、一定の太さを維持することに専念している。", source: "No02-07", answer: false, exp: "誤り。成長期は毛が作られる時期であり、毛母細胞の細胞分裂が「非常に盛ん」に行われています。" },
+    { id: "test_hifukagaku_original_No02_08", text: "ケラチン分子を構成するポリペプチド鎖は、通常、まっすぐな直線状に並んでいる。", source: "No02-08", answer: false, exp: "誤り。ケラチン分子のポリペプチド鎖は、通常「螺旋（らせん）状（α-ケラチン）」に巻いています。" },
+    { id: "test_hifukagaku_original_No02_09", text: "立毛筋は自分の意志で動かせる随意筋であり、寒さや驚きに関係なく収縮させることができる。", source: "No02-09", answer: false, exp: "誤り。立毛筋は自分の意志では動かせない「不随意筋（平滑筋）」であり、自律神経の支配を受けています。" },
+    { id: "test_hifukagaku_original_No02_10", text: "健康な成人の頭毛においては、全体の約85〜90％が成長期にある。", source: "No02-10", answer: true, exp: "正しい。日本人の健康な頭毛の大半は成長期にあり、絶えず伸び続けています。休止期にあるのは全体の10〜15％程度です。" },
+    { id: "test_hifukagaku_original_No02_11", text: "毛の構造において、中心部にある毛髄質（メデュラ）は、胎生毛や軟毛、一部の硬毛では欠如している場合がある。", source: "No02-11", answer: true, exp: "正しい。毛髄質はすべての毛に必ず存在するわけではなく、特に細い毛などでは欠けていることがあります。" },
+],
+"No03.皮膚付属器官の構造(脂腺・汗線・爪)、皮膚の循環器系と神経系　M24": [
+    { id: "test_hifukagaku_original_No_03_01", text: "アポクリン腺は、手掌（手のひら）や足底（足のうら）に最も多く分布している。", source: "No03-01", answer: false, exp: "誤り。手掌や足底に多く分布し、全身のほとんどに存在するのはエクリン腺です。アポクリン腺は、腋窩（わきの下）、乳輪、臍、外耳道、会陰部などに分布します。" },
+    { id: "test_hifukagaku_original_No_03_02", text: "爪は表皮の角質層が変形したものであり、その主な成分はケラチンである。", source: "No03-02", answer: true, exp: "正しい。爪は皮膚の付属器官であり、表皮の角質層が硬く変化したもので、ケラチンというタンパク質で構成されています。" },
+    { id: "test_hifukagaku_original_No_03_03", text: "脂腺（皮脂腺）は、短い排出管をもって毛包に開口し、皮膚にあぶら（皮脂）を供給している。", source: "No03-03", answer: true, exp: "正しい。脂腺は通常、毛包に付随して開口しており、分泌された皮脂は皮膚や毛を保護する役割を担います。" },
+    { id: "test_hifukagaku_original_No_03_04", text: "エクリン腺の汗腺体は、アポクリン腺よりも深い「皮下組織」の層に位置している。", source: "No03-04", answer: false, exp: "誤り。エクリン腺の汗腺体は真皮内にあります。皮下組織の深いところまで達するのは、アポクリン腺の汗腺体です。" },
+    { id: "test_hifukagaku_original_No_03_05", text: "爪の根元に見える白い半月状の部分（爪半月）は、水分をほとんど含んでいないため白く不透明に見える。", source: "No03-05", answer: false, exp: "誤り。爪半月はまだ角化が不十分な部分であり、水分を多く含んでいるために白く見えます。(角化が未熟で細胞核が残っているため、光を乱反射して白く見える。)" },
+    { id: "test_hifukagaku_original_No_03_06", text: "皮膚の血管において、酸素を多く含む動脈血が多くなれば皮膚の色は赤くなり、酸素の少ない静脈血が多くなると紫色になる。", source: "No03-06", answer: true, exp: "正しい。動脈血は鮮紅色をしているため肌は赤みを帯び、酸素が少ない静脈血の割合が増えると青紫色に見えます。" },
+    { id: "test_hifukagaku_original_No_03_07", text: "皮膚のリンパ管は、表皮にあるリンパ管から始まって、全身のリンパ節へとつながっている。", source: "No03-07", answer: false, exp: "誤り。皮膚のリンパ管は、表皮ではなく「真皮乳頭層」にある毛細リンパ管から始まります(これを起始部リンパ管ともいう)。表皮には血管もリンパ管も通っていません。" },
+    { id: "test_hifukagaku_original_No_03_08", text: "皮膚には、感覚をつかさどる知覚神経と、血管や腺のはたらきをつかつどる自律神経が分布しているが、運動神経は分布していない。", source: "No03-08", answer: true, exp: "正しい。汗の分泌や立毛筋の収縮などは自律神経によって支配されており、皮膚には自分の意思で動かせる筋肉を支配する運動神経はきていません。" },
+],
+"No04.皮膚と皮膚付属器官の生理機能": [
+    { id: "test_hifukagaku_original_No04_01", text: "皮膚の角質層からは、脂溶性物質よりも水溶性物質のほうが吸収されやすい性質がある。", source: "No04-01", answer: false, exp: "誤り。皮膚の角質層は脂になじみやすいため、水溶性物質よりも「脂溶性物質（油に溶けるもの）」の方が吸収されやすい性質があります。" },
+    { id: "test_hifukagaku_original_No04_02", text: "日光中の紫外線を浴びると、表皮にあるメラノサイトがメラニンを大量に作るため、皮膚の色が黒くなる。", source: "No04-02", answer: true, exp: "正しい。紫外線の刺激によってメラノサイトが活性化し、メラニン色素が生成されることで肌の色が暗く変化します。" },
+    { id: "test_hifukagaku_original_No04_03", text: "皮膚の再生能力は極めて高いため、たとえ真皮の結合組織を深く損傷した場合であっても、まったく瘢痕を残さずに再生する。", source: "No04-03", answer: false, exp: "誤り。表皮の基底細胞が保持されていれば瘢痕を残さず再生できますが、真皮の結合組織まで深く損傷した場合は、再生過程で肉芽組織が増殖し「瘢痕（きずあと）」が残ります。" },
+    { id: "test_hifukagaku_original_No04_04", text: "皮膚における体温調節作用を積極的に行っているのは、毛細血管の拡張・収縮と、汗腺による発汗である。", source: "No04-04", answer: true, exp: "正しい。毛細血管の血流量調節や、発汗による気化熱の放出は、体温を一定に保つための重要な生理機能です。" },
+    { id: "test_hifukagaku_original_No04_05", text: "脂腺の発育と分泌を促進するのは主に男性ホルモンの刺激によるものであり、一般に男性は女性より皮脂の分泌量が多い。", source: "No04-05", answer: true, exp: "正しい。脂腺の活動を活発にするのは男性ホルモン（アンドロゲン）であるため、性別による分泌量の差が生じます。" },
+    { id: "test_hifukagaku_original_No04_06", text: "皮膚の表面に分泌される皮脂は、皮下組織にある脂肪細胞が血液から脂肪分を取り込み、それを排出することによって作られる。", source: "No04-06", answer: false, exp: "誤り。皮脂は、脂腺を構成する「脂腺細胞」そのものが脂肪を蓄えて壊れることによって作られます。皮下組織の脂肪細胞で作られるわけではありません。" },
+    { id: "test_hifukagaku_original_No04_07", text: "日焼けで皮膚の色が黒くなる（メラニンの増加）現象は、主に日光に含まれる赤外線の作用によって引き起こされる。", source: "No04-07", answer: false, exp: "誤り。日焼け（メラニンの増加）を引き起こすのは「紫外線」です。赤外線は熱を感じさせる作用がありますが、色素沈着の直接的な原因ではありません。" },
+    { id: "test_hifukagaku_original_No04_08", text: "皮膚における皮脂の分泌量は、思春期以降に急増して２０～２５歳で最高となり、その後は加齢とともに次第に減少していく。", source: "No04-08", answer: true, exp: "正しい。皮脂の分泌は若年期にピークを迎え、高齢になると脂腺の機能が低下するため分泌量は少なくなります。" },
+    { id: "test_hifukagaku_original_No04_09", text: "皮膚表面の脂肪膜（皮脂膜）は通常pH7の中性を示し、外から侵入する病原微生物（細菌など）に対する自浄作用は持たない。", source: "No04-09", answer: false, exp: "誤り。皮膚表面の皮脂膜は、汗と皮脂が混ざり合うことで通常「弱酸性（pH4.5〜6.5程度）」に保たれており、これにより病原微生物の繁殖を抑える自浄作用（殺菌・抑制作用）を果たしています。" },
+],
+"No05.皮膚と皮膚付属器官の保健": [
+    { id: "test_hifukagaku_original_No05_01", text: "皮膚の老化は、個人の素因（遺伝的要因）によるものであり、紫外線や乾燥、食生活などの環境の影響を受けることはない。", source: "No05-01", answer: false, exp: "誤り。皮膚の老化は個人の素因だけでなく、紫外線による光老化、乾燥、喫煙、食生活などの環境要因の影響を強く受け、比較的規則正しく、老化現象が進行していきます。" },
+    { id: "test_hifukagaku_original_No05_02", text: "成人では加齢とともに皮膚の新陳代謝や分泌作用が低下するため、皮膚表面は乾燥して硬くなる傾向がある。", source: "No05-02", answer: true, exp: "正しい。加齢によって皮脂の分泌量や水分保持能力などの諸機能が低下するため、肌の柔軟性が失われていきます。" },
+    { id: "test_hifukagaku_original_No05_03", text: "健康な成人の皮膚表面は、通常、弱アルカリ性（pH7.4～8.0）を示すのが一般的である。", source: "No05-03", answer: false, exp: "誤り。健康な皮膚表面は、皮脂と汗が混ざり合った皮脂膜によって「弱酸性（pH4.5〜6.5程度）」に保たれています。" },
+    { id: "test_hifukagaku_original_No05_04", text: "皮膚の健康を維持するために必要な栄養（タンパク質やビタミンなど）は、常に皮膚表面から与えられる外用剤によって補われる。", source: "No05-04", answer: false, exp: "誤り。皮膚の健康に必要な栄養の大部分は、体内の「血液」によって供給されます。化粧品や外用剤はあくまで補助的な役割です。" },
+    { id: "test_hifukagaku_original_No05_05", text: "保湿剤を使用する際は、入浴後に皮膚の水分を完全に乾燥させてから塗布するのが最も効果的である。", source: "No05-05", answer: false, exp: "誤り。保湿剤は入浴直後の「水分が肌に残っている間」に塗布するのが最も効果的であり、完全に乾燥させてからでは水分保持効果が薄れてしまいます。" },
+    { id: "test_hifukagaku_original_No05_06", text: "毛の水分喪失を防ぎ、光沢としなやかさを保つための皮脂を分泌しているのは、エクリン腺である。", source: "No05-06", answer: false, exp: "誤り。皮脂を分泌するのは「脂腺（皮脂腺）」です。エクリン腺は、主に体温調節のために汗を分泌する器官です。" },
+    { id: "test_hifukagaku_original_No05_07", text: "日光に含まれる紫外線は、日焼けやシミの原因にはなるが、尋常性痤瘡（ニキビ）や円形脱毛症を引き起こす直接的な主要原因とはされていない。", source: "No05-07", answer: true, exp: "正しい。紫外線は肌の光老化には大きく関与しますが、ニキビや円形脱毛症の直接の主原因ではありません。" },
+    { id: "test_hifukagaku_original_No05_08", text: "円形脱毛症は、主に精神的ストレスや自己免疫異常が原因と考えられており、細菌や真菌による感染症ではない。", source: "No05-08", answer: true, exp: "正しい。円形脱毛症は自分の免疫細胞が毛包を攻撃してしまう免疫異常などが背景にあり、カビや細菌が原因で他人にうつるものではありません。" },
+    { id: "test_hifukagaku_original_No05_09", text: "肝臓病（肝機能障害）になると、血液中のビリルビンが増加して「黄疸」が現れ、皮膚が黄色くなったり強いかゆみを生じたりすることがある。", source: "No05-09", answer: true, exp: "正しい。肝臓の機能低下により胆汁色素であるビリルビンが血中に増えて皮膚に沈着し、黄染やかゆみを引き起こします。" },
+    { id: "test_hifukagaku_original_No05_10", text: "心臓や腎臓の病状が長く続いて皮膚の色が変化する場合、その代表的な症状として皮膚が鮮やかな黄色になる。", source: "No05-10", answer: false, exp: "誤り。皮膚が黄色くなる「黄疸」は、主に肝臓や胆嚢の疾患に関連する症状です。心臓や腎臓が原因の場合は、むくみ（浮腫）などが主な皮膚変化として現れます。また、心臓などが悪いと血液の循環がうまくいかず、血液中の酸素が不足し、皮膚の色が変化する場合があるが、それはチアノーゼと呼ばれ、皮膚は紫色を帯びます。" },
+    { id: "test_hifukagaku_original_No05_11", text: "糖尿病の人は、体の免疫力や皮膚の抵抗力が低下するため、細菌（化膿菌）や真菌（カビ）による皮膚疾患を合併しやすい。", source: "No05-11", answer: true, exp: "正しい。糖尿病の代表的な特徴として、抵抗力の低下により感染症にかかりやすくなることが挙げられます。" },
+],
+"No06.皮膚と皮膚付属器官の疾患": [
+    { id: "test_hifukagaku_original_No06_01", text: "尋常性毛瘡（カミソリカブレ）は、ひげ剃りなどの傷から黄色ブドウ球菌などの細菌（化膿菌）が感染して起こる疾患である。", source: "No06-01", answer: true, exp: "正しい。尋常性毛瘡は、カミソリによる小さな傷口から化膿菌が入り込み、毛包で炎症を起こすことで発生します。" },
+    { id: "test_hifukagaku_original_No06_02", text: "頭部白癬（シラクモ）は、特定のウイルスが皮膚に侵入することによって引き起こされる感染症である。", source: "No06-02", answer: false, exp: "誤り。頭部白癬の原因はウイルスではなく、真菌（カビの一種である白癬菌）の感染です。" },
+    { id: "test_hifukagaku_original_No06_03", text: "円形脱毛症は、免疫機能の異常が原因と考えられている疾患であり、病原体による感染ではないため他人に感染することはない。", source: "No06-03", answer: true, exp: "正しい。円形脱毛症は自己免疫の異常が関与していると考えられており、他人にうつることはありません。" },
+    { id: "test_hifukagaku_original_No06_04", text: "尋常性痤瘡（ニキビ）は、毛包にウイルスが増殖することによって起こる疾患である。", source: "No06-04", answer: false, exp: "誤り。尋常性痤瘡の原因はウイルスではなく、細菌（アクネ菌）です。皮脂の過剰分泌や毛穴の詰まりにより細菌が増殖して起こります。" },
+    { id: "test_hifukagaku_original_No06_05", text: "伝染性膿痂疹（トビヒ）は、皮膚の真皮層が特定のウイルスに侵されることによって発症する疾患である。", source: "No06-05", answer: false, exp: "誤り。伝染性膿痂疹は真皮ではなく「表皮」に「細菌（化膿菌）」が感染して起こる疾患です。ウイルスではありません。" },
+    { id: "test_hifukagaku_original_No06_06", text: "脂漏性皮膚炎は、フケ症やあぶら性の人に多い皮膚炎であり、頭部や顔面によくみられる。", source: "No06-06", answer: true, exp: "正しい。脂漏性皮膚炎は皮脂分泌の多い部位に発生しやすく、マラセチア菌（真菌）の関与も知られています。" },
+    { id: "test_hifukagaku_original_No06_07", text: "頭部白癬（シラクモ）は、皮膚の抵抗力が衰えた高齢者が特にかかりやすい疾患である。", source: "No06-07", answer: false, exp: "誤り。頭部白癬は高齢者ではなく、主に小学校に通う年ごろの子どもにできやすいのが特徴です。" },
+    { id: "test_hifukagaku_original_No06_08", text: "伝染性膿痂疹（トビヒ）は、水疱の中の膿が他の部位の皮膚に付着することで、周囲に感染が広がる性質を持っている。", source: "No06-08", answer: true, exp: "正しい。膿に含まれる化膿菌が他の皮膚に付くことで次々と広がるため、トビヒと呼ばれます。" },
+    { id: "test_hifukagaku_original_No06_09", text: "尋常性痤瘡（ニキビ）の発生には、性ホルモンのうち「女性ホルモン」が皮脂分泌を強力に促進することが重要な原因となる。", source: "No06-09", answer: false, exp: "誤り。皮脂分泌を促進してニキビの重要な原因となるのは「男性ホルモン（アンドロゲン）」です。女性ホルモンは逆に皮脂分泌を抑える働きがあります。" },
+    { id: "test_hifukagaku_original_No06_10", text: "癤（せつ）は、毛包に黄色ブドウ球菌などの細菌（化膿菌）が感染して起こる急性の化膿性炎症である。", source: "No06-10", answer: true, exp: "正しい。一般におできと呼ばれる癤は、化膿菌が毛包に感染して起こる急性の炎症を指します。" },
+    { id: "test_hifukagaku_original_No06_11", text: "「水痘（ミズボウソウ）」は、特定のウイルス感染によって引き起こされる皮膚疾患である。", source: "No06-11", answer: true, exp: "正しい。水痘は、水痘・帯状疱疹ウイルスによる「ウイルス」感染症です。" },
+    { id: "test_hifukagaku_original_No06_12", text: "「伝染性膿痂疹（トビヒ）」を引き起こす主な原因は、ヒゼンダニの寄生によるものである。", source: "No06-12", answer: false, exp: "誤り。伝染性膿痂疹（トビヒ）の原因は、黄色ブドウ球菌などの「細菌（化膿菌）」です。ヒゼンダニが原因となるのは「疥癬（かいせん）」という疾患です。" },
+    { id: "test_hifukagaku_original_No06_13", text: "「帯状疱疹（帯状ヘルペス）」の原因は、真菌（カビの一種）が皮膚に感染することによる。", source: "No06-13", answer: false, exp: "誤り。帯状疱疹は真菌ではなく「ウイルス」による感染症です。真菌はシラクモ（頭部白癬）などの原因となります。" },
+    { id: "test_hifukagaku_original_No06_14", text: "酸化染毛剤に用いられる酸化染料の「パラフェニレンジアミン」は、接触性皮膚炎（カブレ）を非常に起こしやすい物質である。", source: "No06-14", answer: true, exp: "正しい。パラフェニレンジアミンは酸化染料の中でも特にアレルギー反応（カブレ）を引き起こしやすい物質であることが知られています。" }
+　　　　　　]
+        }
+    },
+    "test_hifukagaku_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_hifukagaku_past_2025_01", text: "皮膚の表皮には、ケラチンを産生する角化細胞のほかに、コラーゲンやエラスチンを産生する線維芽細胞が含まれている。", source: "52回 問題31", answer: false, exp: "誤り。線維芽細胞は表皮ではなく、その下層にある「真皮」に存在する細胞です。表皮の約95％は角化細胞で占められています。" },
+    { id: "test_hifukagaku_past_2025_02", text: "皮膚付属器官の構造において、眉毛やまつ毛（睫毛）、鼻毛の毛包には、通常、立毛筋が付いていない。", source: "52回 問題32", answer: true, exp: "正しい。立毛筋はすべての毛包にあるわけではなく、眉毛、睫毛、鼻毛には存在しません。" },
+    { id: "test_hifukagaku_past_2025_03", text: "真皮に存在する「組織球」は、日光に含まれる有害な紫外線から表皮の基底細胞を保護する重要な役割を担っている。", source: "52回 問題33", answer: false, exp: "誤り。紫外線から基底細胞を保護するのは、色素細胞（メラノサイト）が産生する「メラニン」です。組織球は異物を食べる貪食作用を持ちます。" },
+    { id: "test_hifukagaku_past_2025_04", text: "紫外線の種類のうち、UVB（中波長紫外線）はUVA（長波長紫外線）に比べて、急激な作用で皮膚に炎症（サンバーン）を起こしやすい。", source: "52回 問題34", answer: true, exp: "正しい。UVBは皮膚を赤く腫らすサンバーンの主な原因となります。一方、UVAは主に即時的な黒化（サンタン）に関与します。" },
+    { id: "test_hifukagaku_past_2025_05", text: "ラテックスアレルギーは、主に「合成ゴム」製の手袋を日常的に使用する職業の人に多く見られるアレルギー反応である。", source: "52回 問題35", answer: false, exp: "誤り。ラテックスアレルギーの原因は合成ゴムではなく、「天然ゴム」に含まれるタンパク質です。医療従事者や調理師などに多く発症します。" },
+    { id: "test_hifukagaku_past_2025_06", text: "頭（頭皮）の皮膚は、他の部位の皮膚と比較して、血管や皮脂を分泌する脂腺が豊富に存在しているのが特徴である。", source: "51回 問題31", answer: true, exp: "正しい。頭皮は毛髪の成長を支えるために血管系が発達しており、脂腺の密度も非常に高い部位です。" },
+    { id: "test_hifukagaku_past_2025_07", text: "皮膚の表面に現れる毛の生える方向（毛流）は、真皮内の線維の走行方向である「皮膚の割線」と直角に交差している。", source: "51回 問題32", answer: false, exp: "誤り。毛流の方向は、皮膚の割線（割線方向）とおおよそ「一致」しています。直角ではありません。" },
+    { id: "test_hifukagaku_past_2025_08", text: "皮膚の感覚点（痛点、触点、冷点、温点）の分布密度において、1cm2あたりで最も数が多いのは痛点であり、最も少ないのは温点である。", source: "51回 問題33", answer: true, exp: "正しい。感覚点の密度は一般に「痛点 ＞ 触点 ＞ 冷点 ＞ 温点」の順となっており、温点が最もまばらです。" },
+    { id: "test_hifukagaku_past_2025_09", text: "加齢によって皮膚の張りと弾力が失われると、皮膚にたるみが生じ、それが定着することで「しわ」が形成される。", source: "51回 問題34", answer: true, exp: "正しい。真皮のコラーゲンやエラスチンの変質・減少により肌の弾力が低下することが、たるみやしわの主な原因です。" },
+    { id: "test_hifukagaku_past_2025_10", text: "小児の顔面によく見られる「顔面単純性粃糠疹（ハタケ）」の主な原因は、白癬菌という真菌（カビの一種）が感染することである。", source: "51回 問題35", answer: false, exp: "誤り。ハタケは白癬菌による感染症ではありません。原因不明の皮膚炎であり、通常は児童が成長するにつれ自然に治ります。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_hifukagaku_past_2024_01", text: "表皮と真皮の境目が波形になっていることは、皮膚の弾力性を保つ一因となっている。", source: "50回 問題31", answer: true, exp: "正しい。表皮の下層と真皮の境目は波状にかみ合っており、これにより皮膚は弾力性に富み、両者の連結が強く保たれています。" },
+    { id: "test_hifukagaku_past_2024_02", text: "毛の構造は3層から成るが、その中間の層である「毛皮質」の細胞には褐色のメラニンが含まれている。", source: "50回 問題32", answer: true, exp: "正しい。毛の主成分である毛皮質にはメラニン色素が含まれており、その量によって毛の色が決まります。" },
+    { id: "test_hifukagaku_past_2024_03", text: "皮膚における皮脂の分泌量は、思春期に盛んになり20〜25歳で最高となった後、高齢になるほどさらに増加する。", source: "50回 問題33", answer: false, exp: "誤り。皮脂の分泌量は20〜25歳で最高となりますが、その後は加齢とともに次第に減少していくのが一般的です。" },
+    { id: "test_hifukagaku_past_2024_04", text: "体内の健康状態が皮膚に現れる際、貧血があると還元ヘモグロビン量が増加するため、皮膚は紫色を帯びる「チアノーゼ」の状態になる。", source: "50回 問題34", answer: false, exp: "誤り。貧血がある場合、皮膚は一般に「青白く」なります。皮膚が紫色を帯びるチアノーゼは、主に心臓や肺の疾患により血液中の酸素が不足した際に現れる症状です。" },
+    { id: "test_hifukagaku_past_2024_05", text: "頭部白癬（シラクモ）は、特定の細菌が頭皮に感染することによって引き起こされる伝染性の皮膚疾患である。", source: "50回 問題35", answer: false, exp: "誤り。頭部白癬（シラクモ）の原因は細菌ではなく、白癬菌という「真菌（カビの仲間）」による感染です。" },
+    { id: "test_hifukagaku_past_2024_06", text: "表皮を構成する細胞のうち、約95％はケラチンをつくる細胞系列である「角化細胞（ケラチノサイト）」である。", source: "49回 問題31", answer: true, exp: "正しい。表皮細胞の大部分は角化細胞であり、残りの5％程度をメラノサイトやランゲルハンス細胞などが占めています。" },
+    { id: "test_hifukagaku_past_2024_07", text: "皮膚付属器官の分布において、手掌（手のひら）や足底（足のうら）には、皮膚を保護するための脂腺が豊富に存在する。", source: "49回 問題32", answer: false, exp: "誤り。手掌（手のひら）や足底（足のうら）には脂腺は存在しません。これらの部位に豊富に分布しているのはエクリン腺（汗腺）です。" },
+    { id: "test_hifukagaku_past_2024_08", text: "皮膚の保護作用において、色素細胞が産生する「メラニン」は、病原菌やウイルスなどの微生物に対する保護の役割を担っている。", source: "49回 問題33", answer: false, exp: "誤り。メラニンの本来の役割は、有害な「紫外線」を吸収し、皮膚内部の細胞を保護することです。微生物に対する保護は、脂肪膜の弱酸性による自浄作用などが担っています。" },
+    { id: "test_hifukagaku_past_2024_09", text: "内臓疾患と皮膚の状態の関係において、心臓疾患がある場合に現れる代表的な皮膚症状は「蕁麻疹」である。", source: "49回 問題34", answer: false, exp: "誤り。心臓疾患や腎疾患がある場合に現れる代表的な皮膚症状は、組織に水分がたまる「むくみ（浮腫）」です。蕁麻疹は主にアレルギー反応などによって生じます。" },
+    { id: "test_hifukagaku_past_2024_10", text: "「頭部白癬」は真菌による感染症であり、アトピー性皮膚炎や尋常性乾癬などの非感染性疾患とは区別される。", source: "49回 問題35", answer: true, exp: "正しい。頭部白癬（シラクモ）は白癬菌という真菌による感染症です。選択肢にある他の疾患は病原体による感染症ではありません。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_hifukagaku_past_2023_01", text: "皮膚の真皮は、表皮の数倍の厚さを持つ層であり、膠原線維（コラーゲン）や弾性線維（エラスチン）を含んでいる。", source: "48回 問題31", answer: true, exp: "正しい。真皮は皮膚の本体ともいえる部分で、表皮よりもはるかに厚く、皮膚に強さと弾力を与える線維成分が豊富に含まれています。" },
+    { id: "test_hifukagaku_past_2023_02", text: "睫毛（まつ毛）、耳毛、鼻毛以外の毛は、皮膚表面から垂直に向かって真っ直ぐに生えている。", source: "48回 問題32", answer: false, exp: "誤り。睫毛、耳毛、鼻毛以外の毛も、すべて皮膚表面に対して垂直ではなく斜めに生えています。この生える方向を毛流と呼びます。" },
+    { id: "test_hifukagaku_past_2023_03", text: "汗腺のうち、エクリン腺から出る汗は弱アルカリ性であり、アポクリン腺から出る汗は酸性を示す。", source: "48回 問題33", answer: false, exp: "誤り。エクリン腺から出る汗は酸性ですが、アポクリン腺から出る汗はアルカリ性です。なお、皮膚表面の脂肪膜は通常、弱酸性に保たれています。" },
+    { id: "test_hifukagaku_past_2023_04", text: "紫外線の種類のうち、UVB（中波長紫外線）はUVA（長波長紫外線）に比べて、皮膚に対する刺激が強くサンバーンを起こしやすい。", source: "48回 問題34", answer: true, exp: "正しい。UVBは波長が短い分エネルギーが強く、短時間の照射でも皮膚に赤い炎症（サンバーン）を引き起こすなど、刺激が強いのが特徴です。" },
+    { id: "test_hifukagaku_past_2023_05", text: "「伝染性軟属腫（ミズイボ）」は、細菌や真菌ではなく、特定のウイルスが感染することによって起こる皮膚疾患である。", source: "48回 問題35", answer: true, exp: "正しい。ミズイボはポックスウイルス科のウイルス感染によって生じる疾患です。伝染性膿痂疹（トビヒ）は細菌が原因となります。" },
+    { id: "test_hifukagaku_past_2023_06", text: "顔の皮膚は表情を作るために筋肉と密着しているため、顔のどの部位であってもその厚さはほぼ均一である。", source: "47回 問題31", answer: false, exp: "誤り。顔の皮膚は部位によって厚さが異なり、特に眼瞼（まぶた）の皮膚は非常に薄く、鼻や額、頬などは比較的厚くなっています。" },
+    { id: "test_hifukagaku_past_2023_07", text: "毛の構造において、皮膚の内部にある毛根の下端がフラスコ状に大きく膨らんでいる部分を「毛球」という。", source: "47回 問題32", answer: true, exp: "正しい。毛球の底にある凹みには毛乳頭があり、そこに接する毛母細胞が分裂を繰り返すことで毛が成長します。" },
+    { id: "test_hifukagaku_past_2023_08", text: "皮膚に急な冷たい刺激を与えると、自律神経の支配を受けて立毛筋が収縮し、いわゆる鳥肌反応が起こる。", source: "47回 問題33", answer: true, exp: "正しい。立毛筋は自分の意思では動かせない不随意筋であり、寒さや恐怖などの刺激により反射的に収縮して鳥肌を作ります。" },
+    { id: "test_hifukagaku_past_2023_09", text: "肝臓の機能が低下し、血液中のビリルビンが皮膚に沈着して現れる代表的な皮膚症状は「チアノーゼ」である。", source: "47回 問題34", answer: false, exp: "誤り。肝臓障害により胆汁色素（ビリルビン）が沈着して皮膚が黄色くなるのは「黄疸」です。チアノーゼは血液中の酸素不足により皮膚が紫色になる状態を指します。" },
+    { id: "test_hifukagaku_past_2023_10", text: "尋常性疣贅（いわゆるイボ）は、白癬菌という真菌（カビの一種）が角質層に寄生することによって発症する疾患である。", source: "47回 問題35", answer: false, exp: "誤り。尋常性疣贅（イボ）の原因は、ヒト乳頭ウイルスというウイルスです。白癬菌は白癬（シラクモや水虫）などの原因となる真菌です。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_hifukagaku_past_2022_01", text: "皮膚の表皮は、表面から順に角質層、顆粒層、有棘層、基底層の4つの層で構成されている。", source: "46回 問題31", answer: true, exp: "正しい。表皮は最も外側の角質層から最も内側の基底層まで、4つの細胞層が重なってできています。" },
+    { id: "test_hifukagaku_past_2022_02", text: "毛の構造はすべて共通しており、胎生毛や軟毛を含め、すべての毛に毛髄質が存在する。", source: "46回 問題32", answer: false, exp: "誤り。すべての毛に毛髄質があるわけではなく、胎生毛や軟毛には通常、毛髄質は存在しません。" },
+    { id: "test_hifukagaku_past_2022_03", text: "健康な皮膚の表面にある皮脂膜（脂肪膜）は弱酸性に保たれており、細菌の繁殖を抑制する自浄作用を持つ。", source: "46回 問題33", answer: true, exp: "正しい。皮脂膜が弱酸性であることにより、皮膚表面での細菌の発育や増殖が抑えられています。" },
+    { id: "test_hifukagaku_past_2022_04", text: "長波長紫外線（UVA）は真皮まで到達するが、色素細胞（メラノサイト）の働きを弱める性質がある。", source: "46回 問題34", answer: false, exp: "誤り。UVAはメラノサイトを活性化させ、メラニン産生を促して皮膚を黒くするサンタン（黒化）を引き起こします。" },
+    { id: "test_hifukagaku_past_2022_05", text: "脂漏性皮膚炎は、皮脂分泌の多い部位に発生しやすい湿疹であり、紅斑（赤み）や落屑（ふけ状のくず）が見られるのが特徴である。", source: "46回 問題35", answer: true, exp: "正しい。脂漏性皮膚炎はあぶら症の人に多く、頭部や顔面などの脂漏部位によく現れます。" },
+    { id: "test_hifukagaku_past_2022_06", text: "表皮を構成する細胞のうち、メラニン色素を作る「色素細胞」が全体の約95％を占めている。", source: "45回 問題31", answer: false, exp: "誤り。表皮細胞の約95％を占めるのは、ケラチンを作る「角化細胞（ケラチノサイト）」です。色素細胞は残りの数％に含まれます。" },
+    { id: "test_hifukagaku_past_2022_07", text: "健康な成人の頭毛において、全体の約85〜90％は絶えず伸び続けている「成長期」の状態にある。", source: "45回 問題32", answer: true, exp: "正しい。日本人の頭毛の大半は成長期にあり、休止期にあるのは全体の10〜15％程度です。" },
+    { id: "test_hifukagaku_past_2022_08", text: "日光の紫外線を浴びて皮膚の色が黒くなるのは、真皮にあるエラスチンが大量に産生されるためである。", source: "45回 問題33", answer: false, exp: "誤り。皮膚が黒くなる原因は、色素細胞で作られる「メラニン」が増加するためです。エラスチンは肌の弾力を保つタンパク質です。" },
+    { id: "test_hifukagaku_past_2022_09", text: "皮膚の老化には、加齢による個人素因だけでなく、紫外線や乾燥といった外部環境の要因が大きく関わっている。", source: "45回 問題34", answer: true, exp: "正しい。老化は遺伝的な要因と、光老化（紫外線）や乾燥などの環境要因が組み合わさって進行します。" },
+    { id: "test_hifukagaku_past_2022_10", text: "尋常性痤瘡（ニキビ）は、脂腺の多い箇所の毛包に特定のウイルスが増殖することによって発生する。", source: "45回 問題35", answer: false, exp: "誤り。ニキビの原因はウイルスではなく細菌（アクネ菌）です。皮脂を栄養源として毛包内で増殖し、炎症を起こします。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_hifukagaku_past_2021_01", text: "表皮の細胞の約95％を占める角化細胞（ケラチノサイト）は、皮膚の色素であるメラニンをつくる細胞である。", source: "44回 問題31", answer: false, exp: "誤り。角化細胞（ケラチノサイト）がつくるのはケラチンです。メラニンをつくるのはメラノサイト（色素細胞）です。" },
+    { id: "test_hifukagaku_past_2021_02", text: "爪は、表皮の角質層が変形したものであり、その主な成分はケラチンというタンパク質である。", source: "44回 問題32", answer: true, exp: "正しい。爪は皮膚の付属器官の一つで、角質層が硬く変化したものであり、ケラチンで構成されています。" },
+    { id: "test_hifukagaku_past_2021_03", text: "人間の皮膚感覚において、痛みを感じる点を痛点といい、冷たさを感じる点を温点という。", source: "44回 問題33", answer: false, exp: "誤り。痛みを感じる点は痛点ですが、冷たさを感じる点は冷点です。温点は温かさを感じる点です。" },
+    { id: "test_hifukagaku_past_2021_04", text: "肝臓に障害が起きて血中に胆汁色素（ビリルビン）が増加し、それが皮膚に沈着すると「黄疸」と呼ばれる症状が現れる。", source: "44回 問題34", answer: true, exp: "正しい。肝機能の低下によりビリルビンが血液中に増えて皮膚が黄色くなる状態を黄疸といいます。" },
+    { id: "test_hifukagaku_past_2021_05", text: "頭部白癬（シラクモ）は、白癬菌という真菌による感染症であり、イヌやネコなどのペットから感染することもある。", source: "44回 問題35", answer: true, exp: "正しい。シラクモはカビの一種である白癬菌による疾患で、接触によって人や動物から感染します。" },
+    { id: "test_hifukagaku_past_2021_06", text: "表皮の最も外側にある角質層は、顔面や手足の屈曲部で最も厚く、手掌（手のひら）や足底で最も薄い。", source: "43回 問題31", answer: false, exp: "誤り。角質層は、外部刺激や摩擦の多い手掌（手のひら）や足底（足のうら）で最も厚く、顔面などでは薄くなっています。" },
+    { id: "test_hifukagaku_past_2021_07", text: "毛の構造を、中心から外側に向かって順番に並べると、毛髄質、毛小皮（キューティクル）、毛皮質の順になる。", source: "43回 問題32", answer: false, exp: "誤り。毛の構造は中心から順に、毛髄質（メデュラ）、毛皮質（コルテックス）、毛小皮（キューティクル）の3層になっています。" },
+    { id: "test_hifukagaku_past_2021_08", text: "皮膚への化学的刺激に対しては、まず表面の脂肪膜（皮脂膜）が防ぎ、次いで角質層にあるケラチンが防御の役割を担っている。", source: "43回 問題33", answer: true, exp: "正しい。皮脂膜によるバリアと角質層のケラチンによる物理的な保護が二段構えで刺激を防いでいます。" },
+    { id: "test_hifukagaku_past_2021_09", text: "ふけ症は、頭皮の角質層が過剰に剥がれ落ちる現象のことであり、皮脂分泌の状態により脂性と乾性の2つに分けられる。", source: "43回 問題34", answer: true, exp: "正しい。ふけには、皮脂が多くベタついた脂性ふけと、水分不足などでカサカサした乾性ふけがあります。" },
+    { id: "test_hifukagaku_past_2021_10", text: "疥癬（ヒゼン）は、一般に「しらみ」と呼ばれる昆虫が皮膚や衣類に寄生することによって起こる疾患である。", source: "43回 問題35", answer: false, exp: "誤り。疥癬（ヒゼン）の原因は、しらみではなく「ヒゼンダニ」というダニの一種の寄生によるものです。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_hifukagaku_past_2020_01", text: "皮膚にある色素細胞（メラノサイト）の数は、同一の部位であっても、白色人種に比べて黒色人種の方が圧倒的に多い。", source: "42回 問題31", answer: false, exp: "誤り。色素細胞（メラノサイト）の数は、人種に関わらず同一の部位であればほぼ一定です。肌の色の違いは、産生されるメラニンの量や配列などの違いによるものです。" },
+    { id: "test_hifukagaku_past_2020_02", text: "毛の成分であるケラチンは、全体として長軸（縦）の方向に鎖状に結合しているため、縦に裂けやすい性質を持っている。", source: "42回 問題32", answer: true, exp: "正しい。毛を構成するポリペプチド鎖は縦方向に並んでいるため、毛髪は横よりも縦に裂けやすい構造をしています。" },
+    { id: "test_hifukagaku_past_2020_03", text: "皮膚には外界からの刺激を感知するための感覚点が分布しており、それらは痛点、触点、温点、冷点の4つに分けられる。", source: "42回 問題33", answer: true, exp: "正しい。これら4つの感覚点が皮膚に点在することで、痛み、接触、温度の変化などを脳へ伝えています。" },
+    { id: "test_hifukagaku_past_2020_04", text: "皮膚の新陳代謝や分泌作用は加齢とともに活発になるため、高齢者の皮膚は若年層に比べて脂っぽく柔軟である。", source: "42回 問題34", answer: false, exp: "誤り。加齢に伴い皮膚の分泌作用や新陳代謝は低下します。そのため、高齢者の皮膚は脂分や水分が不足して乾燥し、硬くなるのが一般的です。" },
+    { id: "test_hifukagaku_past_2020_05", text: "蕁麻疹（じんましん）は、特定の食物や薬剤によるアレルギー反応のほか、寒冷、温熱、日光といった物理的な外的刺激によっても生じることがある。", source: "42回 問題35", answer: true, exp: "正しい。蕁麻疹の誘因は多岐にわたり、特定の物質を摂取した際だけでなく、温度変化や光などの刺激によっても一時的な発疹が現れます。" },
+    { id: "test_hifukagaku_past_2020_06", text: "表皮を構成する主な細胞系列には、角化細胞、色素細胞、ランゲルハンス細胞、およびコラーゲンを作る線維芽細胞が含まれる。", source: "41回 問題31", answer: false, exp: "誤り。角化細胞、色素細胞などは表皮の細胞ですが、線維芽細胞は表皮の下層にある「真皮」に存在する細胞です。" },
+    { id: "test_hifukagaku_past_2020_07", text: "皮膚の構造において、皮膚の表面から外に露出している毛の部分を毛幹、皮膚の内部に埋まっている部分を毛根という。", source: "41回 問題32", answer: true, exp: "正しい。毛は大きく分けて、目に見える部分（毛幹）と組織内に隠れている部分（毛根）に区分されます。" },
+    { id: "test_hifukagaku_past_2020_08", text: "皮膚は紫外線を吸収したり散乱させたりすることによって、有害な光線が身体の内部へ侵入するのを防いでいる。", source: "41回 問題33", answer: true, exp: "正しい。皮膚表面の角質層による散乱や、メラニンによる吸収といった働きにより、生体内部を紫外線ダメージから保護しています。" },
+    { id: "test_hifukagaku_past_2020_09", text: "健康な成人の皮膚表面は、細菌や真菌の発育を抑制する機能を高めるため、常に「弱アルカリ性」に保たれている。", source: "41回 問題34", answer: false, exp: "誤り。健康な皮膚表面は、皮脂膜によって「弱酸性（pH4.5〜6.5）」に保たれています。これにより微生物の繁殖を抑える自浄作用を果たしています。" },
+    { id: "test_hifukagaku_past_2020_10", text: "「円形脱毛症」は自己免疫の異常が主な原因と考えられており、白癬菌という真菌が感染することによって起こる他人にうつる疾患である。", source: "41回 問題35", answer: false, exp: "誤り。円形脱毛症は免疫の異常などが関与する非感染性の疾患であり、他人にうつることはありません。真菌（白癬菌）の感染で起こるのは頭部白癬（シラクモ）です。" }
+]
+        }
+    },
+     "test_hifukagaku_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.皮膚の構造": [
+    { id: "test_hifukagaku_extra_hifunokozo_No01", text: "皮膚の構造において、表皮の下層と真皮の境界は、表皮突起と真皮乳頭が互いにかみ合い、波状になっている。", source: "No.01", answer: true, exp: "正しい。表皮と真皮の境界を波状にすることで、両者の連結を強く保ち、皮膚に弾力性を与えています。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No02", text: "皮膚を断面から見て表面から順に並べると、真皮、表皮、皮下組織の3つの層から成り立っている。", source: "No.02", answer: false, exp: "誤り。皮膚の最も外側にあるのは表皮です。正しくは、表面から順に表皮、真皮、皮下組織となります。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No03", text: "角化細胞（ケラチノサイト）は表皮細胞の約95％を占めており、その最外層である角質層の水分が10％以下になると、皮膚は荒れ性のかさかさした状態になる。", source: "No.03", answer: true, exp: "正しい。角化細胞は表皮の主要な構成細胞であり、バリア機能を担う角質層の水分保持能力が低下すると肌荒れの原因となります。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No04", text: "皮下組織は皮膚の最も深い部分に位置しているが、脂肪細胞は含まれておらず、栄養物質を蓄える貯蔵庫としての役割は果たしていない。", source: "No.04", answer: false, exp: "誤り。皮下組織は多量の脂肪細胞を含んでおり、余分な栄養を脂肪として蓄える貯蔵庫としての重要な役割を果たしています。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No05", text: "皮下組織にある皮下脂肪は、外界からの機械的な外力に対するクッションのはたらきと、体内の熱を逃がさない断熱材としてのはたらきを併せ持っている。", source: "No.05", answer: true, exp: "正しい。皮下脂肪はその物理的な性質により、内部の筋肉や内臓を保護し、体温を一定に保つ助けをしています。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No06", text: "真皮を構成する成分のうち、最も大きな割合を占めているのは、皮膚に弾力を与えるタンパク質である「弾性線維」である。", source: "No.06", answer: false, exp: "誤り。真皮の大部分を占めているのは、コラーゲンから成る「膠原線維（こうげんせんい）」です。弾性線維は膠原線維の間を走り、弾力を与えます。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No07", text: "メラニン色素は、日光中の有害な紫外線を吸収したり散乱させたりすることによって、身体の内部へ侵入するのを防ぐはたらきをしている。", source: "No.07", answer: true, exp: "正しい。色素細胞で作られるメラニンは、天然の防護壁として、紫外線による細胞ダメージや障害から生体を守る重要な役割を担っています。" },
+    { id: "test_hifukagaku_extra_hifunokozo_No08", text: "頭（頭皮）の皮膚は、他の部位の皮膚と比較して、皮脂を分泌する脂腺の数が非常に少ないのが特徴である。", source: "No.08", answer: false, exp: "誤り。頭皮は全身の中でも特に脂腺の数が多く、皮脂の分泌が極めて盛んな部位であるため、あぶらぎりやすいという特徴があります。" },
+],
+"B.皮膚付属器官の構造": [
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No09", text: "人体の毛は、すべての部位の毛が同じ周期で一斉に成長と脱毛を繰り返している。", source: "No.09", answer: false, exp: "誤り。人体の毛は1本ごとに独立した毛周期（成長周期）を持っており、すべての毛が同時に生え変わることはありません。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No10", text: "健康な成人の頭毛は、1日におよそ4〜5mmという非常に速いスピードで伸びている。", source: "No.10", answer: false, exp: "誤り。頭毛が1日に成長する速度は、およそ0.3〜0.4mm程度です。4〜5mmという数値は過大です。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No11", text: "毛の断面構造は、中心部から順に毛髄質、毛皮質、毛小皮（キューティクル）の3層から成り立っている。", source: "No.11", answer: true, exp: "正しい。毛は中心から外側に向かって、メデュラ（髄質）、コルテックス（皮質）、キューティクル（小皮）の3層構造になっています。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No12", text: "同じ人間の頭毛であっても部位によって太さに違いがあり、一般に後頭部の毛が最も太く、頭頂部の毛が最も細い。", source: "No.12", answer: true, exp: "正しい。毛の太さは部位や個人差がありますが、頭毛の中では後頭部が最も太く発達し、頭頂部が最も細い傾向にあります。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No13", text: "人体の皮膚に生えている毛には、成長や脱毛を司る「成長周期」というものは存在しない。", source: "No.13", answer: false, exp: "誤り。すべての毛には、成長期、退行期、休止期を繰り返す「成長周期（毛周期）」が存在します。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No14", text: "脂腺は、手のひら（手掌）や足のうら（足底）には全く存在しない。", source: "No.14", answer: true, exp: "正しい。脂腺の分布は部位によって異なり、皮脂分泌の必要がない手掌や足底には分布していません。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No15", text: "アポクリン腺は、脂腺と同じように毛包を通さず、直接皮膚の表面に汗を排出する開口部を持っている。", source: "No.15", answer: false, exp: "誤り。直接皮膚表面に開口するのはエクリン腺です。アポクリン腺は、毛包内の脂腺開口部よりもさらに上方に開口部を持っています。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No16", text: "寒さなどの刺激によって立毛筋が収縮し、皮膚表面が盛り上がる反応を鳥肌（鳥肌反応）という。", source: "No.16", answer: true, exp: "正しい。自律神経の働きにより立毛筋が収縮することで毛が直立し、周囲の皮膚が盛り上がって鳥肌の状態になります。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No17", text: "爪の表面に現れる軽い縦方向の溝（縦溝）は、すべて内臓の重い病気が原因で生じるものである。", source: "No.17", answer: false, exp: "誤り。爪の軽い縦溝は、主に加齢に伴う生理的な変化であり、必ずしも病的な意味があるわけではありません。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No18", text: "爪には毛のような成長周期はなく、爪根の基部にある爪母で絶えず作られ、伸び続けている。", source: "No.18", answer: true, exp: "正しい。爪は毛と異なり生え変わりの周期を持たず、生涯にわたって絶えず成長を続ける器官です。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No19", text: "脂腺の分布は全身で均一ではなく、頭部や顔面の鼻翼周辺には少なく、体の末端にいくほど多くなっている。", source: "No.19", answer: false, exp: "誤り。脂腺は頭部や顔面（特に鼻翼周辺）に多く分布しており、体の末端へいくほど少なくなっています。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No20", text: "立毛筋は自律神経の支配を受けており、収縮すると毛が直立して毛孔部が盛り上がる「鳥肌反応」を引き起こす。", source: "No.20", answer: true, exp: "正しい。立毛筋は意志で動かせない不随意筋であり、寒さや驚きなどの刺激によって自律神経が働き、鳥肌を形成します。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No21", text: "爪は真皮の膠原線維が角質化したものであり、毛とは異なり生涯にわたって成長周期を持たずに伸び続ける。", source: "No.21", answer: false, exp: "誤り。爪は真皮ではなく「表皮」の角質層が変形したものです。絶えず成長を続けるという点は正しい記述です。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No22", text: "眉毛や鼻毛、耳毛などは、高齢になるにつれて毛の成長期が長くなるという特徴がある。", source: "No.22", answer: true, exp: "正しい。眉毛などは高齢化に伴い成長期が延長される傾向があるため、若い頃よりも長く伸びるようになります。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No23", text: "爪の構造において、新しい爪の細胞を作り出す最も重要な部分である「爪母」は、爪根の基部に位置している。", source: "No.23", answer: true, exp: "正しい。爪は爪根の下にある爪母で産生され、角化しながら前方に押し出されて伸びていきます。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No24", text: "鳥肌反応に関与する立毛筋は、皮膚の表面に露出している「毛幹」の部分に直接付着している。", source: "No.24", answer: false, exp: "誤り。立毛筋が付着しているのは皮膚の内部にある「毛包」です。露出している毛幹には付着していません。" },
+    { id: "test_hifukagaku_extra_hifufuzokukikannokozo_No25", text: "爪甲（そうこう）は、爪の中で最も大切な部分であり、この板状の部分自体が細胞分裂を行って爪を形成している。", source: "No.25", answer: false, exp: "誤り。爪が作られる最も重要な部分は「爪母」です。爪甲は爪母で新しく作られた細胞が角化して板状になったものであり、爪甲自体が細胞分裂を行うことはありません。" },
+],
+"C.皮膚と皮膚付属器官の生理機能": [
+    { id: "test_hifukagaku_extra_serikino_No26", text: "角質層のケラチンと真皮の膠原線維（コラーゲン）は、ともに機械的な外力に強いタンパク質であり、身体を保護する役割を果たしている。", source: "No.26", answer: true, exp: "正しい。これらはいずれも強靭な構造をもつタンパク質であり、外部からの物理的な刺激や衝撃から内部組織を守っています。" },
+    { id: "test_hifukagaku_extra_serikino_No27", text: "人間の皮膚における発汗（エクリン腺）の最も主要な目的は、皮膚の表面を常に滑らかに保ち光沢を与えることである。", source: "No.27", answer: false, exp: "誤り。発汗の最も重要な生理的作用は、蒸発時の気化熱を利用して「体温を一定に保つ（体温調節）」ことです。" },
+    { id: "test_hifukagaku_extra_serikino_No28", text: "皮膚表面を覆う脂肪膜（皮脂膜）は、通常はアルカリ性を示しており、これによって細菌や真菌の発育を強力に抑制している。", source: "No.28", answer: false, exp: "誤り。皮膚表面の脂肪膜は通常「弱酸性」に保たれています。この弱酸性の性質によって、細菌などの発育を抑制する自浄作用を果たしています。" },
+    { id: "test_hifukagaku_extra_serikino_No29", text: "皮膚のかゆみという感覚は、一般に皮膚の温度が下がると強くなり、温度が上がると弱まって鎮まる傾向がある。", source: "No.29", answer: false, exp: "誤り。かゆみは一般に、皮膚の温度が「上がる」と強くなり、逆に「下げる（冷やす）」と弱まる（鎮まる）傾向があります。" },
+    { id: "test_hifukagaku_extra_serikino_No30", text: "周囲の温度が高いとき、皮膚の毛細血管は拡張して血流が盛んになり、体内の熱を体表から放散しやすくする仕組みがはたらく。", source: "No.30", answer: true, exp: "正しい。血管を広げて血流量を調節することは、発汗と並んで体温調節のための重要な機能です。" },
+    { id: "test_hifukagaku_extra_serikino_No31", text: "皮膚の表面に存在する非病原性の常在菌は、外部から侵入する病原性の細菌が繁殖するのを抑える保護作用をもっている。", source: "No.31", answer: true, exp: "正しい。皮膚の常在菌がバランスを保って存在することで、有害な病原菌の増殖を防ぐ生体防御の一翼を担っています。" },
+    { id: "test_hifukagaku_extra_serikino_No32", text: "精神性発汗とは、精神的な感動や緊張によって起こる発汗であり、主に手掌（手のひら）や足底（足のうら）、腋窩（わきの下）に現れる。", source: "No.32", answer: true, exp: "正しい。温熱性発汗が全身（手足のひらを除く）に起こるのに対し、精神性発汗は特定の部位に突発的にすぐ起こるのが特徴です。" },
+    { id: "test_hifukagaku_extra_serikino_No33", text: "皮膚の健康を維持するために必要な真の栄養は、主に皮膚表面から与えられるクリームや美容液などの薬品類によって補われる。", source: "No.33", answer: false, exp: "誤り。皮膚の栄養は、体内の「血液やリンパ液、組織液」を通じて供給されます。外部から塗布するものは、あくまで皮膚の機能を補完するためのものです。" },
+    { id: "test_hifukagaku_extra_serikino_No34", text: "脂腺の発育と皮脂の分泌を促進する主な要因は、男性ホルモン（アンドロゲン）の刺激によるものである。", source: "No.34", answer: true, exp: "正しい。脂腺の活動は性ホルモン、特に男性ホルモンの影響を強く受けるため、思春期以降に分泌が急増します。" },
+],
+"D.皮膚と皮膚付属器官の保健": [
+    { id: "test_hifukagaku_extra_hoken_No35", text: "皮膚のしわは、加齢や紫外線の影響によって、真皮内の弾性線維や膠原線維が増加することで形成される。", source: "No.35", answer: false, exp: "誤り。皮膚のしわは、加齢や紫外線の影響により、真皮内の弾性線維や膠原線維が「減少・変性」することで生じます。" },
+    { id: "test_hifukagaku_extra_hoken_No36", text: "糖尿病にかかっている人は、体の抵抗力が低下するため、化膿菌や真菌（カビ）による皮膚疾患を合併しやすい。", source: "No.36", answer: true, exp: "正しい。糖尿病になると、皮膚の抵抗力や体の免疫機能が低下するため、細菌や真菌による感染症にかかりやすい状態になります。" },
+    { id: "test_hifukagaku_extra_hoken_No37", text: "肝臓の機能が低下し、血液中の胆汁色素（ビリルビン）が皮膚に沈着して現れる代表的な皮膚症状は「チアノーゼ」である。", source: "No.37", answer: false, exp: "誤り。肝臓障害によりビリルビンが沈着して皮膚が黄色くなるのは「黄疸」です。チアノーゼは血液中の酸素不足により皮膚が紫色になる状態を指します。" },
+],
+"E.皮膚と皮膚付属器官の疾患": [
+    { id: "test_hifukagaku_extra_sikkan_No38", text: "金属製の腕時計やピアス、イヤリングなどは、アレルギー性のカブレ（接触皮膚炎）を引き起こす代表的な原因物質の一つである。", source: "No.38", answer: true, exp: "正しい。ニッケルやクロムなどの金属製品は、アレルギー性接触皮膚炎の代表的な原因物質となります。" },
+    { id: "test_hifukagaku_extra_sikkan_No39", text: "一度アレルギー性のカブレを起こした染毛剤（白髪染め）であっても、市販の精製水で十分に薄めて使用すれば、カブレの発症を防ぐことができる。", source: "No.39", answer: false, exp: "誤り。アレルギー性のカブレは、原因物質がごく微量であっても反応するため、染毛剤を薄めて使用しても防ぐことはできません。" },
+    { id: "test_hifukagaku_extra_sikkan_No40", text: "化粧品によるカブレは、製品に含まれる香料や色素、油脂そのもの、あるいは製造過程で混入した不純物などが原因となって起こる。", source: "No.40", answer: true, exp: "正しい。化粧品カブレ（化粧カブレ）の原因は、基剤となる油脂から添加物の香料、不純物まで多岐にわたります。" },
+    { id: "test_hifukagaku_extra_sikkan_No41", text: "接触皮膚炎（カブレ）の最も特徴的な点として、皮膚の炎症は原因物質に触れた場所とは全く無関係な部位に、ぼんやりと現れる性質がある。", source: "No.41", answer: false, exp: "誤り。接触皮膚炎（カブレ）は、原則として原因物質に触れた場所と一致して、比較的はっきりと炎症が現れるのが特徴です。" },
+    { id: "test_hifukagaku_extra_sikkan_No42", text: "尋常性毛瘡（カミソリカブレ）は、ひげ剃りなどの際の小さな傷口から、黄色ブドウ球菌などの細菌（化膿菌）が感染して起こる疾患である。", source: "No.42", answer: true, exp: "正しい。カミソリカブレは、物理的な傷から侵入した化膿菌が毛包で繁殖し、炎症を起こすことで発生します。" },
+    { id: "test_hifukagaku_extra_sikkan_No43", text: "伝染性軟属腫（ミズイボ）は、白癬菌という真菌（カビの一種）が角質層に寄生することによって引き起こされる皮膚疾患である。", source: "No.43", answer: false, exp: "誤り。伝染性軟属腫（ミズイボ）の原因は真菌ではなく「ウイルス」です。白癬菌はシラクモやミズムシなどの原因となります。" },
+    { id: "test_hifukagaku_extra_sikkan_No44", text: "胼胝腫（タコ）は、圧迫や摩擦といった皮膚への慢性的・機械的な刺激に対する防御反応として、角質層が厚くなったものである。", source: "No.44", answer: true, exp: "正しい。タコは病原体の感染によるものではなく、繰り返される外部刺激から身体を保護しようとして角質が肥厚した状態です。" },
+    { id: "test_hifukagaku_extra_sikkan_No45", text: "肝斑（シミ）の悪化を最小限に抑えるためには、外出時の日焼け止めクリームの使用や日光の回避などの紫外線対策が非常に有効である。", source: "No.45", answer: true, exp: "正しい。肝斑は日光の紫外線を浴びることで悪化する性質があるため、光を遮断することが予防の基本となります。" },
+    { id: "test_hifukagaku_extra_sikkan_No46", text: "蕁麻疹（じんましん）は、皮膚に強いかゆみを伴う膨疹（みみずばれ）が現れるのが特徴であり、ヒリヒリとした強い神経痛を伴うのが一般的である。", source: "No.46", answer: false, exp: "誤り。蕁麻疹の主な特徴は一過性の膨疹と強い「かゆみ」であり、通常、強い神経痛のような痛みは伴いません。痛みは帯状疱疹などの特徴です。" },
+    { id: "test_hifukagaku_extra_sikkan_No47", text: "水痘（ミズボウソウ）は、溶血性レンサ球菌という強力な細菌が皮膚から侵入し、感染を広げることによって発症する。", source: "No.47", answer: false, exp: "誤り。水痘（ミズボウソウ）の原因は細菌ではなく、「水痘・帯状疱疹ウイルス」による感染症です。" },
+    { id: "test_hifukagaku_extra_sikkan_No48", text: "尋常性白斑（シロナマズ）は、白癬菌という真菌が皮膚に感染することによって起こる疾患である。", source: "No.48", answer: false, exp: "誤り。尋常性白斑（シロナマズ）は、白癬菌などの感染によるものではなく、後天的にメラニンが消失する色素欠乏症です。" },
+    { id: "test_hifukagaku_extra_sikkan_No49", text: "疣贅（イボ）には、ヒト乳頭ウイルスによるウイルス性のものと、老化現象による老人性疣贅（脂漏性角化症）がある。", source: "No.49", answer: true, exp: "正しい。一般にイボと呼ばれる疣贅にはウイルス性のものがありますが、高齢者にみられる老人性疣贅はウイルスによるものではなく、老化現象の一つです。" },
+    { id: "test_hifukagaku_extra_sikkan_No50", text: "癤（せつ）は、特定のウイルスが毛包に感染して起こる急性の化膿性炎症である。", source: "No.50", answer: false, exp: "誤り。癤（せつ）は、ウイルスではなく黄色ブドウ球菌などの「細菌（化膿菌）」が毛包に感染して起こる急性の化膿性炎症です。" },
+    { id: "test_hifukagaku_extra_sikkan_No51", text: "伝染性軟属腫（ミズイボ）は、特定のウイルスが皮膚に感染することによって引き起こされる疾患である。", source: "No.51", answer: true, exp: "正しい。伝染性軟属腫（ミズイボ）は、ポックスウイルス科のウイルス感染によって発症する感染性の皮膚疾患です。" },
+    { id: "test_hifukagaku_extra_sikkan_No52", text: "疥癬（ヒゼン）の原因は、白癬菌という真菌（カビの一種）が角質層に寄生することである。", source: "No.52", answer: false, exp: "誤り。疥癬（ヒゼン）の原因は真菌ではなく、「ヒゼンダニ」というダニの一種（小動物）が寄生することです。" },
+    { id: "test_hifukagaku_extra_sikkan_No53", text: "肝斑（シミ）の発生や悪化の原因として、女性ホルモンの影響や、経口避妊薬（ピル）の使用が挙げられる。", source: "No.53", answer: true, exp: "正しい。肝斑は主に成人女性の顔面にみられる淡褐色の色素斑で、妊娠や経口避妊薬などによる女性ホルモンのバランスの変化が関与していると考えられています。" },
+    { id: "test_hifukagaku_extra_sikkan_No54", text: "円形脱毛症は、真菌であるカンジダが頭皮の毛包に感染して、急速に脱毛が広がる感染症である。", source: "No.54", answer: false, exp: "誤り。円形脱毛症はカビ（真菌）による感染症ではなく、主な原因は自己免疫の異常やストレスと考えられており、他人にうつることはありません。" },
+    { id: "test_hifukagaku_extra_sikkan_No55", text: "伝染性膿痂疹（トビヒ）は、ブドウ球菌やレンサ球菌などの細菌（化膿菌）が皮膚に感染して起こる疾患である。", source: "No.55", answer: true, exp: "正しい。トビヒは細菌による感染症で、水疱の中の膿が他の部位に付着することで周囲に広がっていくのが特徴です。" },
+    { id: "test_hifukagaku_extra_sikkan_No56", text: "ベルロック皮膚炎は、原因物質に触れた後に「暗い場所」で安静にしていることで引き起こされる特殊な皮膚炎である。", source: "No.56", answer: false, exp: "誤り。ベルロック皮膚炎は、特定の成分が含まれる化粧品や香水をつけた状態で「強い直射日光（紫外線）」を浴びることで起こる光接触皮膚炎です。" },
+    { id: "test_hifukagaku_extra_sikkan_No57", text: "脂漏性皮膚炎は、皮脂分泌の盛んな「脂漏部位」である頭部や顔面に生じやすく、ふけ症やあぶら性の人によく見られる。", source: "No.57", answer: true, exp: "正しい。脂漏性皮膚炎はあぶら性の人に多い皮膚炎で、赤み（紅斑）やふけ状のくず（落屑）が見られます。" },
+],
+"F.総合問題": [
+    { id: "test_hifukagaku_extra_sogomondai_No62", text: "皮膚の色の白さや黒さは、主に皮膚に存在する色素細胞（メラノサイト）の数の多い少ないによって決定される。", source: "No.62", answer: false, exp: "誤り。肌の色の違いは色素細胞の数ではなく、産生されるメラニンの量やその配列によって決まります。色素細胞の数は、同一部位であれば人種に関わらずほぼ一定です。" },
+    { id: "test_hifukagaku_extra_sogomondai_No63", text: "表皮を構成する主な細胞である角化細胞（ケラチノサイト）は、強靭な構造をもつタンパク質であるケラチンをつくる役割を担っている。", source: "No.63", answer: true, exp: "正しい。表皮細胞の約95％を占める角化細胞は、ケラチンを産生して皮膚のバリア機能を形成します。" },
+    { id: "test_hifukagaku_extra_sogomondai_No64", text: "毛根の下端にある毛母には、メラニンをつくる色素細胞（メラノサイト）が多数存在し、新しく作られる毛の細胞に色素を与えている。", source: "No.64", answer: true, exp: "正しい。毛の色は、毛母に存在する色素細胞から受け渡されるメラニン色素の量や種類によって決定されます。" },
+    { id: "test_hifukagaku_extra_sogomondai_No65", text: "健康な成人の皮膚表面を覆っている脂肪膜（皮脂膜）は、細菌の増殖を防ぐために、通常は「弱アルカリ性」を示している。", source: "No.65", answer: false, exp: "誤り。皮膚表面の脂肪膜は、通常「弱酸性（pH4.5〜6.5）」に保たれています。この酸性の性質によって、細菌や真菌の発育を抑制する自浄作用を果たしています。" },
+    { id: "test_hifukagaku_extra_sogomondai_No66", text: "毛髪の1日の成長速度は、爪の成長速度（1日平均約0.1mm）と比較して、それよりもさらに遅いのが特徴である。", source: "No.66", answer: false, exp: "誤り。毛の成長速度（1日約0.3〜0.4mm）は、爪の成長速度（1日約0.1mm）よりも「速い」です。" },
+    { id: "test_hifukagaku_extra_sogomondai_No67", text: "皮膚の断面構造において、表皮の下層と真皮の境界は水平になっており、これにより隙間なく密着して皮膚の強度を保っている。", source: "No.67", answer: false, exp: "誤り。表皮の下層と真皮の境界は水平ではなく「波状（凹凸状）」にかみ合っています。これにより連結が強くなり、皮膚に弾力性と強さを与えています。" },
+    { id: "test_hifukagaku_extra_sogomondai_No68", text: "皮脂を分泌する脂腺の分布は部位によって異なり、手掌（手のひら）や足底（足のうら）には全く存在しない。", source: "No.68", answer: true, exp: "正しい。脂腺は手のひらや足のうらには存在しません。これらの部位には代わりにエクリン腺（汗腺）が豊富に分布しています。" },
+    { id: "test_hifukagaku_extra_sogomondai_No69", text: "性ホルモンや脂溶性ビタミン（ビタミンAなど）は、分子が大きいため、健康な皮膚の表面から体内に吸収されることはない。", source: "No.69", answer: false, exp: "誤り。性ホルモンや脂溶性ビタミンなどは、脂腺や毛包などを通じて、あるいは角質層を透過して体内に吸収される「経皮吸収」が行われます。" },
+    { id: "test_hifukagaku_extra_sogomondai_No70", text: "皮膚は、外部からのさまざまな化学的刺激に対して強い抵抗力を示すが、強アルカリに対しては比較的侵されやすい性質がある。", source: "No.70", answer: true, exp: "正しい。角質層のケラチンは酸や多くの化学薬品に強い抵抗力を持ちますが、アルカリには溶解・膨潤しやすいため、アルカリ性の薬剤を扱う際は注意が必要です。" },
+    { id: "test_hifukagaku_extra_sogomondai_No71", text: "パッチテスト（皮膚貼布試験）は、化粧品や染毛剤などによる接触皮膚炎（カブレ）の原因物質を見いだすための有効な検査方法である。", source: "No.71", answer: true, exp: "正しい。パッチテストは、原因と疑われる物質を皮膚に貼り、アレルギー反応の有無を確認することで、カブレの原因を特定するために用いられます。" },
+    { id: "test_hifukagaku_extra_sogomondai_No72", text: "尋常性痤瘡（ニキビ）は、毛包が角質の栓で詰まった状態であるため、油性成分を多く含んだ保湿剤で皮膚を保護することが望ましい。", source: "No.72", answer: false, exp: "誤り。尋常性痤瘡（ニキビ）は、毛包に皮脂や角質が詰まることで発生します。油分を多く含む製品を使用すると、さらに毛穴を詰まらせて症状を悪化させるリスクがあるため、不適切です。" },
+    { id: "test_hifukagaku_extra_sogomondai_No73", text: "皮膚には「自己浄化作用」が備わっており、表面の細菌が深く身体内部へ侵入して病気を引き起こすのを防ぐ仕組みがある。", source: "No.73", answer: true, exp: "正しい。皮膚表面の弱酸性の皮脂膜や常在菌のバランスによる自己浄化作用により、病原菌の侵入や増殖が抑えられています。" },
+    { id: "test_hifukagaku_extra_sogomondai_No74", text: "疥癬（ヒゼン）は、特定の真菌（カビ）が皮膚の角質層に寄生することによって激しいかゆみを生じる疾患である。", source: "No.74", answer: false, exp: "誤り。疥癬の原因は真菌ではなく、「ヒゼンダニ」というダニの寄生によるものです。真菌が原因となるのは白癬（水虫やシラクモ）などです。" },
+    { id: "test_hifukagaku_extra_sogomondai_No75", text: "伝染性膿痂疹（トビヒ）は、黄色ブドウ球菌などの細菌（化膿菌）が皮膚に感染して起こる疾患である。", source: "No.75", answer: true, exp: "正しい。伝染性膿痂疹は細菌による感染症であり、水疱の中の膿が他の部位に付着することで周囲に感染が広がるのが特徴です。" }
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_hifukagaku_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_hifukagaku_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_hifukagaku_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_hifukagaku_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
