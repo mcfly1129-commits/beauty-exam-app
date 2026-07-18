@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美容師国家試験 対策アプリ</title>
+    <style>
+        :root {
+            --primary-color: #fab1a0;
+            --bg-color: #fefaf0;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --accent-blue: #74b9ff;
+            --accent-orange: #e67e22;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.4rem;
+            text-align: center;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .trophy-badge {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            color: #2d3436;
+            padding: 8px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+            transition: all 0.5s ease;
+        }
+
+        /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+        @keyframes master-glow {
+            0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+            50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+            100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+        }
+        .master-active {
+            animation: master-glow 2.5s infinite alternate;
+            border: 2px solid #ffd700;
+        }
+
+        /* 画面制御 */
+        .screen { display: none; }
+        .active { display: block; }
+        
+        /* ボタン基本定義 */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        
+        button:disabled {
+            background-color: #d1d8e0 !important;
+            color: #8e959c !important;
+            box-shadow: none !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+
+        /* 範囲選択用のリンクボタンスタイル */
+        .btn-subject {
+            background: linear-gradient(135deg, #fab1a0, #ff7675);
+            color: white;
+            font-size: 1.1rem;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(254, 177, 160, 0.4);
+        }
+
+        /* 統合された問題総合履歴ボタン */
+        .btn-all-history {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+        }
+        .btn-weakness {
+            background-color: #ff7675;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(255, 118, 117, 0.3);
+        }
+        
+        /* 単元リスト表示 */
+        .unit-item {
+            background: #fffbe6;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unit-info { width: 65%; }
+        .unit-name { font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .progress-bar-bg {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            width: 100%;
+        }
+        .progress-bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .unit-action { 
+            width: 32%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-start { padding: 8px; margin: 0; font-size: 0.9rem; }
+        
+        /* 下部・汎用リンクボタン */
+        .btn-link {
+            background-color: #f1f2f6;
+            color: #57606f;
+            font-size: 0.85rem;
+            padding: 10px;
+            border: 1px solid #ced6e0;
+        }
+        .btn-form {
+            background-color: #ffeaa7;
+            color: #d35400;
+            font-size: 0.85rem;
+            padding: 10px;
+        }
+
+        /* クイズ画面ヘッダーの表示崩れ対策 */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            gap: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .quiz-unit-title-box {
+            flex: 1;
+            font-weight: bold;
+            color: var(--text-color);
+            line-height: 1.4;
+            font-size: 0.85rem;
+        }
+        .quiz-meta-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .quiz-progress-text {
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            min-height: 100px;
+        }
+        .ox-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .btn-o { background-color: #28a745; color: white; font-size: 1.5rem; margin: 0;}
+        .btn-x { background-color: #dc3545; color: white; font-size: 1.5rem; margin: 0;}
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-correct { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result-incorrect { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .result-status { font-weight: bold; font-size: 1.2rem; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.95rem; line-height: 1.5; }
+        
+        /* モーダル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 4px; color: #2d3436; border-bottom: 2px solid #fdcb6e; padding-bottom: 5px;}
+        .modal-score-summary { font-size: 0.9rem; color: #2c3e50; font-weight: bold; margin-bottom: 12px; background: #f1f2f6; padding: 8px; border-radius: 6px; text-align: center;}
+        .sort-container {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .btn-sort {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.75rem;
+            background: #f1f2f6;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            margin: 0;
+            color: #57606f;
+        }
+        .btn-sort.active-sort {
+            background: #fdcb6e;
+            color: #2d3436;
+            border-color: #f1c40f;
+        }
+        .history-item { border-bottom: 1px dashed #eee; padding: 12px 0; font-size: 0.85rem;}
+        .history-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-right: 5px;}
+        .tag-done { background: #d4edda; color: #155724; }
+        .tag-yet { background: #ffeaa7; color: #d35400; }
+        .tag-bookmark { background: #ffeaa7; color: #e67e22; border: 1px solid #e67e22; }
+        .btn-view-exp {
+            background: #74b9ff;
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: auto;
+            margin: 5px 0 0 0;
+        }
+        .history-exp-box {
+            background: #f8f9fa;
+            border-left: 3px solid #74b9ff;
+            padding: 8px;
+            margin-top: 6px;
+            display: none;
+            font-size: 0.8rem;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        #bookmark-toggle-btn {
+            width: auto;
+            margin: 0;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            background-color: #f1f2f6;
+            color: #7f8c8d;
+            border: 1px solid #ced6e0;
+            border-radius: 6px;
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+.info-accordion {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 20px 0;
+    padding: 15px;
+}
+.info-accordion summary {
+    font-weight: bold;
+    cursor: pointer;
+    list-style: none; /* デフォルトの三角を消す */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #57606f;
+}
+.info-accordion summary::-webkit-details-marker { display: none; } /* Safari用 */
+.info-accordion summary::after {
+    content: '▼';
+    font-size: 0.8rem;
+    color: #ced6e0;
+}
+.info-accordion[open] summary::after {
+    content: '▲';
+}
+.info-accordion .content {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ced6e0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #57606f;
+}
+.info-accordion .content p { margin: 5px 0; }
+
+#summary-element {
+    white-space: pre-wrap; 
+}
+
+/* トップ画面のカードスタイル [5][4] を統合 */
+.menu-item-card {
+    background: #fff9e6; /* ②のような薄い黄色 */
+    border: 1px solid #ffeaa7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.menu-item-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2f3542;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* プログレスバーのデザイン [4] の再現 */
+.progress-container {
+    margin-top: 8px;
+}
+
+.progress-bar-bg {
+    background: #f1f2f6; /* より白に近い、明るい灰色に変更 */
+    border-radius: 10px;
+    height: 10px;        /* 少し太くすると見やすくなります */
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #ff9f43, #ffca28); 
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2f3542; /* 濃いグレー/紺色系 */
+    text-align: center;
+}
+
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+<div id="subject-screen" class="screen active">
+    <h1>スキマ時間で最初の一歩<br>『運営管理』</h1>
+    <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
+    
+    <details class="info-accordion">
+        <summary>本アプリのご利用にあたって</summary>
+        <div class="content">
+            <p><strong>本アプリは、国家試験対策の「補助教材」です。</strong></p>
+            <p><strong>使い方:</strong> 教科書やノートを併用し、基礎固めに活用してください。</p>
+            <p><strong>目標:</strong> 最終的に4択問題(本番形式)で得点できる力を養いましょう。</p>
+            <p><strong>サポート:</strong> 学習がうまくいかない時は、一人で抱え込まず、遠慮なく担当教員へ相談してください。</p>
+            <hr style="border: 0; border-top: 1px dashed #ced6e0; margin: 10px 0;">
+            <p><small>※内容の誤りや改善要望は<a href="https://forms.gle/KpNHUKrFQENfAbq4A" target="_blank">Googleフォーム</a>よりお寄せください。<br>
+            ※免責事項：本アプリの利用によって生じた不利益について、開発者は責任を負いかねます。学習の際は公式教材を優先してください。</small></p>
+            <p><small>───【データ保持に関する重要事項】───<br>
+当アプリは、セキュリティとプライバシー保護のため、サーバーではなくブラウザ内（ローカルストレージ）のみにデータを保存しています。そのため、以下の操作や環境下では、保存データが自動的に削除されたり、読み込めなくなったりする可能性があります。<br>
+・ブラウザの変更、端末の変更<br>
+・ブラウザのキャッシュクリア、設定変更<br>
+・プライベートブラウズモード（シークレットモード）の使用<br>
+・端末のストレージ不足<br>
+・長期の未アクセス</small></p>
+
+        </div>
+    </details>
+
+    <div id="subject-menu-container"></div>
+
+        <footer style="text-align: center; padding-top: 40px;">
+
+            <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
+        </footer>
+    </div>
+
+    <div id="unit-screen" class="screen">
+        <h1 id="page-title">単元別の問題(頻出抜粋)</h1>
+        
+        <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+        
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+        <div id="unit-list"></div>
+
+<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ced6e0; text-align: center; margin-bottom: 20px;">
+
+    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">
+        ↓この範囲の学習進捗を最初からやり直す↓
+    </p>
+    <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+        学習データをリセット
+    </button>
+</div>
+
+        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+                
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
+
+        <footer style="text-align: center; padding: 15px 10px 5px 10px; border-top: 1px solid #eee; margin-top: 20px;">
+            <p style="font-size: 11px; line-height: 1.6; color: #777777; margin: 0 auto 10px auto; text-align: justify;">
+                ※本アプリは国家試験対策のための学習補助教材（個人作成）です。情報の正確性には万全を期していますが、内容に誤りが含まれる可能性もあります。万が一、本アプリの利用によって生じた不利益について、開発者は一切の責任を負いかねます。
+学習の際は、必ず公式の教科書や講義ノートを併用し、最終確認は公式教材で行ってください。
+            </p>
+        </footer>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-header">
+            <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
+            <div class="quiz-meta-wrap">
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
+            </div>
+        </div>
+        <div id="quiz-source" style="font-size: 0.85rem; color: #888; margin-bottom: 5px;">出典: </div>
+        <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
+        
+        <div id="input-area" class="ox-container">
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+        </div>
+
+        <div id="result-area" class="result-area">
+            <div id="result-status" class="result-status">正解！</div>
+            <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
+            <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
+        <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
+        
+        <div class="sort-container" id="modal-sort-container">
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+        </div>
+
+        <div id="modal-history-list"></div>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<script>
+
+// ==========================================
+// 【Part01】全体の共通定数定義 (セーブキー衝突防止)
+// ==========================================
+
+
+const CONFIG = {
+    SUBJECT_KEY: "test_unekanri_unit_ver01_2026",
+    LEARNED_STREAK_THRESHOLD: 1,
+    QUIZ_COUNT_PER_SET: 3,         
+    WEAKNESS_STREAK_GOAL: 3        
+};
+
+// ==========================================
+// 【データ部】全コースデータ管理（ここから差し替え）
+// ==========================================
+const ALL_DATA_SOURCE = {
+    "test_unekanri_unit_ver01_2026": {  // ここを修正！
+        title: "単元別の問題(頻出抜粋)",  // ここを修正！
+        questionPool: {
+"No01.資金の管理": [
+    { id: "test_unekanri_original_No01_01", text: "損益計算書を作成することで、一定の期間における店舗の利益や費用の発生状況を正確に把握することができる。", source: "No01-01", answer: true, exp: "正しい。損益計算書は、ある一定期間の売上とそれにかかった費用を対比させ、最終的な利益や損失といった経営成績を明らかにするための重要な書類です。" },
+    { id: "test_unekanri_original_No01_02", text: "土地と建物を所有している場合、固定資産税は土地と建物の両方に課税される。", source: "No01-02", answer: true, exp: "正しい。固定資産税は、土地、建物（家屋）、および償却資産を所有している者に対して課税される地方税です。" },
+    { id: "test_unekanri_original_No01_03", text: "所得税や法人税は、年間の経営成績において「所得（黒字の利益）」が生じた場合に、その所得額に応じて課税される税金であるため、赤字（所得がゼロまたはマイナス）のときには、これらの所得課税分は課されない。", source: "No01-03", answer: true, exp: "正しい。 所得税（個人）や法人税（法人）は、売上から経費を差し引いた「所得（いわゆる手元に残った利益・黒字分）」に対して課税される税金です。したがって、経営が赤字で所得が発生していない場合は、これらの所得に対してかかる税金は発生しません。※ただし、法人として登記している場合は、赤字であっても地方税である「法人住民税の均等割（最低年7万円程度）」は一律で納める義務があるため、すべての税金がゼロになるわけではない点に注意しましょう。" },
+    { id: "test_unekanri_original_No01_04", text: "所得税や法人税は、年間の経営成績において「所得（黒字の利益）」が生じた場合に、その所得額に応じて課税される税金であるため、赤字（所得がゼロまたはマイナス）のときには、これらの所得課税分は課されない。", source: "No01-04", answer: true, exp: "正しい。所得税（個人）や法人税（法人）は、売上から経費を差し引いた「所得（いわゆる手元に残った利益・黒字分）」に対して課税される税金です。したがって、経営が赤字で所得が発生していない場合は、これらの税（所得課税分）は発生しません。※ただし、法人として登記している場合は、赤字であっても地方税である「法人住民税の均等割（最低年7万円程度）」は一律で納める義務があるため、すべての税金が完全にゼロになるわけではない点に注意しましょう。" },
+    { id: "test_unekanri_original_No01_05", text: "美容所の雇用主は、従業員の給与から所得税を源泉徴収して預かり、国へ納付する義務を負っている。", source: "No01-05", answer: true, exp: "正しい。雇用主は支払う給与から源泉所得税を預かり、原則として支払った月の翌月10日までに税務署に納付しなければなりません。" },
+    { id: "test_unekanri_original_No01_06", text: "固定資産税は、店舗の売上から一定の割合を顧客から預かり、事業者が後日まとめて税務署に納める税金である。", source: "No02-01", answer: false, exp: "誤り。売上時に顧客から預かり、後日まとめて国（税務署）に申告・納付する税金は「消費税（地方消費税含む）」です。固定資産税は、土地や建物などの固定資産を所有している者に対して、その資産がある市区町村（東京23区は都）が課税し、地方自治体に直接納付する「地方税」です。" },
+    { id: "test_unekanri_original_No01_07", text: "固定資産税は、土地や建物の所有者に課される地方税であり、店舗の経営が赤字で利益が出ていない年度であっても納税しなければならない。", source: "No02-02", answer: true, exp: "正しい。所得税や法人税は所得（利益）に対して課税されますが、固定資産税は資産（土地や建物など）を所有しているという事実に対して、その資産が所在する市区町村（東京23区は都）から課される地方税であるため、経営成績の赤字・黒字に関わらず納税義務が生じます。" },
+    { id: "test_unekanri_original_No01_08", text: "個人で経営を行う美容業の場合、所得税の課税対象となる期間（会計期間）は、事業者が自由に定めることができる。", source: "No02-03", answer: false, exp: "誤り。 法人の場合は事業年度（会計期間）を定款で自由に定められますが、個人事業主の場合、所得税法によって課税対象となる期間は「毎年1月1日から12月31日まで」と法律で一律に決められています。そのため、個人経営の美容室が、事業者の都合で自由に会計期間や決算の区切りを変更することはできません。" },
+],
+"No02.労働者の権利": [
+    { id: "test_unekanri_original_No02_01", text: "労働基準法は、使用者の別居の親族が労働者として美容所に従事している場合、その労働者に対しても適用される。", source: "No02-04", answer: true, exp: "正しい。労働基準法は、同居の親族のみを使用する事業所を除き適用されます。別居の親族を使用している場合は、通常の労働者と同様に法の適用対象となります。" },
+    { id: "test_unekanri_original_No02_02", text: "労働基準法において、使用者は技能の習得を目的とする労働者であることを理由として、その労働者を酷使してはならないと定められている。", source: "No02-05", answer: true, exp: "正しい。労働基準法第69条では、徒弟や見習いといった技能習得を目的とする労働者であっても、教育を名目に不当に酷使することを固く禁じています。" },
+    { id: "test_unekanri_original_No02_03", text: "美容所の使用者は、パートタイムの労働者に対しては、年次有給休暇を与えなくてもよい。", source: "No03-01", answer: false, exp: "誤り。労働基準法により、パートタイム労働者であっても、一定の要件を満たせば勤続期間や労働日数に応じた年次有給休暇を付与しなければなりません。" },
+    { id: "test_unekanri_original_No02_04", text: "美容所の使用者は、労働契約の締結に際し、従業者に賃金や労働時間などの「絶対的に明示しなければならない労働条件」であっても、書面（本人が希望した場合は電子メール等も可）で交付する必要はない。", source: "No03-02", answer: false, exp: "誤り。労働基準法により、使用者は労働契約の締結に際し、労働条件のうち特に重要とされる事項（労働契約の期間、就業の場所、従事する業務、労働時間、賃金の決定・計算方法、退職に関する事項など）について、原則として書面（本人が希望した場合は電子書面も可）を交付して明示しなければなりません。" },
+],
+"No03.従業員としての視点から": [
+    { id: "test_unekanri_original_No03_01", text: "日本国内に住所がある20歳以上60歳未満の者は、学生や無職であっても原則として国民年金に加入しなければならない。", source: "No03-03", answer: true, exp: "正しい。日本の公的年金制度は20歳以上の全国民の加入を義務付けており、学生や失業中などの場合でも第1号被保険者として加入する必要があります。" },
+    { id: "test_unekanri_original_No03_02", text: "日本国内に住所がある20歳以上60歳未満の者は、学生や無職であっても、原則として国民年金に加入しなければならない。", source: "No03-04", answer: true, exp: "正しい。日本の公的年金制度（国民皆年金）に基づき、国内に居住する20歳以上60歳未満のすべての人は、収入の有無に関わらず国民年金への加入が義務付けられています。" },
+    { id: "test_unekanri_original_No03_03", text: "厚生年金保険の被保険者である会社員等は、原則として自動的に国民年金の「第2号被保険者」にもなる。", source: "No03-05", answer: true, exp: "正しい。 日本の公的年金制度は「2階建て」の仕組みになっています。会社員など厚生年金に加入している人は、同時に国民年金の「第2号被保険者」となり、国民年金の加入者（1階部分）にも位置づけられます。なお、国民年金保険料は厚生年金保険料全体の中から拠出されるため、個別に国民年金保険料を二重に支払う必要はありません。" },
+    { id: "test_unekanri_original_No03_04", text: "国民年金の第1号被保険者（自営業者等）が支払う保険料は、厚生年金のように本人の所得（給与額等）に応じて変動する仕組みではなく、一律の定額（基準額）となっている。", source: "No03-06", answer: true, exp: "正しい。 会社員などの厚生年金保険料は「給与や賞与（所得）に応じた割合（比例制）」で計算されますが、自営業者や美容学校生などの国民年金第1号被保険者が支払う保険料は、所得の多寡に関わらず「全国一律の定額」として毎年度定められています。※ただし、所得が低く納付が困難な場合には、申請により免除や猶予が受けられる制度が別途存在します。" },
+    { id: "test_unekanri_original_No03_05", text: "国民年金の第1号被保険者は、定額の保険料に付加保険料を上乗せして納めることで、将来の年金額を増やせる制度がある。", source: "No03-07", answer: true, exp: "正しい。第1号被保険者や任意加入被保険者は、月額400円の付加保険料を納付することで、老齢基礎年金に付加年金を加算して受給できる仕組みが設けられています。" },
+    { id: "test_unekanri_original_No03_06", text: "国民年金の障害基礎年金は、障害の程度（1級または2級）にかかわらず、すべて同額の年金が支給される。", source: "No03-08", answer: false, exp: "誤り。障害基礎年金は障害の状態によって支給額が異なり、重度の1級に該当する場合は、2級の1.25倍の額が支給される仕組みとなっています。" },
+    { id: "test_unekanri_original_No03_07", text: "国民年金の第1号被保険者が納付する保険料は、厚生年金のように本人の所得（給与額等）に応じて変動する仕組みではなく、一律の定額（基準額）となっている。", source: "No03-09", answer: true, exp: "正しい。厚生年金保険料は所得に応じて料率が変わる「比例制」ですが、国民年金第1号被保険者（自営業者や学生など）の保険料は、所得の多寡に関わらず「全国一律の定額」として毎年度定められています。※ただし、所得が低く納付が困難な場合には、申請により免除や猶予（全額・一部）が受けられる制度が別途存在します。" },
+    { id: "test_unekanri_original_No03_08", text: "後期高齢者医療制度の被保険者となるのは、原則として75歳以上の者（または65歳以上74歳以下で一定の障害があると認定された者）である。", source: "No03-10", answer: true, exp: "正しい。後期高齢者医療制度の被保険者は、原則として「75歳以上のすべての人」です。ただし、65歳から74歳までの人で、一定の障害があると認定された人も対象となります。74歳以下の一般的な健康な人は、引き続き健康保険や国民健康保険の被保険者となります。" },
+    { id: "test_unekanri_original_No03_09", text: "国民健康保険の保険者は、都道府県及び市町村（特別区を含む）と、国民健康保険組合の2種類である。", source: "No03-11", answer: true, exp: "正しい。国民健康保険は、地域住民を対象とする都道府県・市町村運営のものと、特定の同業者が組織する国民健康保険組合の2つにより運営されています。" },
+    { id: "test_unekanri_original_No03_10", text: "国民健康保険を運営する保険者は、国および各都道府県が組織する国民健康保険組合である。", source: "No03-12", answer: false, exp: "誤り。国民健康保険の保険者は国ではなく、都道府県および市町村（特別区を含む）と、同種事業の従業者で組織する国民健康保険組合です。" },
+    { id: "test_unekanri_original_No03_11", text: "国民健康保険の保険者は、主に中小企業の従業員が加入する全国健康保険協会（協会けんぽ）である。", source: "No03-13", answer: false, exp: "誤り。全国健康保険協会は健康保険（被用者保険）の保険者です。国民健康保険の保険者は、都道府県、市町村、および国民健康保険組合です。" },
+    { id: "test_unekanri_original_No03_12", text: "健康保険の被用者（現役世代の本人）が、病気やケガで医療機関を受診した際の窓口での一部負担金は、原則として医療費の3割である。", source: "No03-14", answer: true, exp: "正しい。医療保険制度（被用者保険）において、70歳未満の被保険者（現役世代の本人）の一部負担金の割合は、原則としてかかった医療費の3割と定められています。※年齢（小学校入学前や70歳以上）や本人の所得状況（現役並み所得など）によっては、2割または1割（後期高齢者の場合）に引き下げられます。" },
+    { id: "test_unekanri_original_No03_13", text: "医療保険における窓口での一部負担金の割合は、被保険者・被扶養者の年齢や所得に関わらず、一律で医療費の3割と定められている。", source: "No03-15", answer: false, exp: "誤り。医療保険の窓口負担（一部負担金）は一律3割ではなく、年齢や所得によって段階的に定められています。原則として、小学校入学前は「2割」、小学校入学後から70歳未満は「3割」、70歳以上75歳未満は「2割（現役並み所得者は3割）」などとなっています。" },
+    { id: "test_unekanri_original_No03_14", text: "介護保険の第2号被保険者は、市区町村に住所を有する75歳以上の医療保険加入者と規定されている。", source: "No03-16", answer: false, exp: "誤り。介護保険の第2号被保険者は、市区町村に住所を有する40歳以上65歳未満の医療保険加入者です。65歳以上は第1号被保険者となります。" },
+    { id: "test_unekanri_original_No03_15", text: "介護保険の被保険者は、年齢によって区分されており、第1号被保険者は65歳以上の者、第2号被保険者は40歳以上65歳未満の医療保険加入者と定められている。", source: "No03-17", answer: true, exp: "正しい。介護保険の被保険者は、市区町村に住所を有する「40歳以上」の人が対象です。その中で、65歳以上の人を「第1号被保険者」、40歳以上65歳未満の医療保険加入者を「第2号被保険者」と区分しています。40歳未満の人は被保険者には含まれません。" },
+    { id: "test_unekanri_original_No03_16", text: "雇用保険の適用事業所に雇用される者は、1週間の所定労働時間の長さに関わらず、すべて被保険者となる。", source: "No03-18", answer: false, exp: "誤り。雇用保険の被保険者となるためには、31日以上の雇用見込みがあること、および週の所定労働時間が20時間以上である必要があります。" },
+    { id: "test_unekanri_original_No03_17", text: "雇用保険の基本手当は、倒産や解雇による離職だけでなく、一定の要件を満たせば自己都合により退職した場合も給付の対象となる。", source: "No03-19", answer: true, exp: "正しい。自己都合による退職であっても、離職日以前2年間に被保険者期間が通算12か月以上あるなどの要件を満たせば、給付制限期間を経て基本手当を受給できます。" },
+    { id: "test_unekanri_original_No03_18", text: "雇用保険の基本手当は、自己都合で退職した場合には、いかなる理由があっても支給の対象外となる。", source: "No03-20", answer: false, exp: "誤り。自己都合による退職であっても、離職日以前2年間に被保険者期間が通算12か月以上あるなどの要件を満たせば、給付制限期間を経て基本手当を受給できます。" },
+    { id: "test_unekanri_original_No03_19", text: "雇用保険の給付制度には、失業した際の基本手当のほかに、育児のために休業する労働者を支援する給付も含まれる。", source: "No03-21", answer: true, exp: "正しい。雇用保険には、失業時の生活保障だけでなく、育児休業や介護休業を取得する労働者に対して支給される継続雇用のための給付制度があります。" },
+    { id: "test_unekanri_original_No03_20", text: "雇用保険の給付制度には、失業した際の基本手当のほかに、業務上の災害による療養にかかった費用を補助する療養補償給付が含まれる。", source: "No03-22", answer: false, exp: "誤り。業務災害による「療養補償給付（または通勤災害による療養給付）」は、雇用保険ではなく、労働者災害補償保険（労災保険）から支給される給付です。雇用保険は主に、失業や育児・介護休業時の生活および雇用継続のための所得保障を行います。" },
+    { id: "test_unekanri_original_No03_21", text: "労働者災害補償保険（労災保険）は、国籍や年齢に関わらず、適用事業所に使用される労働者のすべてが対象となる。", source: "No03-23", answer: true, exp: "正しい。労災保険は、雇用形態や国籍、年齢などを問わず、適用事業に使用され賃金が支払われるすべての労働者に対して一律に適用される制度です。" },
+],
+"No04.健康管理の基礎": [
+    { id: "test_unekanri_original_No04_01", text: "労働安全衛生法は、職場における労働者の安全と健康を確保するとともに、快適な職場環境の形成を促進することを目的としている。", source: "No03-24", answer: true, exp: "正しい。労働安全衛生法は、事業者が実施すべき健康診断や安全管理体制を定め、労働者の健康維持と快適な職場作りを推進する法律です。" },
+    { id: "test_unekanri_original_No04_02", text: "労働基準法は、職場における労働者の安全と健康を確保するとともに、快適な職場環境の形成を促進することを目的としている。", source: "No03-25", answer: false, exp: "誤り。設問の記述は「労働安全衛生法」の目的です。労働基準法は、労働者が「人たるに値する生活を営むための必要を充たす」ことを目指し、賃金や労働時間、休息など、労働条件に関する最低基準を定めることを目的としています。" },
+    { id: "test_unekanri_original_No04_03", text: "他人を雇用して営業する美容所において、常時使用する従業員が少ない小規模なサロンであれば、使用者には「常時使用する労働者」に対する定期健康診断の実施義務はない。", source: "No03-26", answer: false, exp: "誤り。労働安全衛生法により、事業者はサロンの規模（従業員数）にかかわらず、常時使用する労働者に対して、医師による健康診断を1年以内ごとに1回、定期的に実施する義務があります。※なお、「常時使用する労働者」とは、原則として期間の定めのない契約者や、週の所定労働時間が同種の通常の労働者の4分の3以上である者を指します。" },
+　　　　　　]
+        }
+    },
+    "test_unekanri_past_2026": {  // ここを修正！
+        title: "過去問",  // ここを修正！
+        questionPool: {
+"第52-51回 (2025年)": [
+    { id: "test_unekanri_past_2025_01", text: "法人税や個人で経営する者の所得税は、利益が出ているときに納める税金である。", source: "52回 問題8", answer: true, exp: "正しい。法人税や所得税は、個人の所得（利益）や法人の所得に対して課される税金です。" },
+    { id: "test_unekanri_past_2025_02", text: "使用者は、労働者に対して、原則として2週間に少なくとも1日の休日を与えなければならない。", source: "52回 問題9", answer: false, exp: "誤り。使用者は労働者に対し、原則として「2週間に1日」ではなく「毎週少なくとも1日」の休日を与えなければならないと定められています。" },
+    { id: "test_unekanri_past_2025_03", text: "老齢基礎年金の給付額は、保険料の納付済期間にかかわらず、すべての受給者において同額となっている。", source: "52回 問題10", answer: false, exp: "誤り。老齢基礎年金の給付額は一律ではなく、保険料納付済期間等によって決まります。" },
+    { id: "test_unekanri_past_2025_04", text: "貸借対照表において、1年以内に返済しなければならない借金は流動負債に分類される。", source: "51回 問題8", answer: true, exp: "正しい。会計上の区分において「流動」は1年以内を指すため、1年以内に返済する借金は流動負債となります。" },
+    { id: "test_unekanri_past_2025_05", text: "健康保険には、産前産後休業中の保険料と育児休業中の保険料が免除される制度がある。", source: "51回 問題9", answer: true, exp: "正しい。健康保険制度では、産前産後休業や育児休業中の保険料が免除される仕組みが整っています。" },
+    { id: "test_unekanri_past_2025_06", text: "雇用保険の保険料は、その公共性の高さから、全額を事業主が負担することとなっている。", source: "51回 問題10", answer: false, exp: "誤り。雇用保険の保険料は、事業主だけでなく被保険者（労働者）の両方が負担します。" },
+],
+"第50-49回 (2024年)": [
+    { id: "test_unekanri_past_2024_01", text: "労働者に対する医師による健康診断の実施は、従業員が50人以上いる事業所にのみ義務付けられている。", source: "50回 問題8", answer: false, exp: "誤り。従業員の人数にかかわらず、すべての事業者は労働者に対して健康診断を実施する義務があります。" },
+    { id: "test_unekanri_past_2024_02", text: "日本国内に居住する20歳以上60歳未満のすべての人は、国民年金制度の対象となり、加入しなければならない。", source: "50回 問題9", answer: true, exp: "正しい。国民年金は、日本国内に住所を有する20歳以上60歳未満のすべての人を対象とした公的年金制度です。" },
+    { id: "test_unekanri_past_2024_03", text: "介護保険の被保険者のうち、第1号被保険者とされるのは市区町村に住所を有する75歳以上の者である。", source: "50回 問題10", answer: false, exp: "誤り。介護保険の第1号被保険者は、市区町村に住所を有する「65歳以上」の者です。" },
+    { id: "test_unekanri_past_2024_04", text: "雇用主は、従業員の給与から源泉所得税を預かり、原則として翌月10日までに税務署に納める義務がある。", source: "49回 問題8", answer: true, exp: "正しい。源泉徴収制度により、雇用主は預かった税金を原則として翌月10日までに納付しなければなりません。" },
+    { id: "test_unekanri_past_2024_05", text: "パートタイムやアルバイトとして雇用される労働者に対しては、年次有給休暇を与える必要はない。", source: "49回 問題9", answer: false, exp: "誤り。労働基準法に基づき、パートタイムやアルバイトの労働者に対しても、年次有給休暇を与えなければなりません。" },
+    { id: "test_unekanri_past_2024_06", text: "健康保険と国民健康保険のどちらの制度においても、高額療養費制度が設けられている。", source: "49回 問題10", answer: true, exp: "正しい。高額療養費制度は、医療費の自己負担額が高額になった場合に負担を軽減する仕組みであり、どちらの保険制度にも存在します。" },
+],
+"第48-47回 (2023年)": [
+    { id: "test_unekanri_past_2023_01", text: "国民年金の第1号被保険者（自営業者等）の保険料は、所得が高いほど高額になる仕組みとなっている。", source: "48回 問題8", answer: false, exp: "誤り。第1号被保険者の保険料は、所得に関わらず一定です。" },
+    { id: "test_unekanri_past_2023_02", text: "健康保険の保険料率は、全国健康保険協会の都道府県支部や健康保険組合に関わらず、すべての保険者で一律である。", source: "48回 問題9", answer: false, exp: "誤り。全国健康保険協会の場合は都道府県ごとに保険料率が異なり、健康保険組合の場合は各組合が独自に決定します。" },
+    { id: "test_unekanri_past_2023_03", text: "雇用保険の給付には、失業時の基本手当だけでなく、育児休業給付も含まれている。", source: "48回 問題10", answer: true, exp: "正しい。雇用保険の給付には育児休業給付が含まれます。ただし、一定の被保険者期間を満たすなどの条件があります。" },
+    { id: "test_unekanri_past_2023_04", text: "所得税や法人税は、個人の所得や法人の利益が出ているときに納める税金である。", source: "47回 問題8", answer: true, exp: "正しい。所得税や法人税は、利益（所得）に対して課される性質の税金です。" },
+    { id: "test_unekanri_past_2023_05", text: "労働基準法は、同居の親族以外に従業員を1人でも雇用していれば、その美容所に適用される。", source: "47回 問題9", answer: true, exp: "正しい。労働基準法は、同居の親族以外を1人でも使用している場合に適用されます。" },
+    { id: "test_unekanri_past_2023_06", text: "介護保険の被保険者は、日本国内に住所を有する20歳以上のすべての国民が対象となる。", source: "47回 問題10", answer: false, exp: "誤り。 介護保険の被保険者は、国民に限らず、日本国内に住所を有する「40歳以上」のすべての人が対象です（国籍は問いません、40〜64歳の人は「医療保険に入っていること」が条件になります）。" },
+],
+"第46-45回 (2022年)": [
+    { id: "test_unekanri_past_2022_01", text: "貸借対照表において、1年以内に返済しなければならない借金は固定負債に分類される。", source: "46回 問題8", answer: false, exp: "誤り。貸借対照表において、すぐ（1年以内）に返済しなければならない借金は、固定負債ではなく「流動負債」に分類される。" },
+    { id: "test_unekanri_past_2022_02", text: "健康保険においては、育児休業期間中の保険料が免除される制度が設けられている。", source: "46回 問題9", answer: true, exp: "正しい。健康保険制度には、申請を行うことで育児休業中の保険料が免除される仕組みがある。" },
+    { id: "test_unekanri_past_2022_03", text: "雇用保険の基本手当は、労働者の自己都合によって退職し失業した場合には支給の対象とならない。", source: "46回 問題10", answer: false, exp: "誤り。自己都合で退職した場合であっても、1か月(5年間で3回目以降は3か月)の給付制限期間を経た後に基本手当は支給される。(かつては3か月であったが2020年10月より2か月となり、2025年4月から1か月となっている。)自己都合であれば、退職前2年間に被保険者期間が通算12ヶ月以上あることも要件です。" },
+    { id: "test_unekanri_past_2022_04", text: "労働安全衛生法に基づき、小規模な事業者であっても労働者に対する医師による健康診断を実施することが義務付けられている。", source: "45回 問題8", answer: true, exp: "正しい。事業者の規模に関わらず、労働者に対する健康診断の実施は法律で義務付けられている。" },
+    { id: "test_unekanri_past_2022_05", text: "国民年金の障害基礎年金の給付額は、障害の状態が1級であっても2級であっても同額である。", source: "45回 問題9", answer: false, exp: "誤り。給付額は障害の状態（1～2級）により異なり、1級の障害は2級の1.25倍の金額が支給される。" },
+    { id: "test_unekanri_past_2022_06", text: "健康保険の出産育児一時金は、被保険者本人だけでなく、一定要件に該当する扶養家族が出産した際にも支給される。", source: "45回 問題10", answer: true, exp: "正しい。被保険者本人または一定の要件を満たす扶養家族の出産に対して支給される制度である。" },
+],
+"第44-43回 (2021年)": [
+    { id: "test_unekanri_past_2021_01", text: "固定資産税は、所有者に課せられる税金であるため、美容所の経営が赤字の状態であっても支払わなければならない。", source: "44回 問題8", answer: true, exp: "正しい。固定資産税は経営の損益に関わらず、土地や建物の所有者に対して課せられるため、赤字であっても納税義務があります。" },
+    { id: "test_unekanri_past_2021_02", text: "国民年金の第1号被保険者（自営業者等）が納める保険料は、本人の所得額が高くなるほど引き上げられる仕組みとなっている。", source: "44回 問題9", answer: false, exp: "誤り。第1号被保険者の国民年金保険料は、所得に関わらず一定の金額と定められています。" },
+    { id: "test_unekanri_past_2021_03", text: "雇用保険制度では、失業時の給付だけでなく、育児や介護のために仕事を休業せざるを得ない場合も給付の対象としている。", source: "44回 問題10", answer: true, exp: "正しい。雇用保険は失業保険を基礎としていますが、現在は育児休業給付や介護休業時のサポートも含まれています。" },
+    { id: "test_unekanri_past_2021_04", text: "消費税は顧客から預かっている税金であり、経営者は経費支払時に支払った消費税との差額を後日税務署に納める。", source: "43回 問題8", answer: true, exp: "正しい。消費税は消費者が負担し、事業者が預かって納税する仕組みとなっており、仕入れ等で支払った税額との差額を納付します。" },
+    { id: "test_unekanri_past_2021_05", text: "美容所に雇用されて育児休業をしている期間は、医療保険（健康保険）の保険料負担が継続し、免除されることはない。", source: "43回 問題9", answer: false, exp: "誤り。健康保険等の医療保険には、産前産後休業中および育児休業中の保険料が労使共に免除される制度が設けられています。" },
+    { id: "test_unekanri_past_2021_06", text: "労働者災害補償保険（労災保険）の主な給付には、療養補償給付、休業補償給付、育児休業給付の3つがある。", source: "43回 問題10", answer: false, exp: "誤り。育児休業給付は「雇用保険」の給付です。労災保険の主な給付は、療養（補償）給付、休業（補償）給付、障害（補償）給付、遺族（補償）給付となります。" },
+],
+"第42-41回 (2020年)": [
+    { id: "test_unekanri_past_2020_01", text: "美容所に同居の親族以外の従業員が1人でもいる場合、その美容所には労働基準法が適用される。", source: "42回 問題8", answer: true, exp: "正しい。労働基準法は、同居の親族以外の従業員を1人でも雇用している事業所に適用されます。" },
+    { id: "test_unekanri_past_2020_02", text: "国民年金による給付は老齢基礎年金のみに限定されており、障害基礎年金などの制度は設けられていない。", source: "42回 問題9", answer: false, exp: "誤り。国民年金による給付には、老齢基礎年金のほかに、障害基礎年金や遺族基礎年金があります。" },
+    { id: "test_unekanri_past_2020_03", text: "雇用保険の基本手当とは、労働者が失業したときに支給される失業給付のことを指す。", source: "42回 問題10", answer: true, exp: "正しい。基本手当は、失業者の生活の安定と再就職の促進のために支給される雇用保険の給付です。" },
+    { id: "test_unekanri_past_2020_04", text: "固定資産税は土地や建物などの所有者に課される税金であるため、経営が赤字の年であっても支払わなければならない。", source: "41回 問題8", answer: true, exp: "正しい。固定資産税は経営状況に関わらず所有者に課されるため、赤字であっても納税の義務があります。" },
+    { id: "test_unekanri_past_2020_05", text: "労働基準法は、働く人たちの安全と健康の確保、および快適な職場環境の形成を促進することを主な目的とした法律である。", source: "41回 問題9", answer: false, exp: "誤り。安全と健康の確保、快適な職場環境の形成を目的としているのは「労働安全衛生法」です。労働基準法は労働条件の最低基準を定めた法律です。" },
+    { id: "test_unekanri_past_2020_06", text: "健康保険の療養の給付における被保険者の一部負担金は、年齢に関わらず、かかった医療費の一律1割である。", source: "41回 問題10", answer: false, exp: "誤り。健康保険の被保険者が支払う一部負担金は、原則として3割です。ただし、70歳以上や小学校入学前などの区分により割合が異なります。" }
+]
+        }
+    },
+    "test_unekanri_extra_2026": {  // ここを修正！
+        title: "追加問題",  // ここを修正！
+        questionPool: {
+"A.経営とは・経営者とは": [
+    { id: "test_unekanri_extra_keetoha_No01", text: "事業の長期的な継続や信頼獲得の意義を理解することは、経営者の考えや行動を理解する手助けにはならない。", source: "No.01", answer: false, exp: "誤り。事業の継続と信頼獲得の意義を理解することは、経営者の理念や行動を把握する上で不可欠な要素です。" },
+    { id: "test_unekanri_extra_keetoha_No02", text: "経営者には、自店の魅力や価値を創り上げ、それを顧客に対してきちんと保証できるものにしていく責任がある。", source: "No.02", answer: true, exp: "正しい。魅力や価値を創り上げ、提供するサービスを保証することは、経営者が事業を続けていくために果たすべき責任です。" },
+    { id: "test_unekanri_extra_keetoha_No03", text: "経営の目的を達成するために必要な「経営資源」の基本3要素は、人（ひと）、物（もの）、資金（かね）から構成される。", source: "No.03", answer: true, exp: "正しい。経営資源の最も基本的な3つの要素は、「人（経営者・従業員）」「物（店舗・設備・機材）」「資金（運転資金・自己資金）」です。これに「情報」を加えて4要素とする場合もありますが、基本はこの3つです。" },
+    { id: "test_unekanri_extra_keetoha_No04", text: "経営戦略を考えるうえで重要な客観的な視点とは、自分たち（自店）の基準ではなく、顧客（買い手）の視点から自店の価値を評価することである。", source: "No.04", answer: true, exp: "正しい。自己満足の経営（主観）に陥らないためには、「顧客から見てこのサービスに価値があるか」という客観的な視点から事業を評価・計画することが極めて重要です。" },
+],
+"B.美容業の経営について": [
+    { id: "test_unekanri_extra_biyogyonokeenituite_No05", text: "理容店・美容店の閉店理由において、経営者の高齢化や後継者がいないといった要因が占める割合は極めて少ない。", source: "No.05", answer: false, exp: "誤り。理容・美容業界における閉店の理由として、経営者の高齢化や後継者の不在は非常に大きな割合を占めています。" },
+    { id: "test_unekanri_extra_biyogyonokeenituite_No06", text: "厚生労働大臣が認可した「標準営業約款（Sマーク）」制度は、消費者（顧客）に対して安全・安心・清潔を約束し、信頼を獲得するためのものである。", source: "No.06", answer: true, exp: "正しい。Sマーク制度（Standard、Safety、Sanity）は、厚生労働大臣が認可した標準営業約款に基づいて、理・美容店などが「安全・清潔・安心」を提供していることを消費者に分かりやすくアピールする制度です。" },
+    { id: "test_unekanri_extra_biyogyonokeenituite_No07", text: "理容業・美容業においては、市場の飽和や競合の増加により、既存の顧客がいなくなっても新たな顧客を見つけることは容易である。", source: "No.07", answer: false, exp: "誤り。市場の飽和や競合の増加により、新規顧客を継続的に獲得することは既存顧客の維持よりも困難であるとされています。" },
+],
+"C.資金の管理": [
+    { id: "test_unekanri_extra_sikinnokanri_No08", text: "会計には、所得税や法人税などの算定に使われる「複式簿記」という記録方法があり、そのルールにしたがって記録していく。", source: "No.08", answer: true, exp: "正しい。複式簿記は、取引の二面性（例：現金が増えた理由）を同時に記録することで、正確な利益（損益）だけでなく、店の財産や借入金（財政状態）を正しく把握するために不可欠な記録方法です。" },
+    { id: "test_unekanri_extra_sikinnokanri_No09", text: "お金をきちんと管理していくためには、帳簿記入を含めた会計の専門的な知識は特に必要ない。", source: "No.09", answer: false, exp: "誤り。健全な経営と正確な資金管理を行うためには、最低限の帳簿記入や会計に関する知識が不可欠です。" },
+    { id: "test_unekanri_extra_sikinnokanri_No10", text: "利益を増やしたければ、売上を増やすと同時にコスト（費用）も比例して増やしていくことが大切である。", source: "No.10", answer: false, exp: "誤り。利益を増やすには、売上を最大化しつつ、コストを抑制・削減していく必要があります。" },
+    { id: "test_unekanri_extra_sikinnokanri_No11", text: "損益計算書を活用することで、一定の期間における利益や費用がどのような状況になっているのかを把握することができる。", source: "No.11", answer: true, exp: "正しい。損益計算書は、一定期間の「収益（売上）から費用（コスト）」を引いた経営成績を把握するための書類です。" },
+    { id: "test_unekanri_extra_sikinnokanri_No12", text: "従業員の給与から差し引かれる源泉所得税は、従業員が直接税務署に支払うものであり、雇用主が預かることはない。", source: "No.12", answer: false, exp: "誤り。源泉所得税は雇用主が給与から天引きして一時的に預かり、従業員に代わって国に納付する仕組みです。" },
+    { id: "test_unekanri_extra_sikinnokanri_No13", text: "消費税は消費者が負担し、事業者が売上時に顧客から預かって後日まとめて税務署に納める税金である。", source: "No.13", answer: true, exp: "正しい。消費税は消費者が負担する「間接税」であり、事業者が顧客から預かって納税義務を果たします。" },
+    { id: "test_unekanri_extra_sikinnokanri_No14", text: "帳簿をつけることを推進するために作られた青色申告制度では、青色申告書を提出する納税者に対して税制上の恩典が与えられている。", source: "No.14", answer: true, exp: "正しい。青色申告は正確な記帳を行うことを条件に、特別控除や欠損金の繰越といった優遇措置を受けることができます。" },
+],
+"D.人という資源": [
+    { id: "test_unekanri_extra_hitotoiusigen_No15", text: "経営資源である「人材（ひと）」において、最も重要視されるのはその「量」であり、技術や接客態度といった「質」は二の次である。", source: "No.15", answer: false, exp: "誤り。理容業・美容業においては、技術や接客態度といった「質」が極めて重要視される資源です。" },
+    { id: "test_unekanri_extra_hitotoiusigen_No16", text: "就職して間もない新人期間の基本給（初任給など）は、実績が少ない状態であっても、まずは日々の生活を支えるための「生活保障給」的な性格が強い。", source: "No.16", answer: true, exp: "正しい。美容室の給与は「基本給」と実績に応じた「歩合給（インセンティブ）」で構成されることが多いですが、まだ売上実績を上げられない新人期間の基本給は、生活を安定させて定着を促すための「生活保障給」としての役割を強く持っています。" },
+    { id: "test_unekanri_extra_hitotoiusigen_No17", text: "昇進は給与を上げることよりも頻繁に行われるものであり、その意味は組織的に非常に軽いものである。", source: "No.17", answer: false, exp: "誤り。昇進は給与の見直しよりも頻度が少なく、その人が組織的に重い責任のある仕事を任された証しとなります。" },
+    { id: "test_unekanri_extra_hitotoiusigen_No18", text: "日本の労働三法とは、「労働基準法」「労働組合法」「労働関係調整法」の3つの法律を指す。", source: "No.18", answer: true, exp: "正しい。この3法は労働者の権利を守るための基本的な法律として定められており、労働安全衛生法は含まれません。" },
+    { id: "test_unekanri_extra_hitotoiusigen_No19", text: "年次有給休暇の付与要件は、採用日から3カ月間継続勤務し、全労働日の6割以上出勤することである。", source: "No.19", answer: false, exp: "誤り。有給休暇の付与には、6ヶ月間の継続勤務と全労働日の8割以上の出勤という条件を満たす必要があります。" },
+    { id: "test_unekanri_extra_hitotoiusigen_No20", text: "経営者には、セクシャルハラスメントやパワーハラスメントなどに対して防止措置をとることが法律で義務付けられている。", source: "No.20", answer: true, exp: "正しい。男女雇用機会均等法などにより、各種ハラスメントの防止措置を講じることは事業主の義務となっています。" },
+],
+"E.従業員としての視点から": [
+    { id: "test_unekanri_extra_jugyointositenositenkara_No21", text: "公的年金制度において、所得の減少などにより保険料の納付が困難な場合であっても、免除や納付猶予が認められる制度は存在しない。", source: "No.21", answer: false, exp: "誤り。所得減少等で納付が困難な場合には、申請により免除や猶予が認められる制度が設けられています。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No22", text: "国民年金の保険料を未納のままにしておくと、障害や死亡といった不慮の事態が発生した際に、年金が受けられないリスクがある。", source: "No.22", answer: true, exp: "正しい。未納期間があると、不慮の事故の際の障害年金などが支給されない可能性があります。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No23", text: "国民健康保険の給付内容は、療養の給付や高額療養費などの点において、会社員などが加入する健康保険との共通点はほとんどない。", source: "No.23", answer: false, exp: "誤り。国民健康保険の給付内容は、療養の給付や高額療養費など、職域の健康保険と共通する点が多くあります。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No24", text: "国民年金の第1号被保険者である自営業者や学生などの保険料は、所得の多寡にかかわらず一律の定額となっている。", source: "No.24", answer: true, exp: "正しい。所得に応じて決まる厚生年金とは異なり、国民年金の第1号被保険者の保険料は所得に関わらず一律です。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No25", text: "厚生年金保険において、労働時間などが一般社員と同等の短時間労働者は、本人の希望がある場合に限り被保険者として取り扱うことができる。", source: "No.25", answer: false, exp: "誤り。一般社員と同等の労働時間や日数がある者は、本人の希望にかかわらず強制的に被保険者となります。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No26", text: "健康保険の療養の給付における一部負担金は、年齢や所得により異なるが、現役世代は原則として医療費の3割である。", source: "No.26", answer: true, exp: "正しい。一部負担金は年齢等で異なりますが、現役世代は原則3割負担、小学校入学前などは2割負担などと定められています。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No27", text: "育児休業給付や高年齢雇用継続給付は、市町村が運営する国民健康保険から支給される主な給付内容に含まれる。", source: "No.27", answer: false, exp: "誤り。これらは雇用保険の給付です。国民健康保険から支給されるのは、療養の給付や出産育児一時金などです。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No28", text: "介護保険の第2号被保険者とは、市町村の区域内に住所を有する40歳以上65歳未満の医療保険加入者のことである。", source: "No.28", answer: true, exp: "正しい。40歳以上65歳未満の医療保険加入者は第2号被保険者、65歳以上は第1号被保険者に区分されます。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No29", text: "介護保険の運営主体は都道府県であり、原則として日本国内に居住する20歳以上のすべての国民が被保険者となる。", source: "No.29", answer: false, exp: "誤り。介護保険の保険者は市町村であり、被保険者の対象となるのは40歳以上からです。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No30", text: "雇用保険において、正当な理由のない自己都合で退職した場合は、一定の「給付制限期間」を経たあとに基本手当（いわゆる失業手当）が支給される。", source: "No.30", answer: true, exp: "正しい。会社の倒産や解雇（会社都合）とは異なり、自分の都合で仕事を辞めた場合は、7日間の待期期間に加え、最新の教科書に記載されている通り、原則として1ヶ月の「給付制限期間」が経過するまで基本手当は支給されません。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No31", text: "雇用保険の給付には、失業した際に支払われる基本手当が含まれる。", source: "No.31", answer: true, exp: "正しい。基本手当は失業給付とも呼ばれ、雇用保険を代表する給付の一つです。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No32", text: "労働者災害補償保険（労災保険）の保険料は、事業主と従業員が折半して負担することとされている。", source: "No.32", answer: false, exp: "誤り。労災保険の保険料は従業員が負担することはなく、事業主が全額を負担します。" },
+    { id: "test_unekanri_extra_jugyointositenositenkara_No33", text: "育児休業給付は、労働者災害補償保険（労災保険）の管轄に基づき支給される制度である。", source: "No.33", answer: false, exp: "誤り。育児休業給付は雇用保険から支給される制度であり、労災保険の給付ではありません。" },
+],
+"F.健康・安全な職場環境の実現": [
+    { id: "test_unekanri_extra_shokubakankyonojitugen_No34", text: "ストレスチェックの実施は、従業員が100人以上の職場に対して義務付けられている。", source: "No.34", answer: false, exp: "誤り。ストレスチェックの実施義務は、常時50人以上の労働者を使用する事業場に課されています。" },
+    { id: "test_unekanri_extra_shokubakankyonojitugen_No35", text: "理容師・美容師が従事する立ち仕事や施術姿勢において、慢性的な疲労を感じやすい主な身体部位として、足、腰部、肩が挙げられる。", source: "No.35", answer: true, exp: "正しい。長時間の立ち仕事や、カット・シャンプー時の中腰、手を上げ続ける姿勢などは、足、腰部、肩といった特定の部位に大きな負担をかけ、慢性的な疲労や職業病（腰痛など）を招く原因となります。" },
+    { id: "test_unekanri_extra_shokubakankyonojitugen_No36", text: "理容師・美容師の三大職業病とは、腰痛、腱鞘炎、膀胱炎である。", source: "No.36", answer: false, exp: "誤り。理容師・美容師の三大職業病は「腰痛」「腱鞘炎」「手荒れ」であり、膀胱炎は含まれません。" },
+    { id: "test_unekanri_extra_shokubakankyonojitugen_No37", text: "カットの際の中腰や上半身のひねりのような不自然な作業姿勢も、腰痛の原因となる。", source: "No.37", answer: true, exp: "正しい。長時間の立ち仕事に加え、カット時の中腰やひねりなどの不自然な姿勢は腰痛を引き起こす要因となります。" },
+    { id: "test_unekanri_extra_shokubakankyonojitugen_No38", text: "理容店・美容店では健康維持や衛生管理のため、加湿器や除湿器を利用して適切な湿度を保持する工夫が必要である。", source: "No.38", answer: true, exp: "正しい。湿度は40パーセントから70パーセント程度が適切とされており、環境に応じて加湿や除湿を行うことが重要です。" },
+],
+"G.サービス・デザイン": [
+    { id: "test_unekanri_extra_sabisudezain_No39", text: "サービスは顧客の期待にこたえ、顧客満足を実現する活動といえる。", source: "No.39", answer: true, exp: "正しい。サービスは顧客が何を期待しているかを汲み取り、その満足を実現するための活動です。" },
+    { id: "test_unekanri_extra_sabisudezain_No40", text: "サービスの実現のために必要な人や道具、機器、情報などは、それぞれ独立して機能すればよく、システムとして連携する必要はない。", source: "No.40", answer: false, exp: "誤り。質の高いサービスを安定して提供するためには、人、物、情報が有機的に連携し、システムとして機能することが不可欠です。" },
+    { id: "test_unekanri_extra_sabisudezain_No41", text: "理容業・美容業のサービス・システムは、その大半を顧客が見ることができないため、細部まで手を抜いても顧客の評価には影響しない。", source: "No.41", answer: false, exp: "誤り。理容・美容のシステムは施術プロセスを含め大半を顧客が直接目にすることになるため、目に見えるすべての要素が顧客の評価に直結します。" },
+    { id: "test_unekanri_extra_sabisudezain_No42", text: "顧客のサービスに対する期待を「適切に」高めることは、顧客満足を向上させるうえで重要な意味を持つ。", source: "No.42", answer: true, exp: "正しい。理・美容のサービスは、スタイリストと顧客が一緒に創り上げるものです。顧客の期待を「適切に」高めることで、顧客は「こういう髪型にしたい」という要望を熱心に伝えて施術に協力してくれる（共同提供者になる）ようになり、結果としてより高い顧客満足に繋がります。" },
+],
+"H.サービス・マーケティング": [
+    { id: "test_unekanri_extra_sabisumakethingu_No43", text: "マーケティングにおいて重要になるのは、設計されたサービスを「顧客視点」から評価し、顧客にとって魅力的なものにしていくことである。", source: "No.43", answer: true, exp: "正しい。マーケティングは経営者視点ではなく顧客の目線に立ち、顧客が価値を感じ満足する方法を具体的に実行することです。" },
+    { id: "test_unekanri_extra_sabisumakethingu_No44", text: "顧客に提供するサービスは「コア」と「周辺」の2つのみで構成されており、特別な希望に対応する要素は含まれない。", source: "No.44", answer: false, exp: "誤り。サービスは核となる「コア」、付随する「周辺」、そして特別希望に対応する「オプション」の3つで構成されています。" },
+    { id: "test_unekanri_extra_sabisumakethingu_No45", text: "店の立地やターゲット、コンセプトによって最適な手法は異なるため、すべての店に通用する万能なプロモーション方法は存在しない。", source: "No.45", answer: true, exp: "正しい。プロモーションは店の特性や予算、目的に応じて最適な手法が異なるため、どの店にも通用する万能な方法は存在しません。" },
+    { id: "test_unekanri_extra_sabisumakethingu_No46", text: "インターネットが広く普及したが、理容業・美容業におけるマーケティングの手法や顧客との関係性は劇的には変化していない。", source: "No.46", answer: false, exp: "誤り。インターネットの普及により、SNSや予約サイトを通じた双方向のやり取りやデータ分析が可能になり、マーケティングの手法は劇的に変化しました。" },
+],
+"I.サービスにおける人の役割": [
+    { id: "test_unekanri_extra_hitonoyakuwari_No47", text: "接客で使用する言葉は、専門用語や流行語などは世代により解釈が異なることがあるため、相手の立場に合わせた分かりやすい言葉選びが不可欠である。", source: "No.47", answer: true, exp: "正しい。顧客に誤解を与えず信頼を得るためには、専門用語などを避け、相手が理解しやすい言葉で接することが重要です。" },
+    { id: "test_unekanri_extra_hitonoyakuwari_No48", text: "接客の実践において、顧客との関係性を深めるためには、プライバシーに関わる内容や近隣の噂話などの話題を積極的に提供すべきである。", source: "No.48", answer: false, exp: "誤り。プライバシーに関わる話題や噂話は顧客の不信感を招く原因となるため、接客においては避けるべき内容です。" },
+    { id: "test_unekanri_extra_hitonoyakuwari_No49", text: "地震や火災といった不測の事態に備え、顧客や従業員が安全に避難できるように日頃から準備や訓練をしておくことが大切である。", source: "No.49", answer: true, exp: "正しい。防災訓練や避難経路の確保は、店舗として顧客と従業員の安全を守るための基本的な義務といえます。" },
+    { id: "test_unekanri_extra_hitonoyakuwari_No50", text: "店側の責任が明らかなトラブルが発生した場合、深刻化を防ぐために、要求された内容が過度であっても全て顧客の言うとおりにすべきである。", source: "No.50", answer: false, exp: "誤り。誠実な謝罪と被害拡大の防止は不可欠ですが、何でも言いなりになるのではなく、事実確認に基づき適切に対応することが重要です。" },
+]
+        }
+    }
+}; 
+
+let currentSubjectKey = "test_unekanri_unit_ver01_2026";
+let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+
+// 【追加】メニューの構成設定
+const SUBJECT_MENU_CONFIG = [
+    { 
+        id: "unit_questions", 
+        label: "単元別の問題(頻出抜粋)",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_unekanri_unit_ver01_2026"  // ここを修正！
+    }, 
+    { 
+        id: "past_exam", 
+        label: "過去問",   // ここを修正！
+        enabled: true,  // ここを修正！true or false
+        dataKey: "test_unekanri_past_2026" // ここを修正！
+    },
+    { 
+        id: "extra_question", 
+        label: "追加問題",   // ここを修正！
+        enabled: true,  // ここを修正！
+        dataKey: "test_unekanri_extra_2026" // ここを修正！
+    }
+];
+
+// ==========================================
+// 【Part02】【システム部】アプリの状態管理
+// ==========================================
+let currentUnit = "";
+let currentQuestions = [];
+let currentQuestionIndex = 0;
+let currentSortMode = "default";
+let isWeaknessMode = false;
+let isAllHistoryMode = false; 
+let isDailyMode = false; 
+let weaknessSessionWrongCount = 0; 
+let activeModalUnit = "";
+
+// デイリースタンプモードの状態管理
+let dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+let lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+let dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+let questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+let unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+
+let hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false; 
+let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0; 
+let isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+// 選択された範囲（dataKey）に合わせて全てのデータを再ロードする関数
+function refreshAppData() {
+    questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+    unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY)) || {};
+    hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY)) ?? false;
+    weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY)) || false;
+    
+    // ★ここだけ変更：後ろの「+ CONFIG.SUBJECT_KEY」を取り除き、全体共通の固定キー名にします
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    
+    dailyStreak = JSON.parse(localStorage.getItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY)) || 0;
+    lastDailyDate = localStorage.getItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY) || "";
+}
+
+// 称号を判定する共通関数
+function getRankForScope(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const weaknessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + dataKey)) || 0;
+    
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    let totalQuestions = 0;
+    let masteredCount = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    // 全問題の統計を集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            if (stat) {
+                // 進捗判定（習得済みか） [1]
+                if ((stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                    masteredCount++;
+                }
+                totalAns += stat.total;
+                totalCorrect += stat.correct_count;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return "";
+
+    const isProgress100 = (masteredCount === totalQuestions);
+    const isAccuracy100 = (totalAns > 0 && totalAns === totalCorrect);
+    const isWeaknessCleared = (weaknessStreak >= CONFIG.WEAKNESS_STREAK_GOAL);
+
+    // 称号判定ロジック
+    if (isProgress100 && isAccuracy100) {
+        return "<br>【グランドマスター】";
+    } else if (isWeaknessCleared && isProgress100) {
+        return "<br>【マスター】";
+    } else if (totalAns > 0) {
+        return "【修行中】";
+    }
+    
+    return "";
+}
+
+// 画面切り替え共通関数
+function navigateTo(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+}
+
+// 日付判定ヘルパー
+function getTodayString() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getYesterdayString() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// 起動時初期化
+window.onload = function() {
+    navigateTo('subject-screen');
+    checkDailyStreakOnLoad(); 
+    renderMenu();
+};
+
+function checkDailyStreakOnLoad() {
+    const today = getTodayString();
+    const yesterday = getYesterdayString();
+    if (lastDailyDate !== today && lastDailyDate !== yesterday && lastDailyDate !== "") {
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+    }
+}
+
+// 単元リスト・UI描画
+function renderUnitList() {
+    const listContainer = document.getElementById("unit-list");
+    if (!listContainer) return;
+    listContainer.innerHTML = "";
+
+    let totalQuestionsCount = 0;
+    let totalExcludedCount = 0;
+    let appTotalAnswers = 0;
+    let appTotalCorrects = 0;
+
+    for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        const excludedCount = questions.filter(q => (questionStats[q.id]?.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD).length;
+        const unitPlayCount = unitCountData[unitName] || 0;
+        
+        totalQuestionsCount += questions.length;
+        totalExcludedCount += excludedCount;
+
+        questions.forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                appTotalAnswers += (stat.total || 0);
+                appTotalCorrects += (stat.correct_count || 0);
+            }
+        });
+        
+        let progressPercent = questions.length > 0 ? Math.round((excludedCount / questions.length) * 100) : 0;
+        const isCompleted = (excludedCount === questions.length);
+        
+        let buttonHtml = isCompleted 
+            ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+
+        const unitHtml = `
+            <div class="unit-item">
+                <div class="unit-info">
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #666; margin-top: 4px;">習得済み: ${excludedCount} / ${questions.length} 問 (${progressPercent}%)</div>
+                </div>
+                <div class="unit-action">
+                    ${buttonHtml}
+                    <span style="font-size: 0.72rem; color: #e67e22; font-weight: normal; white-space: nowrap;">${unitPlayCount}セット 実施済</span>
+                </div>
+            </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', unitHtml);
+    }
+
+    const weaknessBtn = document.getElementById("weakness-btn");
+    const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalExcludedCount / totalQuestionsCount) * 100) : 0;
+
+    if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+            weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+            weaknessBtn.disabled = false;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モードに挑戦可能\n(現在${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット達成中)`;
+        } else {
+            weaknessBtn.disabled = true;
+            weaknessBtn.style.display = "block";
+            weaknessBtn.innerText = `弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+    }
+
+    updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
+    renderDailyBanner();
+}
+
+function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+    
+    const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+    
+    rankEl.classList.remove("master-active");
+
+    // 基本となる進捗・正答率の定量評価テキストを共通化
+    const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+        📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+    </div>`;
+
+    if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br>
+        <small>一度のミスもなく全概念を完全支配した者</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
+        rankEl.classList.add("master-active");
+    } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br>
+        <small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
+        rankEl.classList.add("master-active");
+    } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑 <br>(弱点克服挑戦中)</strong><br>
+        <small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！</small>
+        ${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
+    } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else if (percent >= 5) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>ビギナー</strong>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.style.background = ""; rankEl.style.color = "";
+    }
+}
+
+function renderDailyBanner() {
+    let existingBanner = document.getElementById("daily-streak-banner");
+    if (existingBanner) existingBanner.remove();
+
+    const rankEl = document.getElementById("user-rank");
+    if (!rankEl) return;
+
+    const today = getTodayString();
+    const isCompletedToday = (lastDailyDate === today);
+    const banner = document.createElement("div");
+    banner.id = "daily-streak-banner";
+    banner.style.margin = "15px 0";
+    banner.style.padding = "15px";
+    banner.style.borderRadius = "12px";
+    banner.style.boxShadow = "0 4px 15px rgba(0,0,0,0.1)";
+    banner.style.textAlign = "center";
+
+    if (isCompletedToday) {
+        banner.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+        banner.style.color = "#ffffff";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.9;">本日の勝負はクリア済み！<br>その調子で明日も挑みましょう 🚀</div>
+        `;
+    } else {
+        banner.style.background = "linear-gradient(135deg, #ff9f43, #ee5253)";
+        banner.style.color = "#ffffff";
+        banner.style.cursor = "pointer";
+        banner.innerHTML = `
+            <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
+                👉 ここをタップして今日の3問に挑戦！
+            </div>
+        `;
+        banner.onclick = startDailyQuiz;
+    }
+    rankEl.parentNode.insertBefore(banner, rankEl.nextSibling);
+}
+
+function startDailyQuiz() {
+    if (lastDailyDate === getTodayString()) {
+        alert("今日のデイリースタンプは獲得済みです！");
+        return;
+    }
+    isDailyMode = true;
+    isWeaknessMode = false;
+    currentUnit = "デイリー真剣勝負";
+
+    let allPoolQuestions = [];
+    for (let u in questionPool) {
+        questionPool[u].forEach(q => {
+            allPoolQuestions.push({...q, parentUnit: u});
+        });
+    }
+    if (allPoolQuestions.length === 0) return;
+
+    let shuffled = [...allPoolQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+// ==========================================
+// 【Part03】クイズ制御・判定コア部
+// ==========================================
+function startWeaknessQuiz() {
+    let allQuestions = [];
+    for (let unitName in questionPool) {
+        questionPool[unitName].forEach(q => {
+            const stat = questionStats[q.id];
+            if (stat) {
+                const wrongCount = stat.total - stat.correct_count;
+                if (wrongCount > 0) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: wrongCount});
+                }
+            }
+        });
+    }
+    if (allQuestions.length < CONFIG.QUIZ_COUNT_PER_SET) {
+        for (let unitName in questionPool) {
+            questionPool[unitName].forEach(q => {
+                if (!questionStats[q.id] && allQuestions.length < 15) {
+                    allQuestions.push({...q, parentUnit: unitName, wrongCount: 0});
+                }
+            });
+        }
+    }
+    if (allQuestions.length === 0) {
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        return;
+    }
+
+    isWeaknessMode = true;
+    isDailyMode = false;
+    weaknessSessionWrongCount = 0; 
+    currentUnit = "弱点克服モード";
+
+    allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
+    let shuffled = [...allQuestions.slice(0, 15)];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET);
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function startQuiz(unitName) {
+    isWeaknessMode = false;
+    isDailyMode = false;
+    currentUnit = unitName;
+    const availableQuestions = questionPool[unitName].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+
+    if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        return;
+    }
+    if (!unitCountData[unitName]) unitCountData[unitName] = 0;
+    unitCountData[unitName] += 1;
+    localStorage.setItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY, JSON.stringify(unitCountData));
+
+    let shuffled = [...availableQuestions];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        let r = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[r]] = [shuffled[r], shuffled[i]];
+    }
+    currentQuestions = shuffled.slice(0, CONFIG.QUIZ_COUNT_PER_SET); 
+    currentQuestionIndex = 0;
+    navigateTo('quiz-screen');
+    showQuestion();
+}
+
+function toggleBookmark() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+    
+    const idx = bookmarkedIds.indexOf(currentQ.id);
+    if (idx > -1) {
+        bookmarkedIds.splice(idx, 1);
+    } else {
+        bookmarkedIds.push(currentQ.id);
+    }
+    
+    // ★ここだけ変更：「"beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY」を消して、全体共通のキー名にします
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    updateBookmarkButtonUI(currentQ.id);
+}
+
+function updateBookmarkButtonUI(questionId) {
+    const bookmarkBtn = document.getElementById("bookmark-toggle-btn");
+    if (!bookmarkBtn) return;
+    if (bookmarkedIds.includes(questionId)) {
+        bookmarkBtn.innerText = "⭐ マーク中";
+        bookmarkBtn.classList.add("is-bookmarked");
+    } else {
+        bookmarkBtn.innerText = "☆ をつける";
+        bookmarkBtn.classList.remove("is-bookmarked");
+    }
+}
+
+function showQuestion() {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    document.getElementById("quiz-unit-title").innerText = isDailyMode ? "デイリー真剣勝負" : (isWeaknessMode ? `弱点克服モード` : currentUnit);
+    document.getElementById("quiz-progress-num").innerText = `${currentQuestionIndex + 1} / ${currentQuestions.length} 問目`;
+    document.getElementById("quiz-source").innerText = `出典: ${currentQ.source}`;
+    document.getElementById("quiz-text").innerText = currentQ.text;
+    updateBookmarkButtonUI(currentQ.id);
+    document.getElementById("input-area").style.display = "flex";
+    document.getElementById("result-area").style.display = "none";
+}
+
+function submitAnswer(userAns) {
+    const currentQ = currentQuestions[currentQuestionIndex];
+    const isCorrect = (userAns === currentQ.answer);
+
+    if (isCorrect && !isDailyMode) {
+        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+        
+        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+    } else if (isCorrect && isDailyMode) {
+        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
+        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+    }
+
+    dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    
+    if (!isDailyMode) {
+        if (!questionStats[currentQ.id]) questionStats[currentQ.id] = { total: 0, streak: 0, correct_count: 0 };
+        questionStats[currentQ.id].total += 1;
+        if (isCorrect) {
+            questionStats[currentQ.id].streak += 1;
+            questionStats[currentQ.id].correct_count += 1;
+        } else {
+            questionStats[currentQ.id].streak = 0;
+        }
+        localStorage.setItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY, JSON.stringify(questionStats));
+    } else {
+        if (isCorrect && !dailyCorrectedIds.includes(currentQ.id)) {
+            dailyCorrectedIds.push(currentQ.id);
+            localStorage.setItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY, JSON.stringify(dailyCorrectedIds));
+        }
+    }
+    
+    const resultArea = document.getElementById("result-area");
+    const resultStatus = document.getElementById("result-status");
+    const streakEl = document.getElementById("current-streak");
+    let actionButtonsHtml = "";
+
+    if (isCorrect) {
+        resultStatus.innerText = "正解！";
+        resultArea.className = "result-area result-correct";
+    } else {
+        resultStatus.innerText = "間違い！";
+        resultArea.className = "result-area result-incorrect";
+        hasEverFailed = true;
+        localStorage.setItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY, JSON.stringify(hasEverFailed));
+        if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            weaknessSuccessStreak = 0; 
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+        }
+    }
+    
+    if (isDailyMode) {
+        streakEl.innerText = `🔥 デイリー真剣勝負の記録 現在: 【 ${dailyStreak} 日 】連続中`;
+} else if (isWeaknessMode) {
+    // 定数 CONFIG.WEAKNESS_STREAK_GOAL (5セット) と完全に同期させます
+    streakEl.innerText = `弱点克服モード現在の達成数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット`;
+} else {
+        let stat = questionStats[currentQ.id] || { correct_count: 0 };
+        streakEl.innerText = `この問題の正解数: ${stat.correct_count}回`;
+    }
+    streakEl.style.display = "block";
+    document.getElementById("quiz-explanation").innerText = currentQ.exp;
+    document.getElementById("input-area").style.display = "none";
+
+    const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
+
+    if (isDailyMode) {
+        if (!isCorrect) {
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+        } else if (isLastQuestion) {
+            dailyStreak++;
+            lastDailyDate = getTodayString();
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+            triggerFeverEffect();
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+        } else {
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+        }
+    } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+    } else if (isLastQuestion) {
+        if (isWeaknessMode) {
+            weaknessSuccessStreak++;
+            localStorage.setItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY, JSON.stringify(weaknessSuccessStreak));
+            triggerFeverEffect();
+            if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+                isMasterStatus = true;
+                localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+            } else {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                `;
+            }
+        } else {
+            const currentSetCorrectCount = currentQuestions.filter(q => (questionStats[q.id]?.streak || 0) > 0).length;
+            if (currentSetCorrectCount === CONFIG.QUIZ_COUNT_PER_SET) triggerFeverEffect(); 
+
+            const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
+            if (remain.length > 0) {
+                actionButtonsHtml = `
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                `;
+            } else {
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+            }
+        }
+    } else {
+        actionButtonsHtml = `
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+        `;
+    }
+
+    const oldButtons = resultArea.querySelector("div[style*='display: flex']");
+    if (oldButtons) oldButtons.innerHTML = actionButtonsHtml;
+    resultArea.style.display = "block";
+}
+
+function triggerFeverEffect() {
+    if (typeof confetti === "function") {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    }
+}
+
+function nextQuestion() {
+    currentQuestionIndex += 1;
+    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+}
+
+// ==========================================
+// 【Part04】履歴確認・モーダル制御完全版
+// ==========================================
+function openSubjectTotalHistoryModal() {
+    isAllHistoryMode = true;
+    
+    let combinedPool = {};
+    let combinedStats = {};
+    let combinedBookmarks = [];
+    let combinedDailyIds = [];
+
+    // SUBJECT_MENU_CONFIG をすべてループしてデータを集約
+    SUBJECT_MENU_CONFIG.forEach(menuItem => {
+        if (menuItem.enabled && ALL_DATA_SOURCE[menuItem.dataKey]) {
+            const dKey = menuItem.dataKey;
+
+            // 1. 問題プールの統合（既存の処理）
+            const sourcePool = ALL_DATA_SOURCE[dKey].questionPool;
+            for (let unit in sourcePool) {
+                const decoratedUnitName = `[${menuItem.label}] ${unit}`;
+                combinedPool[decoratedUnitName] = sourcePool[unit];
+            }
+
+            // 2. 学習統計 (Stats) の統合 【ここを追加/修正】
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dKey)) || {};
+            Object.assign(combinedStats, stats);
+
+            // 3. お気に入り (Bookmarks) の統合 【ここを追加/修正】
+            const bookmarks = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + dKey)) || [];
+            // 重複を避けながらマージ
+            combinedBookmarks = [...new Set([...combinedBookmarks, ...bookmarks])];
+
+            // 4. デイリー正解済みIDの統合
+            const dailyIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + dKey)) || [];
+            combinedDailyIds = [...new Set([...combinedDailyIds, ...dailyIds])];
+        }
+    });
+
+    // 元のデータを退避（モーダルを閉じた時に戻すため）
+    const originalPool = questionPool;
+    const originalStats = questionStats;
+    const originalBookmarks = bookmarkedIds;
+    const originalDailyIds = dailyCorrectedIds;
+
+    // グローバル変数を「合算された全データ」に一時的に差し替え
+    questionPool = combinedPool;
+    questionStats = combinedStats;
+    bookmarkedIds = combinedBookmarks;
+    dailyCorrectedIds = combinedDailyIds;
+
+    // UIの表示更新
+    document.getElementById("modal-unit-title").innerText = "この科目の総合履歴・分析";
+    document.getElementById("history-modal").style.display = "flex";
+    
+    // 履歴リストの描画
+    toggleSort("default");
+
+    // モーダルを閉じる際のクリーンアップ処理
+    const originalClose = closeHistoryModal;
+    window.closeHistoryModal = function() {
+        document.getElementById("history-modal").style.display = "none";
+        // データを元の（個別の）状態に戻す
+        questionPool = originalPool;
+        questionStats = originalStats;
+        bookmarkedIds = originalBookmarks;
+        dailyCorrectedIds = originalDailyIds;
+        window.closeHistoryModal = originalClose;
+    };
+}
+
+function backToHome(isSetCompleted = false) {
+    if (isDailyMode) {
+        if (isSetCompleted) {
+            alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
+        } else {
+            dailyStreak = 0;
+            localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
+            alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。\n今からまた積み重ねましょう！");
+        }
+        isDailyMode = false;
+    } else if (isWeaknessMode && isSetCompleted && weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+        alert("👑 おめでとうございます！弱点克服モードを3セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！");
+    } else if (isWeaknessMode && isSetCompleted) {
+        alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま一覧に戻ってもリセットされません）`);
+    } else if (isWeaknessMode && !isSetCompleted && weaknessSessionWrongCount > 0) {
+        alert("克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+    }
+
+    navigateTo('unit-screen');
+    renderUnitList();
+
+    // 1. 最新の統計データを読み込み直す（進捗反映に必須）
+    questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY)) || {};
+
+    // 2. 画面遷移先を ②「細かい学習範囲の選択画面」に設定
+    navigateTo('unit-screen'); 
+
+    // 3. ②の画面のリスト（各単元の進捗）を更新して表示
+    renderUnitList();
+
+    // 4. 【重要】①のトップ画面の進捗も、裏側でこっそり更新しておく
+    // これにより、②から①へ戻った時にも進捗が最新の状態になっています
+    renderMenu();
+}
+
+function openHistoryModal(unitName) {
+    isAllHistoryMode = false;
+    activeModalUnit = unitName;
+    document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+    document.getElementById("sort-btn-wrong").style.display = "block"; 
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function openAllHistoryModal() {
+    isAllHistoryMode = true;
+    document.getElementById("modal-unit-title").innerText = "この範囲の履歴・分析";
+    document.getElementById("sort-btn-wrong").style.display = "block";
+    document.getElementById("history-modal").style.display = "flex";
+    toggleSort("default");
+}
+
+function closeHistoryModal() {
+    document.getElementById("history-modal").style.display = "none";
+}
+
+function toggleSort(mode) {
+    currentSortMode = mode;
+    document.getElementById("sort-btn-default").classList.remove("active-sort");
+    document.getElementById("sort-btn-count").classList.remove("active-sort");
+    document.getElementById("sort-btn-wrong").classList.remove("active-sort");
+
+    const bookmarkSortBtn = document.getElementById("sort-btn-bookmark");
+    if (bookmarkSortBtn) bookmarkSortBtn.classList.remove("active-sort");
+
+    if (mode === "default") document.getElementById("sort-btn-default").classList.add("active-sort");
+    if (mode === "count") document.getElementById("sort-btn-count").classList.add("active-sort");
+    if (mode === "wrong") document.getElementById("sort-btn-wrong").classList.add("active-sort");
+    if (mode === "bookmark" && bookmarkSortBtn) bookmarkSortBtn.classList.add("active-sort");
+
+    renderHistoryList();
+}
+
+function renderHistoryList() {
+    const container = document.getElementById("modal-history-list");
+    const summaryEl = document.getElementById("modal-score-summary");
+    if (!container) return;
+    container.innerHTML = "";
+
+dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
+
+// ★ bookmarkedIds の保存キーから「+ CONFIG.SUBJECT_KEY」を削除し、全体共通の固定名に変更します
+bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+    let targetQuestions = [];
+
+    if (isAllHistoryMode) {
+        for (let u in questionPool) {
+            questionPool[u].forEach(q => {
+                targetQuestions.push({...q, parentUnit: u});
+            });
+        }
+    } else {
+        if (!activeModalUnit || !questionPool[activeModalUnit]) return;
+        targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
+    }
+
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+    
+    summaryEl.innerText = isAllHistoryMode 
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
+
+    // ソート処理
+    if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+    } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+            let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+            let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+            return wB - wA;
+        });
+    } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? 1 : 0) - (bookmarkedIds.includes(a.id) ? 1 : 0));
+    }
+
+    let lastRenderedUnit = null;
+
+    targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = stat.streak >= CONFIG.LEARNED_STREAK_THRESHOLD;
+        const isDailyMarked = dailyCorrectedIds.includes(q.id);
+        const isBookmarked = bookmarkedIds.includes(q.id);
+        const wrongCount = stat.total - stat.correct_count;
+
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
+        if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
+            lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
+            const unitHeaderHtml = `
+                <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
+                    ■ ${displayUnitName}
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', unitHeaderHtml);
+        }
+
+        let tagsHtml = [isMastered ? `<span class="history-tag tag-done">習得済</span>` : `<span class="history-tag tag-yet">未習得</span>`];
+        if (isDailyMarked) tagsHtml.push(`<span class="history-tag" style="background:#e8f4fd; color:#1da1f2; border:1px solid #bce0f6; margin-left:4px;">デイリークリア🔥</span>`);
+        if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
+
+        let removeBookmarkBtnHtml = isBookmarked 
+    ? `<button onclick="
+        event.stopPropagation(); 
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== '${q.id}'); // タップされたこの問題IDだけを取り除く
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList(); // その場で履歴画面を新しく更新する
+      " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
+
+        const itemHtml = `
+            <div class="history-item">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
+                    <div style="font-size:0.75rem; color:#666; text-align:right;">
+                        トライ:${stat.total}回 / 誤答:${wrongCount}回
+                        ${removeBookmarkBtnHtml}
+                    </div>
+                </div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
+                <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${q.id}')">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+    });
+}
+
+function toggleHistoryBookmark(event, qId) {
+    event.stopPropagation(); // イベント伝播の競合を完全に遮断
+    bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY)) || [];
+    const idx = bookmarkedIds.indexOf(qId);
+    if (idx !== -1) bookmarkedIds.splice(idx, 1);
+    localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
+    renderHistoryList();
+}
+
+function toggleHistoryExp(qId) {
+    const el = document.getElementById(`hist-exp-${qId}`);
+    if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+}
+
+function resetLearningData() {
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
+        localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_weakness_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
+        localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        
+        // 2. メモリ上の変数をすべて初期化
+        questionStats = {};
+        unitCountData = {};
+        hasEverFailed = false;
+        weaknessSuccessStreak = 0;
+        isMasterStatus = false;
+        dailyStreak = 0;
+        lastDailyDate = "";
+        dailyCorrectedIds = [];
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
+        location.reload(); 
+    }
+}
+
+function updatePageTitle() {
+    const titleElement = document.getElementById("page-title");
+    if (titleElement) {
+        // 現在のコースキーからデータを参照してタイトルを書き換え
+        titleElement.innerText = ALL_DATA_SOURCE[currentSubjectKey].title;
+    }
+}
+
+function calculateScopeProgress(dataKey) {
+    const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + dataKey)) || {};
+    const pool = ALL_DATA_SOURCE[dataKey].questionPool;
+    
+    let totalQuestions = 0;
+    let masteredCount = 0;
+
+    // 全単元の問題を走査して集計
+    for (const unit in pool) {
+        pool[unit].forEach(q => {
+            totalQuestions++;
+            const stat = stats[q.id];
+            // 設定された習得しきい値（通常3回連続正解など）に達しているか判定
+            if (stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD) {
+                masteredCount++;
+            }
+        });
+    }
+
+    if (totalQuestions === 0) return 0;
+    // 小数点以下を切り捨ててパーセントを返す
+    return Math.floor((masteredCount / totalQuestions) * 100);
+}
+
+function renderMenu() {
+    const container = document.getElementById("subject-menu-container");
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    // --- 【追加】科目全体の統計ボタン ---
+    const totalHistoryBtn = document.createElement("div");
+    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
+    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.style.color = "white";
+    totalHistoryBtn.innerHTML = `
+        <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
+        <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
+    `;
+    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
+    container.appendChild(totalHistoryBtn);
+    // ----------------------------------
+
+    SUBJECT_MENU_CONFIG.forEach(item => {
+        if (!item.enabled) return;
+
+        const card = document.createElement("div");
+        card.className = "menu-item-card";
+        const rank = getRankForScope(item.dataKey);
+
+        card.innerHTML = `
+            <div class="menu-item-title">${item.label} <span class="rank-label">${rank}</span></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${calculateScopeProgress(item.dataKey)}%"></div>
+                </div>
+                <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
+            </div>
+        `;
+        
+        card.onclick = () => {
+            // 1. キーを更新
+            currentSubjectKey = item.dataKey;
+            CONFIG.SUBJECT_KEY = item.dataKey;
+            
+            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
+            refreshAppData(); 
+
+            // 3. 画面遷移と描画
+            navigateTo('unit-screen');
+            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
+            updatePageTitle();
+        };
+        container.appendChild(card);
+    });
+}
+
+</script>
+
+</body>
+</html>
