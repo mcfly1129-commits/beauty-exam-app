@@ -259,16 +259,29 @@
         </div>
     </div>
 
-    <!-- 📤 成果報告送信ボタンエリア -->
+<!-- 📤 成果報告送信ボタンエリア -->
     <div class="card" style="text-align: center;">
-        <h3 class="card-title">📤 成果報告『データ一 括送信』</h3>
+        <h3 class="card-title">📤 成果報告『データ一括送信』</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; text-align: left; line-height: 1.4; margin-top: 0;">
             各科目を解いて溜まった蓄積した最新のデータを一括送信します。<br>
             <strong>⚠️ 1回送信すると、その後1週間（7日間）は送信できなくなります。</strong>
         </p>
+        
         <button class="btn-submit" id="submit-data-btn" onclick="executeDataTransmission()">
             📤 成果を報告する
         </button>
+
+        <!-- ⏳ 送信進捗メーター（新規追加） -->
+        <div id="upload-progress-container" style="display: none; margin-top: 15px; background: #eee; border-radius: 8px; height: 20px; overflow: hidden; position: relative;">
+            <div id="upload-progress-bar" style="background: linear-gradient(90deg, #74b9ff, #0984e3); width: 0%; height: 100%; transition: width 0.1s ease;"></div>
+            <span id="upload-progress-text" style="position: absolute; width: 100%; left: 0; top: 0; font-size: 0.75rem; color: #2c3e50; font-weight: bold; line-height: 20px;">現在送信中... 0%</span>
+        </div>
+
+        <!-- 🏆 送信結果・順位・エール表示エリア（新規追加） -->
+        <div id="transmission-result-box" style="display: none; margin-top: 20px; padding: 15px; border-radius: 12px; text-align: left; font-size: 0.9rem; line-height: 1.5;">
+            <!-- ここにJavaScriptから結果が注入されます -->
+        </div>
+
         <div id="lock-timer-msg" style="font-size: 0.8rem; color: var(--accent-red); font-weight: bold; margin-top: 10px; display: none;"></div>
         <div id="history-log-area" style="font-size: 0.72rem; color: #7f8c8d; text-align: left; border-top: 1px dotted #ccc; margin-top: 15px; padding-top: 10px;">
             <strong>📜 送信履歴：</strong><span id="send-history-count">0回</span>
@@ -480,60 +493,146 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
 }
 
 /**
- * 📤 成果報告（データ一 括送信）：全科目個別のデータをGASへ送信する
+ * 📤 成果報告（データ一括送信）：進捗メーター・順位・100人以上判定エール機能搭載版
  */
 function executeDataTransmission() {
     const userEmail = localStorage.getItem('teacher_userEmail');
-    const myData = calculateMyCurrentStats(); // 全科目分のデータ [科目1, 科目2, ...]
+    const myData = calculateMyCurrentStats(); 
     
-    // 画面ロック用のスナップショット計算（従来通りの判定用）
     const avgProgress = Math.round(myData.progress.reduce((a,b)=>a+b, 0) / 10);
     const avgAccuracy = Math.round(myData.accuracy.reduce((a,b)=>a+b, 0) / 10);
 
     const btn = document.getElementById('submit-data-btn');
-    btn.disabled = true;
-    btn.innerText = "⏳ 送信中...";
+    const progressContainer = document.getElementById('upload-progress-container');
+    const progressBar = document.getElementById('upload-progress-bar');
+    const progressText = document.getElementById('upload-progress-text');
+    const resultBox = document.getElementById('transmission-result-box');
 
-    // 🚀 【重要】全科目それぞれの個別データをそのまま含めたオブジェクトを作成
+    // UIの初期化（メーターの表示開始）
+    btn.disabled = true;
+    btn.innerText = "⏳ サーバーと通信を開始...";
+    if (progressContainer) progressContainer.style.display = "block";
+    if (resultBox) resultBox.style.display = "none";
+
+    // 🏎️ メーターを滑らかに疑似アニメーションさせる（0%からスタートして最大95%で待機）
+    let currentPercent = 0;
+    const progressTimer = setInterval(() => {
+        if (currentPercent < 95) {
+            currentPercent += Math.floor(Math.random() * 5) + 2; 
+            if (currentPercent > 95) currentPercent = 95;
+            if (progressBar) progressBar.style.width = currentPercent + "%";
+            if (progressText) progressText.innerText = `⏳ 現在データ送信中... ${currentPercent}%`;
+        }
+    }, 150);
+
     const payload = {
         email: userEmail,
-        // 全科目の進捗率（10個の数値が入った配列）と正答率の配列をそのまま送る
         progressArray: myData.progress, 
         accuracyArray: myData.accuracy
     };
 
-    // 非同期でGAS Webアプリと通信
+    // 🚨 mode: "no-cors" を廃止し、GASからの順位・人数データを正式に受け取る双方向通信
     fetch(GAS_API_URL, {
         method: "POST",
-        mode: "no-cors", // CORSエラーを安全に回避する設定
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "text/plain" }, 
         body: JSON.stringify(payload)
     })
-    .then(() => {
-        // 送信成功時のローカル保存処理
-        localStorage.setItem('dashboard_last_sent_progress', avgProgress);
-        localStorage.setItem('dashboard_last_sent_accuracy', avgAccuracy);
-        
-        // 1週間のロックタイマーをセット
-        const now = new Date().getTime();
-        localStorage.setItem('dashboard_last_send_timestamp', now);
+    .then(response => {
+        if (!response.ok) throw new Error("サーバー通信に失敗しました。");
+        return response.json(); 
+    })
+    .then(res => {
+        // 送信完了時にメーターを100%にする
+        clearInterval(progressTimer);
+        if (progressBar) progressBar.style.width = "100%";
+        if (progressText) progressText.innerText = "🎉 送信完了しました！ 100%";
 
-        // 送信履歴の追記
-        let history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
-        history.push(new Date().toLocaleString('ja-JP'));
-        localStorage.setItem('dashboard_send_history', JSON.stringify(history));
+        if (res.status === "success") {
+            // スナップショットの保存
+            localStorage.setItem('dashboard_last_sent_progress', avgProgress);
+            localStorage.setItem('dashboard_last_sent_accuracy', avgAccuracy);
+            localStorage.setItem('dashboard_last_send_timestamp', new Date().getTime());
 
-        alert("🎉 全科目別の成果報告が正常に完了しました！\nデータが送信され蓄積されました。");
-        
-        // 画面を再リロードして最新のUIに書き換える
-        location.reload();
+            let history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
+            history.push(new Date().toLocaleString('ja-JP'));
+            localStorage.setItem('dashboard_send_history', JSON.stringify(history));
+
+            // 🎯 順位と下位15%の計算・判定
+            const total = res.totalParticipants; // 総参加人数
+            const rank = res.myRank;             // 自分の順位
+            const rankPercent = (rank / total) * 100; // 上位％（例：100人中86位なら86%）
+
+            let messageHtml = "";
+            
+            // 🚨 【設定】100人以上溜まっているかどうかで処理を分岐
+            if (total < 100) {
+                // 👥 100人未満：データ蓄積中のメッセージ
+                messageHtml = `
+                    <div style="background: #74b9ff; color: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 10px rgba(116,185,255,0.3);">
+                        📊 報告完了（現在データ蓄積中：${total} 人参加済）<br><br>
+                        【システムメッセージ】<br>
+                        成果報告の送信に成功しました！精度の高い全国順位を算出するため、現在データを蓄積しています。<br>
+                        参加人数が <strong>100人</strong> に達した段階で、ここにあなたのリアルタイムな全国順位とエールバッジが解放されます。周りの友人にもぜひ声をかけて、みんなでデータを送信してみましょう！
+                    </div>
+                `;
+            } else {
+                // 🏆 100人以上：本格的な順位・下位15%判定モード
+                if (rankPercent > 85) { 
+                    // 🔴 下位15%（合格圏外・注意監視エリア）
+                    messageHtml = `
+                        <div style="background: #ff7675; color: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 10px rgba(255,118,117,0.3);">
+                            🚨 報告完了：現在の順位【第 ${rank} 位 / 総参加者 ${total} 人中】<br><br>
+                            【先生からのエール】<br>
+                            国家試験の合格ライン（目標上位85%）に対して、現在少し遅れをとっています。今が一番の踏ん張りどころです！<br>
+                            間違えた問題が集まる弱点克服モードを毎日繰り返し解いて、1つずつ×を○に変えていきましょう。先生たちもあなたの努力をデータ越しにしっかり見守っています。絶対に諦めずに、ここから一緒に這い上がりましょう！
+                        </div>
+                    `;
+                } else {
+                    // 🟢 上位85%以内（合格圏内エリア）
+                    messageHtml = `
+                        <div style="background: #2ecc71; color: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 10px rgba(46,204,113,0.3);">
+                            🎉 報告完了：現在の順位【第 ${rank} 位 / 総参加者 ${total} 人中】<br><br>
+                            【先生からのエール】<br>
+                            素晴らしい！現在の合格圏内（上位85%以上）をしっかりキープできています。<br>
+                            この調子で日々のクイズを習慣化し、油断することなく、全31範囲の「100%グランドマスター」完全制覇を目指して突き進みましょう！
+                        </div>
+                    `;
+                }
+            }
+
+            // 結果を画面に出力
+            if (resultBox) {
+                resultBox.innerHTML = messageHtml;
+                resultBox.style.display = "block";
+            }
+
+            // 4秒後に自動リロードしてダッシュボード全体を更新
+            setTimeout(() => {
+                location.reload();
+            }, 4000);
+
+        } else {
+            alert("❌ サーバーエラー: " + res.message);
+            resetTransmissionUI(progressTimer);
+        }
     })
     .catch(err => {
-        alert("❌ 通信エラーが発生しました。URL設定を確認してください。");
+        clearInterval(progressTimer);
+        alert("❌ 通信エラーが発生しました。インターネット接続やGASのデプロイ設定を確認してください。");
         console.error(err);
+        resetTransmissionUI(progressTimer);
+    });
+}
+
+function resetTransmissionUI(timer) {
+    clearInterval(timer);
+    const btn = document.getElementById('submit-data-btn');
+    if (btn) {
         btn.disabled = false;
         btn.innerText = "📤 成果を報告する";
-    });
+    }
+    const progressContainer = document.getElementById('upload-progress-container');
+    if (progressContainer) progressContainer.style.display = "none";
 }
 
 /**
