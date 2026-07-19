@@ -191,6 +191,21 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ✨【新規追加】クイズ画面から戻ってきたときや、別タブでデータが動いたときに自動で再計算するセンサー
+window.addEventListener('pageshow', () => {
+    const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
+    if (isLoggedIn === 'true') {
+        initDashboard(); // 画面が表示されたらリアルタイムに再集計して表示を書き換える
+    }
+});
+
+window.addEventListener('storage', (e) => {
+    // LocalStorageのデータ（solved_ や stats_）が書き換わったらその場でグラフを更新
+    if (e.key && (e.key.startsWith('solved_') || e.key.startsWith('beauty_app_'))) {
+        initDashboard();
+    }
+});
+
 // ログイン画面の初期化と表示
 function showLoginScreen() {
     document.getElementById('main-app-screen').style.display = 'none';
