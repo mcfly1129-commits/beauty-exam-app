@@ -261,7 +261,7 @@
 
     <!-- 📤 成果報告送信ボタンエリア -->
     <div class="card" style="text-align: center;">
-        <h3 class="card-title">📤 成果報告『データ一 括送信』</h3>
+        <h3 class="card-title">📤 成果報告『データ 一括送信』</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; text-align: left; line-height: 1.4; margin-top: 0;">
             各科目を解いて<br>蓄積した最新のデータを一括送信します。<br>
             <strong>⚠️ 1回送信すると、<br>その後1週間（7日間）は送信できなくなります。</strong>
@@ -837,7 +837,7 @@ function checkTransmissionLock() {
         const days = Math.floor(remainMs / (24 * 60 * 60 * 1000));
         const hours = Math.floor((remainMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
         
-        msg.innerText = `🔒 ロック中: 次回送信まで<br> あと ${days}日 ${hours}時間 必要です`;
+        msg.innerText = `🔒 ロック中: 次回送信まで\nあと ${days}日 ${hours}時間 必要です`;
     }
 }
 
