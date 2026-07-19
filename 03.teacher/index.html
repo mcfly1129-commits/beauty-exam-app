@@ -72,10 +72,20 @@
             background: #fff9e6; border: 1px solid #ffeaa7; padding: 8px 15px;
             border-radius: 10px; margin-bottom: 15px; font-size: 0.8rem;
         }
-        .btn-logout {
-            background: #ff7675; color: white; border: none; border-radius: 5px;
-            padding: 4px 5px; cursor: pointer; font-size: 0.6rem;
-        }
+.btn-logout {
+    background: #ff7675; 
+    color: white; 
+    border: none; 
+    border-radius: 5px;
+    padding: 6px 10px;        /* 上下の余白を少し調整 */
+    cursor: pointer; 
+    font-size: 0.75rem;       /* 少し大きくして読みやすく */
+    display: flex;            /* 横並びにする */
+    align-items: center;      /* 縦中央揃え */
+    justify-content: center;  /* 横中央揃え */
+    white-space: nowrap;      /* 改行を禁止する */
+    min-width: 70px;          /* 幅を最低限確保して安定させる */
+}
     </style>
 </head>
 <body>
@@ -102,7 +112,7 @@
     <!-- ログイン中のユーザー情報表示領域 -->
     <div class="user-info-bar">
         <span>🔑 検証者: <b id="display-user-email">取得中...</b></span>
-        <button class="btn-logout" onclick="handleLogout()">ログ<br>アウト</button>
+        <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
     </div>
 
     <h1>スキマ時間で最初の一歩<br>『学習ホーム (検証版)』</h1>
