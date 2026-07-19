@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>総合成長ダッシュボード</title>
+    <title>成長ダッシュボード</title>
     <!-- 📊 レーダーチャート描画用の標準ライブラリ (Chart.js) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -201,7 +201,7 @@
 
     <!-- 📊 グラフA：努力の可視化（進捗度） -->
     <div class="card">
-        <h3 class="card-title">📊 全科目 進捗度比較『努力の可視化』</h3>
+        <h3 class="card-title">📊 進捗度比較『努力の可視化』</h3>
         <div class="chart-box">
             <canvas id="progressChart"></canvas>
         </div>
@@ -212,7 +212,7 @@
 
     <!-- 📊 グラフB：実力の可視化（正答率） -->
     <div class="card">
-        <h3 class="card-title">🎯 全科目 正答率比較『実力の可視化』</h3>
+        <h3 class="card-title">🎯 正答率比較『実力の可視化』</h3>
         <div class="chart-box">
             <canvas id="accuracyChart"></canvas>
         </div>
@@ -246,7 +246,7 @@
         <h3 class="card-title">🔥 全国トップ・優秀クラス</h3>
         
         <div style="margin-bottom: 15px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 全国総合正答率トップ5(個人)</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 全国 総合正答率 トップ5（個人）</div>
             <ol class="rank-list" id="rank-progress-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ol>
@@ -254,7 +254,7 @@
         </div>
 
         <div>
-            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">🏫 現在の優秀クラス（進捗中央値）</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">🏫 現在の優秀クラス（進捗中央値で比較）</div>
             <ul class="rank-list" id="rank-class-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ul>
