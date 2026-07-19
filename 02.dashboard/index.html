@@ -243,10 +243,10 @@
 
     <!-- 🏆 上位ランカーボード -->
     <div class="card">
-        <h3 class="card-title">🔥 全国トップクラス・優秀クラス</h3>
+        <h3 class="card-title">🔥 全国トップ・優秀クラス</h3>
         
         <div style="margin-bottom: 15px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 全国総合正答率トップ5</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 全国総合正答率トップ5(個人)</div>
             <ol class="rank-list" id="rank-progress-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ol>
@@ -254,7 +254,7 @@
         </div>
 
         <div>
-            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">🏫 今週の優秀クラス対抗（進捗中央値）</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-color); margin-bottom: 5px;">🏫 現在の優秀クラス（進捗中央値）</div>
             <ul class="rank-list" id="rank-class-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ul>
@@ -431,7 +431,7 @@ function handleDashboardData(data) {
     progList.innerHTML = "";
     if (data.ranking && data.ranking.progress_top5 && data.ranking.progress_top5.length > 0) {
         data.ranking.progress_top5.forEach((r, idx) => {
-            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${r.school} ${r.className} (匿名)</span> <strong>${r.value}%</strong></li>`;
+            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${r.school} ${r.className} (個人)</span> <strong>${r.value}%</strong></li>`;
         });
     } else {
         progList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">現在ランキング対象者がいません</span></li>`;
