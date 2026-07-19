@@ -406,6 +406,7 @@
 
     </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -531,6 +532,43 @@
 </div>
 
 <script>
+// ==========================================
+// 🔒 【追加】検証エリア専用：認証ガード ＆ データ蓄積ロジック
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    // ページ読み込み時に先生のログイン状態をチェック
+    const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
+    const userEmail = localStorage.getItem('teacher_userEmail');
+
+    // もし未ログイン、または許可アドレス情報がなければ強制送還
+    if (isLoggedIn !== 'true' || !userEmail) {
+        alert("🔒 アクセス権限がありません。ログインしてください。");
+        // 2つ上の階層（03.teacher/index.html）へ強制リダイレクト
+        window.location.href = "../../index.html"; 
+        return;
+    }
+    console.log("🔓 認証成功: " + userEmail + " としてクイズ検証中");
+});
+
+// ローカルに回答結果を「溜める」共通関数
+function saveQuizResultToLocal(questionId, isCorrect) {
+    const userEmail = localStorage.getItem('teacher_userEmail');
+    if (!userEmail) return;
+
+    const storageKey = "beauty_app_unsent_data";
+    let unsentData = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    const newRecord = {
+        email: userEmail,
+        question_id: questionId,
+        is_correct: isCorrect,
+        answered_at: new Date().toLocaleString('ja-JP')
+    };
+
+    unsentData.push(newRecord);
+    localStorage.setItem(storageKey, JSON.stringify(unsentData));
+    console.log("📝 データをローカルに蓄積しました（未送信）:", newRecord);
+}
 
 // ==========================================
 // 【Part01】全体の共通定数定義 (セーブキー衝突防止)
@@ -1236,6 +1274,8 @@ function showQuestion() {
 function submitAnswer(userAns) {
     const currentQ = currentQuestions[currentQuestionIndex];
     const isCorrect = (userAns === currentQ.answer);
+// ✨【連動カスタム】クイズ回答判定の瞬間に、ローカル蓄積関数を発動
+    saveQuizResultToLocal(currentQ.id, isCorrect);
 
     if (isCorrect && !isDailyMode) {
         // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
