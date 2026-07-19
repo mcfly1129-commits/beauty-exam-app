@@ -185,6 +185,13 @@
         <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
     </div>
 
+<!-- 👑 自分のグランドマスター達成数（新規追加） -->
+    <div class="gm-counter" style="background: linear-gradient(135deg, #ff9f43, #ff6b6b); margin-bottom: 20px;">
+        <div style="font-size: 0.85rem; font-weight: bold; letter-spacing: 1px;">🏆 あなたの『グランドマスター』達成科目数</div>
+        <div class="gm-number" id="my-grandmaster-count" style="color: #ffffff;">0 / 10</div>
+        <div style="font-size: 0.65rem; opacity: 0.9;">※進捗度100%かつ正答率100%を達成した科目数</div>
+    </div>
+
     <!-- 👑 グランドマスター輩出数カウンター -->
     <div class="gm-counter">
         <div style="font-size: 0.85rem; font-weight: bold; letter-spacing: 1px;">🌌 全校『グランドマスター』通算輩出数</div>
@@ -317,6 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. ローカルデータの集計
     const myData = calculateMyCurrentStats();
 
+    // 👑 自分のグランドマスター数を計算して表示（新規追加）
+    updateMyGrandMasterCount();
+
     // 2. 送信制限タイマーのチェックとUI反映
     checkTransmissionLock();
     renderSendHistory();
@@ -404,7 +414,7 @@ function handleDashboardData(data) {
     progList.innerHTML = "";
     if (data.ranking && data.ranking.progress_top5 && data.ranking.progress_top5.length > 0) {
         data.ranking.progress_top5.forEach((r, idx) => {
-            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${r.school} ${r.className} (匿名メンバー)</span> <strong>${r.value}%</strong></li>`;
+            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${r.school} ${r.className} (匿名)</span> <strong>${r.value}%</strong></li>`;
         });
     } else {
         progList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">現在ランキング対象者がいません</span></li>`;
@@ -583,6 +593,47 @@ function handleLogout() {
     localStorage.removeItem('teacher_userEmail');
     location.reload();
 }
+
+/**
+ * 👑 自分の10科目の進捗をリアルタイム走査し、グランドマスター達成数を画面に反映する
+ */
+function updateMyGrandMasterCount() {
+    let gmAchievedCount = 0;
+
+    DASHBOARD_SUBJECTS.forEach(sub => {
+        // 1. 進捗度の計算
+        let subSolved = 0;
+        sub.keys.forEach(key => {
+            subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
+        });
+        let progPercent = sub.total > 0 ? Math.floor((subSolved / sub.total) * 100) : 0;
+        if (progPercent > 100) progPercent = 100;
+
+        // 2. 正答率の計算
+        let totalAns = 0;
+        let totalCorrect = 0;
+        sub.keys.forEach(key => {
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+            Object.keys(stats).forEach(qId => {
+                totalAns += (stats[qId].total || 0);
+                totalCorrect += (stats[qId].correct_count || 0);
+            });
+        });
+        let accPercent = totalAns > 0 ? Math.floor((totalCorrect / totalAns) * 100) : 0;
+
+        // 3. 進捗100% かつ 正答率100% ならカウントアップ
+        if (progPercent >= 100 && accPercent >= 100) {
+            gmAchievedCount++;
+        }
+    });
+
+    // 4. 画面のHTML要素に数値を反映
+    const el = document.getElementById('my-grandmaster-count');
+    if (el) {
+        el.innerText = `${gmAchievedCount} / 10`;
+    }
+}
+
 </script>
 
 </body>
