@@ -481,13 +481,13 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
 }
 
 /**
- * 📤 成果報告（データ一括送信）をGASへ実行する関数
+ * 📤 成果報告（データ一括送信）：10科目個別のデータをGASへ送信する
  */
 function executeDataTransmission() {
     const userEmail = localStorage.getItem('teacher_userEmail');
-    const myData = calculateMyCurrentStats();
+    const myData = calculateMyCurrentStats(); // 10科目分のデータ [科目1, 科目2, ...]
     
-    // 10科目の平均値を算出
+    // 画面ロック用のスナップショット計算（従来通りの判定用）
     const avgProgress = Math.round(myData.progress.reduce((a,b)=>a+b, 0) / 10);
     const avgAccuracy = Math.round(myData.accuracy.reduce((a,b)=>a+b, 0) / 10);
 
@@ -495,11 +495,12 @@ function executeDataTransmission() {
     btn.disabled = true;
     btn.innerText = "⏳ 送信中...";
 
-    // GASへポストするデータ構造
+    // 🚀 【重要】10科目それぞれの個別データをそのまま含めたオブジェクトを作成
     const payload = {
         email: userEmail,
-        progress: avgProgress,
-        accuracy: avgAccuracy
+        // 10科目の進捗率（10個の数値が入った配列）と正答率の配列をそのまま送る
+        progressArray: myData.progress, 
+        accuracyArray: myData.accuracy
     };
 
     // 非同期でGAS Webアプリと通信
@@ -510,7 +511,7 @@ function executeDataTransmission() {
         body: JSON.stringify(payload)
     })
     .then(() => {
-        // 送信成功時のローカル保存処理（前回の自分スナップショット）
+        // 送信成功時のローカル保存処理
         localStorage.setItem('dashboard_last_sent_progress', avgProgress);
         localStorage.setItem('dashboard_last_sent_accuracy', avgAccuracy);
         
@@ -523,7 +524,7 @@ function executeDataTransmission() {
         history.push(new Date().toLocaleString('ja-JP'));
         localStorage.setItem('dashboard_send_history', JSON.stringify(history));
 
-        alert("🎉 成果報告が正常に完了しました！\nデータが送信され蓄積されました。");
+        alert("🎉 10科目別の成果報告が正常に完了しました！\nデータが送信され蓄積されました。");
         
         // 画面を再リロードして最新のUIに書き換える
         location.reload();
@@ -532,7 +533,7 @@ function executeDataTransmission() {
         alert("❌ 通信エラーが発生しました。URL設定を確認してください。");
         console.error(err);
         btn.disabled = false;
-        btn.innerText = "📤 成果を先生へ報告する";
+        btn.innerText = "📤 成果を報告する";
     });
 }
 
