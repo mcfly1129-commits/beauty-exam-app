@@ -431,12 +431,9 @@ function handleDashboardData(data) {
         classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...</span></li>`;
     }
 
-    // 4. 中央値データの抽出と10科目グラフへの展開
-    const medianProgressVal = data.median ? data.median.progress : 0;
-    const medianAccuracyVal = data.median ? data.median.accuracy : 0;
-    
-    const globalMedianProgress = Array(10).fill(medianProgressVal);
-    const globalMedianAccuracy = Array(10).fill(medianAccuracyVal);
+// 4. 中央値データの抽出と10科目グラフへの展開（10個の配列データをそのまま採用）
+    const globalMedianProgress = (data.median && Array.isArray(data.median.progress)) ? data.median.progress : Array(10).fill(0);
+    const globalMedianAccuracy = (data.median && Array.isArray(data.median.accuracy)) ? data.median.accuracy : Array(10).fill(0);
 
     // 現在の自分のリアルタイムデータを再計算してグラフをドロー
     const myData = calculateMyCurrentStats();
