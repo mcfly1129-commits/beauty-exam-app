@@ -343,12 +343,14 @@ function calculateMyCurrentStats() {
     let accuracyData = [];
 
     DASHBOARD_SUBJECTS.forEach(sub => {
-        // 進捗度の計算 (solved_xxx の合算)
-        let subSolved = 0;
+// 進捗度の計算 (すでに％で入っている数値を範囲の個数で平均化する)
+        let totalPercentSum = 0;
         sub.keys.forEach(key => {
-            subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
+            // solved_xxx には 0〜100 の進捗率が直接入っているためそのまま加算
+            totalPercentSum += parseInt(localStorage.getItem('solved_' + key) || 0);
         });
-        let progPercent = sub.total > 0 ? Math.floor((subSolved / sub.total) * 100) : 0;
+        // 範囲の個数（3つ、または香粧品の4つ）で割って科目の平均進捗率を出す
+        let progPercent = sub.keys.length > 0 ? Math.round(totalPercentSum / sub.keys.length) : 0;
         if (progPercent > 100) progPercent = 100;
         progressData.push(progPercent);
 
