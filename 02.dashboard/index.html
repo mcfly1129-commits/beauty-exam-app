@@ -201,7 +201,7 @@
 
     <!-- 📊 グラフA：努力の視覚化（進捗度） -->
     <div class="card">
-        <h3 class="card-title">📊 10科目 進捗度比較『努力の視覚化』</h3>
+        <h3 class="card-title">📊 全科目 進捗度比較『努力の視覚化』</h3>
         <div class="chart-box">
             <canvas id="progressChart"></canvas>
         </div>
@@ -212,7 +212,7 @@
 
     <!-- 📊 グラフB：実力の視覚化（正答率） -->
     <div class="card">
-        <h3 class="card-title">🎯 10科目 正答率比較『実力の視覚化』</h3>
+        <h3 class="card-title">🎯 全科目 正答率比較『実力の視覚化』</h3>
         <div class="chart-box">
             <canvas id="accuracyChart"></canvas>
         </div>
@@ -289,7 +289,7 @@
 // ★先ほどデプロイしてコピーしたURLをここに貼り付けてください
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
 
-// 10科目の定義（各クイズ画面の保存キーと完全一致）
+// 全科目の定義（各クイズ画面の保存キーと完全一致）
 const DASHBOARD_SUBJECTS = [
     { id: '01', name: '関係法規・制度', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'], total: 290 },
     { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'], total: 122 },
@@ -336,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * 📊 自分の現在の10科目の進捗度と正答率をLocalStorageから計算する
+ * 📊 自分の現在の全科目の進捗度と正答率をLocalStorageから計算する
  */
 function calculateMyCurrentStats() {
     let progressData = [];
@@ -431,7 +431,7 @@ function handleDashboardData(data) {
         classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...</span></li>`;
     }
 
-// 4. 中央値データの抽出と10科目グラフへの展開（10個の配列データをそのまま採用）
+// 4. 中央値データの抽出と全科目グラフへの展開（10個の配列データをそのまま採用）
     const globalMedianProgress = (data.median && Array.isArray(data.median.progress)) ? data.median.progress : Array(10).fill(0);
     const globalMedianAccuracy = (data.median && Array.isArray(data.median.accuracy)) ? data.median.accuracy : Array(10).fill(0);
 
@@ -478,11 +478,11 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
 }
 
 /**
- * 📤 成果報告（データ一括送信）：10科目個別のデータをGASへ送信する
+ * 📤 成果報告（データ一括送信）：全科目個別のデータをGASへ送信する
  */
 function executeDataTransmission() {
     const userEmail = localStorage.getItem('teacher_userEmail');
-    const myData = calculateMyCurrentStats(); // 10科目分のデータ [科目1, 科目2, ...]
+    const myData = calculateMyCurrentStats(); // 全科目分のデータ [科目1, 科目2, ...]
     
     // 画面ロック用のスナップショット計算（従来通りの判定用）
     const avgProgress = Math.round(myData.progress.reduce((a,b)=>a+b, 0) / 10);
@@ -492,10 +492,10 @@ function executeDataTransmission() {
     btn.disabled = true;
     btn.innerText = "⏳ 送信中...";
 
-    // 🚀 【重要】10科目それぞれの個別データをそのまま含めたオブジェクトを作成
+    // 🚀 【重要】全科目それぞれの個別データをそのまま含めたオブジェクトを作成
     const payload = {
         email: userEmail,
-        // 10科目の進捗率（10個の数値が入った配列）と正答率の配列をそのまま送る
+        // 全科目の進捗率（10個の数値が入った配列）と正答率の配列をそのまま送る
         progressArray: myData.progress, 
         accuracyArray: myData.accuracy
     };
@@ -521,7 +521,7 @@ function executeDataTransmission() {
         history.push(new Date().toLocaleString('ja-JP'));
         localStorage.setItem('dashboard_send_history', JSON.stringify(history));
 
-        alert("🎉 10科目別の成果報告が正常に完了しました！\nデータが送信され蓄積されました。");
+        alert("🎉 全科目別の成果報告が正常に完了しました！\nデータが送信され蓄積されました。");
         
         // 画面を再リロードして最新のUIに書き換える
         location.reload();
