@@ -44,14 +44,20 @@
             margin-bottom: 20px;
             font-weight: bold;
         }
-        .btn-logout {
-            background: var(--accent-red);
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+.btn-logout {
+    background: #ff7675; 
+    color: white; 
+    border: none; 
+    border-radius: 5px;
+    padding: 6px 10px;        /* 上下の余白を少し調整 */
+    cursor: pointer; 
+    font-size: 0.75rem;       /* 少し大きくして読みやすく */
+    display: flex;            /* 横並びにする */
+    align-items: center;      /* 縦中央揃え */
+    justify-content: center;  /* 横中央揃え */
+    white-space: nowrap;      /* 改行を禁止する */
+    min-width: 70px;          /* 幅を最低限確保して安定させる */
+}
         
         /* 📦 カード共通スタイル */
         .card {
@@ -182,7 +188,7 @@
     <!-- 🔑 ログイン・認証情報表示領域 -->
     <div class="user-info">
         <span>🔑 ログイン中: <span id="display-email">...</span></span>
-        <button class="btn-logout" onclick="handleLogout()">ログ<br>アウト</button>
+        <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
     </div>
 
 <!-- 👑 自分のグランドマスター達成数 -->
