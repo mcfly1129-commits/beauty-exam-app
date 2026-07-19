@@ -385,12 +385,51 @@ function fetchGlobalDashboardData(myData) {
         document.getElementById('growth-accuracy').innerHTML = `<span class="value-zero">未報告</span>`;
     }
 
-    // デフォルトの「全体中央値」の初期値（データがまだ無い時のフォールバック用）
-    let globalMedianProgress = [10, 15, 20, 10, 5, 0, 0, 0, 0, 0];
-    let globalMedianAccuracy = [50, 45, 60, 40, 30, 0, 0, 0, 0, 0];
+    // 🚀 【本物連動】JSONP通信を使ってGASからdashboard_outputシートのデータを取得
+    const script = document.createElement('script');
+    script.src = `${GAS_API_URL}?callback=handleDashboardData&_=${new Date().getTime()}`;
+    document.body.appendChild(script);
+}
 
-    // 🚀 本番時はここで「別エンドポイント」または「doGet」からJSONを引っ張る設計にします。
-    // 今回は安全のため、初期描画とダッシュボード用のグラフを構築します。
+/**
+ * 📥 GASから受け取った本物の統計データを画面の全要素へマッピングするコールバック関数
+ */
+function handleDashboardData(data) {
+    // 1. 全校グランドマスター通算輩出数の反映
+    const gmCount = data.global_metrics ? data.global_metrics.grand_master_count : 0;
+    document.getElementById('gm-total-count').innerText = `${gmCount} 回`;
+
+    // 2. 個人ランキングトップ5の反映
+    const progList = document.getElementById('rank-progress-list');
+    progList.innerHTML = "";
+    if (data.ranking && data.ranking.progress_top5 && data.ranking.progress_top5.length > 0) {
+        data.ranking.progress_top5.forEach((r, idx) => {
+            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${r.school} ${r.className} (匿名メンバー)</span> <strong>${r.value}%</strong></li>`;
+        });
+    } else {
+        progList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">現在ランキング対象者がいません</span></li>`;
+    }
+
+    // 3. 優秀クラス対抗の反映
+    const classList = document.getElementById('rank-class-list');
+    classList.innerHTML = "";
+    if (data.class_ranking && data.class_ranking.top_classes && data.class_ranking.top_classes.length > 0) {
+        data.class_ranking.top_classes.forEach((c, idx) => {
+            classList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span>${c.name}</span> <strong>${c.value}%</strong></li>`;
+        });
+    } else {
+        classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...</span></li>`;
+    }
+
+    // 4. 中央値データの抽出と10科目グラフへの展開
+    const medianProgressVal = data.median ? data.median.progress : 0;
+    const medianAccuracyVal = data.median ? data.median.accuracy : 0;
+    
+    const globalMedianProgress = Array(10).fill(medianProgressVal);
+    const globalMedianAccuracy = Array(10).fill(medianAccuracyVal);
+
+    // 現在の自分のリアルタイムデータを再計算してグラフをドロー
+    const myData = calculateMyCurrentStats();
     renderRadarCharts(myData.progress, globalMedianProgress, myData.accuracy, globalMedianAccuracy);
 }
 
