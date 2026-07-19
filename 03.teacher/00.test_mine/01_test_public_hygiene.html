@@ -544,7 +544,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (isLoggedIn !== 'true' || !userEmail) {
         alert("🔒 アクセス権限がありません。ログインしてください。");
         // 2つ上の階層（03.teacher/index.html）へ強制リダイレクト
-        window.location.href = "../../index.html"; 
+        window.location.href = "../index.html"; // ここを修正！
         return;
     }
     console.log("🔓 認証成功: " + userEmail + " としてクイズ検証中");
