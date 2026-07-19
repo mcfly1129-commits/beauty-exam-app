@@ -837,7 +837,7 @@ function checkTransmissionLock() {
         const days = Math.floor(remainMs / (24 * 60 * 60 * 1000));
         const hours = Math.floor((remainMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
         
-        msg.innerText = `🔒 ロック中: 次回送信まで\nあと ${days}日 ${hours}時間 必要です`;
+        msg.innerText = `🔒 ロック中: 次回送信まであと ${days}日 ${hours}時間 必要です`;
     }
 }
 
