@@ -502,7 +502,7 @@ function checkTransmissionLock() {
     const timePassed = now - parseInt(lastSubTime);
 
     if (timePassed < oneWeekMs) {
-        btn.disabled = true;
+        // btn.disabled = true;// 👈 ここが報告ボタンを固めている 修正はここ
         msg.style.display = "block";
         
         // 残り時間のカウントダウン計算
