@@ -412,10 +412,25 @@ function fetchGlobalDashboardData(myData) {
         document.getElementById('growth-accuracy').innerHTML = `<span class="value-zero">未報告</span>`;
     }
 
-    // 🚀 【本物連動】JSONP通信を使ってGASからdashboard_outputシートのデータを取得
-    const script = document.createElement('script');
-    script.src = `${GAS_API_URL}?callback=handleDashboardData&_=${new Date().getTime()}`;
-    document.body.appendChild(script);
+// 🚀 iPhoneのブロックを回避するため、fetch通信でGASからデータを安全に取得する
+    fetch(GAS_API_URL + "?action=getDashboard", {
+        method: "GET"
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("データの取得に失敗しました。");
+        return response.json();
+    })
+    .then(data => {
+        // 無事にデータが届いたら、既存の描画ロジックへそのまま流し込む
+        handleDashboardData(data);
+    })
+    .catch(err => {
+        console.error("ユーザーデータ取得エラー:", err);
+        // 通信エラー時のセーフティとして、グラフの枠だけは自分のデータで描画しておく
+        const globalMedianProgress = Array(10).fill(0);
+        const globalMedianAccuracy = Array(10).fill(0);
+        renderRadarCharts(myData.progress, globalMedianProgress, myData.accuracy, globalMedianAccuracy);
+    });
 }
 
 /**
