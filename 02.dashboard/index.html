@@ -244,7 +244,7 @@
         <h3 class="card-title">🔥 全国トップクラス・優秀クラス</h3>
         
         <div style="margin-bottom: 15px;">
-            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 進捗度トップ5</div>
+            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 5px;">👑 全国総合正答率トップ5</div>
             <ol class="rank-list" id="rank-progress-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ol>
@@ -572,7 +572,7 @@ function executeDataTransmission() {
                         📊 報告完了（現在データ蓄積中：${total} 人参加済）<br><br>
                         【システムメッセージ】<br>
                         成果報告の送信に成功しました！精度の高い全国順位を算出するため、現在データを蓄積しています。<br>
-                        参加人数が <strong>100人</strong> に達した段階で、ここにあなたのリアルタイムな全国順位とエールバッジが解放されます。周りの友人にもぜひ声をかけて、みんなでデータを送信してみましょう！
+                        参加人数が <strong>100人</strong> に達した段階で、ここにあなたのリアルタイムな全国順位とエールバッジが解放されます。周りの友人にもぜひ声をかけて、みんなでデータを送信してみましょう！(今後15秒後にページが再取得されデータが更新されます。)
                     </div>
                 `;
             } else {
@@ -584,7 +584,7 @@ function executeDataTransmission() {
                             🚨 報告完了：現在の順位【第 ${rank} 位 / 総参加者 ${total} 人中】<br><br>
                             【先生からのエール】<br>
                             国家試験の合格ライン（目標上位85%）に対して、現在少し遅れをとっています。今が一番の踏ん張りどころです！<br>
-                            間違えた問題が集まる弱点克服モードを毎日繰り返し解いて、1つずつ×を○に変えていきましょう。先生たちもあなたの努力をデータ越しにしっかり見守っています。絶対に諦めずに、ここから一緒に這い上がりましょう！
+                            毎日繰り返し解いて、1つずつ知識を暗記し正答率をあげていきましょう。先生たちもあなたの努力をデータ越しにしっかり見守っています。絶対に諦めずに、ここから一緒に這い上がりましょう！
                         </div>
                     `;
                 } else {
@@ -593,8 +593,8 @@ function executeDataTransmission() {
                         <div style="background: #2ecc71; color: white; padding: 15px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 10px rgba(46,204,113,0.3);">
                             🎉 報告完了：現在の順位【第 ${rank} 位 / 総参加者 ${total} 人中】<br><br>
                             【先生からのエール】<br>
-                            素晴らしい！現在の合格圏内（上位85%以上）をしっかりキープできています。<br>
-                            この調子で日々のクイズを習慣化し、油断することなく、全31範囲の「100%グランドマスター」完全制覇を目指して突き進みましょう！
+                            素晴らしい！現在の合格圏内（上位85%以上）をキープできています。<br>
+                            この調子で日々の学習を習慣化し、油断することなく、全31範囲の「100%グランドマスター」完全制覇を目指して突き進みましょう！
                         </div>
                     `;
                 }
@@ -606,10 +606,10 @@ function executeDataTransmission() {
                 resultBox.style.display = "block";
             }
 
-            // 4秒後に自動リロードしてダッシュボード全体を更新
+            // 15秒後に自動リロードしてダッシュボード全体を更新
             setTimeout(() => {
                 location.reload();
-            }, 4000);
+            }, 15000);
 
         } else {
             alert("❌ サーバーエラー: " + res.message);
