@@ -199,9 +199,9 @@
         <div style="font-size: 0.65rem; opacity: 0.8;">※進捗・正答率が共に100%を達成した猛者が<br>現在どのくらいいるかを示しています</div>
     </div>
 
-    <!-- 📊 グラフA：努力の視覚化（進捗度） -->
+    <!-- 📊 グラフA：努力の可視化（進捗度） -->
     <div class="card">
-        <h3 class="card-title">📊 全科目 進捗度比較『努力の視覚化』</h3>
+        <h3 class="card-title">📊 全科目 進捗度比較『努力の可視化』</h3>
         <div class="chart-box">
             <canvas id="progressChart"></canvas>
         </div>
@@ -210,9 +210,9 @@
         </p>
     </div>
 
-    <!-- 📊 グラフB：実力の視覚化（正答率） -->
+    <!-- 📊 グラフB：実力の可視化（正答率） -->
     <div class="card">
-        <h3 class="card-title">🎯 全科目 正答率比較『実力の視覚化』</h3>
+        <h3 class="card-title">🎯 全科目 正答率比較『実力の可視化』</h3>
         <div class="chart-box">
             <canvas id="accuracyChart"></canvas>
         </div>
@@ -263,10 +263,10 @@
 
 <!-- 📤 成果報告送信ボタンエリア -->
     <div class="card" style="text-align: center;">
-        <h3 class="card-title">📤 成果報告『データ一括送信』</h3>
+        <h3 class="card-title">📤 成果報告『データ 一括送信』</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; text-align: left; line-height: 1.4; margin-top: 0;">
             各科目を解いて蓄積したデータを一括送信します。<br>
-            <strong>⚠️ 1回送信すると、<br>その後1週間（7日間）は送信できなくなります。</strong>
+            <strong>⚠️ 1回送信すると、<br>   その後1週間（7日間）は送信できなくなります。</strong>
         </p>
         
         <button class="btn-submit" id="submit-data-btn" onclick="executeDataTransmission()">
@@ -660,7 +660,9 @@ function checkTransmissionLock() {
         const days = Math.floor(remainMs / (24 * 60 * 60 * 1000));
         const hours = Math.floor((remainMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
         
-        msg.innerText = `🔒 ロック中: 次回送信まで あと<br> ${days}日 ${hours}時間 必要です<br>(※現在、検証用のため報告制限を解除しています)`;
+        msg.innerText = `🔒 ロック中: 次回送信まで
+   あと ${days}日 ${hours}時間 必要です
+   (※現在、検証用のため報告制限を解除しています)`;
     }
 }
 
