@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>【教員テスト用】学習ホーム</title>
+    <title>【教員検証用】学習ホーム</title>
     <!-- Google Identity Services ライブラリの読み込み -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -83,9 +83,9 @@
 <!-- 🔒 非ログイン時に表示される画面 -->
 <div id="login-screen" class="container" style="display: none;">
     <div class="login-box">
-        <h2 style="color: #d35400; font-size: 1.2rem; margin-top: 0;">🔒 教員テスト環境ログイン</h2>
+        <h2 style="color: #d35400; font-size: 1.2rem; margin-top: 0;">🔒 教員検証環境ログイン</h2>
         <p style="font-size: 0.85rem; color: #7f8c8d; line-height: 1.6; margin-bottom: 25px;">
-            このエリアは新問題のテスト用スペースです。<br>
+            このエリアは新問題の検証用スペースです。<br>
             許可されたGmailアカウントでのサインインが必要です。
         </p>
         <!-- Google公式ログインボタンの設置先 -->
@@ -101,11 +101,11 @@
     
     <!-- ログイン中のユーザー情報表示領域 -->
     <div class="user-info-bar">
-        <span>🔑 テスト者: <b id="display-user-email">取得中...</b></span>
+        <span>🔑 検証者: <b id="display-user-email">取得中...</b></span>
         <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
     </div>
 
-    <h1>スキマ時間で最初の一歩<br>『学習ホーム (テスト版)』</h1>
+    <h1>スキマ時間で最初の一歩<br>『学習ホーム (検証版)』</h1>
     <p class="subtitle">最短で基礎固め。<br>○✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
         
     <div class="dashboard-monitor">
@@ -167,7 +167,7 @@ const GOOGLE_CLIENT_ID = "285598257375-qkvp6gjjr0h7k2uqkdo8iclmveh2omor.apps.goo
 // ★設定：許可する個人Gmailアドレスのホワイトリスト
 const ALLOWED_EMAILS = [
     "mcfly1129@gmail.com",       // あなたのアドレスに書き換え// ここを修正！
-    "teacher-sample@gmail.com"    // テストを依頼する先生のアドレスに書き換え// ここを修正！
+    "teacher-sample@gmail.com"    // 検証を依頼する先生のアドレスに書き換え// ここを修正！
 ];
 
 // 画面読み込み時の認証判定
