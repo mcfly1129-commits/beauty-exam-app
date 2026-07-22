@@ -443,11 +443,31 @@
 
             <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
         </footer>
+
+<!-- 📄 オープンソース・ライセンス情報（修正版：被り解消） -->
+<div style="text-align: center; margin-top: 10px; margin-bottom: 20px; font-size: 0.75rem; color: #7f8c8d;">
+    <a href="#" onclick="document.getElementById('license-modal-quiz').style.display='flex'; return false;" style="color: #7f8c8d; text-decoration: underline;">📄 オープンソース・ライセンス情報</a>
+</div>
+
+        <!-- 📄 ライセンス表記モーダル構造（新規追加） -->
+        <div id="license-modal-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;" onclick="this.style.display='none'">
+            <div style="background: white; padding: 20px; border-radius: 16px; width: 90%; max-width: 400px; text-align: left; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" onclick="event.stopPropagation()">
+                <h3 style="font-size: 1.1rem; font-weight: bold; color: #fab1a0; text-align: center; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #fab1a0; padding-bottom: 5px;">サードパーティ・ライセンス表記</h3>
+                <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0;">
+                    <p style="margin-top:0;">本画面では、演出（紙吹雪等）のために以下のライブラリを使用しています。</p>
+                    <hr style="border: 0; border-top: 1px dashed #fab1a0; margin: 10px 0;">
+                    <p style="margin: 5px 0;"><strong>canvas-confetti</strong><br>
+                    Copyright (c) 2020, Kiril Vatev<br>
+                    Released under the MIT License</p>
+                </div>
+                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;" onclick="document.getElementById('license-modal-quiz').style.display='none'">閉じる</button>
+            </div>
+        </div>
+
     </div>
 
     <div id="unit-screen" class="screen">
-        <h1 id="page-title">単元別の問題</h1>
-        
+        <h1 id="page-title">単元別の問題</h1>        
         <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
         
         <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
