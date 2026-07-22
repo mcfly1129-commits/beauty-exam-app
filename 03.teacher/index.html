@@ -268,7 +268,7 @@ function showAppScreen(email) {
 // Googleから認証データが返ってきたときのコールバック
 function handleCredentialResponse(response) {
     // ボタン押下直後に案内メッセージを表示
-    showError("⏳ 学校の名簿（ライセンス）を照合中... <br>しばらくお待ちください。");
+    showError("⏳ 学校の名簿（ライセンス）を照合中... \nしばらくお待ちください。");
 
     try {
         const idToken = response.credential;
