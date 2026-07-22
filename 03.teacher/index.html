@@ -175,22 +175,25 @@
 
 <script>
 // ==========================================
-// 🔒 認証制御用スクリプト（ホワイトリスト完全外部化版）
+// 🔒 認証制御用スクリプト（初回のみGAS照合＆ライセンスガード版）
 // ==========================================
 
 // ★設定：ここに取得したクライアントIDを貼り付けてください
 const GOOGLE_CLIENT_ID = "285598257375-qkvp6gjjr0h7k2uqkdo8iclmveh2omor.apps.googleusercontent.com";
+
+// ★設定：Google Apps Script (GAS) のWebアプリURL
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
 
 // 画面読み込み時の認証判定
 window.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
     const savedEmail = localStorage.getItem('teacher_userEmail');
 
-    // ログイン済み情報があればそのままメイン画面を表示
+    // 2回目以降：認証済みフラグがあれば通信なしで即座にメイン画面を表示
     if (isLoggedIn === 'true' && savedEmail) {
         showAppScreen(savedEmail);
     } else {
-        // 未ログインならログイン画面を表示
+        // 未認証ならログイン画面を表示
         showLoginScreen();
     }
 });
@@ -242,25 +245,38 @@ function showAppScreen(email) {
 
 // Googleから認証データが返ってきたときのコールバック
 function handleCredentialResponse(response) {
+    // ボタン押下直後に案内メッセージを表示
+    showError("⏳ 学校名簿（ライセンス）を照合中... しばらくお待ちください。");
+
     try {
-        // JWTトークンを簡易デコードして表示用メールアドレスを抽出
-        const base64Url = response.credential.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
+        const idToken = response.credential;
 
-        const payload = JSON.parse(jsonPayload);
-        const userEmail = payload.email;
-
-        // 【セキュリティ改修】フロント側でのホワイトリスト判定を全撤去
-        // Googleで正常にサインインできたらトークンとフラグを保持して画面を開く
-        localStorage.setItem('teacher_google_id_token', response.credential);
-        localStorage.setItem('teacher_isLoggedIn', 'true');
-        localStorage.setItem('teacher_userEmail', userEmail);
-        document.getElementById('login-error-msg').style.display = 'none';
-        
-        showAppScreen(userEmail);
+        // 【新規追加】初回1回のみGASへ名簿照合の問い合わせを実施
+        fetch(GAS_API_URL + "?action=checkAuth&idToken=" + encodeURIComponent(idToken), {
+            method: "GET"
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("サーバー通信エラー");
+            return res.json();
+        })
+        .then(data => {
+            if (data.isAuthorized) {
+                // ⭕ ホワイトリスト登録済み：認証フラグを保存して画面を開く
+                localStorage.setItem('teacher_google_id_token', idToken);
+                localStorage.setItem('teacher_isLoggedIn', 'true');
+                localStorage.setItem('teacher_userEmail', data.email);
+                document.getElementById('login-error-msg').style.display = 'none';
+                
+                showAppScreen(data.email);
+            } else {
+                // ❌ ホワイトリスト未登録（部外者）：画面を開かせずエラー表示
+                showError(data.message || "❌ アクセス権限がありません。学校に登録されたGoogleアカウントでログインしてください。");
+            }
+        })
+        .catch(err => {
+            console.error("認証エラー:", err);
+            showError("❌ 認証処理中に通信エラーが発生しました。ネット接続を確認してください。");
+        });
 
     } catch (e) {
         showError("❌ 認証処理中にエラーが発生しました。");
