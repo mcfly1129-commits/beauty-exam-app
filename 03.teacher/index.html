@@ -95,8 +95,8 @@
     <div class="login-box">
         <h2 style="color: #d35400; font-size: 1.2rem; margin-top: 0;">🔒 検証環境ログイン</h2>
         <p style="font-size: 0.85rem; color: #7f8c8d; line-height: 1.6; margin-bottom: 25px;">
-            このエリアは新問題の検証用スペースです。<br>
-            許可されたGmailアカウントでのサインインが必要です。
+            このエリアは検証用スペースです。<br>
+            許可されたGmailアカウントでの<br>サインインが必要です。
         </p>
         <!-- Google公式ログインボタンの設置先 -->
         <div style="display: flex; justify-content: center;">
@@ -104,6 +104,9 @@
         </div>
         <p id="login-error-msg" style="color: #ff7675; font-size: 0.8rem; font-weight: bold; margin-top: 15px; display: none;"></p>
     </div>
+
+    <!-- 📄 ログイン画面用のサードパーティ・ライセンス表示ボタン（枠線の外・下に配置） -->
+    <button class="btn-form" style="background-color: #f1f2f6; color: #57606f; margin-top: 20px;" onclick="document.getElementById('license-modal').style.display='flex'">📄 オープンソース・ライセンス情報</button>
 </div>
 
 <!-- 🔓 ログイン成功時に表示されるメインコンテンツ -->
@@ -162,9 +165,6 @@
 
     <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
 </div>
-
-<!-- 📄 サードパーティ・ライセンス表示ボタン（新規追加） -->
-    <button class="btn-form" style="background-color: #f1f2f6; color: #57606f; margin-top: -10px;" onclick="document.getElementById('license-modal').style.display='flex'">📄 オープンソース・ライセンス情報</button>
 
 <!-- モーダル構造 -->
 <div id="history-modal" class="modal-overlay" onclick="closeHomeHistoryModal()">
