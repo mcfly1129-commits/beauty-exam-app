@@ -305,11 +305,12 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ✨ クイズ画面から戻ってきたときや、別タブでデータが動いたときに自動で再計算するセンサー
+// ✨ クイズ画面や成長ダッシュボードから戻ってきたとき（ブラウザバック含む）に自動で全データを再計算するセンサー
 window.addEventListener('pageshow', () => {
     const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
     if (isLoggedIn === 'true') {
-        initDashboard(); // 画面が表示されたらリアルタイムに再集計して表示を書き換える
+        initDashboard();           // 進捗グラフや各科目の進捗数を再集計
+        renderHeaderDailyStats();  // ★追加：連続挑戦日数・通算成功数・最高連勝数を即座に再読み込みして表示
     }
 });
 
