@@ -1772,15 +1772,15 @@ function toggleHistoryExp(qId) {
 }
 
 function resetLearningData() {
-    if (confirm("これまでの習得進捗や回答履歴を含む学習データを初期化しますか？(※挑戦連続日数や通算記録は保持されます)")) {
-        // ★ 追加：共通の継続実績データを一時保護する
+    if (confirm("これまでの習得進捗や回答履歴を含む学習データを初期化しますか？(※他科目のお気に入りや挑戦連続日数は保持されます)")) {
+        // 1. 共通の実績データを一時保護
         const saveLastDate = localStorage.getItem('daily_last_challenge_date');
         const saveChallengeStreak = localStorage.getItem('daily_challenge_streak');
         const saveTotalSuccess = localStorage.getItem('daily_total_success_count');
         const saveCurrentStreak = localStorage.getItem('daily_current_streak');
         const saveMaxStreak = localStorage.getItem('daily_max_streak');
 
-        // 1. ローカルストレージの削除
+        // 2. この科目（範囲）の学習データを削除
         localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
@@ -1791,19 +1791,30 @@ function resetLearningData() {
         localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem('solved_' + currentSubjectKey);
 
-        // ★ 追加：保護したデータを復元する（捏造・誤消去の完全防止）
+        // 3. ★【安全対策】他科目の「⭐マーク」を守り、この科目の「⭐」だけ解除する処理
+        let allBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+        let currentSubjectQuestionIds = [];
+        
+        // 今開いている科目（questionPool）の問題IDだけを抽出
+        for (let unit in questionPool) {
+            questionPool[unit].forEach(q => currentSubjectQuestionIds.push(q.id));
+        }
+        
+        // 全お気に入りの中から「今開いている科目のID」だけを除外（他科目は残す）
+        allBookmarks = allBookmarks.filter(id => !currentSubjectQuestionIds.includes(id));
+        
+        // フィルタリングしたお気に入りを保存し直す
+        localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(allBookmarks));
+        bookmarkedIds = allBookmarks;
+
+        // 4. 保護した実績データを復元
         if (saveLastDate) localStorage.setItem('daily_last_challenge_date', saveLastDate);
         if (saveChallengeStreak) localStorage.setItem('daily_challenge_streak', saveChallengeStreak);
         if (saveTotalSuccess) localStorage.setItem('daily_total_success_count', saveTotalSuccess);
         if (saveCurrentStreak) localStorage.setItem('daily_current_streak', saveCurrentStreak);
         if (saveMaxStreak) localStorage.setItem('daily_max_streak', saveMaxStreak);
-        
-        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
-        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
-        
-        localStorage.removeItem('solved_' + currentSubjectKey);
-        
-        // 2. メモリ上の変数をすべて初期化
+
+        // 5. メモリ上の変数を初期化
         questionStats = {};
         unitCountData = {};
         hasEverFailed = false;
@@ -1812,23 +1823,15 @@ function resetLearningData() {
         dailyStreak = 0;
         lastDailyDate = "";
         dailyCorrectedIds = [];
-        
-        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
-        // bookmarkedIds = [];
-        
-        // 3. UIの更新
-        closeHistoryModal();           // モーダルを閉じる
-        navigateTo('subject-screen');  // トップ画面（①）へ戻る
-        
-        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
-        renderMenu();                  // これがないと①の表記が古いまま残ります
-        
-        // その他の状態更新
-        checkDailyStreakOnLoad();      // デイリー状態の再チェック
-        renderUnitList();              //念のため②の画面リストも更新しておく
-        
-        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
-        alert("学習データをリセットしました。");
+
+        // 6. UIの再描画
+        closeHistoryModal();
+        navigateTo('subject-screen');
+        renderMenu();
+        checkDailyStreakOnLoad();
+        renderUnitList();
+
+        alert("この科目の学習データをリセットしました。");
         location.reload(); 
     }
 }
