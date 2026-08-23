@@ -745,6 +745,7 @@ function navigateTo(screenId) {
 }
 
 // 日付判定ヘルパー
+// 📅 iOS Safariでも絶対にバグらない超安定日付文字列生成 (YYYY-MM-DD)
 function getTodayString() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -848,11 +849,11 @@ function renderUnitList() {
  * 🔥 デイリー実績（挑戦連続日数・通算成功数・最大連勝数）を更新する共通関数
  * @param {boolean} isSuccess - 今回の挑戦・問題に成功（合格/正解）したか
  */
+// 🎯 クイズ回答時にデイリー実績（連続日数・成功数・最高連勝数）を更新・保存する関数（Safari完全対応版）
 function updateDailyStreakStats(isSuccess) {
-    const todayStr = new Date().toLocaleDateString('ja-JP');
-
-    // LocalStorage から既存データを取得（無ければ初期値）
+    const todayStr = getTodayString();
     const lastDate = localStorage.getItem('daily_last_challenge_date') || "";
+
     let challengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || "0");
     let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0");
     let currentStreak = parseInt(localStorage.getItem('daily_current_streak') || "0");
@@ -861,16 +862,15 @@ function updateDailyStreakStats(isSuccess) {
     // 1. 挑戦連続日数（🔥）の更新判定（1日1回だけカウント）
     if (lastDate !== todayStr) {
         if (lastDate) {
-            const last = new Date(lastDate);
-            const today = new Date(todayStr);
-            const diffTime = Math.abs(today - last);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const last = new Date(lastDate + "T00:00:00");
+            const today = new Date(todayStr + "T00:00:00");
+            const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
 
             if (diffDays === 1) {
                 challengeStreak += 1; // 昨日からの連続
             } else if (diffDays > 1) {
                 challengeStreak = 1; // 2日以上空いたためリセット
-                currentStreak = 0;   // ★ ここを追加して差し替えてください！
+                currentStreak = 0;   // 連勝数もリセット
             }
         } else {
             challengeStreak = 1; // 初挑戦
@@ -879,7 +879,7 @@ function updateDailyStreakStats(isSuccess) {
         localStorage.setItem('daily_challenge_streak', challengeStreak);
     }
 
-    // 2. 通算成功数（🎯）と連勝記録（🏆）の更新
+    // 2. 成功数・連勝数の更新
     if (isSuccess) {
         totalSuccess += 1;
         currentStreak += 1;
@@ -890,9 +890,12 @@ function updateDailyStreakStats(isSuccess) {
         currentStreak = 0; // 不正解時は現在の連勝数のみリセット
     }
 
-    localStorage.setItem('daily_total_success_count', totalSuccess);
     localStorage.setItem('daily_current_streak', currentStreak);
     localStorage.setItem('daily_max_streak', maxStreak);
+    localStorage.setItem('daily_total_success_count', totalSuccess);
+
+    // 画面のバッジ表示を即座に更新
+    renderHeaderDailyStats();
 }
 
 function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
