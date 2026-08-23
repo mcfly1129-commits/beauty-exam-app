@@ -400,53 +400,25 @@
 
 <script>
 
-window.addEventListener('pageshow', (event) => {
-    // 🔥 画面読み込み・復帰時にバッジ表示を更新
-    renderHeaderDailyStats();
+// 📊 裏側からでもリロード無しでリアルタイムに進捗を再集計・再描画できる共通関数
+function initDashboard() {
+    // 🔥 デイリーバッジの表示を最新化
+    if (typeof renderHeaderDailyStats === "function") renderHeaderDailyStats();
+    if (typeof updateSpeedDashboardBadges === "function") updateSpeedDashboardBadges();
 
     // 科目ごとの範囲キー設定（頭に test_ を追加してクイズ側と完全リンクさせます）
     const subjects = [
-    { 
-        id: '01', name: '関係法規・制度', total: 290, 
-        keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] 
-    },
-    { 
-        id: '02', name: '運営管理', total: 122, 
-        keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] 
-    },
-    { 
-        id: '03', name: '公衆衛生・環境衛生', total: 194, 
-        keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'] 
-    },
-    { 
-        id: '04', name: '感染症', total: 174, 
-        keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'] 
-    },
-    { 
-        id: '05', name: '衛生管理技術', total: 148, 
-        keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'] 
-    },
-    { 
-        id: '06', name: '人体の構造及び機能', total: 311, 
-        keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'] 
-    },
-    { 
-        id: '07', name: '皮膚科学', total: 192, 
-        keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'] 
-    },
-    { 
-        id: '08', name: '香粧品化学', total: 314, 
-        keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'] 
-    },
-    { 
-        id: '09', name: '文化論', total: 120, 
-        keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'] 
-    },
-    { 
-        id: '10', name: '美容技術理論', total: 432, 
-        keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] 
-    }
-];
+        { id: '01', name: '関係法規・制度', total: 290, keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] },
+        { id: '02', name: '運営管理', total: 122, keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] },
+        { id: '03', name: '公衆衛生・環境衛生', total: 194, keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'] },
+        { id: '04', name: '感染症', total: 174, keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'] },
+        { id: '05', name: '衛生管理技術', total: 148, keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'] },
+        { id: '06', name: '人体の構造及び機能', total: 311, keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'] },
+        { id: '07', name: '皮膚科学', total: 192, keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'] },
+        { id: '08', name: '香粧品化学', total: 314, keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'] },
+        { id: '09', name: '文化論', total: 120, keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'] },
+        { id: '10', name: '美容技術理論', total: 432, keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] }
+    ];
 
     let totalSolved = 0;
     let totalQuestions = 0;
@@ -459,24 +431,22 @@ window.addEventListener('pageshow', (event) => {
             // その科目の全範囲（keys）の正解数を合算
             let subSolved = 0;
             sub.keys.forEach(key => {
-                // localStorageから 'solved_' + 各範囲キー で値を取得
                 subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
             });
 
             totalSolved += subSolved;
             totalQuestions += sub.total;
 
-            // 科目別パネルの生成 (元のコンパクトなレイアウト・見え方を完全維持し、クリック可能にする記述のみ追加)
+            // 科目別パネルの生成 (コンパクトなレイアウトを100%維持)
             const item = document.createElement('div');
             item.style.cssText = 'font-size: 0.7rem; padding: 6px; background: #fff9e6; border-radius: 8px; border: 1px solid #ffeaa7; cursor: pointer;';
             item.innerHTML = `
                 <div style="color: #7f8c8d; font-size: 0.6rem;">${sub.id} ${sub.name}</div>
                 <div style="font-weight: bold;"><span style="color: #e67e22;">${subSolved}</span> / ${sub.total}問</div>
             `;
-            
-            // ★追加：進捗カードがクリックされたら履歴ポップアップを開く
+
+            // 進捗カードをクリックした時の履歴モーダル展開を維持
             item.onclick = () => openHomeHistoryModal(sub);
-            
             container.appendChild(item);
         });
 
@@ -484,10 +454,15 @@ window.addEventListener('pageshow', (event) => {
         const percentage = (totalQuestions > 0) ? Math.floor((totalSolved / totalQuestions) * 100) : 0;
         const progressBar = document.getElementById('progress-bar-all');
         const progressText = document.getElementById('progress-text');
-        
+
         if (progressBar) progressBar.style.width = percentage + '%';
         if (progressText) progressText.innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
     }
+}
+
+// 🔄 画面ロード・復帰・ブラウザバックを検知して瞬時に再集計・再描画
+window.addEventListener('pageshow', (event) => {
+    initDashboard();
 });
 
 // --- ★追加：学習ホーム側で科目の全範囲の履歴データを合算してポップアップ表示する関数 ---
