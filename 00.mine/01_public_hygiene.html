@@ -1153,6 +1153,11 @@ function submitAnswer(userAns) {
             lastDailyDate = getTodayString();
             localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
             localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
+
+            // 💡【ここを追加】学習ホーム最上部の「成功回数」を加算して保存
+            let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0") + 1;
+            localStorage.setItem('daily_total_success_count', totalSuccess);
+
             triggerFeverEffect();
             actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
         } else {
