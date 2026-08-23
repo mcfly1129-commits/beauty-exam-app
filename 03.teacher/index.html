@@ -1046,8 +1046,17 @@ function updateSpeedBookmarkButtonUI(questionId) {
 }
 
 // 🎉 高速学習画面（z-index:2000）の最前面で舞う紙吹雪演出エフェクト関数
+// 🎉 高速学習画面（z-index:2000）の最前面で舞う紙吹雪演出エフェクト関数（スマホ最適化版）
 function triggerFeverEffect() {
-    if (typeof confetti === "function") {
+    const canvas = document.getElementById("speed-confetti-canvas");
+    if (canvas) {
+        // 専用キャンバスを使って、最前面でconfettiを起動（iOS/SafariのStacking Context対策）
+        const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
+        myConfetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { myConfetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { myConfetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    } else if (typeof confetti === "function") {
+        // フォールバック
         confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, zIndex: 9999 });
         setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, zIndex: 9999 }); }, 250);
         setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, zIndex: 9999 }); }, 400);
@@ -1240,6 +1249,7 @@ function escapeHTML(str) {
      📥 スピードクイズ専用・全画面オーバーレイ（自動インプラント）
      ========================================== -->
 <div id="speed-quiz-screen" class="speed-quiz-overlay">
+    <canvas id="speed-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
     <div class="container" style="box-sizing: border-box; min-height: 100vh; padding: 20px 15px;">
         <div class="quiz-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
             <span id="speed-quiz-mode-title" class="quiz-unit-title-box" style="background: #e1f5fe; color: #0288d1; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">スピードクイズ</span>
