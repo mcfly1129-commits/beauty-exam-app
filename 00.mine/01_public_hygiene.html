@@ -1145,8 +1145,10 @@ function submitAnswer(userAns) {
 
     const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
 
-    if (isDailyMode) {
+if (isDailyMode) {
         if (!isCorrect) {
+            // ❌ 途中で間違えた場合：現在の連勝数をリセット
+            localStorage.setItem('daily_current_streak', '0');
             actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
         } else if (isLastQuestion) {
             dailyStreak++;
@@ -1154,8 +1156,44 @@ function submitAnswer(userAns) {
             localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
             localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
 
-            // 💡【ここを追加】学習ホーム最上部の「成功回数」を加算して保存
-            let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0") + 1;
+            // 💡【追加】学習ホーム最上部用（連続日数・成功回数・最高連勝数）の一括更新処理
+            const todayStr = getTodayString();
+            const lastDate = localStorage.getItem('daily_last_challenge_date') || "";
+
+            let challengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || "0");
+            let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0");
+            let currentStreak = parseInt(localStorage.getItem('daily_current_streak') || "0");
+            let maxStreak = parseInt(localStorage.getItem('daily_max_streak') || "0");
+
+            // 1. 挑戦連続日数（🔥）の更新（1日1回）
+            if (lastDate !== todayStr) {
+                if (lastDate) {
+                    const last = new Date(lastDate + "T00:00:00");
+                    const today = new Date(todayStr + "T00:00:00");
+                    const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        challengeStreak += 1;
+                    } else if (diffDays > 1) {
+                        challengeStreak = 1;
+                        currentStreak = 0;
+                    }
+                } else {
+                    challengeStreak = 1;
+                }
+                localStorage.setItem('daily_last_challenge_date', todayStr);
+                localStorage.setItem('daily_challenge_streak', challengeStreak);
+            }
+
+            // 2. 成功数（🎯）・連勝数・最高連勝数（🏆）の更新
+            totalSuccess += 1;
+            currentStreak += 1;
+            if (currentStreak > maxStreak) {
+                maxStreak = currentStreak;
+            }
+
+            localStorage.setItem('daily_current_streak', currentStreak);
+            localStorage.setItem('daily_max_streak', maxStreak);
             localStorage.setItem('daily_total_success_count', totalSuccess);
 
             triggerFeverEffect();
