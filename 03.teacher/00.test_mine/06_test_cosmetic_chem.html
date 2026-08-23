@@ -899,8 +899,10 @@ function updateDailyStreakStats(isSuccess) {
     localStorage.setItem('daily_max_streak', maxStreak);
     localStorage.setItem('daily_total_success_count', totalSuccess);
 
-    // 画面のバッジ表示を即座に更新
-    renderHeaderDailyStats();
+    // 画面のバッジ表示を即座に更新（関数が定義されている場合のみ安全に呼び出し、スマホでのクラッシュを防ぎます）
+    if (typeof renderHeaderDailyStats === "function") {
+        renderHeaderDailyStats();
+    }
 }
 
 function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
