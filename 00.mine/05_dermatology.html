@@ -738,6 +738,7 @@ function navigateTo(screenId) {
 }
 
 // 日付判定ヘルパー
+// 📅 iOS Safariでも絶対にバグらない超安定日付文字列生成 (YYYY-MM-DD)
 function getTodayString() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
