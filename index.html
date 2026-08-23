@@ -971,10 +971,6 @@ function submitSpeedAnswer(userAns) {
         statusEl.style.color = "#ff7675";
     }
 
-    if (typeof updateDailyStreakStats === "function") {
-        updateDailyStreakStats(isCorrect);
-    }
-
     document.getElementById("speed-current-streak").innerText = `この問題の正解数: ${stats[q.id].correct_count}回 (連続: ${stats[q.id].streak}回)`;
     document.getElementById("speed-quiz-explanation").innerText = q.exp || "解説は現在準備中です。";
 
