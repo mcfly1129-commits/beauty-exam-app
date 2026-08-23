@@ -410,6 +410,7 @@
   <script src="../../js/questions_database.js"></script>
 </head>
 <body>
+  <canvas id="quiz-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
 
 <div class="container">
 
@@ -1256,11 +1257,21 @@ function submitAnswer(userAns) {
     resultArea.style.display = "block";
 }
 
+// 🎉 スマホ（Safari/WebKit）でも最前面に必ず表示させる紙吹雪演出エフェクト（スマホ最適化版）
+// 🎉 スマホ（Safari/WebKit）でも最前面に必ず表示させる紙吹雪演出エフェクト（スマホ最適化版）
 function triggerFeverEffect() {
-    if (typeof confetti === "function") {
-        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
-        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    const canvas = document.getElementById("quiz-confetti-canvas");
+    if (canvas) {
+        // 専用キャンバスを使って、最前面でconfettiを起動
+        const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
+        myConfetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        setTimeout(() => { myConfetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } }); }, 250);
+        setTimeout(() => { myConfetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } }); }, 400);
+    } else if (typeof confetti === "function") {
+        // フォールバック（従来の挙動）
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, zIndex: 9999 });
+        setTimeout(() => { confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.8 }, zIndex: 9999 }); }, 250);
+        setTimeout(() => { confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.8 }, zIndex: 9999 }); }, 400);
     }
 }
 
