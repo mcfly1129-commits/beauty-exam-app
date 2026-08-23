@@ -497,7 +497,7 @@
 
         <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※2)デイリー真剣勝負を除き、<br>問題を1回正解すると単元の出題から除外されます</p>
 
-        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
+        <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※3)デイリー真剣勝負は<br>選択した範囲につき1日1回、<br>出題範囲は選択した学習範囲から出題されます</p>
 
         <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※4)デイリー真剣勝負で正解した問題は、<br>履歴にマークとして記録されますが、<br>進捗率や正答率に影響を及ぼしません</p>
 
@@ -545,7 +545,7 @@
             <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
             <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
             <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
-            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐ マーク</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐マーク</button>
         </div>
 
         <div id="modal-history-list"></div>
@@ -975,7 +975,7 @@ function renderDailyBanner() {
         banner.innerHTML = `
             <div style="font-size: 1.2rem; font-weight: bold;">🔥 デイリー真剣勝負<br> 【 ${dailyStreak} 日 】連続中</div>
             <div style="font-size: 0.85rem; margin-top: 5px; font-weight: bold; background: rgba(255,255,255,0.2); padding: 4px; border-radius: 6px;">
-                👉 ここをタップして今日の3問に挑戦！
+                👉 ここをタップして<br>　今日の3問に挑戦！
             </div>
         `;
         banner.onclick = startDailyQuiz;
