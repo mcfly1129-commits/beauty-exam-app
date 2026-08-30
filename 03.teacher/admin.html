@@ -670,7 +670,7 @@
                     <label for="filter-status">指導ステータス</label>
                     <select id="filter-status" onchange="applyFilters()">
                         <option value="">全て表示</option>
-                        <option value="alert-danger">🔴 要個別面談（未報告・進捗極低）</option>
+                        <option value="alert-danger">🔴 要個別指導（未報告・進捗極低）</option>
                         <option value="alert-warning">🟡 停滞（7日以上報告なし）</option>
                         <option value="alert-clear">🟢 順調</option>
                     </select>
@@ -687,7 +687,7 @@
                         <th>最終報告日時</th>
                         <th>学校名</th>
                         <th>クラス名</th>
-                        <th>生徒識別番号</th>
+                        <th>生徒識別情報</th>
                         <th>シリアルコード</th>
                         <th>総合進捗度</th>
                         <th>平均正答率</th>
@@ -723,7 +723,7 @@
                 <div class="profile-grid">
                     <div class="profile-card">
                         <div class="profile-item">
-                            <strong>生徒識別番号</strong>
+                            <strong>生徒識別情報</strong>
                             <span id="p-name">--</span>
                         </div>
                         <div class="profile-item">
@@ -753,10 +753,10 @@
                         </div>
                     </div>
                     
-                    <!-- 2. 科目別強み弱み（レーダーチャート） -->
+                    <!-- 2. 科目別特徴（レーダーチャート） -->
                     <div class="card">
                         <h3 class="card-title">
-                            <span>🎯 10科目別強み弱み（全体中央値比較）</span>
+                            <span>🎯 10科目別特徴（全体中央値比較）</span>
                         </h3>
                         <div class="chart-container">
                             <canvas id="studentRadarChart"></canvas>
@@ -1065,7 +1065,7 @@
                 if (!student.timestamp || progress < 10) {
                     alertClass = "row-alert-danger";
                     statusLabel = "alert-danger";
-                    statusBadge = '<span class="badge badge-danger">🔴 要個別面談</span>';
+                    statusBadge = '<span class="badge badge-danger">🔴 要個別指導</span>';
                 }
                 else if (student.timestamp) {
                     const sendTime = new Date(student.timestamp).getTime();
@@ -1091,7 +1091,7 @@
                     <td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
                     <td data-label="学校名">${escapeHTML(student.school || '不明')}</td>
                     <td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
-                    <td data-label="生徒識別番号" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの生徒')}</td>
+                    <td data-label="生徒識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの生徒')}</td>
                     <td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
                     <td data-label="総合進捗度" style="text-align:center; font-weight:bold;">${progress}%</td>
                     <td data-label="平均正答率" style="text-align:center; font-weight:bold;">${parseInt(student.totalAccuracy || 0)}%</td>
