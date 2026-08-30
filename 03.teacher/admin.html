@@ -248,7 +248,7 @@
             background-color: #616a6b;
         }
 
-        /* 📋 生徒一覧テーブル */
+        /* 📋 学生一覧テーブル */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -292,7 +292,7 @@
             background-color: #f8fafc;
         }
 
-        /* 🚨 指導ステータス警告カラー（停滞者・進捗極低者） [cite: 877] */
+        /* 🚨 指導ステータス警告カラー（停滞・進捗極低:10%未満） [cite: 877] */
         .row-alert-danger {
             background-color: #fdf2f2 !important;
             border-left: 4px solid var(--danger-color);
@@ -581,7 +581,7 @@
         <header>
             <div class="header-title-area">
                 <h1>👨‍🏫 教員向け総合管理画面</h1>
-                <p>生徒全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
+                <p>学生全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
             </div>
             <div class="header-user-area">
                 <span class="user-badge" id="display-teacher-email">取得中...</span>
@@ -593,28 +593,28 @@
         <div class="quick-metrics">
             <div class="metric-card" style="border-left: 4px solid var(--secondary-color);">
                 <div class="metric-info">
-                    <h3>登録生徒総数</h3>
+                    <h3>登録学生総数</h3>
                     <p id="metric-total-students">-- 名</p>
                 </div>
                 <div class="metric-icon">👥</div>
             </div>
             <div class="metric-card" style="border-left: 4px solid var(--success-color);">
                 <div class="metric-info">
-                    <h3>14日以内アクティブ生徒</h3>
+                    <h3>14日以内アクティブ学生</h3>
                     <p id="metric-active-students">-- 名</p>
                 </div>
                 <div class="metric-icon">🔥</div>
             </div>
             <div class="metric-card" style="border-left: 4px solid var(--warning-color);">
                 <div class="metric-info">
-                    <h3>指導対象（進捗極低・未報告）</h3>
+                    <h3>指導対象（未報告・進捗極低:10%未満）</h3>
                     <p id="metric-warning-students" style="color: var(--danger-color);">-- 名</p>
                 </div>
                 <div class="metric-icon">🚨</div>
             </div>
             <div class="metric-card" style="border-left: 4px solid #9b59b6;">
                 <div class="metric-info">
-                    <h3>全校GM獲得総数</h3>
+                    <h3>全校GM(グランドマスター)獲得総数</h3>
                     <p id="metric-total-gm">-- 回</p>
                 </div>
                 <div class="metric-icon">🏆</div>
@@ -625,8 +625,8 @@
         <div class="dashboard-grid">
             <div class="card">
                 <h3 class="card-title">
-                    <span>📊 クラス別：平均進捗率比較</span>
-                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">努力（％）</span>
+                    <span>📊 クラス別：平均進捗率</span>
+                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">努力を可視化（％）</span>
                 </h3>
                 <div class="chart-container">
                     <canvas id="progressChart"></canvas>
@@ -635,8 +635,8 @@
 
             <div class="card">
                 <h3 class="card-title">
-                    <span>🎯 クラス別：平均正答率比較</span>
-                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">実力（％）</span>
+                    <span>🎯 クラス別：平均正答率</span>
+                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">実力を可視化（％）</span>
                 </h3>
                 <div class="chart-container">
                     <canvas id="accuracyChart"></canvas>
@@ -663,15 +663,15 @@
                     </select>
                 </div>
                 <div class="filter-item">
-                    <label for="search-student">検索 (識別情報 or コード を入力)</label>
+                    <label for="search-student">検索 (識別情報コード を入力)</label>
                     <input type="text" id="search-student" placeholder="一部を入力" oninput="applyFilters()">
                 </div>
                 <div class="filter-item">
                     <label for="filter-status">指導ステータス</label>
                     <select id="filter-status" onchange="applyFilters()">
                         <option value="">全て表示</option>
-                        <option value="alert-danger">🔴 要個別指導（未報告・進捗極低）</option>
-                        <option value="alert-warning">🟡 停滞（7日以上報告なし）</option>
+                        <option value="alert-danger">🔴 要個別指導（未報告・進捗極低:10%未満）</option>
+                        <option value="alert-warning">🟡 停滞（14日以上報告なし）</option>
                         <option value="alert-clear">🟢 順調</option>
                     </select>
                 </div>
@@ -679,7 +679,7 @@
             </div>
         </div>
 
-        <!-- 📋 生徒個別進捗 data 一覧テーブル -->
+        <!-- 📋 学生個別進捗 data 一覧テーブル -->
         <div class="table-responsive">
             <table id="student-table">
                 <thead>
@@ -687,7 +687,7 @@
                         <th>最終報告日時</th>
                         <th>学校名</th>
                         <th>クラス名</th>
-                        <th>生徒識別情報</th>
+                        <th>識別情報</th>
                         <th>シリアルコード</th>
                         <th>総合進捗度</th>
                         <th>平均正答率</th>
@@ -723,7 +723,7 @@
                 <div class="profile-grid">
                     <div class="profile-card">
                         <div class="profile-item">
-                            <strong>生徒識別情報</strong>
+                            <strong>識別情報</strong>
                             <span id="p-name">--</span>
                         </div>
                         <div class="profile-item">
@@ -1061,7 +1061,7 @@
                 let statusLabel = "";
                 let statusBadge = "";
 
-                // 要注意・指導対象判定（未送信 or 進捗極低） [cite: 877]
+                // 要注意・指導対象判定（未送信 or 進捗極低:10%未満） [cite: 877]
                 if (!student.timestamp || progress < 10) {
                     alertClass = "row-alert-danger";
                     statusLabel = "alert-danger";
@@ -1069,10 +1069,10 @@
                 }
                 else if (student.timestamp) {
                     const sendTime = new Date(student.timestamp).getTime();
-                    if (now - sendTime > 7 * 24 * 60 * 60 * 1000) {
+                    if (now - sendTime > 14 * 24 * 60 * 60 * 1000) {
                         alertClass = "row-alert-warning";
                         statusLabel = "alert-warning";
-                        statusBadge = '<span class="badge badge-warning">🟡 停滞(7日超過)</span>';
+                        statusBadge = '<span class="badge badge-warning">🟡 停滞(14日超過)</span>';
                     } else {
                         statusLabel = "alert-clear";
                         statusBadge = '<span class="badge badge-success">🟢 順調</span>';
@@ -1091,7 +1091,7 @@
                     <td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
                     <td data-label="学校名">${escapeHTML(student.school || '不明')}</td>
                     <td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
-                    <td data-label="生徒識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの生徒')}</td>
+                    <td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td>
                     <td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
                     <td data-label="総合進捗度" style="text-align:center; font-weight:bold;">${progress}%</td>
                     <td data-label="平均正答率" style="text-align:center; font-weight:bold;">${parseInt(student.totalAccuracy || 0)}%</td>
@@ -1106,7 +1106,7 @@
 
             const tableStatus = document.getElementById('table-status');
             if (visibleCount === 0) {
-                tableStatus.innerHTML = '🔍 条件に合致する生徒データが見つかりません。';
+                tableStatus.innerHTML = '🔍 条件に合致する学生データが見つかりません。';
                 tableStatus.style.display = 'block';
             } else {
                 tableStatus.style.display = 'none';
