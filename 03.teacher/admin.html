@@ -667,28 +667,28 @@
                     <input type="text" id="search-student" placeholder="一部を入力" oninput="applyFilters()">
                 </div>
                 <div class="filter-item">
-<label for="filter-status">指導ステータス</label>
-<select id="filter-status" onchange="applyFilters()">
-<option value="">全て表示</option>
-<option value="alert-danger">🔴 要個別指導（未報告・進捗極低:10%未満）</option>
-<option value="alert-warning">🟡 停滞（14日以上報告なし）</option>
-<option value="alert-clear">🟢 順調</option>
-</select>
-</div>
-<!-- 🆕 ソート用プルダウンを追加 -->
-<div class="filter-item">
-<label for="sort-key">並び替え</label>
-<select id="sort-key" onchange="applyFilters()">
-<option value="time-desc">最終報告（新しい順）</option>
-<option value="time-asc">最終報告（古い順）</option>
-<option value="progress-desc">総合進捗率（高い順）</option>
-<option value="progress-asc">総合進捗率（低い順）</option>
-<option value="accuracy-desc">平均正答率（高い順）</option>
-<option value="accuracy-asc">平均正答率（低い順）</option>
-<option value="name-asc">生徒識別番号順</option>
-</select>
-</div>
-<button class="btn-reset-filter" onclick="resetFilters()">フィルタ解除</button>
+                    <label for="filter-status">指導ステータス</label>
+                    <select id="filter-status" onchange="applyFilters()">
+                        <option value="">全て表示</option>
+                        <option value="alert-danger">🔴 要個別指導（未報告・進捗極低:10%未満）</option>
+                        <option value="alert-warning">🟡 停滞（14日以上報告なし）</option>
+                        <option value="alert-clear">🟢 順調</option>
+                    </select>
+                </div>
+                <!-- 🆕 並び替えプルダウンを追加 -->
+                <div class="filter-item">
+                    <label for="sort-key">並び替え</label>
+                    <select id="sort-key" onchange="applyFilters()">
+                        <option value="time-desc">最終報告（新しい順）</option>
+                        <option value="time-asc">最終報告（古い順）</option>
+                        <option value="progress-desc">総合進捗率（高い順）</option>
+                        <option value="progress-asc">総合進捗率（低い順）</option>
+                        <option value="accuracy-desc">平均正答率（高い順）</option>
+                        <option value="accuracy-asc">平均正答率（低い順）</option>
+                        <option value="name-asc">生徒識別番号順</option>
+                    </select>
+                </div>
+                <button class="btn-reset-filter" onclick="resetFilters()">フィルタ解除</button>
             </div>
         </div>
 
@@ -966,102 +966,183 @@
             document.getElementById('metric-total-gm').innerText = `${totalGm} 回`;
         }
 
-        // 📋 フィルター検索の実行 ＆ テーブル表示マッピング
-function applyFilters() {
-const targetSchool = document.getElementById('filter-school').value;
-const targetClass = document.getElementById('filter-class').value;
-const searchText = document.getElementById('search-student').value.toLowerCase().trim();
-const targetStatus = document.getElementById('filter-status').value;
+        // 📈 マクログラフ（Chart.jsクラス別）
+        function renderCharts() {
+            const classData = { };
 
-const tableBody = document.getElementById('student-table-body');
-tableBody.innerHTML = "";
+            allStudentsRaw.forEach(student => {
+                const clsKey = `${student.school || "不明"} ${student.className || "不明"}`;
+                if (!classData[ clsKey ]) {
+                    classData[ clsKey ] = {
+                        progressSum: 0,
+                        accuracySum: 0,
+                        count: 0
+                    };
+                }
+                classData[ clsKey ].progressSum += parseInt(student.totalProgress || 0);
+                classData[ clsKey ].accuracySum += parseInt(student.totalAccuracy || 0);
+                classData[ clsKey ].count++;
+            });
 
-let visibleCount = 0;
-const now = new Date().getTime();
+            const labels = [ ];
+            const avgProgressList = [ ];
+            const avgAccuracyList = [ ];
 
-// 1. フィルター条件に合致する生徒を一旦シャローコピー配列として抽出
-const filteredList = allStudentsRaw.filter(student => {
-if (targetSchool && student.school !== targetSchool) return false;
-if (targetClass && student.className !== targetClass) return false;
+            Object.keys(classData).forEach(key => {
+                labels.push(key);
+                const item = classData[ key ];
+                avgProgressList.push(Math.round(item.progressSum / item.count));
+                avgAccuracyList.push(Math.round(item.accuracySum / item.count));
+            });
 
-const name = (student.studentName || "").toLowerCase();
-const code = (student.email || "").toLowerCase(); 
-const matchesSearch = searchText === "" || name.includes(searchText) || code.includes(searchText);
-if (!matchesSearch) return false;
+            // 1. クラス別：平均進捗率比較（努力・ブルー）
+            if (progressChartInstance) progressChartInstance.destroy();
+            const ctxP = document.getElementById('progressChart').getContext('2d');
+            progressChartInstance = new Chart(ctxP, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均進捗率 (%)',
+                        data: avgProgressList,
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', 
+                    scales: {
+                        x: { min: 0, max: 100 }
+                    }
+                }
+            });
 
-const progress = parseInt(student.totalProgress || 0);
-let statusLabel = "";
-if (!student.timestamp || progress < 10) {
-statusLabel = "alert-danger";
-} else {
-const sendTime = new Date(student.timestamp).getTime();
-if (now - sendTime > 14 * 24 * 60 * 60 * 1000) { // 👈 停滞基準を14日間に変更 [cite: 49, 78]
-statusLabel = "alert-warning";
-} else {
-statusLabel = "alert-clear";
-}
-}
-if (targetStatus && targetStatus !== statusLabel) return false;
-return true;
-});
+            // 2. クラス別：平均正答率比較（実力・グリーン）
+            if (accuracyChartInstance) accuracyChartInstance.destroy();
+            const ctxA = document.getElementById('accuracyChart').getContext('2d');
+            accuracyChartInstance = new Chart(ctxA, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均正答率 (%)',
+                        data: avgAccuracyList,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100 }
+                    }
+                }
+            });
+        }
 
-// 2. 指定されたキーに基づいてブラウザ側で超高速ソートを実行
-const sortKey = document.getElementById('sort-key').value;
-filteredList.sort((a, b) => {
-if (sortKey === "time-desc") {
-if (!a.timestamp) return 1;  // 未報告（null）の生徒は最下部に並べる
-if (!b.timestamp) return -1;
-return new Date(b.timestamp) - new Date(a.timestamp);
-}
-else if (sortKey === "time-asc") {
-if (!a.timestamp) return 1;
-if (!b.timestamp) return -1;
-return new Date(a.timestamp) - new Date(b.timestamp);
-}
-else if (sortKey === "progress-desc") {
-return parseInt(b.totalProgress || 0) - parseInt(a.totalProgress || 0);
-}
-else if (sortKey === "progress-asc") {
-return parseInt(a.totalProgress || 0) - parseInt(b.totalProgress || 0);
-}
-else if (sortKey === "accuracy-desc") {
-return parseInt(b.totalAccuracy || 0) - parseInt(a.totalAccuracy || 0);
-}
-else if (sortKey === "accuracy-asc") {
-return parseInt(a.totalAccuracy || 0) - parseInt(b.totalAccuracy || 0);
-}
-else if (sortKey === "name-asc") {
-// 自然順ソートで「生徒 01」〜「生徒 10」を人間の感覚通りに並び替え [cite: 3]
-return (a.studentName || "").localeCompare(b.studentName || "", undefined, { numeric: true });
-}
-return 0;
-});
+        // 📋 フィルター検索の実行 ＆ テーブル表示マッピング [cite: 877]
+        function applyFilters() {
+            const targetSchool = document.getElementById('filter-school').value;
+            const targetClass = document.getElementById('filter-class').value;
+            const searchText = document.getElementById('search-student').value.toLowerCase().trim();
+            const targetStatus = document.getElementById('filter-status').value;
 
-// 3. ソート済みの配列をループしてテーブル行を動的生成
-filteredList.forEach(student => {
-const progress = parseInt(student.totalProgress || 0);
-let alertClass = "";
-let statusBadge = "";
+            const tableBody = document.getElementById('student-table-body');
+            tableBody.innerHTML = "";
 
-if (!student.timestamp || progress < 10) {
-alertClass = "row-alert-danger";
-statusBadge = '<span class="badge badge-danger">🔴 要個別指導</span>';
-}
-else if (student.timestamp) {
-const sendTime = new Date(student.timestamp).getTime();
-if (now - sendTime > 14 * 24 * 60 * 60 * 1000) { // 👈 停滞表記を「14日超過」に変更 [cite: 49, 78]
-alertClass = "row-alert-warning";
-statusBadge = '<span class="badge badge-warning">🟡 停滞(14日超過)</span>';
-} else {
-statusBadge = '<span class="badge badge-success">🟢 順調</span>';
-}
-}
+            let visibleCount = 0;
+            const now = new Date().getTime();
 
-visibleCount++;
+            // 1. 先にフィルター条件に合致する生徒のみをシャローコピー配列に抽出
+            const filteredList = allStudentsRaw.filter(student => {
+                if (targetSchool && student.school !== targetSchool) return false;
+                if (targetClass && student.className !== targetClass) return false;
 
-const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
+                const name = (student.studentName || "").toLowerCase();
+                const code = (student.email || "").toLowerCase(); 
+                const matchesSearch = searchText === "" || name.includes(searchText) || code.includes(searchText);
+                if (!matchesSearch) return false;
 
-const row = document.createElement('tr');
+                const progress = parseInt(student.totalProgress || 0);
+                let statusLabel = "";
+                if (!student.timestamp || progress < 10) {
+                    statusLabel = "alert-danger";
+                } else {
+                    const sendTime = new Date(student.timestamp).getTime();
+                    if (now - sendTime > 14 * 24 * 60 * 60 * 1000) {
+                        statusLabel = "alert-warning";
+                    } else {
+                        statusLabel = "alert-clear";
+                    }
+                }
+                if (targetStatus && targetStatus !== statusLabel) return false;
+                return true;
+            });
+
+            // 2. プルダウンの選択値（ソートキー）に応じて配列内を瞬時に並び替え
+            const sortKey = document.getElementById('sort-key').value;
+            filteredList.sort((a, b) => {
+                if (sortKey === "time-desc") {
+                    if (!a.timestamp) return 1;   // 未報告生徒（null）は最下部に回す
+                    if (!b.timestamp) return -1;
+                    return new Date(b.timestamp) - new Date(a.timestamp);
+                }
+                else if (sortKey === "time-asc") {
+                    if (!a.timestamp) return 1;
+                    if (!b.timestamp) return -1;
+                    return new Date(a.timestamp) - new Date(b.timestamp);
+                }
+                else if (sortKey === "progress-desc") {
+                    return parseInt(b.totalProgress || 0) - parseInt(a.totalProgress || 0);
+                }
+                else if (sortKey === "progress-asc") {
+                    return parseInt(a.totalProgress || 0) - parseInt(b.totalProgress || 0);
+                }
+                else if (sortKey === "accuracy-desc") {
+                    return parseInt(b.totalAccuracy || 0) - parseInt(a.totalAccuracy || 0);
+                }
+                else if (sortKey === "accuracy-asc") {
+                    return parseInt(a.totalAccuracy || 0) - parseInt(b.totalAccuracy || 0);
+                }
+                else if (sortKey === "name-asc") {
+                    // 「生徒 01」「生徒 10」などを正しく並び替える自然順ソート [cite: 3]
+                    return (a.studentName || "").localeCompare(b.studentName || "", undefined, { numeric: true });
+                }
+                return 0;
+            });
+
+            // 3. ソート処理が施された配列を行として出力
+            filteredList.forEach(student => {
+                const progress = parseInt(student.totalProgress || 0);
+                let alertClass = "";
+                let statusBadge = "";
+
+                if (!student.timestamp || progress < 10) {
+                    alertClass = "row-alert-danger";
+                    statusBadge = '<span class="badge badge-danger">🔴 要個別指導</span>';
+                }
+                else if (student.timestamp) {
+                    const sendTime = new Date(student.timestamp).getTime();
+                    if (now - sendTime > 14 * 24 * 60 * 60 * 1000) {
+                        alertClass = "row-alert-warning";
+                        statusBadge = '<span class="badge badge-warning">🟡 停滞(14日超過)</span>';
+                    } else {
+                        statusBadge = '<span class="badge badge-success">🟢 順調</span>';
+                    }
+                }
+
+                visibleCount++;
+
+                const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
+
+                const row = document.createElement('tr');
                 row.className = alertClass;
                 row.innerHTML = `
                     <td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
@@ -1095,7 +1176,7 @@ const row = document.createElement('tr');
             document.getElementById('filter-class').value = "";
             document.getElementById('search-student').value = "";
             document.getElementById('filter-status').value = "";
-            document.getElementById('sort-key').value = "time-desc"; // 🆕 ソートキーを初期状態に戻す
+            document.getElementById('sort-key').value = "time-desc"; // 🆕 ソートキーを初期値に戻す
             applyFilters();
         }
 
