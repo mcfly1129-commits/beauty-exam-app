@@ -679,7 +679,7 @@
             </div>
         </div>
 
-        <!-- 📋 生徒個別進捗データ一覧テーブル -->
+        <!-- 📋 生徒個別進捗 data 一覧テーブル -->
         <div class="table-responsive">
             <table id="student-table">
                 <thead>
@@ -811,7 +811,7 @@
         // GAS Web App URL [cite: 97, 128]
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
 
-        let allStudentsRaw = []; 
+        let allStudentsRaw = [ ]; 
         let dashboardSummary = null; 
 
         // チャートのグローバルインスタンス
@@ -856,7 +856,7 @@
                         return;
                     }
 
-                    allStudentsRaw = res.students || [];
+                    allStudentsRaw = res.students || [ ];
                     dashboardSummary = res.dashboard || null;
 
                     renderDashboardAndTable();
@@ -955,29 +955,29 @@
 
         // 📈 マクログラフ（Chart.jsクラス別）
         function renderCharts() {
-            const classData = {};
+            const classData = { };
 
             allStudentsRaw.forEach(student => {
                 const clsKey = `${student.school || "不明"} ${student.className || "不明"}`;
-                if (!classData[clsKey]) {
-                    classData[clsKey] = {
+                if (!classData[ clsKey ]) {
+                    classData[ clsKey ] = {
                         progressSum: 0,
                         accuracySum: 0,
                         count: 0
                     };
                 }
-                classData[clsKey].progressSum += parseInt(student.totalProgress || 0);
-                classData[clsKey].accuracySum += parseInt(student.totalAccuracy || 0);
-                classData[clsKey].count++;
+                classData[ clsKey ].progressSum += parseInt(student.totalProgress || 0);
+                classData[ clsKey ].accuracySum += parseInt(student.totalAccuracy || 0);
+                classData[ clsKey ].count++;
             });
 
-            const labels = [];
-            const avgProgressList = [];
-            const avgAccuracyList = [];
+            const labels = [ ];
+            const avgProgressList = [ ];
+            const avgAccuracyList = [ ];
 
             Object.keys(classData).forEach(key => {
                 labels.push(key);
-                const item = classData[key];
+                const item = classData[ key ];
                 avgProgressList.push(Math.round(item.progressSum / item.count));
                 avgAccuracyList.push(Math.round(item.accuracySum / item.count));
             });
@@ -1142,7 +1142,7 @@
             subjectGrid.innerHTML = "";
             
             SUBJECTS_DEFINITION.forEach(sub => {
-                const stat = (student.subjects && student.subjects[sub.id]) ? student.subjects[sub.id] : { progress: 0, accuracy: 0 };
+                const stat = (student.subjects && student.subjects[ sub.id ]) ? student.subjects[ sub.id ] : { progress: 0, accuracy: 0 };
                 const gridItem = document.createElement('div');
                 gridItem.className = "subject-score-item";
                 gridItem.innerHTML = `
@@ -1156,10 +1156,10 @@
             });
 
             // 2. 時系列データ推移グラフの描画 (Chart.js 折れ線)
-            drawStudentHistoryChart(student.history || []);
+            drawStudentHistoryChart(student.history || [ ]);
 
             // 3. レーダーチャートの描画 (Chart.js レーダー)
-            drawStudentRadarChart(student.subjects || {}, student.school, student.className);
+            drawStudentRadarChart(student.subjects || { }, student.school, student.className);
 
             document.getElementById('student-modal').style.display = 'flex';
         }
@@ -1177,9 +1177,9 @@
                 return;
             }
 
-            const dates = [];
-            const progressData = [];
-            const accuracyData = [];
+            const dates = [ ];
+            const progressData = [ ];
+            const accuracyData = [ ];
 
             history.forEach(h => {
                 if (h.date) {
@@ -1238,10 +1238,10 @@
 
             const labels = SUBJECTS_DEFINITION.map(s => s.name);
             
-            const myProg = [];
-            const myAcc = [];
+            const myProg = [ ];
+            const myAcc = [ ];
             SUBJECTS_DEFINITION.forEach(sub => {
-                const stat = mySubjects[sub.id] || { progress: 0, accuracy: 0 };
+                const stat = mySubjects[ sub.id ] || { progress: 0, accuracy: 0 };
                 myProg.push(stat.progress);
                 myAcc.push(stat.accuracy);
             });
@@ -1282,7 +1282,7 @@
                             backgroundColor: 'rgba(178, 190, 195, 0.05)',
                             borderColor: 'rgba(178, 190, 195, 0.7)',
                             borderWidth: 1,
-                            borderDash: [1],
+                            borderDash: [ 4, 4 ], // ⭐ マークダウンのパース崩れを防ぐためスペースを付与 [cite: 583, 624]
                             pointBackgroundColor: 'rgba(178, 190, 195, 0.7)'
                         },
                         {
@@ -1291,7 +1291,7 @@
                             backgroundColor: 'rgba(47, 53, 66, 0.05)',
                             borderColor: 'rgba(47, 53, 66, 0.7)',
                             borderWidth: 1,
-                            borderDash: [1],
+                            borderDash: [ 4, 4 ], // ⭐ パーサーバグの100%防衛
                             pointBackgroundColor: 'rgba(47, 53, 66, 0.7)'
                         }
                     ]
