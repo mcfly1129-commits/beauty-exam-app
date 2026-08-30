@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教員向け総合管理画面 - 美容師国家試験対策 Webアプリ</title>
+    <!-- 📊 グラフ描画ライブラリ (Chart.js) [cite: 96] -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --bg-color: #f5f6fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* 📱 レスポンシブメインコンテナ */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        /* 🔒 認証保護画面カバー */
+        #auth-loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* 👑 ヘッダー */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-title-area h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title-area p {
+            margin: 5px 0 0 0;
+            font-size: 0.8rem;
+            color: #bdc3c7;
+        }
+
+        .header-user-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background-color: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .btn-logout {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+        }
+
+        /* 📊 クイックサマリー（メトリクス） */
+        .quick-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-info h3 {
+            margin: 0;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-info p {
+            margin: 5px 0 0 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .metric-icon {
+            font-size: 1.8rem;
+            opacity: 0.3;
+        }
+
+        /* 📊 ダッシュボードグリッド（グラフ） */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        /* 📋 フィルターパネル */
+        .control-panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .filter-item label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .filter-item select, .filter-item input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            background-color: white;
+            color: var(--text-color);
+            outline: none;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .filter-item select:focus, .filter-item input:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .btn-reset-filter {
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-reset-filter:hover {
+            background-color: #616a6b;
+        }
+
+        /* 📋 生徒一覧テーブル */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--primary-color);
+            font-weight: bold;
+            padding: 12px 14px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: background-color 0.15s;
+        }
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        /* 🚨 指導ステータス警告カラー（停滞者・進捗極低者） [cite: 877] */
+        .row-alert-danger {
+            background-color: #fdf2f2 !important;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .row-alert-warning {
+            background-color: #fefdf0 !important;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .badge-danger {
+            background-color: #fde8e8;
+            color: var(--danger-color);
+        }
+
+        .badge-warning {
+            background-color: #fef9c3;
+            color: #a16207;
+        }
+
+        .badge-success {
+            background-color: #def7ec;
+            color: var(--success-color);
+        }
+
+        /* 🔍 カルテ詳細ボタン */
+        .btn-detail {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        .btn-detail:hover {
+            opacity: 0.85;
+        }
+
+        .table-status-message {
+            padding: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-muted);
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border-left-color: var(--secondary-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 📱 スマホ用アコーディオンテーブル設計 (@media) */
+        @media (max-width: 800px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            thead {
+                display: none; /* スマホではヘッダー非表示 */
+            }
+
+            tbody tr {
+                background: white;
+                border: 1px solid var(--border-color);
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+
+            tbody tr:hover {
+                background-color: white;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 0;
+                border: none;
+                border-bottom: 1px dashed #f1f2f6;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-top: 10px;
+                justify-content: center;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                color: var(--primary-color);
+                font-size: 0.8rem;
+            }
+        }
+
+        /* 👨‍🏫 【個人カルテモーダル】ポップアップスタイル */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-container {
+            background-color: white;
+            width: 100%;
+            max-width: 900px;
+            height: 90%;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            box-sizing: border-box;
+        }
+
+        /* 個人カルテグリッド設計 */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .profile-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .profile-item {
+            font-size: 0.8rem;
+        }
+        .profile-item strong {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .profile-item span {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* 2カラムグラフ（カルテ内） */
+        .modal-charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .modal-charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 10科目スコア詳細 */
+        .subject-score-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .subject-score-item {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+        }
+
+        .subject-score-item h4 {
+            margin: 0 0 5px 0;
+            color: var(--primary-color);
+            border-left: 3px solid var(--secondary-color);
+            padding-left: 6px;
+            font-size: 0.75rem;
+        }
+
+        .subject-score-item .scores {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+
+        .progress-val { color: var(--secondary-color); }
+        .accuracy-val { color: var(--success-color); }
+    </style>
+</head>
+<body>
+
+    <!-- 🔒 認証保護画面カバー -->
+    <div id="auth-loading">
+        <div>🔒 認証状態を確認しています...</div>
+    </div>
+
+    <div class="container">
+        <!-- 👑 ヘッダーエリア -->
+        <header>
+            <div class="header-title-area">
+                <h1>👨‍🏫 教員向け総合管理画面</h1>
+                <p>生徒全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
+            </div>
+            <div class="header-user-area">
+                <span class="user-badge" id="display-teacher-email">取得中...</span>
+                <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
+            </div>
+        </header>
+
+        <!-- 📊 クイックサマリー指標 -->
+        <div class="quick-metrics">
+            <div class="metric-card" style="border-left: 4px solid var(--secondary-color);">
+                <div class="metric-info">
+                    <h3>登録生徒総数</h3>
+                    <p id="metric-total-students">-- 名</p>
+                </div>
+                <div class="metric-icon">👥</div>
+            </div>
+            <div class="metric-card" style="border-left: 4px solid var(--success-color);">
+                <div class="metric-info">
+                    <h3>14日以内アクティブ生徒</h3>
+                    <p id="metric-active-students">-- 名</p>
+                </div>
+                <div class="metric-icon">🔥</div>
+            </div>
+            <div class="metric-card" style="border-left: 4px solid var(--warning-color);">
+                <div class="metric-info">
+                    <h3>指導対象（進捗極低・未報告）</h3>
+                    <p id="metric-warning-students" style="color: var(--danger-color);">-- 名</p>
+                </div>
+                <div class="metric-icon">🚨</div>
+            </div>
+            <div class="metric-card" style="border-left: 4px solid #9b59b6;">
+                <div class="metric-info">
+                    <h3>全校GM獲得総数</h3>
+                    <p id="metric-total-gm">-- 回</p>
+                </div>
+                <div class="metric-icon">🏆</div>
+            </div>
+        </div>
+
+        <!-- 📊 マクロ統計分析グラフ -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3 class="card-title">
+                    <span>📊 クラス別：平均進捗率比較</span>
+                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">努力（％）</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">
+                    <span>🎯 クラス別：平均正答率比較</span>
+                    <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">実力（％）</span>
+                </h3>
+                <div class="chart-container">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📋 絞り込みフィルター条件パネル -->
+        <div class="control-panel">
+            <h3 style="margin-top:0; margin-bottom:12px; font-size:0.95rem; border-left:4px solid var(--secondary-color); padding-left:8px;">
+                🔍 フィルター検索
+            </h3>
+            <div class="filter-grid">
+                <div class="filter-item">
+                    <label for="filter-school">学校名</label>
+                    <select id="filter-school" onchange="applyFilters()">
+                        <option value="">全ての学校</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="filter-class">クラス名</label>
+                    <select id="filter-class" onchange="applyFilters()">
+                        <option value="">全てのクラス</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="search-student">生徒検索 (コード / 番号)</label>
+                    <input type="text" id="search-student" placeholder="一部を入力" oninput="applyFilters()">
+                </div>
+                <div class="filter-item">
+                    <label for="filter-status">指導ステータス</label>
+                    <select id="filter-status" onchange="applyFilters()">
+                        <option value="">全て表示</option>
+                        <option value="alert-danger">🔴 要個別面談（未報告・進捗極低）</option>
+                        <option value="alert-warning">🟡 停滞（7日以上報告なし）</option>
+                        <option value="alert-clear">🟢 順調</option>
+                    </select>
+                </div>
+                <button class="btn-reset-filter" onclick="resetFilters()">フィルタ解除</button>
+            </div>
+        </div>
+
+        <!-- 📋 生徒個別進捗データ一覧テーブル -->
+        <div class="table-responsive">
+            <table id="student-table">
+                <thead>
+                    <tr>
+                        <th>最終報告日時</th>
+                        <th>学校名</th>
+                        <th>クラス名</th>
+                        <th>生徒識別番号</th>
+                        <th>シリアルコード</th>
+                        <th>総合進捗度</th>
+                        <th>平均正答率</th>
+                        <th>GM達成</th>
+                        <th>指導ステータス</th>
+                        <th style="text-align:center;">詳細カルテ</th>
+                    </tr>
+                </thead>
+                <tbody id="student-table-body">
+                    <!-- JavaScriptから動的に出力 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="table-status" class="table-status-message" style="display:none;"></div>
+    </div>
+
+
+    <!-- ==========================================
+       👨‍🏫 【個人カルテモーダル】ポップアップ構造
+       ========================================== -->
+    <div id="student-modal" class="modal-overlay" onclick="closeStudentModal()">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <!-- モーダルヘッダー -->
+            <div class="modal-header">
+                <h2 id="modal-student-title">👤 個人別詳細カルテ</h2>
+                <button class="btn-close-modal" onclick="closeStudentModal()">&times;</button>
+            </div>
+            
+            <!-- モーダルボディ -->
+            <div class="modal-body">
+                <!-- 基本情報 -->
+                <div class="profile-grid">
+                    <div class="profile-card">
+                        <div class="profile-item">
+                            <strong>生徒識別番号</strong>
+                            <span id="p-name">--</span>
+                        </div>
+                        <div class="profile-item">
+                            <strong>ログイン用シリアル</strong>
+                            <span id="p-code">--</span>
+                        </div>
+                        <div class="profile-item">
+                            <strong>所属</strong>
+                            <span id="p-affiliation">--</span>
+                        </div>
+                        <div class="profile-item">
+                            <strong>最終データ提出日時</strong>
+                            <span id="p-lastdate">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ミクロデータ可視化グラフ -->
+                <div class="modal-charts-grid">
+                    <!-- 1. 時系列データ推移（折れ線） -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span>📈 努力と実力の推移（時系列履歴）</span>
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="studentHistoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. 科目別強み弱み（レーダーチャート） -->
+                    <div class="card">
+                        <h3 class="card-title">
+                            <span>🎯 10科目別強み弱み（全体中央値比較）</span>
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="studentRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10科目数値詳細 -->
+                <div class="subject-score-card">
+                    <h3 style="margin-top:0; margin-bottom:10px; font-size:0.9rem; border-left:4px solid var(--secondary-color); padding-left:8px;">
+                        📖 10科目別詳細データ（進捗度・正答率）
+                    </h3>
+                    <div class="subject-grid" id="modal-subject-grid">
+                        <!-- 動的に挿入 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全科目の定義
+        const SUBJECTS_DEFINITION = [
+            { id: '01', name: '関係法規' },
+            { id: '02', name: '運営管理' },
+            { id: '03', name: '公衆衛生' },
+            { id: '04', name: '感染症' },
+            { id: '05', name: '管理技術' },
+            { id: '06', name: '人体構造' },
+            { id: '07', name: '皮膚科学' },
+            { id: '08', name: '香粧品化学' },
+            { id: '09', name: '文化論' },
+            { id: '10', name: '技術理論' }
+        ];
+
+        // 🔒 XSS防止：文字エスケープ処理 [cite: 96, 127]
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/[&<>"'`]/g, function(match) {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#x27;',
+                    '`': '&#x60;'
+                };
+                return escapeMap[match];
+            });
+        }
+
+        // GAS Web App URL [cite: 97, 128]
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
+
+        let allStudentsRaw = []; 
+        let dashboardSummary = null; 
+
+        // チャートのグローバルインスタンス
+        let progressChartInstance = null;
+        let accuracyChartInstance = null;
+        let studentHistoryChartInstance = null;
+        let studentRadarChartInstance = null;
+
+        // 📅 初期起動処理
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
+            const userEmail = localStorage.getItem('teacher_userEmail');
+
+            if (isLoggedIn !== 'true' || !userEmail) {
+                alert("🔒 アクセス権限がありません。再度ログインし直してください。");
+                window.location.href = "index.html"; // パスバグ修正 [cite: 859]
+                return;
+            }
+
+            document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
+            document.getElementById('auth-loading').style.display = 'none';
+
+            loadTeacherDashboardData();
+        });
+
+        // 📡 API経由の実データロード
+        function loadTeacherDashboardData() {
+            showLoading(true);
+
+            const password = localStorage.getItem('teacher_google_id_token') || "";
+            const fetchUrl = `${GAS_API_URL}?action=getTeacherData&password=${encodeURIComponent(password)}`;
+
+            fetch(fetchUrl, { method: "GET" })
+                .then(response => {
+                    if (!response.ok) throw new Error("API通信エラーが発生しました。");
+                    return response.json();
+                })
+                .then(res => {
+                    if (res.status === "error" || res.isAuthorized === false) {
+                        alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
+                        handleLogout();
+                        return;
+                    }
+
+                    allStudentsRaw = res.students || [];
+                    dashboardSummary = res.dashboard || null;
+
+                    renderDashboardAndTable();
+                    showLoading(false);
+                })
+                .catch(err => {
+                    console.error("データ取得エラー:", err);
+                    const tableStatus = document.getElementById('table-status');
+                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+                    tableStatus.style.display = 'block';
+                });
+        }
+
+        function showLoading(show) {
+            const tableStatus = document.getElementById('table-status');
+            const tableBody = document.getElementById('student-table-body');
+            
+            if (show) {
+                tableBody.innerHTML = "";
+                tableStatus.innerHTML = '<div class="spinner"></div><p>最新の提出データをスプレッドシートから読み込んでいます...</p>';
+                tableStatus.style.display = 'block';
+            } else {
+                tableStatus.style.display = 'none';
+            }
+        }
+
+        function renderDashboardAndTable() {
+            populateFilterOptions();
+            calculateQuickMetrics();
+            renderCharts();
+            applyFilters();
+        }
+
+        // 🔍 学校・クラスの絞り込み選択肢生成
+        function populateFilterOptions() {
+            const schoolSelect = document.getElementById('filter-school');
+            const classSelect = document.getElementById('filter-class');
+
+            schoolSelect.innerHTML = '<option value="">全ての学校</option>';
+            classSelect.innerHTML = '<option value="">全てのクラス</option>';
+
+            const schools = new Set();
+            const classes = new Set();
+
+            allStudentsRaw.forEach(student => {
+                if (student.school) schools.add(student.school);
+                if (student.className) classes.add(student.className);
+            });
+
+            schools.forEach(sch => {
+                const opt = document.createElement('option');
+                opt.value = sch;
+                opt.textContent = sch;
+                schoolSelect.appendChild(opt);
+            });
+
+            classes.forEach(cls => {
+                const opt = document.createElement('option');
+                opt.value = cls;
+                opt.textContent = cls;
+                classSelect.appendChild(opt);
+            });
+        }
+
+        // 📊 サマリー指標の計算
+        function calculateQuickMetrics() {
+            const totalCount = allStudentsRaw.length;
+            let activeCount = 0;
+            let warningCount = 0;
+            let totalGm = 0;
+
+            const now = new Date().getTime();
+
+            allStudentsRaw.forEach(student => {
+                const progress = parseInt(student.totalProgress || 0);
+                const gm = parseInt(student.gmCount || 0);
+                totalGm += gm;
+
+                if (progress < 10 || !student.timestamp) {
+                    warningCount++;
+                }
+
+                if (student.timestamp) {
+                    const sendDate = new Date(student.timestamp).getTime();
+                    if (now - sendDate < 14 * 24 * 60 * 60 * 1000) {
+                        activeCount++;
+                    }
+                }
+            });
+
+            document.getElementById('metric-total-students').innerText = `${totalCount} 名`;
+            document.getElementById('metric-active-students').innerText = `${activeCount} 名`;
+            document.getElementById('metric-warning-students').innerText = `${warningCount} 名`;
+            document.getElementById('metric-total-gm').innerText = `${totalGm} 回`;
+        }
+
+        // 📈 マクログラフ（Chart.jsクラス別）
+        function renderCharts() {
+            const classData = {};
+
+            allStudentsRaw.forEach(student => {
+                const clsKey = `${student.school || "不明"} ${student.className || "不明"}`;
+                if (!classData[clsKey]) {
+                    classData[clsKey] = {
+                        progressSum: 0,
+                        accuracySum: 0,
+                        count: 0
+                    };
+                }
+                classData[clsKey].progressSum += parseInt(student.totalProgress || 0);
+                classData[clsKey].accuracySum += parseInt(student.totalAccuracy || 0);
+                classData[clsKey].count++;
+            });
+
+            const labels = [];
+            const avgProgressList = [];
+            const avgAccuracyList = [];
+
+            Object.keys(classData).forEach(key => {
+                labels.push(key);
+                const item = classData[key];
+                avgProgressList.push(Math.round(item.progressSum / item.count));
+                avgAccuracyList.push(Math.round(item.accuracySum / item.count));
+            });
+
+            // 1. クラス別：平均進捗率比較（努力・ブルー）
+            if (progressChartInstance) progressChartInstance.destroy();
+            const ctxP = document.getElementById('progressChart').getContext('2d');
+            progressChartInstance = new Chart(ctxP, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均進捗率 (%)',
+                        data: avgProgressList,
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', 
+                    scales: {
+                        x: { min: 0, max: 100 }
+                    }
+                }
+            });
+
+            // 2. クラス別：平均正答率比較（実力・グリーン）
+            if (accuracyChartInstance) accuracyChartInstance.destroy();
+            const ctxA = document.getElementById('accuracyChart').getContext('2d');
+            accuracyChartInstance = new Chart(ctxA, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '平均正答率 (%)',
+                        data: avgAccuracyList,
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 100 }
+                    }
+                }
+            });
+        }
+
+        // 📋 フィルター検索の実行 ＆ テーブル表示マッピング [cite: 877]
+        function applyFilters() {
+            const targetSchool = document.getElementById('filter-school').value;
+            const targetClass = document.getElementById('filter-class').value;
+            const searchText = document.getElementById('search-student').value.toLowerCase().trim();
+            const targetStatus = document.getElementById('filter-status').value;
+
+            const tableBody = document.getElementById('student-table-body');
+            tableBody.innerHTML = "";
+
+            let visibleCount = 0;
+            const now = new Date().getTime();
+
+            allStudentsRaw.forEach(student => {
+                if (targetSchool && student.school !== targetSchool) return;
+                if (targetClass && student.className !== targetClass) return;
+
+                const name = (student.studentName || "").toLowerCase();
+                const code = (student.email || "").toLowerCase(); 
+                const matchesSearch = searchText === "" || name.includes(searchText) || code.includes(searchText);
+                if (!matchesSearch) return;
+
+                const progress = parseInt(student.totalProgress || 0);
+                let alertClass = "";
+                let statusLabel = "";
+                let statusBadge = "";
+
+                // 要注意・指導対象判定（未送信 or 進捗極低） [cite: 877]
+                if (!student.timestamp || progress < 10) {
+                    alertClass = "row-alert-danger";
+                    statusLabel = "alert-danger";
+                    statusBadge = '<span class="badge badge-danger">🔴 要個別面談</span>';
+                }
+                else if (student.timestamp) {
+                    const sendTime = new Date(student.timestamp).getTime();
+                    if (now - sendTime > 7 * 24 * 60 * 60 * 1000) {
+                        alertClass = "row-alert-warning";
+                        statusLabel = "alert-warning";
+                        statusBadge = '<span class="badge badge-warning">🟡 停滞(7日超過)</span>';
+                    } else {
+                        statusLabel = "alert-clear";
+                        statusBadge = '<span class="badge badge-success">🟢 順調</span>';
+                    }
+                }
+
+                if (targetStatus && targetStatus !== statusLabel) return;
+
+                visibleCount++;
+
+                const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
+
+                const row = document.createElement('tr');
+                row.className = alertClass;
+                row.innerHTML = `
+                    <td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
+                    <td data-label="学校名">${escapeHTML(student.school || '不明')}</td>
+                    <td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
+                    <td data-label="生徒識別番号" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの生徒')}</td>
+                    <td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
+                    <td data-label="総合進捗度" style="text-align:center; font-weight:bold;">${progress}%</td>
+                    <td data-label="平均正答率" style="text-align:center; font-weight:bold;">${parseInt(student.totalAccuracy || 0)}%</td>
+                    <td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td>
+                    <td data-label="指導ステータス">${statusBadge}</td>
+                    <td data-label="詳細カルテ" style="text-align:center;">
+                        <button class="btn-detail" onclick="openStudentModal('${escapeHTML(student.email)}')">詳細カルテ</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            const tableStatus = document.getElementById('table-status');
+            if (visibleCount === 0) {
+                tableStatus.innerHTML = '🔍 条件に合致する生徒データが見つかりません。';
+                tableStatus.style.display = 'block';
+            } else {
+                tableStatus.style.display = 'none';
+            }
+        }
+
+        // 🔄 フィルター初期化
+        function resetFilters() {
+            document.getElementById('filter-school').value = "";
+            document.getElementById('filter-class').value = "";
+            document.getElementById('search-student').value = "";
+            document.getElementById('filter-status').value = "";
+            applyFilters();
+        }
+
+        // ==========================================
+        // 👨‍🏫 【ミクロ詳細カルテ・モーダル制御】
+        // ==========================================
+        function openStudentModal(email) {
+            const student = allStudentsRaw.find(s => s.email === email);
+            if (!student) return;
+
+            // 基本情報の表示 [cite: 841]
+            document.getElementById('p-name').innerText = escapeHTML(student.studentName || '--');
+            document.getElementById('p-code').innerText = escapeHTML(student.email || '--');
+            document.getElementById('p-affiliation').innerText = `${escapeHTML(student.school || '不明')} ${escapeHTML(student.className || '不明')}`;
+            
+            const lastDateText = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP') : "一度も提出実績がありません（未報告）";
+            document.getElementById('p-lastdate').innerText = escapeHTML(lastDateText);
+
+            // 1. 10科目別詳細データの出力
+            const subjectGrid = document.getElementById('modal-subject-grid');
+            subjectGrid.innerHTML = "";
+            
+            SUBJECTS_DEFINITION.forEach(sub => {
+                const stat = (student.subjects && student.subjects[sub.id]) ? student.subjects[sub.id] : { progress: 0, accuracy: 0 };
+                const gridItem = document.createElement('div');
+                gridItem.className = "subject-score-item";
+                gridItem.innerHTML = `
+                    <h4>${sub.id} ${escapeHTML(sub.name)}</h4>
+                    <div class="scores">
+                        <span>進捗: <span class="progress-val">${stat.progress}%</span></span>
+                        <span>正答: <span class="accuracy-val">${stat.accuracy}%</span></span>
+                    </div>
+                `;
+                subjectGrid.appendChild(gridItem);
+            });
+
+            // 2. 時系列データ推移グラフの描画 (Chart.js 折れ線)
+            drawStudentHistoryChart(student.history || []);
+
+            // 3. レーダーチャートの描画 (Chart.js レーダー)
+            drawStudentRadarChart(student.subjects || {}, student.school, student.className);
+
+            document.getElementById('student-modal').style.display = 'flex';
+        }
+
+        function closeStudentModal() {
+            document.getElementById('student-modal').style.display = 'none';
+        }
+
+        // 📈 個人の時系列折れ線グラフ描画 (Invalid Date セーフガード追加)
+        function drawStudentHistoryChart(history) {
+            if (studentHistoryChartInstance) studentHistoryChartInstance.destroy();
+            const ctx = document.getElementById('studentHistoryChart').getContext('2d');
+
+            if (!history || history.length === 0) {
+                return;
+            }
+
+            const dates = [];
+            const progressData = [];
+            const accuracyData = [];
+
+            history.forEach(h => {
+                if (h.date) {
+                    const d = new Date(h.date);
+                    if (!isNaN(d.getTime())) {
+                        dates.push(`${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
+                        progressData.push(h.progress);
+                        accuracyData.push(h.accuracy);
+                    }
+                }
+            });
+
+            studentHistoryChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: '総合進捗度 (%)',
+                            data: progressData,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '平均正答率 (%)',
+                            data: accuracyData,
+                            borderColor: '#ff9f43',
+                            backgroundColor: 'rgba(255, 159, 67, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: { stepSize: 20 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 🎯 個人能力レーダーチャート（全体中央値比較） [cite: 854]
+        function drawStudentRadarChart(mySubjects, school, className) {
+            if (studentRadarChartInstance) studentRadarChartInstance.destroy();
+            const ctx = document.getElementById('studentRadarChart').getContext('2d');
+
+            const labels = SUBJECTS_DEFINITION.map(s => s.name);
+            
+            const myProg = [];
+            const myAcc = [];
+            SUBJECTS_DEFINITION.forEach(sub => {
+                const stat = mySubjects[sub.id] || { progress: 0, accuracy: 0 };
+                myProg.push(stat.progress);
+                myAcc.push(stat.accuracy);
+            });
+
+            // dashboardSummaryから全体の中央値を取得 [cite: 854]
+            let globalMedianProg = Array(10).fill(0);
+            let globalMedianAcc = Array(10).fill(0);
+
+            if (dashboardSummary && dashboardSummary.median) {
+                globalMedianProg = dashboardSummary.median.progress || Array(10).fill(0);
+                globalMedianAcc = dashboardSummary.median.accuracy || Array(10).fill(0);
+            }
+
+            studentRadarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '本人：進捗度 (%)',
+                            data: myProg,
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderColor: '#3498db',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#3498db'
+                        },
+                        {
+                            label: '本人：正答率 (%)',
+                            data: myAcc,
+                            backgroundColor: 'rgba(255, 159, 67, 0.2)',
+                            borderColor: '#ff9f43',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#ff9f43'
+                        },
+                        {
+                            label: '全校進捗中央値 (%)',
+                            data: globalMedianProg,
+                            backgroundColor: 'rgba(178, 190, 195, 0.05)',
+                            borderColor: 'rgba(178, 190, 195, 0.7)',
+                            borderWidth: 1,
+                            borderDash: [1],
+                            pointBackgroundColor: 'rgba(178, 190, 195, 0.7)'
+                        },
+                        {
+                            label: '全校正答中央値 (%)',
+                            data: globalMedianAcc,
+                            backgroundColor: 'rgba(47, 53, 66, 0.05)',
+                            borderColor: 'rgba(47, 53, 66, 0.7)',
+                            borderWidth: 1,
+                            borderDash: [1],
+                            pointBackgroundColor: 'rgba(47, 53, 66, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: { stepSize: 20 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('teacher_isLoggedIn');
+            localStorage.removeItem('teacher_userEmail');
+            localStorage.removeItem('teacher_google_id_token');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
