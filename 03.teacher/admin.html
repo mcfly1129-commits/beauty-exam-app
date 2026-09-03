@@ -900,8 +900,13 @@ function loadTeacherDashboardData() {
                 .catch(err => {
                     console.error("データ取得エラー:", err);
                     const tableStatus = document.getElementById('table-status');
-                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。安全のため自動ログアウトします。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
                     tableStatus.style.display = 'block';
+                
+                    // 🔒 安全対策：通信エラー発生時も3秒後に強制ログアウトしてログイン画面に戻す
+                    setTimeout(() => {
+                        handleLogout();
+                    }, 3000);
                 });
         }
 
