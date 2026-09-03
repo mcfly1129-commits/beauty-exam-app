@@ -856,13 +856,13 @@ document.addEventListener('DOMContentLoaded', () => {
   loadTeacherDashboardData();
 });
 
-// 📡 POSTメソッドでの安全なデータ取得 ＆ キャッシュコントロールの追加
+// 📡 POSTメソッドでの安全なデータ取得 ＆ キャッシュコントロール ＆ 強制自動ログアウト
 function loadTeacherDashboardData() {
   showLoading(true);
 
   const password = localStorage.getItem('teacher_google_id_token') || "";
   
-  // パスワードなどの機密情報はURLに載せず、payloadにまとめてPOSTのbodyで送信
+  // 安全対策：パスワードなどの機密情報はURLに載せず、payloadにまとめてPOSTのbodyで送信
   const payload = {
     action: "getTeacherData",
     password: password
@@ -871,44 +871,42 @@ function loadTeacherDashboardData() {
   fetch(GAS_API_URL, { 
     method: "POST",
     headers: {
-      // GAS側がパースできるように plain/text 形式でJSON文字列を送信
       "Content-Type": "text/plain",
-      // 多層防御：認証データや個人情報を含む画面のキャッシュをブラウザやプロキシに保存させない
       "Cache-Control": "no-store, no-cache, must-revalidate",
       "Pragma": "no-cache"
     },
     body: JSON.stringify(payload),
-    cache: "no-store" // ブラウザ側のキャッシュ機構自体も完全に不使用に設定
+    cache: "no-store"
   })
   .then(response => {
     if (!response.ok) throw new Error("API通信エラーが発生しました。");
     return response.json();
   })
-                .then(res => {
-                    if (res.status === "error" || res.isAuthorized === false) {
-                        alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
-                        handleLogout();
-                        return;
-                    }
+  .then(res => {
+    if (res.status === "error" || res.isAuthorized === false) {
+      alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
+      handleLogout();
+      return;
+    }
 
-                    allStudentsRaw = res.students || [ ];
-                    dashboardSummary = res.dashboard || null;
+    allStudentsRaw = res.students || [ ];
+    dashboardSummary = res.dashboard || null;
 
-                    renderDashboardAndTable();
-                    showLoading(false);
-                })
-                .catch(err => {
-                    console.error("データ取得エラー:", err);
-                    const tableStatus = document.getElementById('table-status');
-                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。安全のため自動ログアウトします。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
-                    tableStatus.style.display = 'block';
-                
-                    // 🔒 安全対策：通信エラー発生時も3秒後に強制ログアウトしてログイン画面に戻す
-                    setTimeout(() => {
-                        handleLogout();
-                    }, 3000);
-                });
-        }
+    renderDashboardAndTable();
+    showLoading(false);
+  })
+  .catch(err => {
+    console.error("データ取得エラー:", err);
+    const tableStatus = document.getElementById('table-status');
+    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。安全のため自動ログアウトします。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+    tableStatus.style.display = 'block';
+
+    // 🔒 安全対策：通信エラーや、学生アカウントによる不正アクセス試行時は、3秒後に強制ログアウトしてログイン画面に戻す
+    setTimeout(() => {
+      handleLogout();
+    }, 3000);
+  });
+}
 
         function showLoading(show) {
             const tableStatus = document.getElementById('table-status');
