@@ -668,7 +668,7 @@
                 </div>
                 <div class="filter-item">
                     <label for="filter-status">指導ステータス</label>
-                    <select id="filter-status" onchange="applyFilters()">
+                    <select id="filter-status">
                         <option value="">全て表示</option>
                         <option value="alert-danger">🔴 要個別指導（未報告・進捗極低:10%未満）</option>
                         <option value="alert-warning">🟡 停滞（14日以上報告なし）</option>
@@ -678,7 +678,7 @@
                 <!-- 🆕 並び替えプルダウンを追加 -->
                 <div class="filter-item">
                     <label for="sort-key">並び替え</label>
-                    <select id="sort-key" onchange="applyFilters()">
+                    <select id="sort-key">
                         <option value="time-desc">最終報告（新しい順）</option>
                         <option value="time-asc">最終報告（古い順）</option>
                         <option value="progress-desc">総合進捗率（高い順）</option>
@@ -688,7 +688,7 @@
                         <option value="name-asc">生徒識別番号順</option>
                     </select>
                 </div>
-                <button class="btn-reset-filter" onclick="resetFilters()">フィルタ解除</button>
+                <button class="btn-reset-filter" id="btn-reset-filter">フィルタ解除</button>
             </div>
         </div>
 
@@ -846,6 +846,30 @@
 
             document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
             document.getElementById('auth-loading').style.display = 'none';
+
+            // ⭕ 【追加】ログアウトボタンのイベントを安全に紐付け（インラインonclickを廃止したため）
+            const logoutBtn = document.getElementById('btn-logout');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
+
+            // ⭕ 【追加】指導ステータスセレクトボックスのイベントを安全に紐付け
+            const filterStatus = document.getElementById('filter-status');
+            if (filterStatus) {
+                filterStatus.addEventListener('change', applyFilters);
+            }
+
+            // ⭕ 【追加】並び替えセレクトボックスのイベントを安全に紐付け
+            const sortKey = document.getElementById('sort-key');
+            if (sortKey) {
+                sortKey.addEventListener('change', applyFilters);
+            }
+
+            // ⭕ 【追加】フィルタ解除ボタンのイベントを安全に紐付け
+            const resetFilterBtn = document.getElementById('btn-reset-filter');
+            if (resetFilterBtn) {
+                resetFilterBtn.addEventListener('click', resetFilters);
+            }
 
             loadTeacherDashboardData();
         });
