@@ -448,7 +448,7 @@
 
 <!-- 📄 オープンソース・ライセンス情報（修正版：被り解消） -->
 <div style="text-align: center; margin-top: 10px; margin-bottom: 20px; font-size: 0.75rem; color: #7f8c8d;">
-    <a href="#" id="btn-license-open" style="color: #7f8c8d; text-decoration: underline;">📄 オープンソース・ライセンス情報</a>
+    <a href="#" onclick="document.getElementById('license-modal-quiz').style.display='flex'; return false;" style="color: #7f8c8d; text-decoration: underline;">📄 オープンソース・ライセンス情報</a>
 </div>
 
         <!-- 📄 ライセンス表記モーダル構造（新規追加） -->
@@ -462,7 +462,7 @@
                     Copyright (c) 2020, Kiril Vatev<br>
                     Released under the MIT License</p>
                 </div>
-                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;" id="btn-license-close">閉じる</button>
+                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;" onclick="document.getElementById('license-modal-quiz').style.display='none'">閉じる</button>
             </div>
         </div>
 
@@ -473,9 +473,9 @@
         
         <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
         
-        <button id="all-history-btn" class="btn-all-history" >📊 履歴・分析</button>
+        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
         
-        <button id="weakness-btn" class="btn-weakness" >❌ 弱点克服モードをスタート</button>
+        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
 
         <div id="unit-list"></div>
 
@@ -485,14 +485,14 @@
         ↓この範囲の学習進捗を最初からやり直す↓
     </p>
     <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
-    <button class="btn-form" id="btn-reset-learning" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
         学習データをリセット
     </button>
 </div>
 
         <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
 
-        <button class="btn-link" id="btn-back-to-subject">⬅️ 範囲選択へ戻る</button>
+        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
                 
         <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
 
@@ -514,7 +514,7 @@
         <div class="quiz-header">
             <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
             <div class="quiz-meta-wrap">
-                <button id="bookmark-toggle-btn" >☆ をつける</button>
+                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
                 <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
             </div>
         </div>
@@ -522,8 +522,8 @@
         <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
         
         <div id="input-area" class="ox-container">
-            <button class="btn-o" id="btn-quiz-o">〇</button>
-            <button class="btn-x" id="btn-quiz-x">×</button>
+            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
+            <button class="btn-x" onclick="submitAnswer(false)">×</button>
         </div>
 
         <div id="result-area" class="result-area">
@@ -531,26 +531,26 @@
             <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
             <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
             <div style="display: flex; gap: 8px;">
-                <button class="btn-primary" class="btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="history-modal" class="modal-overlay" id="btn-close-history-modal">
+<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
         <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
         
         <div class="sort-container" id="modal-sort-container">
-            <button id="sort-btn-default" class="btn-sort active-sort">出典順</button>
-            <button id="sort-btn-count" class="btn-sort">回答数順</button>
-            <button id="sort-btn-wrong" class="btn-sort">誤答数順</button>
-            <button id="sort-btn-bookmark" class="btn-sort">⭐マーク</button>
+            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐マーク</button>
         </div>
 
         <div id="modal-history-list"></div>
-        <button class="btn-primary" id="btn-close-history-modal" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
     </div>
 </div>
 
@@ -762,123 +762,6 @@ window.onload = function() {
     navigateTo('subject-screen');
     checkDailyStreakOnLoad(); 
     renderMenu();
-
-
-  // ==========================================================
-  // 🛡️【CSP完全適合】安全なイベントリスナーの一括紐付けとイベント委譲
-  // ==========================================================
-  
-  // 1. 静的要素の安全なクリック登録
-  const btnLicenseOpen = document.getElementById('btn-license-open');
-  if (btnLicenseOpen) {
-    btnLicenseOpen.addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('license-modal-quiz').style.display = 'flex';
-    });
-  }
-  const btnLicenseClose = document.getElementById('btn-license-close');
-  if (btnLicenseClose) {
-    btnLicenseClose.addEventListener('click', () => {
-      document.getElementById('license-modal-quiz').style.display = 'none';
-    });
-  }
-  const btnAllHistory = document.getElementById('all-history-btn');
-  if (btnAllHistory) {
-    btnAllHistory.addEventListener('click', openAllHistoryModal);
-  }
-  const btnWeakness = document.getElementById('weakness-btn');
-  if (btnWeakness) {
-    btnWeakness.addEventListener('click', startWeaknessQuiz);
-  }
-  const btnResetLearning = document.getElementById('btn-reset-learning');
-  if (btnResetLearning) {
-    btnResetLearning.addEventListener('click', resetLearningData);
-  }
-  const btnBackToSubject = document.getElementById('btn-back-to-subject');
-  if (btnBackToSubject) {
-    btnBackToSubject.addEventListener('click', () => navigateTo('subject-screen'));
-  }
-  const btnBookmarkToggle = document.getElementById('bookmark-toggle-btn');
-  if (btnBookmarkToggle) {
-    btnBookmarkToggle.addEventListener('click', toggleBookmark);
-  }
-  const btnQuizO = document.getElementById('btn-quiz-o');
-  if (btnQuizO) {
-    btnQuizO.addEventListener('click', () => submitAnswer(true));
-  }
-  const btnQuizX = document.getElementById('btn-quiz-x');
-  if (btnQuizX) {
-    btnQuizX.addEventListener('click', () => submitAnswer(false));
-  }
-  const btnCloseHistoryModal = document.getElementById('btn-close-history-modal');
-  if (btnCloseHistoryModal) {
-    btnCloseHistoryModal.addEventListener('click', closeHistoryModal);
-  }
-
-  // 2. 履歴モーダルのソートボタン群に対するイベント委譲
-  const sortContainer = document.getElementById('modal-sort-container');
-  if (sortContainer) {
-    sortContainer.addEventListener('click', (e) => {
-      const btn = e.target.closest('.btn-sort');
-      if (btn) {
-        const id = btn.id;
-        if (id === 'sort-btn-default') toggleSort('default');
-        else if (id === 'sort-btn-count') toggleSort('count');
-        else if (id === 'sort-btn-wrong') toggleSort('wrong');
-        else if (id === 'sort-btn-bookmark') toggleSort('bookmark');
-      }
-    });
-  }
-
-  // 3. 【イベント委譲】単元リスト（動的生成）
-  const unitList = document.getElementById('unit-list');
-  if (unitList) {
-    unitList.addEventListener('click', (e) => {
-      const openHistoryBtn = e.target.closest('.btn-open-history');
-      const triggerQuizBtn = e.target.closest('.btn-trigger-quiz');
-      if (openHistoryBtn) {
-        openHistoryModal(openHistoryBtn.getAttribute('data-unit'));
-      } else if (triggerQuizBtn) {
-        startQuiz(triggerQuizBtn.getAttribute('data-unit'));
-      }
-    });
-  }
-
-  // 4. 【イベント委譲】結果画面の動的ボタン
-  const resultArea = document.getElementById('result-area');
-  if (resultArea) {
-    resultArea.addEventListener('click', (e) => {
-      if (e.target.classList.contains('btn-back-home')) {
-        const completed = e.target.getAttribute('data-completed') === 'true';
-        backToHome(completed);
-      } else if (e.target.classList.contains('btn-start-weakness')) {
-        startWeaknessQuiz();
-      } else if (e.target.classList.contains('btn-start-quiz')) {
-        startQuiz(e.target.getAttribute('data-unit'));
-      } else if (e.target.classList.contains('btn-next-question')) {
-        nextQuestion();
-      }
-    });
-  }
-
-  // 5. 【イベント委譲】履歴モーダル内の「⭐解除」と「解説表示」
-  const historyList = document.getElementById('modal-history-list');
-  if (historyList) {
-    historyList.addEventListener('click', (e) => {
-      const removeBookmarkBtn = e.target.closest('.btn-history-bookmark-remove');
-      const viewExpBtn = e.target.closest('.btn-view-exp');
-      if (removeBookmarkBtn) {
-        e.stopPropagation();
-        const qId = removeBookmarkBtn.getAttribute('data-qid');
-        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-        bIds = bIds.filter(id => id !== qId);
-        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
-        renderHistoryList();
-      } else if (viewExpBtn) {
-        toggleHistoryExp(viewExpBtn.getAttribute('data-qid'));
-      }
-    });
-  }
 };
 
 function checkDailyStreakOnLoad() {
@@ -922,12 +805,12 @@ function renderUnitList() {
         
         let buttonHtml = isCompleted 
             ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
-            : `<button class="btn-primary btn-start btn-trigger-quiz" data-unit="${unitName}">開始</button>`;
+            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
 
         const unitHtml = `
             <div class="unit-item">
                 <div class="unit-info">
-                    <div class="unit-name btn-open-history" data-unit="${unitName}" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
                     </div>
@@ -1321,7 +1204,7 @@ function submitAnswer(userAns) {
             // ★ 追加：不正解（失敗）時も共通実績関数を呼び出し、連勝数をリセットする
             updateDailyStreakStats(false);
             
-            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" class="btn-back-home" data-completed="false">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
         } else if (isLastQuestion) {
             dailyStreak++;
             lastDailyDate = getTodayString();
@@ -1332,12 +1215,12 @@ function submitAnswer(userAns) {
             updateDailyStreakStats(true);
 
             triggerFeverEffect();
-            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" class="btn-back-home" data-completed="true">🎉 本日のスタンプ獲得！ホームへ</button>`;
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
         } else {
-            actionButtonsHtml = `<button class="btn-primary" class="btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
         }
     } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
-        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" class="btn-back-home" data-completed="false">❌ 克服失敗：単元画面に戻る</button>`;
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
     } else if (isLastQuestion) {
         if (isWeaknessMode) {
             weaknessSuccessStreak++;
@@ -1346,11 +1229,11 @@ function submitAnswer(userAns) {
             if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
                 isMasterStatus = true;
                 localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
-                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" class="btn-back-home" data-completed="true">👑 祝・マスター達成！<br>画面を戻る</button>`;
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
             } else {
                 actionButtonsHtml = `
-                    <button class="btn-primary"  style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
-                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="true">記録を維持<br>一覧に戻る</button>
+                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
                 `;
             }
         } else {
@@ -1360,17 +1243,17 @@ function submitAnswer(userAns) {
             const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
             if (remain.length > 0) {
                 actionButtonsHtml = `
-                    <button class="btn-primary" class="btn-start-quiz" data-unit="${currentUnit}" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
-                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="false">単元一覧に戻る</button>
+                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
                 `;
             } else {
-                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" class="btn-back-home" data-completed="false">🎉 全問クリア！一覧に戻る</button>`;
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
             }
         }
     } else {
         actionButtonsHtml = `
-            <button class="btn-primary" class="btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
-            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="false">単元を中断<br>して戻る</button>
+            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
         `;
     }
 
@@ -1626,7 +1509,13 @@ let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionS
         if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
 
         let removeBookmarkBtnHtml = isBookmarked 
-            ? `<button class="btn-history-bookmark-remove" data-qid="${safeQId}" style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+            ? `<button onclick="
+                event.stopPropagation(); 
+                let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+                bIds = bIds.filter(id => id !== '${safeQId}');
+                localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+                renderHistoryList();
+              " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
             : "";
 
         const itemHtml = `
@@ -1640,7 +1529,7 @@ let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionS
                 </div>
                 <div style="color:#2d3436; line-height:1.4;">${safeText}</div>
                 <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
-                <button class="btn-view-exp" class="btn-view-exp" data-qid="${safeQId}">解説を表示</button>
+                <button class="btn-view-exp" onclick="toggleHistoryExp('${safeQId}')">解説を表示</button>
                 <div id="hist-exp-${safeQId}" class="history-exp-box">${safeExp}</div>
             </div>
         `;
