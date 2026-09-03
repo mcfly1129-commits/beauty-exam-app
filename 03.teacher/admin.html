@@ -891,7 +891,7 @@ function loadTeacherDashboardData() {
         method: "POST",
         cache: "no-store", // ブラウザによるキャッシュを完全無効化
         headers: { 
-            "Content-Type": "text/plain;charset=utf-8",
+            "Content-Type": "text/plain;charset=utf-8", // ★CORS事前通信(Preflight)を回避するための重要指定
             "Pragma": "no-cache",
             "Cache-Control": "no-cache"
         },
