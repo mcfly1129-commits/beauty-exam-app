@@ -244,19 +244,16 @@
 <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
   <input type="password" id="login-password" placeholder="パスワードを入力" 
          style="width: 250px; padding: 12px; border-radius: 8px; border: 2px solid #fab1a0; font-size: 1rem; text-align: center; box-sizing: border-box;">
-  <button onclick="handlePasswordLogin()" 
-          style="width: 250px; padding: 12px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">
-    ログインする
-  </button>
+<button id="btn-login-submit" style="width: 250px; padding: 12px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;">ログインする</button>
 </div>
 <p id="login-error-msg" style="color: #ff7675; font-size: 0.8rem; font-weight: bold; margin-top: 15px; display: none;"></p>
 </div>
 
 <!-- 📄 ログイン画面用の利用規約・ポリシー・ライセンスボタン群 -->
     <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%;">
-        <button class="btn-form" style="background-color: #f1f2f6; color: #57606f; margin: 0;" onclick="document.getElementById('terms-modal').style.display='flex'">📜 利用規約</button>
-        <button class="btn-form" style="background-color: #f1f2f6; color: #57606f; margin: 0;" onclick="document.getElementById('privacy-modal').style.display='flex'">🔒 プライバシーポリシー</button>
-        <button class="btn-form" style="background-color: #f1f2f6; color: #57606f; margin: 0;" onclick="document.getElementById('license-modal').style.display='flex'">📄 オープンソース・ライセンス情報</button>
+<button class="btn-form" id="btn-terms-open" style="background-color: #f1f2f6; color: #57606f; margin: 0;">📜 利用規約</button>
+<button class="btn-form" id="btn-privacy-open" style="background-color: #f1f2f6; color: #57606f; margin: 0;">🔒 プライバシーポリシー</button>
+<button class="btn-form" id="btn-license-open" style="background-color: #f1f2f6; color: #57606f; margin: 0;">📄 オープンソース・ライセンス情報</button>
     </div>
 </div>
 
@@ -271,7 +268,7 @@
             🔑 検証者:<br>
             <b id="display-user-email" style="word-break: break-all; color: #d35400;">取得中...</b>
         </div>
-        <button class="btn-logout" onclick="handleLogout()" style="flex-shrink: 0;">ログアウト</button>
+        <button class="btn-logout" id="btn-logout-home" style="flex-shrink: 0;">ログアウト</button>
     </div>
 
     <!-- デイリー実績バッジ -->
@@ -311,15 +308,15 @@
     
     <div class="speed-menu-grid">
         <!-- ⚡ スピード特訓（未経験優先・全科目シャッフル） -->
-        <div class="speed-card-hero" onclick="startSpeedQuiz('training')">
-            <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
-                <span style="white-space: nowrap;">⚡ スピード特訓 開始</span>
-                <span style="font-size: 0.7rem; background: rgba(255,255,255,0.25); padding: 3px 6px; border-radius: 4px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">未経験を最優先！</span>
-            </div>
-            <div style="font-size: 0.75rem; margin-top: 6px; opacity: 0.95; line-height: 1.4;">
-                とりあえず範囲選択なしで即スタート。<br>最短で駆け上がろう！
-            </div>
-        </div>
+<div class="speed-card-hero" id="btn-speed-hero">
+    <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+        <span style="white-space: nowrap;">⚡ スピード特訓 開始</span>
+        <span style="font-size: 0.7rem; background: rgba(255,255,255,0.25); padding: 3px 6px; border-radius: 4px; font-weight: bold; white-space: nowrap; flex-shrink: 0;">未経験を最優先！</span>
+    </div>
+    <div style="font-size: 0.75rem; margin-top: 6px; opacity: 0.95; line-height: 1.4;">
+        とりあえず範囲選択なしで即スタート。<br>最短で駆け上がろう！
+    </div>
+</div>
         
         <div class="speed-row-sub">
             <!-- ⭐ マイ・ベスト問題集 -->
@@ -327,8 +324,8 @@
                 <div class="speed-sub-title">⭐ マイ・ベスト</div>
                 <div class="speed-sub-count">現在：<strong id="speed-fav-badge">0</strong> 問</div>
                 <div class="speed-btn-group">
-                    <button class="btn-play-orange" onclick="startSpeedQuiz('bookmark')">解く</button>
-                    <button class="btn-history-gray" onclick="openSpeedHistoryModal('bookmark')">履歴</button>
+<button class="btn-play-orange" id="btn-speed-play-bookmark">解く</button>
+<button class="btn-history-gray" id="btn-speed-history-bookmark">履歴</button>
                 </div>
             </div>
             
@@ -337,8 +334,8 @@
                 <div class="speed-sub-title">❌ 弱点克服</div>
                 <div class="speed-sub-count">現在：<strong id="speed-wrong-badge">0</strong> 問</div>
                 <div class="speed-btn-group">
-                    <button class="btn-play-red" onclick="startSpeedQuiz('wrong')">解く</button>
-                    <button class="btn-history-gray" onclick="openSpeedHistoryModal('wrong')">履歴</button>
+<button class="btn-play-red" id="btn-speed-play-wrong">解く</button>
+<button class="btn-history-gray" id="btn-speed-history-wrong">履歴</button>
                 </div>
             </div>
         </div>
@@ -371,17 +368,17 @@
         <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
     </div>
 
- <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+ <button class="btn-form" id="btn-feedback-form">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
 
 </div>
 
 <!-- モーダル構造 -->
-<div id="history-modal" class="modal-overlay" onclick="closeHomeHistoryModal()">
+<div id="history-modal" class="modal-overlay">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div id="modal-subject-title" class="modal-title">科目別 総合学習履歴</div>
         <div id="modal-score-summary" class="modal-summary"></div>
         <div id="modal-history-list" style="display:flex; flex-direction:column; gap:8px;"></div>
-        <button class="modal-close-btn" onclick="closeHomeHistoryModal()">閉じる</button>
+        <button class="modal-close-btn" id="btn-close-home-history">閉じる</button>
     </div>
 </div>
 
@@ -876,8 +873,108 @@ function updateSpeedDashboardBadges() {
 // 既存の window.onload / page-show と調和するように読み込み登録
 const originalInit = window.onload;
 window.onload = function() {
-    if (originalInit) originalInit();
-    updateSpeedDashboardBadges();
+  if (originalInit) originalInit();
+  updateSpeedDashboardBadges();
+
+  // ==========================================================
+  // 🛡️【インラインJS完全排除】安全なイベントリスナーの一括紐付け
+  // ==========================================================
+
+  // -- 1. ログイン前画面の各種処理 --
+  const btnTermsOpen = document.getElementById('btn-terms-open');
+  if (btnTermsOpen) {
+    btnTermsOpen.addEventListener('click', () => {
+      document.getElementById('terms-modal').style.display = 'flex';
+    });
+  }
+  const btnPrivacyOpen = document.getElementById('btn-privacy-open');
+  if (btnPrivacyOpen) {
+    btnPrivacyOpen.addEventListener('click', () => {
+      document.getElementById('privacy-modal').style.display = 'flex';
+    });
+  }
+  const btnFeedbackForm = document.getElementById('btn-feedback-form');
+  if (btnFeedbackForm) {
+    btnFeedbackForm.addEventListener('click', () => {
+      window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank');
+    });
+  } 
+  const historyModal = document.getElementById('history-modal');
+  if (historyModal) {
+    historyModal.addEventListener('click', (e) => {
+      if (e.target === historyModal) {
+        closeHomeHistoryModal();
+      }
+    });
+  }
+  const btnLicenseOpen = document.getElementById('btn-license-open');
+  if (btnLicenseOpen) {
+    btnLicenseOpen.addEventListener('click', () => {
+      document.getElementById('license-modal').style.display = 'flex';
+    });
+  }
+  const btnLoginSubmit = document.getElementById('btn-login-submit');
+  if (btnLoginSubmit) {
+    btnLoginSubmit.addEventListener('click', handlePasswordLogin);
+  }
+
+  // -- 2. ログイン後メイン画面の処理 --
+  const btnLogoutHome = document.getElementById('btn-logout-home');
+  if (btnLogoutHome) {
+    btnLogoutHome.addEventListener('click', handleLogout);
+  }
+  const btnSpeedHero = document.getElementById('btn-speed-hero');
+  if (btnSpeedHero) {
+    btnSpeedHero.addEventListener('click', () => startSpeedQuiz('training'));
+  }
+  const btnSpeedPlayBookmark = document.getElementById('btn-speed-play-bookmark');
+  if (btnSpeedPlayBookmark) {
+    btnSpeedPlayBookmark.addEventListener('click', () => startSpeedQuiz('bookmark'));
+  }
+  const btnSpeedHistoryBookmark = document.getElementById('btn-speed-history-bookmark');
+  if (btnSpeedHistoryBookmark) {
+    btnSpeedHistoryBookmark.addEventListener('click', () => openSpeedHistoryModal('bookmark'));
+  }
+  const btnSpeedPlayWrong = document.getElementById('btn-speed-play-wrong');
+  if (btnSpeedPlayWrong) {
+    btnSpeedPlayWrong.addEventListener('click', () => startSpeedQuiz('wrong'));
+  }
+  const btnSpeedHistoryWrong = document.getElementById('btn-speed-history-wrong');
+  if (btnSpeedHistoryWrong) {
+    btnSpeedHistoryWrong.addEventListener('click', () => openSpeedHistoryModal('wrong'));
+  }
+
+  // -- 3. モーダル制御 --
+  const btnCloseHomeHistory = document.getElementById('btn-close-home-history');
+  if (btnCloseHomeHistory) {
+    btnCloseHomeHistory.addEventListener('click', closeHomeHistoryModal);
+  }
+  const btnSpeedHistoryClose = document.getElementById('btn-speed-history-close');
+  if (btnSpeedHistoryClose) {
+    btnSpeedHistoryClose.addEventListener('click', closeSpeedHistoryModal);
+  }
+
+  // -- 4. スピードクイズ画面 --
+  const speedBookmarkBtn = document.getElementById('speed-bookmark-btn');
+  if (speedBookmarkBtn) {
+    speedBookmarkBtn.addEventListener('click', toggleSpeedBookmark);
+  }
+  const btnSpeedO = document.getElementById('btn-speed-o');
+  if (btnSpeedO) {
+    btnSpeedO.addEventListener('click', () => submitSpeedAnswer(true));
+  }
+  const btnSpeedX = document.getElementById('btn-speed-x');
+  if (btnSpeedX) {
+    btnSpeedX.addEventListener('click', () => submitSpeedAnswer(false));
+  }
+  const speedNextBtn = document.getElementById('speed-next-btn');
+  if (speedNextBtn) {
+    speedNextBtn.addEventListener('click', nextSpeedQuestion);
+  }
+  const btnSpeedClose = document.getElementById('btn-speed-close');
+  if (btnSpeedClose) {
+    btnSpeedClose.addEventListener('click', closeSpeedQuiz);
+  }
 };
 
 window.addEventListener('pageshow', () => {
@@ -1251,21 +1348,6 @@ function closeSpeedHistoryModal() {
     document.getElementById("speed-history-modal").style.display = "none";
 }
 
-// 簡易テキストエスケープ(XSS防止用)
-function escapeHTML(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/[&<>"'`]/g, function(match) {
-        const escapeMap = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            '`': '&#x60;'
-        };
-        return escapeMap[match];
-    });
-}
 </script>
 
 <!-- ==========================================
@@ -1277,7 +1359,7 @@ function escapeHTML(str) {
         <div class="quiz-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
             <span id="speed-quiz-mode-title" class="quiz-unit-title-box" style="background: #e1f5fe; color: #0288d1; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">スピードクイズ</span>
             <div class="quiz-meta-wrap" style="display: flex; align-items: center; gap: 8px;">
-                <button id="speed-bookmark-btn" onclick="toggleSpeedBookmark()" style="background: #f1f2f6; border: 1px solid #ced6e0; padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">☆ をつける</button>
+                <button id="speed-bookmark-btn" style="background: #f1f2f6; border: 1px solid #ced6e0; padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">☆ をつける</button>
                 <span id="speed-quiz-progress-num" class="quiz-progress-text" style="font-size: 0.8rem; font-weight: bold;">1 / 3 問目</span>
             </div>
         </div>
@@ -1286,8 +1368,8 @@ function escapeHTML(str) {
         <div id="speed-quiz-text" class="question-text" style="font-size: 1.15rem; font-weight: bold; line-height: 1.5; color: #2c3e50; min-height: 120px; padding: 10px; background: #faf9f6; border-radius: 8px; border-left: 5px solid #fab1a0; box-sizing: border-box; margin-bottom: 20px;">問題文がここに表示されます。</div>
 
         <div id="speed-input-area" class="ox-container" style="display: flex; gap: 15px; margin-bottom: 20px;">
-            <button class="btn-o" onclick="submitSpeedAnswer(true)" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #fff5f5; border: 2px solid #ff7675; color: #ff7675; border-radius: 12px; cursor: pointer;">〇</button>
-            <button class="btn-x" onclick="submitSpeedAnswer(false)" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #f0f8ff; border: 2px solid #74b9ff; color: #74b9ff; border-radius: 12px; cursor: pointer;">×</button>
+<button class="btn-o" id="btn-speed-o" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #fff5f5; border: 2px solid #ff7675; color: #ff7675; border-radius: 12px; cursor: pointer;">〇</button>
+<button class="btn-x" id="btn-speed-x" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #f0f8ff; border: 2px solid #74b9ff; color: #74b9ff; border-radius: 12px; cursor: pointer;">×</button>
         </div>
 
         <div id="speed-result-area" class="result-area" style="display: none; background: #fafafa; border-radius: 10px; padding: 15px; border: 1px solid #ced6e0;">
@@ -1295,8 +1377,8 @@ function escapeHTML(str) {
             <div id="speed-current-streak" style="font-size: 0.8rem; color: #e67e22; margin-bottom: 10px;">この問題の戦績</div>
             <div id="speed-quiz-explanation" class="explanation-text" style="font-size: 0.85rem; line-height: 1.5; color: #57606f; background: white; padding: 10px; border-radius: 6px; border: 1px solid #e4e7eb; margin-bottom: 15px;">ここに解説が表示されます。</div>
             <div style="display: flex; gap: 8px;">
-                <button id="speed-next-btn" class="btn-primary" onclick="nextSpeedQuestion()" style="flex: 1; padding: 12px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">次の問題へ</button>
-                <button class="btn-link" onclick="closeSpeedQuiz()" style="padding: 12px; background: #e4e7eb; color: #2c3e50; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">中断して戻る</button>
+<button id="speed-next-btn" class="btn-primary" style="flex: 1; padding: 12px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">次の問題へ</button>
+<button class="btn-link" id="btn-speed-close" style="padding: 12px; background: #e4e7eb; color: #2c3e50; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">中断して戻る</button>
             </div>
         </div>
     </div>
@@ -1315,7 +1397,7 @@ function escapeHTML(str) {
             <!-- JavaScriptからここにアコーディオン付きの問題カードが追加されます -->
         </div>
         
-        <button class="btn-primary" onclick="closeSpeedHistoryModal()" style="padding: 12px; font-weight: bold; background: #ff7675; color: white; border: none; border-radius: 8px; width: 100%; cursor: pointer;">閉じる</button>
+        <button class="btn-primary" id="btn-speed-history-close" style="padding: 12px; font-weight: bold; background: #ff7675; color: white; border: none; border-radius: 8px; width: 100%; cursor: pointer;">閉じる</button>
     </div>
 </div>
 
