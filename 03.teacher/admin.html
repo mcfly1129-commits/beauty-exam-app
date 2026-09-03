@@ -583,10 +583,10 @@
                 <h1>👨‍🏫 教員向け『総合管理画面』</h1>
                 <p>学生全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
             </div>
-            <div class="header-user-area">
-                <span class="user-badge" id="display-teacher-email">取得中...</span>
-                <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
-            </div>
+<div class="header-user-area">
+  <span class="user-badge" id="display-teacher-email">取得中...</span>
+  <button class="btn-logout" id="btn-logout">ログアウト</button>
+</div>
         </header>
 
         <!-- 📊 クイックサマリー指標 -->
@@ -833,55 +833,80 @@
         let studentHistoryChartInstance = null;
         let studentRadarChartInstance = null;
 
-        // 📅 初期起動処理
-        document.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
-            const userEmail = localStorage.getItem('teacher_userEmail');
+// 📅 初期起動処理
+document.addEventListener('DOMContentLoaded', () => {
+  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
+  const userEmail = localStorage.getItem('teacher_userEmail');
 
-            if (isLoggedIn !== 'true' || !userEmail) {
-                alert("🔒 アクセス権限がありません。再度ログインし直してください。");
-                window.location.href = "index.html"; // パスバグ修正 [cite: 859]
-                return;
-            }
+  if (isLoggedIn !== 'true' || !userEmail) {
+    alert("🔒 アクセス権限がありません。再度ログインし直してください。");
+    window.location.href = "index.html"; // パスバグ修正 [cite: 859]
+    return;
+  }
 
-            document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
-            document.getElementById('auth-loading').style.display = 'none';
+  document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
+  document.getElementById('auth-loading').style.display = 'none';
 
-            loadTeacherDashboardData();
-        });
+  // ⭕ 【追加箇所】ログアウトボタンの onclick 属性廃止に伴い、ここでクリックイベントをバインド
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+  }
 
-        // 📡 API経由の実データロード
-        function loadTeacherDashboardData() {
-            showLoading(true);
+  loadTeacherDashboardData();
+});
 
-            const password = localStorage.getItem('teacher_google_id_token') || "";
-            const fetchUrl = `${GAS_API_URL}?action=getTeacherData&password=${encodeURIComponent(password)}`;
+// 📡 POSTメソッドでの安全なデータ取得 ＆ キャッシュコントロール ＆ 強制自動ログアウト
+function loadTeacherDashboardData() {
+  showLoading(true);
 
-            fetch(fetchUrl, { method: "GET" })
-                .then(response => {
-                    if (!response.ok) throw new Error("API通信エラーが発生しました。");
-                    return response.json();
-                })
-                .then(res => {
-                    if (res.status === "error" || res.isAuthorized === false) {
-                        alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
-                        handleLogout();
-                        return;
-                    }
+  const password = localStorage.getItem('teacher_google_id_token') || "";
+  
+  // 安全対策：パスワードなどの機密情報はURLに載せず、payloadにまとめてPOSTのbodyで送信
+  const payload = {
+    action: "getTeacherData",
+    password: password
+  };
 
-                    allStudentsRaw = res.students || [ ];
-                    dashboardSummary = res.dashboard || null;
+  fetch(GAS_API_URL, { 
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "Pragma": "no-cache"
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store"
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("API通信エラーが発生しました。");
+    return response.json();
+  })
+  .then(res => {
+    if (res.status === "error" || res.isAuthorized === false) {
+      alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
+      handleLogout();
+      return;
+    }
 
-                    renderDashboardAndTable();
-                    showLoading(false);
-                })
-                .catch(err => {
-                    console.error("データ取得エラー:", err);
-                    const tableStatus = document.getElementById('table-status');
-                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
-                    tableStatus.style.display = 'block';
-                });
-        }
+    allStudentsRaw = res.students || [ ];
+    dashboardSummary = res.dashboard || null;
+
+    renderDashboardAndTable();
+    showLoading(false);
+  })
+  .catch(err => {
+    console.error("データ取得エラー:", err);
+    const tableStatus = document.getElementById('table-status');
+    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。安全のため自動ログアウトします。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+    tableStatus.style.display = 'block';
+
+    // 🔒 安全対策：通信エラーや、学生アカウントによる不正アクセス試行時は、3秒後に強制ログアウトしてログイン画面に戻す
+    setTimeout(() => {
+      handleLogout();
+    }, 3000);
+  });
+}
 
         function showLoading(show) {
             const tableStatus = document.getElementById('table-status');
