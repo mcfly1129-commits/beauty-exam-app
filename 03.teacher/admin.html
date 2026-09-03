@@ -887,19 +887,17 @@ function loadTeacherDashboardData() {
     // 🔒 パスワードをリクエストボディへ安全に格納し、POST送信
     const password = localStorage.getItem('teacher_google_id_token') || "";
 
-    fetch(GAS_API_URL, {
-        method: "POST",
-        cache: "no-store", // ブラウザによるキャッシュを完全無効化
-        headers: { 
-            "Content-Type": "text/plain;charset=utf-8",
-            "Pragma": "no-cache",
-            "Cache-Control": "no-cache"
-        },
-        body: JSON.stringify({
-            action: "getTeacherData",
-            password: password
-        })
+fetch(GAS_API_URL, {
+    method: "POST",
+    cache: "no-store", // ブラウザキャッシュを完全無効化
+    headers: { 
+        "Content-Type": "text/plain" // ⭕️ プリフライト（OPTIONS）を完全に回避するため極限までシンプルにします
+    },
+    body: JSON.stringify({
+        action: "getTeacherData",
+        password: password
     })
+})
     .then(response => {
         if (!response.ok) throw new Error("API通信エラーが発生しました。");
         return response.json();
