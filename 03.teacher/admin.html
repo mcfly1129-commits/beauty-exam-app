@@ -880,51 +880,51 @@
             loadTeacherDashboardData();
         });
 
-        // 📡 API経由の実データロード
-        function loadTeacherDashboardData() {
-            showLoading(true);
+// 📡 API経由の実データロード
+function loadTeacherDashboardData() {
+    showLoading(true);
 
-// 🔒【POST化 & キャッシュ完全無効化】
-// パスワードを完全に通信の内側に隠し、さらにブラウザキャッシュやプロキシログへの残留を100%防ぎます
-const password = localStorage.getItem('teacher_google_id_token') || "";
+    // 🔒 パスワードをリクエストボディへ安全に格納し、POST送信
+    const password = localStorage.getItem('teacher_google_id_token') || "";
 
-fetch(GAS_API_URL, {
-  method: "POST",
-  cache: "no-store", // ブラウザによるキャッシュを完全無効化
-  headers: { 
-    "Content-Type": "text/plain",
-    "Pragma": "no-cache",
-    "Cache-Control": "no-cache"
-  },
-  body: JSON.stringify({
-    action: "getTeacherData",
-    password: password
-  })
-})
-                .then(response => {
-                    if (!response.ok) throw new Error("API通信エラーが発生しました。");
-                    return response.json();
-                })
-                .then(res => {
-                    if (res.status === "error" || res.isAuthorized === false) {
-                        alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
-                        handleLogout();
-                        return;
-                    }
-
-                    allStudentsRaw = res.students || [ ];
-                    dashboardSummary = res.dashboard || null;
-
-                    renderDashboardAndTable();
-                    showLoading(false);
-                })
-                .catch(err => {
-                    console.error("データ取得エラー:", err);
-                    const tableStatus = document.getElementById('table-status');
-                    tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
-                    tableStatus.style.display = 'block';
-                });
+    fetch(GAS_API_URL, {
+        method: "POST",
+        cache: "no-store", // ブラウザによるキャッシュを完全無効化
+        headers: { 
+            "Content-Type": "text/plain;charset=utf-8",
+            "Pragma": "no-cache",
+            "Cache-Control": "no-cache"
+        },
+        body: JSON.stringify({
+            action: "getTeacherData",
+            password: password
+        })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("API通信エラーが発生しました。");
+        return response.json();
+    })
+    .then(res => {
+        if (res.status === "error" || res.isAuthorized === false) {
+            alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
+            handleLogout();
+            return;
         }
+
+        allStudentsRaw = res.students || [ ];
+        dashboardSummary = res.dashboard || null;
+
+        renderDashboardAndTable();
+        showLoading(false);
+    })
+    .catch(err => {
+        console.error("データ取得エラー:", err);
+        const tableStatus = document.getElementById('table-status');
+        tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+        tableStatus.style.display = 'block';
+        showLoading(false); // ⭕ 通信エラー時にもローディング状態を安全に解除
+    });
+}
 
         function showLoading(show) {
             const tableStatus = document.getElementById('table-status');
