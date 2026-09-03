@@ -591,7 +591,8 @@
             </div>
             <div class="header-user-area">
                 <span class="user-badge" id="display-teacher-email">取得中...</span>
-                <button class="btn-logout" onclick="handleLogout()">ログアウト</button>
+                <!-- onclickを消し、JavaScriptから安全に特定するための id="btn-logout" を追加します -->
+                <button class="btn-logout" id="btn-logout">ログアウト</button>
             </div>
         </header>
 
@@ -658,19 +659,20 @@
             <div class="filter-grid">
                 <div class="filter-item">
                     <label for="filter-school">学校名</label>
-                    <select id="filter-school" onchange="applyFilters()">
-                        <option value="">全ての学校</option>
-                    </select>
+<!-- セレクトボックスから onchange="..." 属性をきれいに削除します -->
+<select id="filter-school">
+    <option value="">全ての学校</option>
+</select>
                 </div>
                 <div class="filter-item">
                     <label for="filter-class">クラス名</label>
-                    <select id="filter-class" onchange="applyFilters()">
-                        <option value="">全てのクラス</option>
-                    </select>
+<select id="filter-class">
+    <option value="">全てのクラス</option>
+</select>
                 </div>
                 <div class="filter-item">
                     <label for="search-student">検索 (識別情報 / コード の一部を入力)</label>
-                    <input type="text" id="search-student" placeholder="一部を入力" oninput="applyFilters()">
+                    <input type="text" id="search-student" placeholder="一部を入力">
                 </div>
                 <div class="filter-item">
                     <label for="filter-status">指導ステータス</label>
@@ -728,13 +730,13 @@
     <!-- ==========================================
        👨‍🏫 【個人カルテモーダル】ポップアップ構造
        ========================================== -->
-    <div id="student-modal" class="modal-overlay" onclick="closeStudentModal()">
-        <div class="modal-container" onclick="event.stopPropagation()">
+<div id="student-modal" class="modal-overlay">
+    <div class="modal-container">
             <!-- モーダルヘッダー -->
-            <div class="modal-header">
-                <h2 id="modal-student-title">👤 個人別詳細カルテ</h2>
-                <button class="btn-close-modal" onclick="closeStudentModal()">&times;</button>
-            </div>
+<div class="modal-header">
+  <h2 id="modal-student-title">👤 個人別詳細カルテ</h2>
+  <button class="btn-close-modal" id="btn-close-modal">&times;</button> <!-- ⭕️ 修正完了 -->
+</div>
             
             <!-- モーダルボディ -->
             <div class="modal-body">
@@ -839,46 +841,97 @@
         let studentHistoryChartInstance = null;
         let studentRadarChartInstance = null;
 
-        // 📅 初期起動処理
-        document.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
-            const userEmail = localStorage.getItem('teacher_userEmail');
+// 📅 初期起動処理
+document.addEventListener('DOMContentLoaded', () => {
+  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
+  const userEmail = localStorage.getItem('teacher_userEmail');
 
-            if (isLoggedIn !== 'true' || !userEmail) {
-                alert("🔒 アクセス権限がありません。再度ログインし直してください。");
-                window.location.href = "index.html"; // パスバグ修正 [cite: 859]
-                return;
-            }
+  if (isLoggedIn !== 'true' || !userEmail) {
+    alert("🔒 アクセス権限がありません。再度ログインし直してください。");
+    window.location.href = "index.html"; // パスバグ修正 [cite: 859]
+    return;
+  }
 
-            document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
-            document.getElementById('auth-loading').style.display = 'none';
+  document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
+  document.getElementById('auth-loading').style.display = 'none';
 
-            // ⭕ 【追加】ログアウトボタンのイベントを安全に紐付け（インラインonclickを廃止したため）
-            const logoutBtn = document.getElementById('btn-logout');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', handleLogout);
-            }
+  // ==========================================================
+  // 🛡️【インラインJS完全排除】安全なイベントリスナーの一括紐付け
+  // ==========================================================
+  
+  // 1. ログアウトボタン（既存の処理）
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+  }
 
-            // ⭕ 【追加】指導ステータスセレクトボックスのイベントを安全に紐付け
-            const filterStatus = document.getElementById('filter-status');
-            if (filterStatus) {
-                filterStatus.addEventListener('change', applyFilters);
-            }
+  // 2. 🆕 モーダルを閉じる×ボタン（追加）
+  const closeModalBtn = document.getElementById('btn-close-modal');
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closeStudentModal);
+  }
 
-            // ⭕ 【追加】並び替えセレクトボックスのイベントを安全に紐付け
-            const sortKey = document.getElementById('sort-key');
-            if (sortKey) {
-                sortKey.addEventListener('change', applyFilters);
-            }
+  // 3. 🆕 学校名絞り込みフィルター（追加）
+  const filterSchool = document.getElementById('filter-school');
+  if (filterSchool) {
+    filterSchool.addEventListener('change', applyFilters);
+  }
 
-            // ⭕ 【追加】フィルタ解除ボタンのイベントを安全に紐付け
-            const resetFilterBtn = document.getElementById('btn-reset-filter');
-            if (resetFilterBtn) {
-                resetFilterBtn.addEventListener('click', resetFilters);
-            }
+  // 4. 🆕 クラス名絞り込みフィルター（追加）
+  const filterClass = document.getElementById('filter-class');
+  if (filterClass) {
+    filterClass.addEventListener('change', applyFilters);
+  }
 
-            loadTeacherDashboardData();
-        });
+  // 5. 指導ステータスセレクトボックス（既存の処理）
+  const filterStatus = document.getElementById('filter-status');
+  if (filterStatus) {
+    filterStatus.addEventListener('change', applyFilters);
+  }
+
+  // 6. 並び替えセレクトボックス（既存の処理）
+  const sortKey = document.getElementById('sort-key');
+  if (sortKey) {
+    sortKey.addEventListener('change', applyFilters);
+  }
+
+  // 7. フィルタ解除ボタン（既存の処理）
+  const resetFilterBtn = document.getElementById('btn-reset-filter');
+  if (resetFilterBtn) {
+    resetFilterBtn.addEventListener('click', resetFilters);
+  }
+
+  // 8. 🆕 検索インプット（入力監視）
+  const searchStudent = document.getElementById('search-student');
+  if (searchStudent) {
+    searchStudent.addEventListener('input', applyFilters);
+  }
+
+  // 9. 🆕 モーダル背景クリック（背景を押した時だけ閉じる）
+  const studentModal = document.getElementById('student-modal');
+  if (studentModal) {
+    studentModal.addEventListener('click', (e) => {
+      if (e.target === studentModal) {
+        closeStudentModal();
+      }
+    });
+  }
+
+  // 10. 🆕 テーブル内の「詳細カルテ」ボタン（イベント委譲による安全な取得）
+  const tableBody = document.getElementById('student-table-body');
+  if (tableBody) {
+    tableBody.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-detail');
+      if (btn) {
+        const email = btn.getAttribute('data-email');
+        if (email) openStudentModal(email);
+      }
+    });
+  }
+
+  // 📡 API経由の実データロードを開始
+  loadTeacherDashboardData();
+});
 
 // 📡 API経由の実データロード
 function loadTeacherDashboardData() {
@@ -1196,7 +1249,7 @@ fetch(GAS_API_URL, {
                     <td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td>
                     <td data-label="指導ステータス">${statusBadge}</td>
                     <td data-label="" style="text-align:center;">
-                        <button class="btn-detail" onclick="openStudentModal('${escapeHTML(student.email)}')">詳細カルテ</button>
+                        <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
                     </td>
                 `;
                 tableBody.appendChild(row);
