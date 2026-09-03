@@ -552,9 +552,14 @@ return;
 showError("⏳ 管理名簿（ライセンス）を照合中... \nしばらくお待ちください。");
 
 try {
-// ⭕ GAS側の新アクション「checkPasswordAuth」へパスワードを投げて照合 [cite: 9, 20]
-fetch(GAS_API_URL + "?action=checkPasswordAuth&password=" + encodeURIComponent(password), {
-method: "GET"
+// 🔒【POST化】パスワードをURLパラメータに結合せず、POSTリクエストのボディに安全に隠して送信します
+fetch(GAS_API_URL, {
+  method: "POST",
+  headers: { "Content-Type": "text/plain" },
+  body: JSON.stringify({
+    action: "checkPasswordAuth",
+    password: password
+  })
 })
 .then(res => {
 if (!res.ok) throw new Error("サーバー通信エラー");
@@ -1081,6 +1086,9 @@ function submitSpeedAnswer(userAns) {
     const q = speedQuestions[speedCurrentIndex];
     const isCorrect = (userAns === q.answer);
 
+    // ⚠️【設定】スピード特訓の戦績は「デイリー実績（連勝数・連続日数）」には加算しません
+    // （デイリー真剣勝負のみで管理するため updateDailyStreakStats は呼び出しません）
+
     // 1. 回答履歴の更新
     let stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + q.subjectKey)) || {};
     if (!stats[q.id]) stats[q.id] = { total: 0, streak: 0, correct_count: 0 };
@@ -1089,7 +1097,7 @@ function submitSpeedAnswer(userAns) {
     if (isCorrect) {
         stats[q.id].streak += 1;
         stats[q.id].correct_count += 1;
-        speedCorrectCountInSet++; // ⭕ 追加：正解したらセット内カウンターを+1
+        speedCorrectCountInSet++; // ⭕ 1セット内カウンターを加算
     } else {
         stats[q.id].streak = 0;
     }
@@ -1151,12 +1159,13 @@ function nextSpeedQuestion() {
 function closeSpeedQuiz() {
     document.getElementById("speed-quiz-screen").style.display = "none";
     
-    // ホーム画面の進捗率をリアルタイム更新
+    // ホーム画面の進捗率・バッジをリアルタイム更新
     if (typeof initDashboard === "function") initDashboard();
     updateSpeedDashboardBadges();
-    if (typeof renderHeaderDailyStats === "function") renderHeaderDailyStats(); // 💡 追加
-}
 
+    // 💡【安全対策】画面復帰時にデイリー実績バッジ表示を再レンダリングして表示崩れを防止
+    if (typeof renderHeaderDailyStats === "function") renderHeaderDailyStats();
+}
 
 // =================================================================
 // 📜 スピード復習用：全科目横断履歴モーダル 制御ロジック
