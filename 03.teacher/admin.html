@@ -568,6 +568,12 @@
         .progress-val { color: var(--secondary-color); }
         .accuracy-val { color: var(--success-color); }
     </style>
+
+<!-- 🔒 セキュリティキャッシュ無効化 -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 </head>
 <body>
 
@@ -878,10 +884,23 @@
         function loadTeacherDashboardData() {
             showLoading(true);
 
-            const password = localStorage.getItem('teacher_google_id_token') || "";
-            const fetchUrl = `${GAS_API_URL}?action=getTeacherData&password=${encodeURIComponent(password)}`;
+// 🔒【POST化 & キャッシュ完全無効化】
+// パスワードを完全に通信の内側に隠し、さらにブラウザキャッシュやプロキシログへの残留を100%防ぎます
+const password = localStorage.getItem('teacher_google_id_token') || "";
 
-            fetch(fetchUrl, { method: "GET" })
+fetch(GAS_API_URL, {
+  method: "POST",
+  cache: "no-store", // ブラウザによるキャッシュを完全無効化
+  headers: { 
+    "Content-Type": "text/plain",
+    "Pragma": "no-cache",
+    "Cache-Control": "no-cache"
+  },
+  body: JSON.stringify({
+    action: "getTeacherData",
+    password: password
+  })
+})
                 .then(response => {
                     if (!response.ok) throw new Error("API通信エラーが発生しました。");
                     return response.json();
