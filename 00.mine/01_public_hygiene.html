@@ -398,16 +398,38 @@
 }
 
 .progress-text {
-    font-size: 0.85rem;
-    font-weight: bold;
-    color: #2f3542; /* 濃いグレー/紺色系 */
-    text-align: center;
-}
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #2f3542; /* 濃いグレー/紺色系 */
+            text-align: center;
+        }
 
+        /* --- モーダル用追加スタイル --- */
+        .terms-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
+            z-index: 2000; justify-content: center; align-items: center;
+        }
+        #terms-modal, #license-modal {
+            z-index: 3000;
+        }
+        .terms-modal-content {
+            background: #fff; padding: 20px; border-radius: 12px;
+            width: 90%; max-width: 480px; max-height: 80vh;
+            overflow-y: auto; box-sizing: border-box; text-align: left;
+            font-size: 0.85rem; line-height: 1.6; color: #2d3436;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .terms-title { font-size: 1.1rem; font-weight: bold; color: #d35400; text-align: center; margin-bottom: 12px; }
+        .terms-body h4 { font-size: 0.9rem; margin: 12px 0 4px 0; color: #2c3e50; }
+        .terms-body p { margin: 0 0 8px 0; font-size: 0.8rem; color: #636e72; }
+        .terms-btn-container { margin-top: 15px; text-align: center; }
+        .terms-close-btn { width: 100%; padding: 10px; background: #fab1a0; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
+        .terms-close-btn:hover { background: #ff7675; }
+        .footer-terms-link { font-size: 0.75rem; color: #7f8c8d; text-decoration: underline; cursor: pointer; background: none; border: none; padding: 0; display: inline-block; width: auto; margin-bottom: 0; white-space: nowrap; }
     </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="../../js/questions_database.js"></script>
+  <script src="../js/questions_database.js"></script>
 </head>
 <body>
   <canvas id="quiz-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
@@ -415,7 +437,7 @@
 <div class="container">
 
 <div id="subject-screen" class="screen active">
-    <h1>スキマ時間で最初の一歩<br>『関係法規・制度(検証版)』</h1>
+    <h1>スキマ時間で最初の一歩<br>『衛生管理』<br>【公衆衛生・環境衛生ver】</h1>
     <p class="subtitle">最短で基礎固め。<br>〇✕問題からはじめる合格への第一歩。<br>学習する範囲を選択してください</p>
     
     <details class="info-accordion">
@@ -442,30 +464,13 @@
     <div id="subject-menu-container"></div>
 
         <footer style="text-align: center; padding-top: 40px;">
-
+            <p style="margin-bottom: 8px;">
+                <button class="footer-terms-link" id="btn-terms-open-footer">利用規約・免責事項</button>
+                <span style="font-size: 0.75rem; color: #7f8c8d;"> | </span>
+                <button class="footer-terms-link" id="btn-license-open-footer">📄 ライセンス情報</button>
+            </p>
             <p style="font-size: 11px; color: #999999;">&copy; 2026年度 美容師国家試験対策アプリ 作成者：山本</p>
         </footer>
-
-<!-- 📄 オープンソース・ライセンス情報（修正版：被り解消） -->
-<div style="text-align: center; margin-top: 10px; margin-bottom: 20px; font-size: 0.75rem; color: #7f8c8d;">
-    <a href="#" onclick="document.getElementById('license-modal-quiz').style.display='flex'; return false;" style="color: #7f8c8d; text-decoration: underline;">📄 オープンソース・ライセンス情報</a>
-</div>
-
-        <!-- 📄 ライセンス表記モーダル構造（新規追加） -->
-        <div id="license-modal-quiz" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;" onclick="this.style.display='none'">
-            <div style="background: white; padding: 20px; border-radius: 16px; width: 90%; max-width: 400px; text-align: left; box-shadow: 0 4px 20px rgba(0,0,0,0.15);" onclick="event.stopPropagation()">
-                <h3 style="font-size: 1.1rem; font-weight: bold; color: #fab1a0; text-align: center; margin-top: 0; margin-bottom: 12px; border-bottom: 2px solid #fab1a0; padding-bottom: 5px;">サードパーティ・ライセンス表記</h3>
-                <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0;">
-                    <p style="margin-top:0;">本画面では、演出（紙吹雪等）のために以下のライブラリを使用しています。</p>
-                    <hr style="border: 0; border-top: 1px dashed #fab1a0; margin: 10px 0;">
-                    <p style="margin: 5px 0;"><strong>canvas-confetti</strong><br>
-                    Copyright (c) 2020, Kiril Vatev<br>
-                    Released under the MIT License</p>
-                </div>
-                <button style="width: 100%; margin-top: 15px; padding: 10px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;" onclick="document.getElementById('license-modal-quiz').style.display='none'">閉じる</button>
-            </div>
-        </div>
-
     </div>
 
     <div id="unit-screen" class="screen">
@@ -473,9 +478,9 @@
         
         <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
         
-        <button id="all-history-btn" class="btn-all-history" onclick="openAllHistoryModal()">📊 履歴・分析</button>
+        <button id="all-history-btn" class="btn-all-history" >📊 履歴・分析</button>
         
-        <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+        <button id="weakness-btn" class="btn-weakness" >❌ 弱点克服モードをスタート</button>
 
         <div id="unit-list"></div>
 
@@ -485,14 +490,14 @@
         ↓この範囲の学習進捗を最初からやり直す↓
     </p>
     <!-- ボタン自体の余白は 0 auto に固定して div 側の余白で距離を調整 -->
-    <button class="btn-form" onclick="resetLearningData()" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
+    <button class="btn-form" id="btn-reset-learning" style="background-color: var(--primary-color); color: white; width: 100%; margin: 0 auto;">
         学習データをリセット
     </button>
 </div>
 
-        <button class="btn-form" onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank')">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
+        <button class="btn-form" id="btn-feedback-open-unit">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
 
-        <button class="btn-link" onclick="navigateTo('subject-screen')">⬅️ 範囲選択へ戻る</button>
+        <button class="btn-link" id="btn-back-to-subject">⬅️ 範囲選択へ戻る</button>
                 
         <p style="text-align: center; font-size: 12px; color: #999; margin-top: 15px; margin-bottom: 30px;">(※1)単元名をタップすると、<br>単元別の履歴が確認できます</p>
 
@@ -514,7 +519,7 @@
         <div class="quiz-header">
             <span id="quiz-unit-title" class="quiz-unit-title-box">単元名</span>
             <div class="quiz-meta-wrap">
-                <button id="bookmark-toggle-btn" onclick="toggleBookmark()">☆ をつける</button>
+                <button id="bookmark-toggle-btn" >☆ をつける</button>
                 <span id="quiz-progress-num" class="quiz-progress-text">1 / 3 問目</span>
             </div>
         </div>
@@ -522,8 +527,8 @@
         <div id="quiz-text" class="question-text">問題文がここに表示されます。</div>
         
         <div id="input-area" class="ox-container">
-            <button class="btn-o" onclick="submitAnswer(true)">〇</button>
-            <button class="btn-x" onclick="submitAnswer(false)">×</button>
+            <button class="btn-o" id="btn-quiz-o">〇</button>
+            <button class="btn-x" id="btn-quiz-x">×</button>
         </div>
 
         <div id="result-area" class="result-area">
@@ -531,90 +536,78 @@
             <div id="current-streak" style="font-size: 0.85rem; margin-bottom: 8px; color: #555; display:none;">連続正解数</div>
             <div id="quiz-explanation" class="explanation-text">解説文がここに表示されます。</div>
             <div style="display: flex; gap: 8px;">
-                <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+                <button class="btn-primary btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<div id="history-modal" class="modal-overlay" >
+    <div class="modal-content">
         <div id="modal-unit-title" class="modal-title">全単元 総合学習履歴</div>
         <div id="modal-score-summary" class="modal-score-summary">単元の分析: 0 / 0 問 (0%)</div>
         
         <div class="sort-container" id="modal-sort-container">
-            <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
-            <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
-            <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
-            <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐マーク</button>
+            <button id="sort-btn-default" class="btn-sort active-sort">出典順</button>
+            <button id="sort-btn-count" class="btn-sort">回答数順</button>
+            <button id="sort-btn-wrong" class="btn-sort">誤答数順</button>
+            <button id="sort-btn-bookmark" class="btn-sort">⭐ マーク</button>
         </div>
 
         <div id="modal-history-list"></div>
-        <button class="btn-primary" onclick="closeHistoryModal()" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+        <button id="btn-close-history-modal" class="btn-primary" style="margin-top: 15px; margin-bottom: 0; padding: 10px;">閉じる</button>
+    </div>
+</div>
+
+<!-- 利用規約表示用モーダル -->
+<div id="terms-modal" class="terms-modal-overlay">
+    <div class="terms-modal-content">
+        <div class="terms-title">利用規約・免責事項への同意</div>
+        <div class="terms-body">
+            <h4>1. データ保存・消去に関する免責</h4>
+            <p>本アプリはサーバーでのデータバックアップを行わず、利用者の端末（ローカルストレージ）内にのみデータを保存する仕様です。ブラウザのキャッシュ削除、端末障害、OSアップデート等によるデータの消失・破損について、開発者は一切の責任を負いません。</p>
+            
+            <h4>2. サービスの変更・中断・終了</h4>
+            <p>アプリの仕様変更、配信停止、メンテナンス等に伴いユーザーに生じた不利益について、開発者は理由を問わず賠償責任を負わないものとします。</p>
+            
+            <h4>3. 知的財産権の帰属</h4>
+            <p>収録されている問題文、解説、画像、デザイン等の著作権・知的財産権は開発者に帰属します。無断転載・複製・解析（リバースエンジニアリング等）を厳重に禁止します。</p>
+        </div>
+        <div class="terms-btn-container">
+            <button class="terms-close-btn" id="btn-agree-terms" style="background: #2ecc71;">利用規約に同意してスタート</button>
+        </div>
+    </div>
+</div>
+
+<!-- ライセンス表記モーダル -->
+<div id="license-modal" class="terms-modal-overlay">
+    <div class="terms-modal-content">
+        <div class="terms-title">サードパーティ・ライセンス表記</div>
+        <div class="terms-body" style="background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0;">
+            <p style="margin-top:0;">本アプリケーションでは、以下のオープンソースライブラリを使用しています。</p>
+            <hr style="border: 0; border-top: 1px dashed #fab1a0; margin: 10px 0;">
+            <p style="margin: 5px 0;"><strong>Chart.js</strong><br>
+            Copyright (c) 2014-2022 Chart.js Contributors<br>
+            Released under the MIT License</p>
+            <hr style="border: 0; border-top: 1px dashed #fab1a0; margin: 10px 0;">
+            <p style="margin: 5px 0;"><strong>canvas-confetti</strong><br>
+            Copyright (c) 2020, Kiril Vatev<br>
+            Released under the MIT License</p>
+        </div>
+        <div class="terms-btn-container">
+            <button class="terms-close-btn" id="btn-license-close-modal">閉じる</button>
+        </div>
     </div>
 </div>
 
 <script>
-// 🔒 XSS対策：文字コードを安全に無害化（エスケープ）する関数
-function escapeHTML(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/[&<>"'`]/g, function(match) {
-        const escapeMap = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            '`': '&#x60;'
-        };
-        return escapeMap[match];
-    });
-}
-
-// ==========================================
-// 🔒 【追加】検証エリア専用：認証ガード ＆ データ蓄積ロジック
-// ==========================================
-window.addEventListener('DOMContentLoaded', () => {
-    // ページ読み込み時に先生のログイン状態をチェック
-    const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
-    const userEmail = localStorage.getItem('teacher_userEmail');
-
-    // もし未ログイン、または許可アドレス情報がなければ強制送還
-    if (isLoggedIn !== 'true' || !userEmail) {
-        alert("🔒 アクセス権限がありません。ログインしてください。");
-        // 2つ上の階層（03.teacher/index.html）へ強制リダイレクト
-        window.location.href = "../index.html"; // ここを修正！
-        return;
-    }
-    console.log("🔓 認証成功: " + userEmail + " としてクイズ検証中");
-});
-
-// ローカルに回答結果を「溜める」共通関数
-function saveQuizResultToLocal(questionId, isCorrect) {
-    const userEmail = localStorage.getItem('teacher_userEmail');
-    if (!userEmail) return;
-
-    const storageKey = "beauty_app_unsent_data";
-    let unsentData = JSON.parse(localStorage.getItem(storageKey)) || [];
-
-    const newRecord = {
-        email: userEmail,
-        question_id: questionId,
-        is_correct: isCorrect,
-        answered_at: new Date().toLocaleString('ja-JP')
-    };
-
-    unsentData.push(newRecord);
-    localStorage.setItem(storageKey, JSON.stringify(unsentData));
-    console.log("📝 データをローカルに蓄積しました（未送信）:", newRecord);
-}
-
 // ==========================================
 // 【Part01】全体の共通定数定義 (セーブキー衝突防止)
 // ==========================================
 
+
 const CONFIG = {
-    SUBJECT_KEY: "test_kankehoki_unit_ver01_2026",
+    SUBJECT_KEY: "test_koshuese_unit_ver01_2026",
     LEARNED_STREAK_THRESHOLD: 1,
     QUIZ_COUNT_PER_SET: 3,         
     WEAKNESS_STREAK_GOAL: 3        
@@ -623,32 +616,30 @@ const CONFIG = {
 // ==========================================
 // 【データ部】全コースデータ管理（ここから差し替え）
 // ==========================================
+const ALL_DATA_SOURCE = ALL_QUESTIONS_DATABASE; 
 
-// 💡 共通データベース（js/questions_database.js）からデータを参照するよう差し替え
-const ALL_DATA_SOURCE = ALL_QUESTIONS_DATABASE;
-
-let currentSubjectKey = "test_kankehoki_unit_ver01_2026";
+let currentSubjectKey = "test_koshuese_unit_ver01_2026";
 let questionPool = ALL_DATA_SOURCE[currentSubjectKey].questionPool;
 
 // 【追加】メニューの構成設定
 const SUBJECT_MENU_CONFIG = [
     { 
         id: "unit_questions", 
-        label: "単元別の問題(抜粋)",   // ここを修正！
+        label: "単元別の問題",   // ここを修正！
         enabled: true,  // ここを修正！
-        dataKey: "test_kankehoki_unit_ver01_2026"  // ここを修正！
+        dataKey: "test_koshuese_unit_ver01_2026"  // ここを修正！
     }, 
     { 
         id: "past_exam", 
         label: "過去問",   // ここを修正！
         enabled: true,  // ここを修正！true or false
-        dataKey: "test_kankehoki_past_2026" // ここを修正！
+        dataKey: "test_koshuese_past_2026" // ここを修正！
     },
     { 
         id: "extra_question", 
         label: "追加問題",   // ここを修正！
         enabled: true,  // ここを修正！
-        dataKey: "test_kankehoki_extra_2026" // ここを修正！
+        dataKey: "test_koshuese_extra_2026" // ここを修正！
     }
 ];
 
@@ -763,6 +754,173 @@ window.onload = function() {
     navigateTo('subject-screen');
     checkDailyStreakOnLoad(); 
     renderMenu();
+
+    // ★ 優先度1: 学習ホーム側で同意済み（beauty_app_terms_agreed）かチェック
+    const isHomeAgreed = localStorage.getItem("beauty_app_terms_agreed");
+    
+    // ★ 優先度2: クイズ画面単体で同意済み（beauty_app_quiz_terms_agreed）かチェック
+    const isQuizAgreed = localStorage.getItem("beauty_app_quiz_terms_agreed");
+
+    // どちらの同意もない場合のみ、利用規約モーダルを自動表示
+    if (!isHomeAgreed && !isQuizAgreed) {
+        openTermsModal();
+    }
+
+
+  // ==========================================================
+  // 🛡️【CSP完全適合】安全なイベントリスナーの一括紐付けとイベント委譲
+  // ==========================================================
+  
+  // 1. 静的なHTMLボタンへの安全なクリック登録
+  const btnLicenseOpen = document.getElementById('btn-license-open');
+  if (btnLicenseOpen) {
+    btnLicenseOpen.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('license-modal-quiz').style.display = 'flex';
+    });
+  }
+  const btnLicenseClose = document.getElementById('btn-license-close');
+  if (btnLicenseClose) {
+    btnLicenseClose.addEventListener('click', () => {
+      document.getElementById('license-modal-quiz').style.display = 'none';
+    });
+  }
+  const btnAllHistory = document.getElementById('all-history-btn');
+  if (btnAllHistory) {
+    btnAllHistory.addEventListener('click', openAllHistoryModal);
+  }
+  const btnWeakness = document.getElementById('weakness-btn');
+  if (btnWeakness) {
+    btnWeakness.addEventListener('click', startWeaknessQuiz);
+  }
+  const btnResetLearning = document.getElementById('btn-reset-learning');
+  if (btnResetLearning) {
+    btnResetLearning.addEventListener('click', resetLearningData);
+  }
+  const btnBackToSubject = document.getElementById('btn-back-to-subject');
+  if (btnBackToSubject) {
+    btnBackToSubject.addEventListener('click', () => navigateTo('subject-screen'));
+  }
+  const btnBookmarkToggle = document.getElementById('bookmark-toggle-btn');
+  if (btnBookmarkToggle) {
+    btnBookmarkToggle.addEventListener('click', toggleBookmark);
+  }
+  const btnQuizO = document.getElementById('btn-quiz-o');
+  if (btnQuizO) {
+    btnQuizO.addEventListener('click', () => submitAnswer(true));
+  }
+  const btnQuizX = document.getElementById('btn-quiz-x');
+  if (btnQuizX) {
+    btnQuizX.addEventListener('click', () => submitAnswer(false));
+  }
+  const btnCloseHistoryModal = document.getElementById('btn-close-history-modal');
+  if (btnCloseHistoryModal) {
+    btnCloseHistoryModal.addEventListener('click', closeHistoryModal);
+  }
+  const btnFeedbackOpen = document.getElementById('btn-feedback-open');
+  if (btnFeedbackOpen) {
+    btnFeedbackOpen.addEventListener('click', () => {
+      window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank');
+    });
+  }
+
+  // 2. 【イベント委譲】トップ画面の動的メニューカード（総合履歴 ＆ 各単元カード）
+  const subjectMenuContainer = document.getElementById('subject-menu-container');
+  if (subjectMenuContainer) {
+    subjectMenuContainer.addEventListener('click', (e) => {
+      const totalHistoryCard = e.target.closest('.menu-card-total-history');
+      const menuCard = e.target.closest('.menu-card-item');
+      if (totalHistoryCard) {
+        openSubjectTotalHistoryModal();
+      } else if (menuCard) {
+        const dataKey = menuCard.getAttribute('data-datakey');
+        if (dataKey) {
+          currentSubjectKey = dataKey;
+          CONFIG.SUBJECT_KEY = dataKey;
+          refreshAppData();
+          navigateTo('unit-screen');
+          renderUnitList();
+          updatePageTitle();
+        }
+      }
+    });
+  }
+
+  // 3. 【イベント委譲】履歴モーダル内の「ソートボタン群」
+  const sortContainer = document.getElementById('modal-sort-container');
+  if (sortContainer) {
+    sortContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-sort');
+      if (btn) {
+        const id = btn.id;
+        if (id === 'sort-btn-default') toggleSort('default');
+        else if (id === 'sort-btn-count') toggleSort('count');
+        else if (id === 'sort-btn-wrong') toggleSort('wrong');
+        else if (id === 'sort-btn-bookmark') toggleSort('bookmark');
+      }
+    });
+  }
+
+  // 4. 【イベント委譲】単元選択リスト（動的生成：単元履歴 ＆ 開始ボタン）
+  const unitList = document.getElementById('unit-list');
+  if (unitList) {
+    unitList.addEventListener('click', (e) => {
+      const openHistoryBtn = e.target.closest('.btn-open-history');
+      const triggerQuizBtn = e.target.closest('.btn-trigger-quiz');
+      if (openHistoryBtn) {
+        openHistoryModal(openHistoryBtn.getAttribute('data-unit'));
+      } else if (triggerQuizBtn) {
+        startQuiz(triggerQuizBtn.getAttribute('data-unit'));
+      }
+    });
+  }
+
+  // 5. 【イベント委譲】クイズ終了画面の動的ボタン（中断、続けて解く、結果ボタンなど）
+  const resultArea = document.getElementById('result-area');
+  if (resultArea) {
+    resultArea.addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-back-home')) {
+        const completed = e.target.getAttribute('data-completed') === 'true';
+        backToHome(completed);
+      } else if (e.target.classList.contains('btn-start-weakness')) {
+        startWeaknessQuiz();
+      } else if (e.target.classList.contains('btn-start-quiz')) {
+        startQuiz(e.target.getAttribute('data-unit'));
+      } else if (e.target.classList.contains('btn-next-question')) {
+        nextQuestion();
+      }
+    });
+  }
+
+  // 6. 【イベント委譲】履歴モーダルリスト内の「⭐解除」と「解説表示」
+  const historyList = document.getElementById('modal-history-list');
+  if (historyList) {
+    historyList.addEventListener('click', (e) => {
+      const removeBookmarkBtn = e.target.closest('.btn-history-bookmark-remove');
+      const viewExpBtn = e.target.closest('.btn-view-exp');
+      if (removeBookmarkBtn) {
+        e.stopPropagation();
+        const qId = removeBookmarkBtn.getAttribute('data-qid');
+        let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+        bIds = bIds.filter(id => id !== qId);
+        localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
+        renderHistoryList();
+      } else if (viewExpBtn) {
+        toggleHistoryExp(viewExpBtn.getAttribute('data-qid'));
+      }
+    });
+  }
+
+  // 7. モーダル背景クリック（e.targetが外枠そのものである時だけ安全に閉じる）
+  const historyModal = document.getElementById('history-overlay'); // または history-modal（二重ID防止）
+  const modalTarget = historyModal || document.getElementById('history-modal');
+  if (modalTarget) {
+    modalTarget.addEventListener('click', (e) => {
+      if (e.target === modalTarget) {
+        closeHistoryModal();
+      }
+    });
+  }
 };
 
 function checkDailyStreakOnLoad() {
@@ -806,12 +964,12 @@ function renderUnitList() {
         
         let buttonHtml = isCompleted 
             ? `<button class="btn-primary btn-start btn-history" style="background-color:#95afc0; color:white; cursor:default;" disabled>習得済み</button>`
-            : `<button class="btn-primary btn-start" onclick="startQuiz('${unitName}')">開始</button>`;
+            : `<button class="btn-primary btn-start btn-trigger-quiz" data-unit="${unitName}">開始</button>`;
 
         const unitHtml = `
             <div class="unit-item">
                 <div class="unit-info">
-                    <div class="unit-name" onclick="openHistoryModal('${unitName}')" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
+                    <div class="unit-name btn-open-history" data-unit="${unitName}" style="cursor:pointer; text-decoration:underline; color:#2c3e50;">${unitName}</div>
                     <div class="progress-bar-bg">
                         <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
                     </div>
@@ -845,61 +1003,6 @@ function renderUnitList() {
 
     updateUserRank(totalExcludedCount, totalQuestionsCount, appTotalAnswers, appTotalCorrects);
     renderDailyBanner();
-}
-
-/**
- * 🔥 デイリー実績（挑戦連続日数・通算成功数・最大連勝数）を更新する共通関数
- * @param {boolean} isSuccess - 今回の挑戦・問題に成功（合格/正解）したか
- */
-// 🎯 クイズ回答時にデイリー実績（連続日数・成功数・最高連勝数）を更新・保存する関数（Safari完全対応版）
-function updateDailyStreakStats(isSuccess) {
-    const todayStr = getTodayString();
-    const lastDate = localStorage.getItem('daily_last_challenge_date') || "";
-
-    let challengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || "0");
-    let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0");
-    let currentStreak = parseInt(localStorage.getItem('daily_current_streak') || "0");
-    let maxStreak = parseInt(localStorage.getItem('daily_max_streak') || "0");
-
-    // 1. 挑戦連続日数（🔥）の更新判定（1日1回だけカウント）
-    if (lastDate !== todayStr) {
-        if (lastDate) {
-            const last = new Date(lastDate + "T00:00:00");
-            const today = new Date(todayStr + "T00:00:00");
-            const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
-
-            if (diffDays === 1) {
-                challengeStreak += 1; // 昨日からの連続
-            } else if (diffDays > 1) {
-                challengeStreak = 1; // 2日以上空いたためリセット
-                currentStreak = 0;   // 連勝数もリセット
-            }
-        } else {
-            challengeStreak = 1; // 初挑戦
-        }
-        localStorage.setItem('daily_last_challenge_date', todayStr);
-        localStorage.setItem('daily_challenge_streak', challengeStreak);
-    }
-
-    // 2. 成功数・連勝数の更新
-    if (isSuccess) {
-        totalSuccess += 1;
-        currentStreak += 1;
-        if (currentStreak > maxStreak) {
-            maxStreak = currentStreak;
-        }
-    } else {
-        currentStreak = 0; // 不正解時は現在の連勝数のみリセット
-    }
-
-    localStorage.setItem('daily_current_streak', currentStreak);
-    localStorage.setItem('daily_max_streak', maxStreak);
-    localStorage.setItem('daily_total_success_count', totalSuccess);
-
-    // 画面のバッジ表示を即座に更新（関数が定義されている場合のみ安全に呼び出し、スマホでのクラッシュを防ぎます）
-    if (typeof renderHeaderDailyStats === "function") {
-        renderHeaderDailyStats();
-    }
 }
 
 function updateUserRank(mastered, total, totalAnswers, correctAnswers) {
@@ -1132,8 +1235,6 @@ function showQuestion() {
 function submitAnswer(userAns) {
     const currentQ = currentQuestions[currentQuestionIndex];
     const isCorrect = (userAns === currentQ.answer);
-// ✨【連動カスタム】クイズ回答判定の瞬間に、ローカル蓄積関数を発動
-    saveQuizResultToLocal(currentQ.id, isCorrect);
 
     if (isCorrect && !isDailyMode) {
         // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
@@ -1200,28 +1301,64 @@ function submitAnswer(userAns) {
 
     const isLastQuestion = (currentQuestionIndex === currentQuestions.length - 1);
 
-    if (isDailyMode) {
+if (isDailyMode) {
         if (!isCorrect) {
-            // ★ 追加：不正解（失敗）時も共通実績関数を呼び出し、連勝数をリセットする
-            updateDailyStreakStats(false);
-            
-            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
+            // ❌ 途中で間違えた場合：現在の連勝数をリセット
+            localStorage.setItem('daily_current_streak', '0');
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" class="btn-back-home" data-completed="false">❌ デイリー失敗：ホームへ戻る（記録リセット）</button>`;
         } else if (isLastQuestion) {
             dailyStreak++;
             lastDailyDate = getTodayString();
             localStorage.setItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY, dailyStreak);
             localStorage.setItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY, lastDailyDate);
-            
-            // ★ 追加：共通の実績更新関数を呼び出す（成功時）
-            updateDailyStreakStats(true);
+
+            // 💡【追加】学習ホーム最上部用（連続日数・成功回数・最高連勝数）の一括更新処理
+            const todayStr = getTodayString();
+            const lastDate = localStorage.getItem('daily_last_challenge_date') || "";
+
+            let challengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || "0");
+            let totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0");
+            let currentStreak = parseInt(localStorage.getItem('daily_current_streak') || "0");
+            let maxStreak = parseInt(localStorage.getItem('daily_max_streak') || "0");
+
+            // 1. 挑戦連続日数（🔥）の更新（1日1回）
+            if (lastDate !== todayStr) {
+                if (lastDate) {
+                    const last = new Date(lastDate + "T00:00:00");
+                    const today = new Date(todayStr + "T00:00:00");
+                    const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        challengeStreak += 1;
+                    } else if (diffDays > 1) {
+                        challengeStreak = 1;
+                        currentStreak = 0;
+                    }
+                } else {
+                    challengeStreak = 1;
+                }
+                localStorage.setItem('daily_last_challenge_date', todayStr);
+                localStorage.setItem('daily_challenge_streak', challengeStreak);
+            }
+
+            // 2. 成功数（🎯）・連勝数・最高連勝数（🏆）の更新
+            totalSuccess += 1;
+            currentStreak += 1;
+            if (currentStreak > maxStreak) {
+                maxStreak = currentStreak;
+            }
+
+            localStorage.setItem('daily_current_streak', currentStreak);
+            localStorage.setItem('daily_max_streak', maxStreak);
+            localStorage.setItem('daily_total_success_count', totalSuccess);
 
             triggerFeverEffect();
-            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" onclick="backToHome(true)">🎉 本日のスタンプ獲得！ホームへ</button>`;
+            actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #2ecc71; color: white; width: 100%; font-weight: bold;" class="btn-back-home" data-completed="true">🎉 本日のスタンプ獲得！ホームへ</button>`;
         } else {
-            actionButtonsHtml = `<button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
+            actionButtonsHtml = `<button class="btn-primary btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次のデイリー問題へ</button>`;
         }
     } else if (isWeaknessMode && weaknessSessionWrongCount > 0) {
-        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" onclick="backToHome(false)">❌ 克服失敗：単元画面に戻る</button>`;
+        actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #dc3545; color: white; width: 100%;" class="btn-back-home" data-completed="false">❌ 克服失敗：単元画面に戻る</button>`;
     } else if (isLastQuestion) {
         if (isWeaknessMode) {
             weaknessSuccessStreak++;
@@ -1230,11 +1367,11 @@ function submitAnswer(userAns) {
             if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
                 isMasterStatus = true;
                 localStorage.setItem("beauty_app_is_master_" + CONFIG.SUBJECT_KEY, JSON.stringify(isMasterStatus));
-                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" onclick="backToHome(true)">👑 祝・マスター達成！<br>画面を戻る</button>`;
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #a29bfe; color: #2d3436; width: 100%;" class="btn-back-home" data-completed="true">👑 祝・マスター達成！<br>画面を戻る</button>`;
             } else {
                 actionButtonsHtml = `
-                    <button class="btn-primary" onclick="startWeaknessQuiz()" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
-                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(true)">記録を維持<br>一覧に戻る</button>
+                    <button class="btn-primary btn-start-weakness" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">👑 次の克服(3問)<br>に連続挑戦！</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="true">記録を維持<br>一覧に戻る</button>
                 `;
             }
         } else {
@@ -1244,17 +1381,17 @@ function submitAnswer(userAns) {
             const remain = questionPool[currentUnit].filter(q => (questionStats[q.id]?.streak || 0) < CONFIG.LEARNED_STREAK_THRESHOLD);
             if (remain.length > 0) {
                 actionButtonsHtml = `
-                    <button class="btn-primary" onclick="startQuiz('${currentUnit}')" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
-                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元一覧に戻る</button>
+                    <button class="btn-primary btn-start-quiz" data-unit="${currentUnit}" style="margin-top: 15px; margin-bottom: 0; background-color: #28a745; color: white;">⚡続けて解く</button>
+                    <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="false">単元一覧に戻る</button>
                 `;
             } else {
-                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" onclick="backToHome(false)">🎉 全問クリア！一覧に戻る</button>`;
+                actionButtonsHtml = `<button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white; width: 100%;" class="btn-back-home" data-completed="false">🎉 全問クリア！一覧に戻る</button>`;
             }
         }
     } else {
         actionButtonsHtml = `
-            <button class="btn-primary" onclick="nextQuestion()" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
-            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" onclick="backToHome(false)">単元を中断<br>して戻る</button>
+            <button class="btn-primary btn-next-question" style="margin-top: 15px; margin-bottom: 0;">次の問題へ</button>
+            <button style="margin-top: 15px; margin-bottom: 0; background-color: #74b9ff; color: white;" class="btn-back-home" data-completed="false">単元を中断<br>して戻る</button>
         `;
     }
 
@@ -1263,7 +1400,6 @@ function submitAnswer(userAns) {
     resultArea.style.display = "block";
 }
 
-// 🎉 スマホ（Safari/WebKit）でも最前面に必ず表示させる紙吹雪演出エフェクト（スマホ最適化版）
 // 🎉 スマホ（Safari/WebKit）でも最前面に必ず表示させる紙吹雪演出エフェクト（スマホ最適化版）
 function triggerFeverEffect() {
     const canvas = document.getElementById("quiz-confetti-canvas");
@@ -1344,16 +1480,7 @@ function openSubjectTotalHistoryModal() {
     toggleSort("default");
 
     // モーダルを閉じる際のクリーンアップ処理
-    const originalClose = closeHistoryModal;
-    window.closeHistoryModal = function() {
-        document.getElementById("history-modal").style.display = "none";
-        // データを元の（個別の）状態に戻す
-        questionPool = originalPool;
-        questionStats = originalStats;
-        bookmarkedIds = originalBookmarks;
-        dailyCorrectedIds = originalDailyIds;
-        window.closeHistoryModal = originalClose;
-    };
+    // （モーダルのクローズ処理は、安全な静的closeHistoryModalを呼び出します）
 }
 
 function backToHome(isSetCompleted = false) {
@@ -1409,7 +1536,8 @@ function openAllHistoryModal() {
 }
 
 function closeHistoryModal() {
-    document.getElementById("history-modal").style.display = "none";
+  document.getElementById("history-modal").style.display = "none";
+  refreshAppData();
 }
 
 function toggleSort(mode) {
@@ -1453,17 +1581,12 @@ bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")
         targetQuestions = questionPool[activeModalUnit].map(q => ({...q, parentUnit: activeModalUnit}));
     }
 
-let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
+    let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionStats[q.id].total > 0).length;
     let ratio = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
     
-    // 🔒 XSS対策：埋め込む数値を文字列化して安全にエスケープ
-    const safeAnswered = escapeHTML(String(answeredCount));
-    const safeTotal = escapeHTML(String(targetQuestions.length));
-    const safeRatio = escapeHTML(String(ratio));
-
     summaryEl.innerText = isAllHistoryMode 
-        ? `全問題の分析\n経験済み ${safeAnswered} 問 / 総数 ${safeTotal} 問 (${safeRatio}%)`
-        : `単元の分析\n経験済み ${safeAnswered} 問 / 単元内 ${safeTotal} 問 (${safeRatio}%)`;
+        ? `全問題の分析\n経験済み ${answeredCount} 問 / 総数 ${targetQuestions.length} 問 (${ratio}%)`
+        : `単元の分析\n経験済み ${answeredCount} 問 / 単元内 ${targetQuestions.length} 問 (${ratio}%)`;
 
     // ソート処理
     if (currentSortMode === "count") {
@@ -1487,19 +1610,13 @@ let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionS
         const isBookmarked = bookmarkedIds.includes(q.id);
         const wrongCount = stat.total - stat.correct_count;
 
-        // 🔒 XSS対策：テキスト要素を全て安全に無害化（エスケープ）
-        const safeSource = escapeHTML(q.source);
-        const safeText = escapeHTML(q.text);
-        const safeExp = escapeHTML(q.exp);
-        const safeParentUnit = escapeHTML(q.parentUnit);
-        const safeQId = escapeHTML(q.id);
-
-        // 総合履歴かつ出典順の時のみ見出し表示
+        // 総合履歴かつ出典順の時のみ見出し表示（置換バグを防止しフォールバックを安定化）
         if (isAllHistoryMode && currentSortMode === "default" && q.parentUnit !== lastRenderedUnit) {
             lastRenderedUnit = q.parentUnit;
+            let displayUnitName = q.parentUnit; 
             const unitHeaderHtml = `
                 <div class="history-unit-header" style="background: #fff5f5; color: #ff7675; padding: 6px 10px; margin-top: 18px; margin-bottom: 6px; font-weight: bold; border-radius: 6px; border-left: 4px solid #ff7675; font-size: 0.85rem; box-sizing: border-box;">
-                    ■ ${safeParentUnit}
+                    ■ ${displayUnitName}
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', unitHeaderHtml);
@@ -1510,28 +1627,22 @@ let answeredCount = targetQuestions.filter(q => questionStats[q.id] && questionS
         if (isBookmarked) tagsHtml.push(`<span class="history-tag tag-bookmark" style="background:#fff9db; color:#f03e3e; border:1px solid #ffe3e3; margin-left:4px;">⭐ マーク</span>`);
 
         let removeBookmarkBtnHtml = isBookmarked 
-            ? `<button onclick="
-                event.stopPropagation(); 
-                let bIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-                bIds = bIds.filter(id => id !== '${safeQId}');
-                localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bIds));
-                renderHistoryList();
-              " style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
-            : "";
+    ? `<button class="btn-history-bookmark-remove" data-qid="${q.id}" style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:8px; vertical-align:middle;">⭐ 解除</button>` 
+    : "";
 
         const itemHtml = `
             <div class="history-item">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
-                    <div>${tagsHtml.join("")} <strong>${safeSource}</strong></div>
+                    <div>${tagsHtml.join("")} <strong>${q.source}</strong></div>
                     <div style="font-size:0.75rem; color:#666; text-align:right;">
                         トライ:${stat.total}回 / 誤答:${wrongCount}回
                         ${removeBookmarkBtnHtml}
                     </div>
                 </div>
-                <div style="color:#2d3436; line-height:1.4;">${safeText}</div>
+                <div style="color:#2d3436; line-height:1.4;">${q.text}</div>
                 <div style="margin-top:4px; font-weight:bold; color:${q.answer ? '#28a745' : '#dc3545'}">正解: ${q.answer ? '〇' : '×'}</div>
-                <button class="btn-view-exp" onclick="toggleHistoryExp('${safeQId}')">解説を表示</button>
-                <div id="hist-exp-${safeQId}" class="history-exp-box">${safeExp}</div>
+                <button class="btn-view-exp" class="btn-view-exp" data-qid="${q.id}">解説を表示</button>
+                <div id="hist-exp-${q.id}" class="history-exp-box">${q.exp}</div>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', itemHtml);
@@ -1553,15 +1664,8 @@ function toggleHistoryExp(qId) {
 }
 
 function resetLearningData() {
-    if (confirm("これまでの習得進捗や回答履歴などを含む、この範囲の学習データを初期化しますか？(※お気に入り⭐は保持されます)")) {
-        // 1. 共通の実績データを一時保護
-        const saveLastDate = localStorage.getItem('daily_last_challenge_date');
-        const saveChallengeStreak = localStorage.getItem('daily_challenge_streak');
-        const saveTotalSuccess = localStorage.getItem('daily_total_success_count');
-        const saveCurrentStreak = localStorage.getItem('daily_current_streak');
-        const saveMaxStreak = localStorage.getItem('daily_max_streak');
-
-        // 2. この科目（範囲）の学習データを削除
+    if (confirm("これまでの習得進捗や回答履歴、デイリー真剣勝負の日数を含む学習データを完全に初期化しますか？(選択中のこの範囲のみ初期化、お気に入り⭐は解除されません)")) {
+        // 1. ローカルストレージの削除
         localStorage.removeItem("beauty_app_question_stats_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_counts_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_has_ever_failed_" + CONFIG.SUBJECT_KEY);
@@ -1570,32 +1674,13 @@ function resetLearningData() {
         localStorage.removeItem("beauty_app_daily_streak_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_last_daily_date_" + CONFIG.SUBJECT_KEY);
         localStorage.removeItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY);
+        
+        // ★修正：お気に入りを保護するため、古い範囲別キーの削除処理をコメントアウト(無効化)します
+        // localStorage.removeItem("beauty_app_bookmarked_ids_" + CONFIG.SUBJECT_KEY);
+        
         localStorage.removeItem('solved_' + currentSubjectKey);
-
-        // 3. ★【安全対策】他科目の「⭐マーク」を守り、この科目の「⭐」だけ解除する処理
-        let allBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
-        let currentSubjectQuestionIds = [];
         
-        // 今開いている科目（questionPool）の問題IDだけを抽出
-        for (let unit in questionPool) {
-            questionPool[unit].forEach(q => currentSubjectQuestionIds.push(q.id));
-        }
-        
-        // 全お気に入りの中から「今開いている科目のID」だけを除外（他科目は残す）
-        allBookmarks = allBookmarks.filter(id => !currentSubjectQuestionIds.includes(id));
-        
-        // フィルタリングしたお気に入りを保存し直す
-        localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(allBookmarks));
-        bookmarkedIds = allBookmarks;
-
-        // 4. 保護した実績データを復元
-        if (saveLastDate) localStorage.setItem('daily_last_challenge_date', saveLastDate);
-        if (saveChallengeStreak) localStorage.setItem('daily_challenge_streak', saveChallengeStreak);
-        if (saveTotalSuccess) localStorage.setItem('daily_total_success_count', saveTotalSuccess);
-        if (saveCurrentStreak) localStorage.setItem('daily_current_streak', saveCurrentStreak);
-        if (saveMaxStreak) localStorage.setItem('daily_max_streak', saveMaxStreak);
-
-        // 5. メモリ上の変数を初期化
+        // 2. メモリ上の変数をすべて初期化
         questionStats = {};
         unitCountData = {};
         hasEverFailed = false;
@@ -1604,15 +1689,23 @@ function resetLearningData() {
         dailyStreak = 0;
         lastDailyDate = "";
         dailyCorrectedIds = [];
-
-        // 6. UIの再描画
-        closeHistoryModal();
-        navigateTo('subject-screen');
-        renderMenu();
-        checkDailyStreakOnLoad();
-        renderUnitList();
-
-        alert("この科目の学習データをリセットしました。");
+        
+        // ★修正：メモリ上のお気に入り配列も初期化せず、そのまま残します
+        // bookmarkedIds = [];
+        
+        // 3. UIの更新
+        closeHistoryModal();           // モーダルを閉じる
+        navigateTo('subject-screen');  // トップ画面（①）へ戻る
+        
+        // 【重要】トップ画面のメニューと進捗表示を最新（0%）の状態で描き直す
+        renderMenu();                  // これがないと①の表記が古いまま残ります
+        
+        // その他の状態更新
+        checkDailyStreakOnLoad();      // デイリー状態の再チェック
+        renderUnitList();              //念のため②の画面リストも更新しておく
+        
+        // ★修正：動かない原因だった「courseTitle」を消して、シンプルなメッセージにします
+        alert("学習データをリセットしました。");
         location.reload(); 
     }
 }
@@ -1652,26 +1745,25 @@ function calculateScopeProgress(dataKey) {
 function renderMenu() {
     const container = document.getElementById("subject-menu-container");
     if (!container) return;
-    container.innerHTML = ""; 
+    container.innerHTML = "";
 
-    // --- 【追加】科目全体の統計ボタン ---
+    // --- 【追加】科目全体の統計ボタン（イベント委譲対応版） ---
     const totalHistoryBtn = document.createElement("div");
-    totalHistoryBtn.className = "menu-item-card"; // ソース01のスタイルを適用 [5]
-    totalHistoryBtn.style.backgroundColor = "#74b9ff"; // 少し色を変えて目立たせる
+    totalHistoryBtn.className = "menu-item-card menu-card-total-history"; // ⚡委譲判定用クラスを追加
+    totalHistoryBtn.style.backgroundColor = "#74b9ff";
     totalHistoryBtn.style.color = "white";
     totalHistoryBtn.innerHTML = `
         <div class="menu-item-title" style="color: white;">📊 この科目の総合履歴・分析</div>
         <div style="font-size: 0.8rem; text-align: center;">全ての出典の問題を集計</div>
     `;
-    totalHistoryBtn.onclick = openSubjectTotalHistoryModal;
     container.appendChild(totalHistoryBtn);
-    // ----------------------------------
 
     SUBJECT_MENU_CONFIG.forEach(item => {
         if (!item.enabled) return;
 
         const card = document.createElement("div");
-        card.className = "menu-item-card";
+        card.className = "menu-item-card menu-card-item"; // ⚡委譲判定用クラスを追加
+        card.setAttribute('data-datakey', item.dataKey); // ⚡データキーを属性に格納
         const rank = getRankForScope(item.dataKey);
 
         card.innerHTML = `
@@ -1683,25 +1775,81 @@ function renderMenu() {
                 <div class="progress-text">${calculateScopeProgress(item.dataKey)}% 完了</div>
             </div>
         `;
-        
-        card.onclick = () => {
-            // 1. キーを更新
-            currentSubjectKey = item.dataKey;
-            CONFIG.SUBJECT_KEY = item.dataKey;
-            
-            // 2. 重要：問題を「単元別」から「過去問」などの適切なものに中身を入れ替える
-            refreshAppData(); 
-
-            // 3. 画面遷移と描画
-            navigateTo('unit-screen');
-            renderUnitList(); // ここで新しくなった questionPool を元にリストが作られます
-            updatePageTitle();
-        };
         container.appendChild(card);
     });
 }
 
-</script>
+// 利用規約・ライセンスモーダル制御用関数
+function openTermsModal() {
+    document.getElementById('terms-modal').style.display = 'flex';
+}
+function closeTermsModal() {
+    document.getElementById('terms-modal').style.display = 'none';
+}
+function openLicenseModal() {
+    document.getElementById('license-modal').style.display = 'flex';
+}
+function closeLicenseModal() {
+    document.getElementById('license-modal').style.display = 'none';
+}
 
+// ★ クイズ画面単体での「同意してスタート」押下時の処理
+function agreeTerms() {
+    // クイズ画面専用のフラグのみを保存（学習ホーム用の beauty_app_terms_agreed は保存しない）
+    localStorage.setItem("beauty_app_quiz_terms_agreed", "true");
+    closeTermsModal();
+}
+
+
+  // ==========================================================
+  // 🛡️【CSP完全適合】安全なイベントリスナーの一括紐付けとイベント委譲 (追加分)
+  // ==========================================================
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. フッターの規約・ライセンス
+    document.getElementById('btn-terms-open-footer')?.addEventListener('click', openTermsModal);
+    document.getElementById('btn-license-open-footer')?.addEventListener('click', openLicenseModal);
+
+    // 2. 履歴モーダル
+    document.getElementById('btn-close-history-modal')?.addEventListener('click', closeHistoryModal);
+
+    // 3. 利用規約モーダル (同意スタート)
+    document.getElementById('btn-agree-terms')?.addEventListener('click', agreeTerms);
+
+    // 4. ライセンスモーダル (閉じる)
+    document.getElementById('btn-license-close-modal')?.addEventListener('click', closeLicenseModal);
+
+    // 5. 単元画面の Google フォーム
+    document.getElementById('btn-feedback-open-unit')?.addEventListener('click', () => {
+      window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank');
+    });
+
+    // 6. 背景タップ時のオーバーレイクローズ処理（バブリング防止onclick削除に伴うJS側代替防御ロジック）
+    const historyModal = document.getElementById('history-modal');
+    if (historyModal) {
+      historyModal.addEventListener('click', (e) => {
+        if (e.target === historyModal) {
+          closeHistoryModal();
+        }
+      });
+    }
+    const termsModal = document.getElementById('terms-modal');
+    if (termsModal) {
+      termsModal.addEventListener('click', (e) => {
+        if (e.target === termsModal) {
+          closeTermsModal();
+        }
+      });
+    }
+    const licenseModal = document.getElementById('license-modal');
+    if (licenseModal) {
+      licenseModal.addEventListener('click', (e) => {
+        if (e.target === licenseModal) {
+          closeLicenseModal();
+        }
+      });
+    }
+  });
+
+</script>
 </body>
 </html>
