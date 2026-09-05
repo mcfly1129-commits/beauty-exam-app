@@ -242,8 +242,8 @@
 </p>
 <!-- ⭕ Googleボタンの代わりにパスワード入力欄とボタンを配置 -->
 <form id="login-form" style="display: flex; flex-direction: column; gap: 12px; align-items: center;" onsubmit="return false;">
-  <input type="password" id="login-password" autocomplete="current-password" placeholder="パスワードを入力" ...>
-  <button type="button" id="btn-login-submit" ...>ログインする</button>
+  <input type="password" id="login-password" autocomplete="current-password" placeholder="パスワードを入力" style="padding: 10px; border: 1px solid #fab1a0; border-radius: 8px; width: 80%; font-size: 0.9rem;">
+  <button type="button" id="btn-login-submit" style="padding: 10px 20px; background: #fab1a0; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">ログインする</button>
 </form>
 <p id="login-error-msg" style="color: #ff7675; font-size: 0.8rem; font-weight: bold; margin-top: 15px; display: none;"></p>
 </div>
@@ -603,6 +603,36 @@ function handleLogout() {
 // 📊 元の進捗ダッシュボードロジック（関数化して維持）
 // ==========================================
 function initDashboard() {
+    // 🌟【自動データクリーニング処理】初回起動時に1回だけ自動補正
+    if (!localStorage.getItem('beauty_app_data_cleaned_2026')) {
+        const subjectsToClean = [
+            'test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026',
+            'test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026',
+            'test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026',
+            'test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026',
+            'test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026',
+            'test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026',
+            'test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026',
+            'test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026',
+            'test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026',
+            'test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'
+        ];
+
+        subjectsToClean.forEach(key => {
+            const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+            let realMasteredCount = 0;
+            Object.keys(stats).forEach(qId => {
+                if (stats[qId] && (stats[qId].streak || 0) >= 1) {
+                    realMasteredCount++;
+                }
+            });
+            const currentSolved = localStorage.getItem('solved_' + key);
+            if (currentSolved !== null) {
+                localStorage.setItem('solved_' + key, realMasteredCount);
+            }
+        });
+        localStorage.setItem('beauty_app_data_cleaned_2026', 'true');
+    }
     const subjects = [
         { id: '01', name: '関係法規・制度', total: 290, keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] },
         { id: '02', name: '運営管理', total: 120, keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] },
@@ -878,7 +908,20 @@ window.onload = function() {
   // ==========================================================
   // 🛡️【インラインJS完全排除】安全なイベントリスナーの一括紐付け
   // ==========================================================
+  const speedHistoryList = document.getElementById("speed-history-list");
+  if (speedHistoryList) {
+    speedHistoryList.addEventListener("click", (e) => {
+        const expBtn = e.target.closest(".btn-speed-exp");
+        const delBtn = e.target.closest(".btn-speed-del-bm");
 
+        if (expBtn) {
+            toggleSpeedHistoryExp(expBtn.getAttribute("data-qid"));
+        } else if (delBtn) {
+            const qId = delBtn.getAttribute("data-qid");
+            removeSpeedHistoryBookmark(qId);
+        }
+    });
+  }
   // -- 1. ログイン前画面の各種処理 --
   const btnTermsOpen = document.getElementById('btn-terms-open');
   if (btnTermsOpen) {
@@ -1346,8 +1389,8 @@ function openSpeedHistoryModal(mode) {
                         <span style="font-size:0.75rem; font-weight:bold; color:${q.answer ? '#ff7675':'#74b9ff'}">[正答: ${q.answer ? '〇':'×'}]</span>
                     </div>
                     <div style="display:flex; gap:6px;">
-                        <button onclick="toggleSpeedHistoryExp('${q.id}')" style="background:#e4e7eb; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">解説を見る</button>
-                        ${mode === 'bookmark' ? `<button onclick="removeSpeedHistoryBookmark(event, '${q.id}')" style="background:#fff3f3; color:#ff7675; border:1px solid #ffccd5; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">削除</button>` : ''}
+                        <button class="btn-speed-exp" data-qid="${q.id}" style="background:#e4e7eb; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">解説を見る</button>
+                        ${mode === 'bookmark' ? `<button class="btn-speed-del-bm" data-qid="${q.id}" style="background:#fff3f3; color:#ff7675; border:1px solid #ffccd5; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">削除</button>` : ''}
                     </div>
                 </div>
                 <div id="speed-hist-exp-${q.id}" style="display:none; background:#faf9f6; font-size:0.8rem; line-height:1.4; color:#57606f; padding:8px; border-radius:6px; border-left:3px solid #fab1a0; margin-top:8px;">${safeExp}</div>
@@ -1362,13 +1405,11 @@ function toggleSpeedHistoryExp(qId) {
     if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
 }
 
-function removeSpeedHistoryBookmark(event, qId) {
-    event.stopPropagation();
+function removeSpeedHistoryBookmark(qId) {
     let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
     bookmarkedIds = bookmarkedIds.filter(id => id !== qId);
     localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
     
-    // バッジとリスト画面を再描画します
     updateSpeedDashboardBadges();
     openSpeedHistoryModal("bookmark");
 }
