@@ -265,7 +265,7 @@
 
              <p style="font-size: 0.62rem; color: #7f8c8d; margin-top: 10px; text-align: center; margin-bottom: 0; line-height: 1.5;">
             ↑※「以前報告ボタンを押した時点の自分」と<br>「現在のリアルタイムな自分」を比較しています。
-
+            </p>
       <!-- 時系列折れ線グラフ用 Canvas -->
       <div class="chart-box" style="position: relative; height: 200px; width: 100%; margin-top: 10px;">
         <canvas id="selfHistoryChart"></canvas>
@@ -1034,7 +1034,7 @@ function updateMyGrandMasterCount() {
  * 📈 自分の時系列データ推移グラフを描画する（努力と実力の推移）
  * LocalStorage データを一切破壊・汚染しない安全設計
  */
-function drawSelfHistoryChart() {
+  function drawSelfHistoryChart() {
   const canvasEl = document.getElementById('selfHistoryChart');
   if (!canvasEl) return;
 
@@ -1050,6 +1050,11 @@ function drawSelfHistoryChart() {
   
   // LocalStorage 自体を汚染（setItem）させないため、メモリ上の一時表示用配列（シャローコピー）を作成
   let renderDataList = [...storedData];
+
+  // 🔴【追加】送信履歴が30件を超える場合、直近の30件（末尾の30件）のみに絞り込む
+  if (renderDataList.length > 30) {
+    renderDataList = renderDataList.slice(-30);
+  }
 
   // 送信履歴がまだ一度もない場合：現在のリアルタイムな自分のステータスを一時的にプロット
   if (renderDataList.length === 0) {
