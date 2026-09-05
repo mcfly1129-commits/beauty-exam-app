@@ -489,8 +489,14 @@ function openHomeHistoryModal(subject) {
         });
     });
 
-    const rate = totalAnswerCount > 0 ? Math.floor((totalCorrectCount / totalAnswerCount) * 100) : 0;
-    summaryEl.innerHTML = `この科目の総学習状況<br><b style="font-size:1.1rem; color:#e67e22;">${totalCorrectCount}問</b> 正解 / のべ回答回数 ${totalAnswerCount}回<br>総合正答率: <b>${rate}%</b>`;
+const rate = totalAnswerCount > 0 ? Math.floor((totalCorrectCount / totalAnswerCount) * 100) : 0;
+
+    // 🔒 XSS対策：変数を事前にエスケープ処理して安全に挿入
+    const safeCorrect = escapeHTML(String(totalCorrectCount));
+    const safeTotal = escapeHTML(String(totalAnswerCount));
+    const safeRate = escapeHTML(String(rate));
+
+    summaryEl.innerHTML = `この科目の総学習状況<br><b style="font-size:1.1rem; color:#e67e22;">${safeCorrect}問</b> 正解 / 実績回答数 ${safeTotal}回<br>総合正答率: <b>${safeRate}%</b><br><span style="font-size:0.7rem; color:#7f8c8d;">※以下はカウント対象外です<br>マイ・ベストでの回答 / 弱点克服での不正解</span>`;
     
     // 各データ範囲（キー）ごとの着手状況（問題数）をリスト化して表示
     subject.keys.forEach(key => {
@@ -1037,25 +1043,55 @@ function submitSpeedAnswer(userAns) {
 
     // 1. 回答履歴の更新
     let stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + q.subjectKey)) || {};
-    if (!stats[q.id]) stats[q.id] = { total: 0, streak: 0, correct_count: 0 };
-    
-    stats[q.id].total += 1;
-    if (isCorrect) {
-        stats[q.id].streak += 1;
-        stats[q.id].correct_count += 1;
-        speedCorrectCountInSet++; // ⭕ 追加：正解したらセット内カウンターを+1
-    } else {
-        stats[q.id].streak = 0;
-    }
-    localStorage.setItem("beauty_app_question_stats_" + q.subjectKey, JSON.stringify(stats));
 
-    // 2. 進捗問題数の更新
-    const isNowMastered = (stats[q.id].streak >= 1);
-    const wasMasteredBefore = (stats[q.id].streak > 1) || (isCorrect && stats[q.id].streak === 1 && stats[q.id].total > 1);
-    
-    if (isCorrect && !wasMasteredBefore) {
+    // 🌟未定義（未回答）の場合は、安全のために最速で初期化してフリーズを防ぐ
+    if (!stats[q.id]) {
+        stats[q.id] = { total: 0, streak: 0, correct_count: 0 };
+    }
+
+    // 🌟更新前の段階で、以前に習得済み（streak >= 1）だったかを安全に判定
+    const wasMasteredBefore = ((stats[q.id].streak || 0) >= 1);
+
+    let needSave = false; // 🌟 LocalStorage 保存判定フラグ
+
+    // 🌟回答履歴の更新（モードによる分岐処理）
+    if (speedQuizMode === "wrong") {
+        // 🌟「弱点克服モード」の特別ルール（正解時のみ克服記録）
+        if (isCorrect) {
+            stats[q.id].total += 1;
+            stats[q.id].correct_count += 1;
+            stats[q.id].streak = 1;       // 習得済みにする
+            speedCorrectCountInSet++;     // セット内正解数を加算（演出用）
+            needSave = true;              // 変更があったため保存フラグを立てる
+        }
+    } else if (speedQuizMode === "bookmark") {
+        // 🌟「マイベストモード」の特別ルール（正否に関わらず完全ノーカウント）
+        if (isCorrect) {
+            speedCorrectCountInSet++;     // 画面上の全問正解演出（紙吹雪）用のみカウント
+        }
+        // 戦績(stats)や保存(needSave)は一切行わない
+    } else {
+        // 通常のスピード特訓の場合（通常カウント）
+        stats[q.id].total += 1;
+        if (isCorrect) {
+            stats[q.id].streak += 1;
+            stats[q.id].correct_count += 1;
+            speedCorrectCountInSet++;
+        } else {
+            stats[q.id].streak = 0;
+        }
+        needSave = true;                  // 常に保存
+    }
+
+    // 2. 進捗問題数の更新（マイベストモード以外、かつ未習得からの正解時のみ加算）
+    if (isCorrect && !wasMasteredBefore && speedQuizMode !== "bookmark") {
         let currentSolved = parseInt(localStorage.getItem('solved_' + q.subjectKey) || 0);
         localStorage.setItem('solved_' + q.subjectKey, currentSolved + 1);
+    }
+
+    // 🌟処理の最後で、更新があった場合のみ1回だけスマートに保存
+    if (needSave) {
+        localStorage.setItem("beauty_app_question_stats_" + q.subjectKey, JSON.stringify(stats));
     }
 
     // 3. 画面判定UI
