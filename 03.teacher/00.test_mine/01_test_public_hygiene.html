@@ -1291,15 +1291,19 @@ function submitAnswer(userAns) {
     saveQuizResultToLocal(currentQ.id, isCorrect);
 
     if (isCorrect && !isDailyMode) {
-        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
+    // 🌟【改善】以前にこの問題を習得（streak >= 1）していたかを回答の瞬間に厳密にチェック
+    const stat = questionStats[currentQ.id];
+    const wasMasteredBefore = stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD;
+
+    // 🌟 今回正解し、かつ「回答前に未習得だった」問題のみ進捗solved_を+1する
+    if (!wasMasteredBefore) {
         let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
         localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
-        
-        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
-    } else if (isCorrect && isDailyMode) {
-        // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
-        console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
+        console.log(currentSubjectKey + " の進捗を新規習得として更新（通常学習）: " + (currentSolved + 1));
+    } else {
+        console.log(currentSubjectKey + " はすでに習得済みのため、進捗（solved_）への重複加算を防止しました。");
     }
+}
 
     dailyCorrectedIds = JSON.parse(localStorage.getItem("beauty_app_daily_corrected_ids_" + CONFIG.SUBJECT_KEY)) || [];
     
