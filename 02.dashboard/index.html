@@ -247,24 +247,33 @@
         </p>
     </div>
 
-<!-- 📈 過去比較の成長率 -->
+<!-- 📊 努力と成長のビフォーアフター（折れ線グラフをインプラント） -->
     <div class="card">
-        <h3 class="card-title">📈 前回報告時からの成長『自己比較』</h3>
-        <div class="growth-grid">
-            <div class="growth-item">
-                <div style="font-size: 0.75rem; color: #7f8c8d;">進捗伸び率</div>
-                <div class="growth-value" id="growth-progress">--</div>
-            </div>
-            <div class="growth-item">
-                <div style="font-size: 0.75rem; color: #7f8c8d;">正答率変化</div>
-                <div class="growth-value" id="growth-accuracy">--</div>
-            </div>
+      <h3 class="card-title">📈 努力と成長のビフォーアフター</h3>
+      
+      <!-- 既存の数値比較UIもコンパクトに残し、変化がパッとわかるようにします -->
+      <div class="growth-grid" style="margin-bottom: 15px;">
+        <div class="growth-item">
+          <div style="font-size: 0.75rem; color: #7f8c8d;">進捗伸び率</div>
+          <div class="growth-value" id="growth-progress">--</div>
         </div>
-        <!-- 🚨 ここから下を新しい文章に書き換えます -->
-        <p style="font-size: 0.62rem; color: #7f8c8d; margin-top: 10px; text-align: center; margin-bottom: 0; line-height: 1.5;">
-            ※「前回の報告ボタンを押した時点の自分」と<br>「現在のリアルタイムな自分」を比較しています。<br>
-            各数値は、10科目それぞれのパーセンテージをすべて足して<br>10で割った「全体平均値」の差分です。
-        </p>
+        <div class="growth-item">
+          <div style="font-size: 0.75rem; color: #7f8c8d;">正答率変化</div>
+          <div class="growth-value" id="growth-accuracy">--</div>
+        </div>
+      </div>
+
+             <p style="font-size: 0.62rem; color: #7f8c8d; margin-top: 10px; text-align: center; margin-bottom: 0; line-height: 1.5;">
+            ↑※「以前報告ボタンを押した時点の自分」と<br>「現在のリアルタイムな自分」を比較しています。
+
+      <!-- 時系列折れ線グラフ用 Canvas -->
+      <div class="chart-box" style="position: relative; height: 200px; width: 100%; margin-top: 10px;">
+        <canvas id="selfHistoryChart"></canvas>
+      </div>
+
+      <p style="font-size: 0.62rem; color: #7f8c8d; margin-top: 10px; text-align: center; margin-bottom: 0; line-height: 1.5;">
+            ※各数値は、10科目それぞれのパーセンテージをすべて足して<br>10で割った「全体平均値」の差分です。
+      </p>
     </div>
 
     <!-- 🏆 上位ランカーボード -->
@@ -385,6 +394,7 @@ const DASHBOARD_SUBJECTS = [
 // グローバル変数（グラフのインスタンス保持用）
 let progressChartInstance = null;
 let accuracyChartInstance = null;
+let selfHistoryChartInstance = null; // ★追加
 
 // 📅 画面読み込み時の初期化
 document.addEventListener('DOMContentLoaded', () => {
@@ -413,7 +423,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. グラフ＆ダッシュボードの初期描画
   fetchGlobalDashboardData(myData);
 
-
+  // 🔴 画面初期表示のライフサイクルにて、自分の時系列自己成長グラフを描画
+  drawSelfHistoryChart(); // ★追加
+  
   // ==========================================
   // 🛡️【インラインJS完全排除】安全なイベント登録
   // ==========================================
@@ -751,15 +763,34 @@ dailyMaxStreak: dailyMaxStreak
         if (progressBar) progressBar.style.width = "100%";
         if (progressText) progressText.innerText = "🎉 送信完了しました！ 100%";
 
-        if (res.status === "success") {
+if (res.status === "success") {
             // スナップショットの保存
             localStorage.setItem('dashboard_last_sent_progress', avgProgress);
             localStorage.setItem('dashboard_last_sent_accuracy', avgAccuracy);
             localStorage.setItem('dashboard_last_send_timestamp', new Date().getTime());
 
+            // 既存の送信ログ（文字列配列）は一切壊さず安全に現状維持
             let history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
             history.push(new Date().toLocaleString('ja-JP'));
             localStorage.setItem('dashboard_send_history', JSON.stringify(history));
+
+            // 🔴 対策：グラフ描画専用の別キーを新設し、オブジェクト構造で履歴を保存（競合回避）
+            let growthHistory = JSON.parse(localStorage.getItem('beauty_app_self_growth_history')) || [];
+            const today = new Date();
+            const formattedDate = `${today.getMonth() + 1}/${today.getDate()} ${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+            
+            growthHistory.push({
+              date: formattedDate,
+              progress: avgProgress, // 送信時点の総合進捗度
+              accuracy: avgAccuracy  // 送信時点の平均正答率
+            });
+            localStorage.setItem('beauty_app_self_growth_history', JSON.stringify(growthHistory));
+
+            // 既存の送信履歴リストの描画をコール
+            renderSendHistory();
+
+            // 🔴 送信完了の瞬間にグラフを即時リアルタイム更新
+            drawSelfHistoryChart();
 
             // 🎯 順位と下位15%の計算・判定
             const total = res.totalParticipants; // 総参加人数
@@ -899,8 +930,9 @@ function renderSendHistory() {
     
     const listEl = document.getElementById('send-history-list');
     listEl.innerHTML = "";
-    history.reverse().forEach((time, index) => {
-        listEl.innerHTML += `<div>第 ${history.length - index} 回報告: ${time} (送信済)</div>`;
+    // ⭕ slice() でシャローコピーを作成してから反転させることで、元の配列を破壊しない
+    history.slice().reverse().forEach((time, index) => {
+        listEl.innerHTML += `<div>第 ${history.length - index} 回報告: ${escapeHTML(time)} (送信済)</div>`;
     });
 }
 
@@ -916,7 +948,16 @@ function handleAllReset() {
         const saveCurrentStreak = localStorage.getItem('daily_current_streak');
         const saveMaxStreak = localStorage.getItem('daily_max_streak');
 
+        // 🔴 対策: リダイレクト直前にメモリ上のチャートインスタンスを明示的に破棄
+        if (selfHistoryChartInstance) {
+          selfHistoryChartInstance.destroy();
+          selfHistoryChartInstance = null;
+        }
+
         localStorage.clear();
+
+        // 🔴 対策: localStorage.clear()でクリアされた新設キーを明示的にクリア（整合性維持）
+        localStorage.removeItem('beauty_app_self_growth_history');
 
         // ★ 追加：保護データの復元
         if (saveLastDate) localStorage.setItem('daily_last_challenge_date', saveLastDate);
@@ -987,6 +1028,95 @@ function updateMyGrandMasterCount() {
     if (el) {
         el.innerText = `${gmAchievedCount} / ${totalTargetKeys}`;
     }
+}
+
+/**
+ * 📈 自分の時系列データ推移グラフを描画する（努力と実力の推移）
+ * LocalStorage データを一切破壊・汚染しない安全設計
+ */
+function drawSelfHistoryChart() {
+  const canvasEl = document.getElementById('selfHistoryChart');
+  if (!canvasEl) return;
+
+  const ctx = canvasEl.getContext('2d');
+  
+  // 以前の古いグラフインスタンスが残っている場合は完全に破棄（ホバー時のチラつきバグ防止）
+  if (selfHistoryChartInstance) {
+    selfHistoryChartInstance.destroy();
+  }
+
+  // グラフ専用の LocalStorage キーからデータを取得（無ければ空配列）
+  const storedData = JSON.parse(localStorage.getItem('beauty_app_self_growth_history')) || [];
+  
+  // LocalStorage 自体を汚染（setItem）させないため、メモリ上の一時表示用配列（シャローコピー）を作成
+  let renderDataList = [...storedData];
+
+  // 送信履歴がまだ一度もない場合：現在のリアルタイムな自分のステータスを一時的にプロット
+  if (renderDataList.length === 0) {
+    const myData = calculateMyCurrentStats();
+    renderDataList.push({
+      date: "現在 (未報告)",
+      progress: myData.totalProgress,
+      accuracy: myData.totalAccuracy
+    });
+  }
+
+  // Chart.js 用の配列へマッピング
+  const labels = renderDataList.map(h => h.date);
+  const progressData = renderDataList.map(h => h.progress);
+  const accuracyData = renderDataList.map(h => h.accuracy);
+
+  selfHistoryChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '総合進捗度 - 努力 (%)',
+          data: progressData,
+          borderColor: '#74b9ff', // 努力の可視化カラー(ブルー)と同調
+          backgroundColor: 'rgba(116, 185, 255, 0.1)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#74b9ff',
+          tension: 0.15,
+          fill: true
+        },
+        {
+          label: '平均正答率 - 実力 (%)',
+          data: accuracyData,
+          borderColor: '#ff9f43', // 実力の可視化カラー(オレンジ)と同調
+          backgroundColor: 'rgba(255, 159, 67, 0.1)',
+          borderWidth: 2,
+          pointRadius: 4,
+          pointBackgroundColor: '#ff9f43',
+          tension: 0.15,
+          fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { font: { size: 10 } }
+        }
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { stepSize: 20, font: { size: 9 } },
+          grid: { color: '#f1f2f6' }
+        },
+        x: {
+          ticks: { font: { size: 9 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
 }
 
 </script>
