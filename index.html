@@ -400,8 +400,49 @@
 
 <script>
 
-// 📊 裏側からでもリロード無しでリアルタイムに進捗を再集計・再描画できる共通関数
+// ==========================================
+// 📊 元の進捗ダッシュボードロジック（関数化して維持）
+// ==========================================
 function initDashboard() {
+
+// 🌟【自動データクリーニング処理】過去の重複加算バグで狂った進捗数（solved_）を、
+// 各問題の実際の「習得済み（streak >= 1）」状態から逆算して、初回起動時に1回だけ自動補正します。
+if (!localStorage.getItem('beauty_app_data_cleaned_2026')) {
+    const subjectsToClean = [
+        'test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026',
+        'test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026',
+        'test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026',
+        'test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026',
+        'test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026',
+        'test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026',
+        'test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026',
+        'test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026',
+        'test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026',
+        'test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'
+    ];
+
+    subjectsToClean.forEach(key => {
+        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+        let realMasteredCount = 0;
+        
+        // 実際の戦績データから、本当に「習得（streak >= 1）」している問題数を正確にカウント
+        Object.keys(stats).forEach(qId => {
+            if (stats[qId] && (stats[qId].streak || 0) >= 1) {
+                realMasteredCount++;
+            }
+        });
+
+        // 狂っていた古い進捗値（solved_）が存在する場合のみ、正しい習得数に自動書き換え
+        const currentSolved = localStorage.getItem('solved_' + key);
+        if (currentSolved !== null) {
+            localStorage.setItem('solved_' + key, realMasteredCount);
+            console.log(`🧹 データクリーンアップ完了 [${key}]: ${currentSolved} ➔ ${realMasteredCount} に補正しました`);
+        }
+    });
+
+    // 2回目以降のアクセスで無駄にループ処理が走らないよう、お掃除完了フラグを保存
+    localStorage.setItem('beauty_app_data_cleaned_2026', 'true');
+}
     // 🔥 デイリーバッジの表示を最新化
     if (typeof renderHeaderDailyStats === "function") renderHeaderDailyStats();
     if (typeof updateSpeedDashboardBadges === "function") updateSpeedDashboardBadges();
