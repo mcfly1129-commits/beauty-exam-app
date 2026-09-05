@@ -1237,12 +1237,19 @@ function submitAnswer(userAns) {
     const currentQ = currentQuestions[currentQuestionIndex];
     const isCorrect = (userAns === currentQ.answer);
 
-    if (isCorrect && !isDailyMode) {
-        // デイリーモード（isDailyMode === true）でない時だけ、学習ホーム用の進捗を更新する
-        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
-        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
-        
-        console.log(currentSubjectKey + " の進捗を更新（通常学習）: " + (currentSolved + 1));
+if (isCorrect && !isDailyMode) {
+        // 🌟 回答前の時点で、すでに習得済み（streak >= threshold）だったかを厳密に判定
+        const stat = questionStats[currentQ.id];
+        const wasMasteredBefore = stat && (stat.streak || 0) >= CONFIG.LEARNED_STREAK_THRESHOLD;
+
+        // 🌟 今回正解し、かつ「回答前に未習得だった」問題のみ進捗 solved_ を +1 加算
+        if (!wasMasteredBefore) {
+            let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+            localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+            console.log(currentSubjectKey + " の進捗を新規習得として更新（通常学習）: " + (currentSolved + 1));
+        } else {
+            console.log(currentSubjectKey + " はすでに習得済みのため、進捗（solved_）への重複加算を防止しました。");
+        }
     } else if (isCorrect && isDailyMode) {
         // デイリーモードの場合は、コンソールにのみログを出す（学習ホームのデータには加算しない）
         console.log("デイリー真剣勝負の正解：進捗にはカウントしません");
