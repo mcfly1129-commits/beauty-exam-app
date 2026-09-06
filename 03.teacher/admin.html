@@ -608,10 +608,10 @@
                 <p>学生全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
             </div>
 <div class="header-user-area" style="display: flex; align-items: center; gap: 10px;">
-  <!-- 🔄 任意更新ボタンの新設 -->
-  <button class="btn-recalc" id="btn-recalculate" style="background-color: #ff9f43; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;">🔄 最新データに更新（再計算）</button>
-  <span class="user-badge" id="display-teacher-email">取得中...</span>
-  <button class="btn-logout" id="btn-logout">ログアウト</button>
+    <!-- 🔴 任意更新ボタンの新設（スマホ等での表示崩れを防ぐ安心設計） -->
+    <button class="btn-recalc" id="btn-recalculate" style="background-color: #ff9f43; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;">🔄 最新データに更新（再計算）</button>
+    <span class="user-badge" id="display-teacher-email">取得中...</span>
+    <button class="btn-logout" id="btn-logout">ログアウト</button>
 </div>
         </header>
 
@@ -832,6 +832,27 @@
             { id: '10', name: '技術理論' }
         ];
 
+// 🔴【新規追加】進捗（努力）と正答率（実力）を評価するランク変換関数
+    function getSelfGrowthRank(val, type) {
+      const num = parseInt(val || 0);
+      
+      if (type === 'progress') {
+        if (num >= 90) return 'S';
+        if (num >= 80) return 'A';
+        if (num >= 60) return 'B';
+        if (num >= 40) return 'C';
+        if (num >= 20) return 'D';
+        return 'E';
+      } else {
+        if (num >= 95) return 'S';
+        if (num >= 85) return 'A';
+        if (num >= 70) return 'B';
+        if (num >= 60) return 'C';
+        if (num >= 51) return 'D';
+        return 'E';
+      }
+    }
+        
         // 🔒 XSS防止：文字エスケープ処理 [cite: 96, 127]
         function escapeHTML(str) {
             if (typeof str !== 'string') return str;
@@ -1295,22 +1316,26 @@ function handleRecalculate() {
 
                 const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
 
-                const row = document.createElement('tr');
-                row.className = alertClass;
-                row.innerHTML = `
-                    <td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
-                    <td data-label="学校名">${escapeHTML(student.school || '不明')}</td>
-                    <td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
-                    <td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td>
-                    <td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
-                    <td data-label="総合進捗度" style="text-align:center; font-weight:bold;">${progress}%</td>
-                    <td data-label="平均正答率" style="text-align:center; font-weight:bold;">${parseInt(student.totalAccuracy || 0)}%</td>
-                    <td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td>
-                    <td data-label="指導ステータス">${statusBadge}</td>
-                    <td data-label="" style="text-align:center;">
-                        <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
-                    </td>
-                `;
+// 🔴 努力（進捗）と実力（正答率）の総合ランクを算出
+const overallProgRank = getSelfGrowthRank(progress, 'progress'); 
+const overallAccRank = getSelfGrowthRank(student.totalAccuracy || 0, 'accuracy');
+const row = document.createElement('tr'); 
+row.className = alertClass; 
+row.innerHTML = `
+<td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td> 
+<td data-label="学校名">${escapeHTML(student.school || '不明')}</td> 
+<td data-label="クラス名">${escapeHTML(student.className || '不明')}</td> 
+<td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td> 
+<td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td> 
+<!-- 🔴 変更: 努力と実力のアルファベットを数値の左側にカラーで表示します -->
+<td data-label="総合進捗度" style="text-align:center; font-weight:bold;"><span style="color:var(--secondary-color); font-size:1.05rem; margin-right:4px;">${overallProgRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${progress}%)</small></td> 
+<td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="color:var(--success-color); font-size:1.05rem; margin-right:4px;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${parseInt(student.totalAccuracy || 0)}%)</small></td> 
+<td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td> 
+<td data-label="指導ステータス">${statusBadge}</td> 
+<td data-label="" style="text-align:center;"> 
+  <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button> 
+</td>
+`;
                 tableBody.appendChild(row);
             });
 
