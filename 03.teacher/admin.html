@@ -589,11 +589,12 @@
                 <h1>👨‍🏫 教員向け『総合管理画面』</h1>
                 <p>学生全体の統計、マクロ分析、未提出・停滞の検知、および時系列でのミクロ個人分析をサポートします</p>
             </div>
-            <div class="header-user-area">
-                <span class="user-badge" id="display-teacher-email">取得中...</span>
-                <!-- onclickを消し、JavaScriptから安全に特定するための id="btn-logout" を追加します -->
-                <button class="btn-logout" id="btn-logout">ログアウト</button>
-            </div>
+<div class="header-user-area" style="display: flex; align-items: center; gap: 10px;">
+  <!-- 🔄 任意更新ボタンの新設 -->
+  <button class="btn-recalc" id="btn-recalculate" style="background-color: #ff9f43; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;">🔄 最新データに更新（再計算）</button>
+  <span class="user-badge" id="display-teacher-email">取得中...</span>
+  <button class="btn-logout" id="btn-logout">ログアウト</button>
+</div>
         </header>
 
         <!-- 📊 クイックサマリー指標 -->
@@ -929,52 +930,92 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 11. 統計データ手動再計算ボタンの安全なイベントバインド
+  const recalcBtn = document.getElementById('btn-recalculate');
+  if (recalcBtn) {
+    recalcBtn.addEventListener('click', handleRecalculate);
+  }
+
   // 📡 API経由の実データロードを開始
   loadTeacherDashboardData();
 });
 
-// 📡 API経由の実データロード
-function loadTeacherDashboardData() {
-    showLoading(true);
+/**
+ * 📡 API経由の実データロード（教員用ダッシュボードデータロード）
+ * @param {boolean} [isRecalculate=false] - サーバー側（GAS）で全体サマリー再集計を強制実行するかどうか
+ */
+function loadTeacherDashboardData(isRecalculate = false) {
+  showLoading(true);
 
-    // 🔒 パスワードをリクエストボディへ安全に格納し、POST送信
-    const password = localStorage.getItem('teacher_google_id_token') || "";
+  // ボタン状態の制御（連打対策とローディング表現）
+  const recalcBtn = document.getElementById('btn-recalculate');
+  if (recalcBtn) {
+    recalcBtn.disabled = true;
+    recalcBtn.innerText = "⏳ 再計算中...";
+    recalcBtn.style.opacity = "0.7";
+  }
 
-fetch(GAS_API_URL, {
+  const password = localStorage.getItem('teacher_google_id_token') || "";
+  const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
+
+  fetch(GAS_API_URL, {
     method: "POST",
-    cache: "no-store", // ブラウザキャッシュを完全無効化
-    headers: { 
-        "Content-Type": "text/plain" // ⭕️ プリフライト（OPTIONS）を完全に回避するため極限までシンプルにします
+    cache: "no-store",
+    headers: {
+      "Content-Type": "text/plain"
     },
     body: JSON.stringify({
-        action: "getTeacherData",
-        password: password
+      action: actionName,
+      password: password
     })
-})
-    .then(response => {
-        if (!response.ok) throw new Error("API通信エラーが発生しました。");
-        return response.json();
-    })
-    .then(res => {
-        if (res.status === "error" || res.isAuthorized === false) {
-            alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
-            handleLogout();
-            return;
-        }
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("API通信エラーが発生しました。");
+    return response.json();
+  })
+  .then(res => {
+    if (res.status === "error" || res.isAuthorized === false) {
+      alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
+      handleLogout();
+      return;
+    }
 
-        allStudentsRaw = res.students || [ ];
-        dashboardSummary = res.dashboard || null;
+    allStudentsRaw = res.students || [ ];
+    dashboardSummary = res.dashboard || null;
 
-        renderDashboardAndTable();
-        showLoading(false);
-    })
-    .catch(err => {
-        console.error("データ取得エラー:", err);
-        const tableStatus = document.getElementById('table-status');
-        tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
-        tableStatus.style.display = 'block';
-        showLoading(false); // ⭕ 通信エラー時にもローディング状態を安全に解除
-    });
+    renderDashboardAndTable();
+    showLoading(false);
+
+    if (isRecalculate) {
+      alert("🎉 最新のスプレッドシート履歴から、統計データの再計算と反映が完了しました！");
+    }
+  })
+  .catch(err => {
+    console.error("データ取得エラー:", err);
+    const tableStatus = document.getElementById('table-status');
+    if (tableStatus) {
+      tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
+      tableStatus.style.display = 'block';
+    }
+    showLoading(false);
+  })
+  .finally(() => {
+    // ボタン状態の復元
+    if (recalcBtn) {
+      recalcBtn.disabled = false;
+      recalcBtn.innerText = "🔄 最新データに更新（再計算）";
+      recalcBtn.style.opacity = "1";
+    }
+  });
+}
+
+/**
+ * 🔄 手動再計算ボタンクリック時のイベントハンドラ
+ */
+function handleRecalculate() {
+  if (confirm("スプレッドシートの全生徒データおよび全履歴を読み込み、全体平均値・中央値・対抗ランキングの再集計を実行します。\nこの処理は完了までに数秒かかります。よろしいですか？")) {
+    loadTeacherDashboardData(true);
+  }
 }
 
         function showLoading(show) {
