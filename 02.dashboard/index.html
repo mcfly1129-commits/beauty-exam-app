@@ -218,12 +218,26 @@
         <div style="font-size: 0.65rem; opacity: 0.9;">※各科目の出題範囲毎において<br>進捗度100%かつ正答率100%を達成した現在の数</div>
     </div>
 
-    <!-- 👑 グランドマスター輩出数カウンター -->
-    <div class="gm-counter">
-        <div style="font-size: 0.85rem; font-weight: bold; letter-spacing: 1px;">🌌 全校『グランドマスター』通算 獲得総数</div>
-        <div class="gm-number" id="gm-total-count">0 回</div>
-        <div style="font-size: 0.65rem; opacity: 0.8;">※『グランドマスター』を獲得した猛者が<br>現在どのくらいいるかを示しています</div>
-    </div>
+<!-- 👑 グランドマスター輩出数カウンター -->
+<div class="gm-counter">
+    <div style="font-size: 0.85rem; font-weight: bold; letter-spacing: 1px;">🌌 全校『グランドマスター』通算 獲得総数</div>
+    <div class="gm-number" id="gm-total-count">0 回</div>
+    <div style="font-size: 0.65rem; opacity: 0.8;">※『グランドマスター』を獲得した猛者が<br>現在どのくらいいるかを示しています</div>
+</div>
+
+<!-- 🔴【新規追加：主役ランクバッジ】現在のあなたの総合評価ランクカード（デカデカと表示） -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+  <div style="background: #ffffff; border: 2px solid var(--primary-color); border-radius: 16px; padding: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+    <div style="font-size: 0.72rem; font-weight: bold; color: #7f8c8d;">🏃 現在の総合努力ランク</div>
+    <div id="my-overall-progress-rank" style="font-size: 2.5rem; font-weight: bold; color: var(--primary-color); margin: 3px 0; line-height: 1;">-</div>
+    <div id="my-overall-progress-percent" style="font-size: 0.7rem; color: #7f8c8d;">平均進捗: --%</div>
+  </div>
+  <div style="background: #ffffff; border: 2px solid var(--accent-orange); border-radius: 16px; padding: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+    <div style="font-size: 0.72rem; font-weight: bold; color: #7f8c8d;">🎯 現在の総合実力ランク</div>
+    <div id="my-overall-accuracy-rank" style="font-size: 2.5rem; font-weight: bold; color: var(--accent-orange); margin: 3px 0; line-height: 1;">-</div>
+    <div id="my-overall-accuracy-percent" style="font-size: 0.7rem; color: #7f8c8d;">平均正答: --%</div>
+  </div>
+</div>
 
     <!-- 📊 グラフA：努力の可視化（進捗度） -->
     <div class="card">
@@ -371,6 +385,31 @@ function escapeHTML(str) {
     });
 }
 
+/**
+ * 📈 進捗（努力）と正答率（実力）をそれぞれ最適な閾値でS〜Eのランクに変換する
+ */
+function getSelfGrowthRank(val, type) {
+  const num = parseInt(val || 0);
+  
+  if (type === 'progress') {
+    // 🏃 進捗率（努力）の基準：0%起点
+    if (num >= 90) return 'S';
+    if (num >= 80) return 'A';
+    if (num >= 60) return 'B';
+    if (num >= 40) return 'C';
+    if (num >= 20) return 'D';
+    return 'E';
+  } else {
+    // 🎯 正答率（実力）の基準：50%起点（あてずっぽう50%を考慮した厳格評価）
+    if (num >= 95) return 'S'; // ほぼノーミス
+    if (num >= 85) return 'A'; // 合格安全圏
+    if (num >= 70) return 'B'; // 合格目安
+    if (num >= 60) return 'C'; // 知識が曖昧
+    if (num >= 51) return 'D'; // ほぼ勘
+    return 'E';                // 50%以下はすべてE（要指導）
+  }
+}
+
 // ==========================================
 // 🔗 【設定】Google Apps Script (GAS) のWebアプリURL
 // ==========================================
@@ -412,6 +451,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1. ローカルデータの集計
   const myData = calculateMyCurrentStats();
+
+  // 🔴【追加】努力（進捗）と実力（正答率）で、それぞれ最適な総合評価ランクを算出して画面の主役バッジ（HTML）に即座に反映！
+  const overallProgRank = getSelfGrowthRank(myData.totalProgress, 'progress');
+  const overallAccRank = getSelfGrowthRank(myData.totalAccuracy, 'accuracy');
+
+  document.getElementById('my-overall-progress-rank').innerText = overallProgRank;
+  document.getElementById('my-overall-progress-percent').innerText = `平均進捗: ${myData.totalProgress}%`;
+
+  document.getElementById('my-overall-accuracy-rank').innerText = overallAccRank;
+  document.getElementById('my-overall-accuracy-percent').innerText = `平均正答: ${myData.totalAccuracy}%`;
 
   // 👑 自分のグランドマスター数を計算して表示
   updateMyGrandMasterCount();
