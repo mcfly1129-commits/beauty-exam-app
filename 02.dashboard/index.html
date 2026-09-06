@@ -576,11 +576,11 @@ function handleDashboardData(data) {
     const gmCount = data.global_metrics ? data.global_metrics.grand_master_count : 0;
     document.getElementById('gm-total-count').innerText = `${gmCount} 回`;
 
-    // 2. 個人ランキングトップ5の反映（🔒 XSS対策版）
+// 2. 個人ランキングトップ5の反映（🔒 XSS対策版）
     const progList = document.getElementById('rank-progress-list');
     progList.innerHTML = "";
-    if (data.ranking && data.ranking.progress_top5 && data.ranking.progress_top5.length > 0) {
-        data.ranking.progress_top5.forEach((r, idx) => {
+    if (data.ranking && data.ranking.accuracy_top5 && data.ranking.accuracy_top5.length > 0) { // ⭕ accuracy_top5 に変更
+        data.ranking.accuracy_top5.forEach((r, idx) => {
             // 外部入力テキストを事前に無害化
             const safeSchool = escapeHTML(r.school || '');
             const safeClass = escapeHTML(r.className || '');
