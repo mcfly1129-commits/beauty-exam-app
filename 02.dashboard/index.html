@@ -688,7 +688,7 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
   // 1. 各グラフ用のラベル配列とランク用データ構造を生成
   // -------------------------------------------------------------
   const progressLabels = [];
-  const progressRankData = []; // 各科目の2行目テキストと色情報
+  const progressRankData = []; 
   DASHBOARD_SUBJECTS.forEach((s, idx) => {
     const progVal = myProg[idx] || 0;
     const progRank = getSelfGrowthRank(progVal, 'progress');
@@ -716,7 +716,7 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
   });
 
   // -------------------------------------------------------------
-  // 2. 2行目のテキストだけを動的カラーで再描画する共通プラグイン
+  // 2. 2行目のテキストだけを動的カラーで再描画する共通プラグイン (強化版)
   // -------------------------------------------------------------
   const dualColorPointLabelsPlugin = {
     id: 'dualColorPointLabels',
@@ -729,26 +729,36 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
 
       ctx.save();
       ctx.font = 'bold 10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
 
       rScale._pointLabelItems.forEach((item, index) => {
         const rankInfo = rankDataList[index];
         if (!rankInfo) return;
 
+        // 複数行ラベル（lines）を取得
         const lines = item.lines || [];
         if (lines.length < 2) return;
 
-        // 2行目の描画位置(x, y)を取得
+        // Chart.js が計算したアライメントと位置を取得
+        const textAlign = item.textAlign || 'center';
+        ctx.textAlign = textAlign;
+        ctx.textBaseline = 'alphabetic'; // 精確な位置揃え
+
+        // 2行目の描画Y座標を計算（1行目の下＋行間12px）
         const x = item.x !== undefined ? item.x : item.left;
-        const y = item.y !== undefined ? (item.y + 12) : (item.top + 12);
+        const lineY = item._lineY || (item.y + 12);
 
-        // 2行目部分を白背景でクリアしてから目的のランク色で上書き描画
+        // ⭕ 2行目の元文字（ダークグレー）を消すため、小さな白矩形でクリア
+        const textWidth = ctx.measureText(rankInfo.text).width;
+        let rectX = x - (textWidth / 2) - 2;
+        if (textAlign === 'left') rectX = x - 2;
+        if (textAlign === 'right') rectX = x - textWidth - 2;
+
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(rankInfo.text, x, y);
+        ctx.fillRect(rectX, lineY - 9, textWidth + 4, 12);
 
+        // ⭕ 目的のランク色で2行目のみを上書き描画
         ctx.fillStyle = rankInfo.color;
-        ctx.fillText(rankInfo.text, x, y);
+        ctx.fillText(rankInfo.text, x, lineY);
       });
 
       ctx.restore();
@@ -775,7 +785,7 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
           min: 0, max: 100, ticks: { stepSize: 20 },
           pointLabels: {
             font: { size: 10, weight: 'bold' },
-            color: '#2c3e50' // ベースカラー（1行目の科目名）は標準のダークグレー
+            color: '#2c3e50' // 1行目（科目名）はダークグレー
           }
         }
       },
@@ -808,7 +818,7 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
           min: 0, max: 100, ticks: { stepSize: 20 },
           pointLabels: {
             font: { size: 10, weight: 'bold' },
-            color: '#2c3e50' // ベースカラー（1行目の科目名）は標準のダークグレー
+            color: '#2c3e50' // 1行目（科目名）はダークグレー
           }
         }
       },
