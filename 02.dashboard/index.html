@@ -681,34 +681,83 @@ function handleDashboardData(data) {
 
 /**
  * 🎨 Chart.js を使って2つのレーダーチャートを描画する
+ * (1行目: 科目名=#2c3e50 / 2行目: ランク=動的ランクカラー)
  */
 function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
-  // 🔴 1. 進捗度グラフ専用：[科目名, ランク] の2行配列 ＆ ランク色の配列を生成
+  // -------------------------------------------------------------
+  // 1. 各グラフ用のラベル配列とランク用データ構造を生成
+  // -------------------------------------------------------------
   const progressLabels = [];
-  const progressRankColors = []; // 各科目の2行目ランク色（ブルー・オレンジ・レッド・グレー）のみ保持
+  const progressRankData = []; // 各科目の2行目テキストと色情報
   DASHBOARD_SUBJECTS.forEach((s, idx) => {
     const progVal = myProg[idx] || 0;
     const progRank = getSelfGrowthRank(progVal, 'progress');
     
     // 1行目に科目名、2行目にアルファベットランク
     progressLabels.push([s.name, `[${progRank}]`]);
-    // 2行目のランク色のみ配列に格納
-    progressRankColors.push(getRankColor(progRank));
+    progressRankData.push({
+      text: `[${progRank}]`,
+      color: getRankColor(progRank)
+    });
   });
 
-  // 🔴 2. 正答率グラフ専用：[科目名, ランク] の2行配列 ＆ ランク色の配列を生成
   const accuracyLabels = [];
-  const accuracyRankColors = [];
+  const accuracyRankData = [];
   DASHBOARD_SUBJECTS.forEach((s, idx) => {
     const progVal = myProg[idx] || 0;
     const accVal = myAcc[idx] || 0;
     const accRank = (progVal > 10) ? getSelfGrowthRank(accVal, 'accuracy') : '-';
     
     accuracyLabels.push([s.name, `[${accRank}]`]);
-    accuracyRankColors.push(getRankColor(accRank));
+    accuracyRankData.push({
+      text: `[${accRank}]`,
+      color: getRankColor(accRank)
+    });
   });
 
-  // 1. 進捗度比較『努力の可視化』グラフ
+  // -------------------------------------------------------------
+  // 2. 2行目のテキストだけを動的カラーで再描画する共通プラグイン
+  // -------------------------------------------------------------
+  const dualColorPointLabelsPlugin = {
+    id: 'dualColorPointLabels',
+    afterDraw(chart, args, options) {
+      const { ctx, scale } = chart;
+      const rScale = scale || chart.scales.r;
+      if (!rScale || !rScale._pointLabelItems) return;
+
+      const rankDataList = options.rankDataList || [];
+
+      ctx.save();
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      rScale._pointLabelItems.forEach((item, index) => {
+        const rankInfo = rankDataList[index];
+        if (!rankInfo) return;
+
+        const lines = item.lines || [];
+        if (lines.length < 2) return;
+
+        // 2行目の描画位置(x, y)を取得
+        const x = item.x !== undefined ? item.x : item.left;
+        const y = item.y !== undefined ? (item.y + 12) : (item.top + 12);
+
+        // 2行目部分を白背景でクリアしてから目的のランク色で上書き描画
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(rankInfo.text, x, y);
+
+        ctx.fillStyle = rankInfo.color;
+        ctx.fillText(rankInfo.text, x, y);
+      });
+
+      ctx.restore();
+    }
+  };
+
+  // -------------------------------------------------------------
+  // 3. 進捗度比較『努力の可視化』グラフの描画
+  // -------------------------------------------------------------
   if (progressChartInstance) progressChartInstance.destroy();
   const ctxP = document.getElementById('progressChart').getContext('2d');
   progressChartInstance = new Chart(ctxP, {
@@ -726,22 +775,22 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
           min: 0, max: 100, ticks: { stepSize: 20 },
           pointLabels: {
             font: { size: 10, weight: 'bold' },
-            // 🔴 行ごとの色分け判定（context.indexLine を使用する公式推奨スタイル）
-            color: (context) => {
-              // 2行目 (indexLine === 1) の場合はランクに応じた動的カラーを返す
-              if (context.indexLine === 1) {
-                return progressRankColors[context.index] || '#7f8c8d';
-              }
-              // 1行目 (indexLine === 0) は通常色（ダークグレー）
-              return '#2c3e50';
-            }
+            color: '#2c3e50' // ベースカラー（1行目の科目名）は標準のダークグレー
           }
         }
+      },
+      plugins: {
+        dualColorPointLabels: {
+          rankDataList: progressRankData
+        }
       }
-    }
+    },
+    plugins: [dualColorPointLabelsPlugin]
   });
 
-  // 2. 正答率比較『実力の可視化』グラフ
+  // -------------------------------------------------------------
+  // 4. 正答率比較『実力の可視化』グラフの描画
+  // -------------------------------------------------------------
   if (accuracyChartInstance) accuracyChartInstance.destroy();
   const ctxA = document.getElementById('accuracyChart').getContext('2d');
   accuracyChartInstance = new Chart(ctxA, {
@@ -759,19 +808,17 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
           min: 0, max: 100, ticks: { stepSize: 20 },
           pointLabels: {
             font: { size: 10, weight: 'bold' },
-            // 🔴 行ごとの色分け判定（context.indexLine を使用する公式推奨スタイル）
-            color: (context) => {
-              // 2行目 (indexLine === 1) の場合はランクに応じた動的カラーを返す
-              if (context.indexLine === 1) {
-                return accuracyRankColors[context.index] || '#7f8c8d';
-              }
-              // 1行目 (indexLine === 0) は通常色（ダークグレー）
-              return '#2c3e50';
-            }
+            color: '#2c3e50' // ベースカラー（1行目の科目名）は標準のダークグレー
           }
         }
+      },
+      plugins: {
+        dualColorPointLabels: {
+          rankDataList: accuracyRankData
+        }
       }
-    }
+    },
+    plugins: [dualColorPointLabelsPlugin]
   });
 }
 
