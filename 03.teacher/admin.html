@@ -1077,7 +1077,7 @@ function handleRecalculate() {
             applyFilters();
         }
 
-        // 🔍 学校・クラスの絞り込み選択肢生成
+// 🔍 学校・クラスの絞り込み選択肢生成
         function populateFilterOptions() {
             const schoolSelect = document.getElementById('filter-school');
             const classSelect = document.getElementById('filter-class');
@@ -1109,15 +1109,15 @@ function handleRecalculate() {
         }
 
         // 📊 サマリー指標の計算
-        function calculateQuickMetrics() {
-            const totalCount = allStudentsRaw.length;
+        function calculateQuickMetrics(studentsList = allStudentsRaw) {
+            const totalCount = studentsList.length;
             let activeCount = 0;
             let warningCount = 0;
             let totalGm = 0;
 
             const now = new Date().getTime();
 
-            allStudentsRaw.forEach(student => {
+            studentsList.forEach(student => {
                 const progress = parseInt(student.totalProgress || 0);
                 const gm = parseInt(student.gmCount || 0);
                 totalGm += gm;
@@ -1140,86 +1140,82 @@ function handleRecalculate() {
             document.getElementById('metric-total-gm').innerText = `${totalGm} 回`;
         }
 
-        // 📈 マクログラフ（Chart.jsクラス別）
-        function renderCharts() {
-            const classData = { };
+// 🔴 渡された生徒リスト（フィルター後のデータ）でクラス別平均を集計してグラフ再描画
+function renderCharts(studentsList = allStudentsRaw) {
+  const classData = { };
 
-            allStudentsRaw.forEach(student => {
-                const clsKey = `${student.school || "不明"} ${student.className || "不明"}`;
-                if (!classData[ clsKey ]) {
-                    classData[ clsKey ] = {
-                        progressSum: 0,
-                        accuracySum: 0,
-                        count: 0
-                    };
-                }
-                classData[ clsKey ].progressSum += parseInt(student.totalProgress || 0);
-                classData[ clsKey ].accuracySum += parseInt(student.totalAccuracy || 0);
-                classData[ clsKey ].count++;
-            });
+  studentsList.forEach(student => {
+    const clsKey = `${student.school || "不明"} ${student.className || "不明"}`;
+    if (!classData[ clsKey ]) {
+      classData[ clsKey ] = {
+        progressSum: 0,
+        accuracySum: 0,
+        count: 0
+      };
+    }
+    classData[ clsKey ].progressSum += parseInt(student.totalProgress || 0);
+    classData[ clsKey ].accuracySum += parseInt(student.totalAccuracy || 0);
+    classData[ clsKey ].count++;
+  });
 
-            const labels = [ ];
-            const avgProgressList = [ ];
-            const avgAccuracyList = [ ];
+  const labels = [ ];
+  const avgProgressList = [ ];
+  const avgAccuracyList = [ ];
 
-            Object.keys(classData).forEach(key => {
-                labels.push(key);
-                const item = classData[ key ];
-                avgProgressList.push(Math.round(item.progressSum / item.count));
-                avgAccuracyList.push(Math.round(item.accuracySum / item.count));
-            });
+  Object.keys(classData).forEach(key => {
+    labels.push(key);
+    const item = classData[ key ];
+    avgProgressList.push(Math.round(item.progressSum / item.count));
+    avgAccuracyList.push(Math.round(item.accuracySum / item.count));
+  });
 
-            // 1. クラス別：平均進捗率比較（努力・ブルー）
-            if (progressChartInstance) progressChartInstance.destroy();
-            const ctxP = document.getElementById('progressChart').getContext('2d');
-            progressChartInstance = new Chart(ctxP, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '平均進捗率 (%)',
-                        data: avgProgressList,
-                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y', 
-                    scales: {
-                        x: { min: 0, max: 100 }
-                    }
-                }
-            });
+  // 1. クラス別：平均進捗率比較（努力・ブルー）
+  if (progressChartInstance) progressChartInstance.destroy();
+  const ctxP = document.getElementById('progressChart').getContext('2d');
+  progressChartInstance = new Chart(ctxP, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '平均進捗率 (%)',
+        data: avgProgressList,
+        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+        borderColor: 'rgba(52, 152, 219, 1)',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: { x: { min: 0, max: 100 } }
+    }
+  });
 
-            // 2. クラス別：平均正答率比較（実力・グリーン）
-            if (accuracyChartInstance) accuracyChartInstance.destroy();
-            const ctxA = document.getElementById('accuracyChart').getContext('2d');
-            accuracyChartInstance = new Chart(ctxA, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: '平均正答率 (%)',
-                        data: avgAccuracyList,
-                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
-                        borderColor: 'rgba(46, 204, 113, 1)',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { min: 0, max: 100 }
-                    }
-                }
-            });
-        }
+  // 2. クラス別：平均正答率比較（実力・グリーン）
+  if (accuracyChartInstance) accuracyChartInstance.destroy();
+  const ctxA = document.getElementById('accuracyChart').getContext('2d');
+  accuracyChartInstance = new Chart(ctxA, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '平均正答率 (%)',
+        data: avgAccuracyList,
+        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+        borderColor: 'rgba(46, 204, 113, 1)',
+        borderWidth: 1,
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100 } }
+    }
+  });
+}
 
         // 📋 フィルター検索の実行 ＆ テーブル表示マッピング [cite: 877]
         function applyFilters() {
@@ -1339,14 +1335,18 @@ row.innerHTML = `
                 tableBody.appendChild(row);
             });
 
-            const tableStatus = document.getElementById('table-status');
-            if (visibleCount === 0) {
-                tableStatus.innerHTML = '🔍 条件に合致する学生データが見つかりません。';
-                tableStatus.style.display = 'block';
-            } else {
-                tableStatus.style.display = 'none';
-            }
-        }
+  const tableStatus = document.getElementById('table-status');
+  if (visibleCount === 0) {
+    tableStatus.innerHTML = '🔍 条件に合致する学生データが見つかりません。';
+    tableStatus.style.display = 'block';
+  } else {
+    tableStatus.style.display = 'none';
+  }
+
+  // 🔴 フィルター結果（filteredList）をもとにサマリー数値とグラフをリアルタイム連動更新！
+  calculateQuickMetrics(filteredList);
+  renderCharts(filteredList);
+}
 
         // 🔄 フィルター初期化
         function resetFilters() {
@@ -1373,23 +1373,31 @@ row.innerHTML = `
             const lastDateText = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP') : "一度も提出実績がありません（未報告）";
             document.getElementById('p-lastdate').innerText = escapeHTML(lastDateText);
 
-            // 1. 10科目別詳細データの出力
-            const subjectGrid = document.getElementById('modal-subject-grid');
-            subjectGrid.innerHTML = "";
-            
-            SUBJECTS_DEFINITION.forEach(sub => {
-                const stat = (student.subjects && student.subjects[ sub.id ]) ? student.subjects[ sub.id ] : { progress: 0, accuracy: 0 };
-                const gridItem = document.createElement('div');
-                gridItem.className = "subject-score-item";
-                gridItem.innerHTML = `
-                    <h4>${sub.id} ${escapeHTML(sub.name)}</h4>
-                    <div class="scores">
-                        <span>進捗: <span class="progress-val">${stat.progress}%</span></span>
-                        <span>正答: <span class="accuracy-val">${stat.accuracy}%</span></span>
-                    </div>
-                `;
-                subjectGrid.appendChild(gridItem);
-            });
+// 1. 10科目別詳細データの出力
+const subjectGrid = document.getElementById('modal-subject-grid');
+subjectGrid.innerHTML = "";
+
+SUBJECTS_DEFINITION.forEach(sub => {
+  const stat = (student.subjects && student.subjects[ sub.id ]) ? student.subjects[ sub.id ] : { progress: 0, accuracy: 0 };
+  
+  // 🏃 努力（進捗）ランクの算出
+  const progRank = getSelfGrowthRank(stat.progress, 'progress');
+  
+  // 🎯 実力（正答率）ランクの算出（進捗率が10%超の場合のみ判定、10%以下の場合は '-' ）
+  const accRank = (stat.progress > 10) ? getSelfGrowthRank(stat.accuracy, 'accuracy') : '-';
+
+  const gridItem = document.createElement('div');
+  gridItem.className = "subject-score-item";
+  gridItem.innerHTML = `
+    <h4>${sub.id} ${escapeHTML(sub.name)}</h4>
+    <div class="scores" style="display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; margin-top: 6px;">
+      <div>進捗: <strong style="color:var(--secondary-color); font-size: 0.95rem; margin-right: 2px;">${progRank}</strong> <small style="color:#7f8c8d; font-size: 0.7rem;">(${stat.progress}%)</small></div>
+      <div>正答: <strong style="color:var(--success-color); font-size: 0.95rem; margin-right: 2px;">${accRank}</strong> <small style="color:#7f8c8d; font-size: 0.7rem;">(${stat.accuracy}%)</small></div>
+    </div>
+  `;
+  subjectGrid.appendChild(gridItem);
+});
+
 
             // 2. 時系列データ推移グラフの描画 (Chart.js 折れ線)
             drawStudentHistoryChart(student.history || [ ]);
