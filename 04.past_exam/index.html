@@ -983,7 +983,7 @@ function renderReviewPickups() {
 }
 
 // ==========================================
-// 8. PDFアンロック描画
+// 8. PDFアンロック描画（修正版）
 // ==========================================
 function renderPdfLinks() {
   const container = document.getElementById("pdf-list-container");
@@ -995,19 +995,32 @@ function renderPdfLinks() {
   for (let r = 52; r >= 41; r--) {
     const roundStr = String(r);
     const isUnlocked = submittedRounds.includes(roundStr);
-    const pdfUrl = latestRecords[roundStr]?.pdf_url || `#`;
+    
+    // ⭕ pdf_url を取得（存在しない場合の判定を強化）
+    const rawPdfUrl = latestRecords[roundStr]?.pdf_url || "";
+    const hasValidUrl = rawPdfUrl && rawPdfUrl !== "#" && rawPdfUrl.startsWith("http");
 
     const card = document.createElement("div");
     card.className = `pdf-link-card ${isUnlocked ? 'unlocked' : ''}`;
     
     if (isUnlocked) {
-      card.innerHTML = `
-        <div>
-          <b>第${r}回 国家試験</b>
-          <span style="font-size:0.7rem; color:#27ae60; margin-left:6px;">🔓 提出済・閲覧解禁</span>
-        </div>
-        <a href="${pdfUrl}" target="_blank" style="padding:6px 12px; background:#2ecc71; color:white; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:bold;">PDFを開く</a>
-      `;
+      if (hasValidUrl) {
+        card.innerHTML = `
+          <div>
+            <b>第${r}回 国家試験</b>
+            <span style="font-size:0.7rem; color:#27ae60; margin-left:6px;">🔓 提出済・閲覧解禁</span>
+          </div>
+          <a href="${rawPdfUrl}" target="_blank" rel="noopener noreferrer" style="padding:6px 12px; background:#2ecc71; color:white; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:bold;">PDFを開く</a>
+        `;
+      } else {
+        card.innerHTML = `
+          <div>
+            <b>第${r}回 国家試験</b>
+            <span style="font-size:0.7rem; color:#e67e22; margin-left:6px;">🔓 提出済 (PDF準備中)</span>
+          </div>
+          <button disabled style="padding:6px 12px; background:#b2bec3; color:white; border:none; border-radius:6px; font-size:0.75rem; font-weight:bold; cursor:not-allowed;">準備中</button>
+        `;
+      }
     } else {
       card.innerHTML = `
         <div>
