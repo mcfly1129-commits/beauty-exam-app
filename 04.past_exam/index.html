@@ -996,7 +996,7 @@ function renderPdfLinks() {
     const roundStr = String(r);
     const isUnlocked = submittedRounds.includes(roundStr);
     
-    // ⭕ pdf_url を取得（存在しない場合の判定を強化）
+    // ⭕ 提出レコードから pdf_url を取得し、有効なURLか判定
     const rawPdfUrl = latestRecords[roundStr]?.pdf_url || "";
     const hasValidUrl = rawPdfUrl && rawPdfUrl !== "#" && rawPdfUrl.startsWith("http");
 
@@ -1005,6 +1005,7 @@ function renderPdfLinks() {
     
     if (isUnlocked) {
       if (hasValidUrl) {
+        // ⭕ 正しいURLが存在する場合：緑色のボタンで「PDFを開く」
         card.innerHTML = `
           <div>
             <b>第${r}回 国家試験</b>
@@ -1013,6 +1014,7 @@ function renderPdfLinks() {
           <a href="${rawPdfUrl}" target="_blank" rel="noopener noreferrer" style="padding:6px 12px; background:#2ecc71; color:white; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:bold;">PDFを開く</a>
         `;
       } else {
+        // ⚠️ 提出済みだがURLが空または未反映の場合
         card.innerHTML = `
           <div>
             <b>第${r}回 国家試験</b>
@@ -1022,6 +1024,7 @@ function renderPdfLinks() {
         `;
       }
     } else {
+      // 未提出の場合
       card.innerHTML = `
         <div>
           <b>第${r}回 国家試験</b>
