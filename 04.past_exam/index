@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美容師国家試験 4択過去問 記録蓄積分析Webアプリ</title>
+<!-- 外部ライブラリ (Chart.js & Confetti) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+:root {
+  --primary-color: #fab1a0;
+  --bg-color: #fefaf0;
+  --text-color: #2d3436;
+  --card-bg: #ffffff;
+  --accent-blue: #74b9ff;
+  --accent-orange: #e67e22;
+  --accent-green: #2ecc71;
+  --accent-red: #ff7675;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 1.25rem;
+  text-align: center;
+  color: #d35400;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  text-align: center;
+  color: #7f8c8d;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+/* ナビゲーションタブ */
+.tab-menu {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ffeaa7;
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  background: #f1f2f6;
+  border: 1px solid #ced6e0;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  color: #57606f;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* 画面切替制御 */
+.screen-section {
+  display: none;
+}
+.screen-section.active {
+  display: block;
+}
+
+/* ログイン認証エリア */
+.auth-box {
+  background: #fff;
+  border: 2px dashed var(--primary-color);
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.input-text {
+  width: 80%;
+  padding: 10px;
+  border: 1px solid #fab1a0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: opacity 0.2s;
+}
+.btn-primary:active { opacity: 0.8; }
+.btn-primary:disabled { background: #b2bec3; cursor: not-allowed; }
+
+/* 過去問回選択セレクター */
+.exam-select-card {
+  background: #fef5ed;
+  border: 1px solid #ffe3d1;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.select-round {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--primary-color);
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #d35400;
+  background: white;
+}
+
+/* 10科目セクション ＆ 55問入力マトリクス */
+.subject-group {
+  margin-bottom: 18px;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.subject-header {
+  background: #f1f2f6;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #2c3e50;
+  border-left: 4px solid var(--primary-color);
+  display: flex;
+  justify-content: space-between;
+}
+
+.question-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f8f9fa;
+}
+.question-row:last-child { border-bottom: none; }
+
+.q-label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.choice-group {
+  display: flex;
+  gap: 6px;
+}
+
+.choice-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid #ced6e0;
+  background: white;
+  color: #57606f;
+  font-weight: bold;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.choice-btn.selected {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: scale(1.08);
+}
+
+/* 送信・再確認画面モーダル */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 440px;
+  max-height: 85vh;
+  border-radius: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin: 12px 0;
+}
+.summary-table td, .summary-table th {
+  border: 1px solid #eee;
+  padding: 6px;
+  text-align: center;
+}
+
+/* ダッシュボード・グラフ枠 */
+.dashboard-card {
+  background: white;
+  border: 1px solid #e4e7eb;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #2c3e50;
+  border-bottom: 2px solid #ffeaa7;
+  padding-bottom: 6px;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+/* 復習ピックアップリスト */
+.pickup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pickup-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.pickup-abs {
+  background: #fff0f0;
+  border-left: 4px solid var(--accent-red);
+}
+.pickup-together {
+  background: #f0f7ff;
+  border-left: 4px solid var(--accent-blue);
+}
+
+/* PDF閲覧リンク */
+.pdf-link-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+.pdf-link-card.unlocked {
+  background: #f0fff4;
+  border-color: #b7eb8f;
+}
+</style>
+</head>
+<body>
+
+<canvas id="quiz-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+
+<div class="container">
+  <h1>美容師筆記 過去問<br>記録蓄積分析Webアプリ</h1>
+  <p class="subtitle">55問・4択の回答を記録・分析<br>自分の『伸び代』と『重要復習問題』がひと目でわかる</p>
+
+  <!-- 🔑 ログイン・学籍認証エリア -->
+  <div id="auth-section" class="auth-box">
+    <div style="font-size:0.85rem; font-weight:bold; color:#d35400; margin-bottom:8px;">🔒 シリアルコード認証</div>
+    <input type="password" id="input-serial-code" class="input-text" placeholder="シリアルコードを入力">
+    <button id="btn-auth-login" class="btn-primary" style="padding:10px;">認証してスタート</button>
+    <div id="auth-msg" style="font-size:0.75rem; color:#e74c3c; margin-top:8px; display:none;"></div>
+  </div>
+
+  <!-- 🔓 メインコンテンツ (認証成功後に表示) -->
+  <div id="main-content" style="display: none;">
+    
+    <!-- ユーザー情報ヘッダー -->
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; background:#f8f9fa; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+      <div>🔑 ログイン中: <b id="user-display-code" style="color:#d35400;">---</b></div>
+      <div style="display:flex; gap:6px;">
+        <button id="btn-open-history-modal" style="background:#74b9ff; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; font-weight:bold; cursor:pointer;">📜 送信履歴・リセット</button>
+        <button id="btn-logout" style="background:#e4e7eb; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">ログアウト</button>
+      </div>
+    </div>
+
+    <!-- タブメニュー -->
+    <div class="tab-menu">
+      <button class="tab-btn active" data-tab="tab-input">📝 回答入力</button>
+      <button class="tab-btn" data-tab="tab-dashboard">📊 分析ダッシュボード</button>
+      <button class="tab-btn" data-tab="tab-review">❌ 重要復習</button>
+      <button class="tab-btn" data-tab="tab-pdf">📄 解説PDF</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: 回答入力画面 -->
+    <!-- ========================================== -->
+    <div id="tab-input" class="screen-section active">
+      <div class="exam-select-card">
+        <span style="font-size:0.85rem; font-weight:bold;">実施する過去問:</span>
+        <select id="select-exam-round" class="select-round">
+          <!-- JSで41回〜52回を動的生成 -->
+        </select>
+      </div>
+
+      <!-- 下書き・提出状況ステータス -->
+      <div id="draft-status-banner" style="font-size:0.72rem; color:#7f8c8d; text-align:right; margin-bottom:10px;">
+        💡 選択肢タップで端末に自動下書き保存されます
+      </div>
+
+      <!-- 10科目・55問の入力フォームコンテナ -->
+      <div id="questions-form-container"></div>
+
+      <button id="btn-open-confirm" class="btn-primary" style="margin-top:15px; margin-bottom:20px;">
+        🔍 入力内容を再確認して送信画面へ
+      </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: 分析ダッシュボード -->
+    <!-- ========================================== -->
+    <div id="tab-dashboard" class="screen-section">
+      <!-- 最新結果レーダーチャート -->
+      <div class="dashboard-card">
+        <h3 class="card-title">🎯 最新取り組み結果（10科目正答率 vs 中央値）</h3>
+        <div style="position: relative; height: 260px;">
+          <canvas id="radarChart"></canvas>
+        </div>
+        <div id="rank-badge-box" style="display:flex; justify-content:space-around; margin-top:12px; background:#fefaf0; padding:8px; border-radius:8px; font-size:0.8rem; font-weight:bold; text-align:center;">
+          <div>総合ランク: <span id="badge-total-rank" style="color:#e67e22; font-size:1.1rem;">-</span></div>
+          <div>正答率: <span id="badge-total-acc" style="color:#0984e3;">--%</span></div>
+        </div>
+      </div>
+
+      <!-- 時系列折れ線グラフ -->
+      <div class="dashboard-card">
+        <h3 class="card-title">📈 実施履歴の推移（時系列折れ線グラフ）</h3>
+        <div style="position: relative; height: 220px;">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: 間違えた問題・重要復習ピックアップ -->
+    <!-- ========================================== -->
+    <div id="tab-review" class="screen-section">
+      <div class="dashboard-card">
+        <h3 class="card-title" style="border-color:var(--accent-red); color:#c0392b;">
+          🔥 個人的絶対復習問題
+        </h3>
+        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率が50％を超えている<br>必ず自分が正解すべき問題（差が大きい順）</p>
+        <div id="abs-review-list" class="pickup-list">
+          <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <h3 class="card-title" style="border-color:var(--accent-blue); color:#2980b9;">
+          🤝 皆で頑張ろう問題
+        </h3>
+        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率も50％以下の高難易度問題</p>
+        <div id="together-review-list" class="pickup-list">
+          <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: 問題・模範解答解説PDF解禁リンク -->
+    <!-- ========================================== -->
+    <div id="tab-pdf" class="screen-section">
+      <div class="dashboard-card">
+        <h3 class="card-title">📄 模範解答・解説PDF閲覧アンロック</h3>
+        <p style="font-size:0.75rem; color:#7f8c8d; margin-top:-6px;">回答入力を提出完了した過去問のみ、閲覧リンクが解禁されます。</p>
+        <div id="pdf-list-container">
+          <!-- JSで全12回分のPDF状態を動的描画 -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 🔍 入力確認モーダル -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-size:1.05rem; text-align:center; color:#d35400; margin-top:0;">回答入力の再確認</h3>
+    <p style="font-size:0.75rem; color:#e74c3c; text-align:center; font-weight:bold;">
+      ⚠️ 送信完了後は修正できません。<br>入力漏れや誤りがないかご確認ください。
+    </p>
+    
+    <div id="unanswered-alert" style="display:none; background:#ffe0e0; color:#c0392b; padding:8px; border-radius:6px; font-size:0.75rem; text-align:center; font-weight:bold; margin-bottom:10px;"></div>
+
+    <div style="max-height:240px; overflow-y:auto;">
+      <table class="summary-table" id="summary-table">
+        <thead>
+          <tr style="background:#f1f2f6;">
+            <th>問</th><th>選択</th><th>問</th><th>選択</th><th>問</th><th>選択</th>
+          </tr>
+        </thead>
+        <tbody id="summary-table-body"></tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button id="btn-cancel-modal" style="flex:1; padding:10px; background:#e4e7eb; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">修正に戻る</button>
+      <button id="btn-submit-exam" class="btn-primary" style="flex:1; padding:10px; background:var(--accent-orange);">確定して送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📜 送信履歴 ＆ リセットモーダル (独立配置) -->
+<div id="history-reset-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-size:1.05rem; text-align:center; color:#2c3e50; margin-top:0;">📜 送信履歴 ＆ データリセット</h3>
+    <p style="font-size:0.75rem; color:#7f8c8d; text-align:center;">送信済みの過去問記録を取り消し（リセット）できます。<br>※リセットするとPDF閲覧リンクも再びロックされます。</p>
+    
+    <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:15px 0;"></div>
+
+    <button id="btn-close-history-reset" style="width:100%; padding:10px; background:#e4e7eb; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">閉じる</button>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// 1. 全体定数 ＆ 設定
+// ==========================================
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbysw9mSZvCVm0EEwNgHIRdQg0rOqehardW-oRojn1eoxLOCaRkmuLTH_drPr5zGDJkbnQ/exec";
+
+// 科目定義 (全10科目・問題番号マッピング)
+const SUBJECT_DEFINITIONS = [
+  { id: 1, name: "関係法規・制度", start: 1, end: 7 },       // ★ 変更 (1〜7)
+  { id: 2, name: "運営管理", start: 8, end: 10 },            // ★ 変更 (8〜10)
+  { id: 3, name: "公衆衛生・環境衛生", start: 11, end: 15 },
+  { id: 4, name: "感染症", start: 16, end: 20 },
+  { id: 5, name: "衛生管理技術", start: 21, end: 25 },
+  { id: 6, name: "人体の構造及び機能", start: 26, end: 30 },
+  { id: 7, name: "皮膚科学", start: 31, end: 35 },
+  { id: 8, name: "香粧品化学", start: 36, end: 40 },
+  { id: 9, name: "文化論", start: 41, end: 43 },             // ★ 変更 (41〜43)
+  { id: 10, name: "美容技術理論", start: 44, end: 55 }        // ★ 変更 (44〜55)
+];
+
+// アプリ状態管理
+let currentSerialCode = localStorage.getItem("beauty_past_exam_serial_code") || "";
+let currentExamRound = "52"; // デフォルト最新52回
+let studentAnswers = new Array(55).fill(""); // 55問の回答
+let studentDashboardData = null; // GAS保持データ
+
+let radarChartInstance = null;
+let lineChartInstance = null;
+
+// ==========================================
+// 2. 起動時処理 ＆ イベントリスナー登録
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+  initExamRoundSelector();
+  renderQuestionsForm();
+  setupEventListeners();
+
+  // 認証情報の自動復元チェック
+  if (currentSerialCode) {
+    document.getElementById("input-serial-code").value = currentSerialCode;
+    verifyAuth(currentSerialCode, true);
+  }
+});
+
+function setupEventListeners() {
+  // 認証ボタン
+  document.getElementById("btn-auth-login").addEventListener("click", () => {
+    const code = document.getElementById("input-serial-code").value.trim();
+    if (!code) {
+      showAuthMsg("シリアルコードを入力してください。");
+      return;
+    }
+    verifyAuth(code, false);
+  });
+
+  // ログアウトボタン
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    if (confirm("ログアウトしますか？")) {
+      localStorage.removeItem("beauty_past_exam_serial_code");
+      location.reload();
+    }
+  });
+
+  // タブ切り替え
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
+      
+      e.target.classList.add("active");
+      const targetTab = e.target.getAttribute("data-tab");
+      document.getElementById(targetTab).classList.add("active");
+
+      if (targetTab === "tab-dashboard") renderDashboardCharts();
+      if (targetTab === "tab-review") renderReviewPickups();
+      if (targetTab === "tab-pdf") renderPdfLinks();
+    });
+  });
+
+  // 実施回変更
+  document.getElementById("select-exam-round").addEventListener("change", (e) => {
+    currentExamRound = e.target.value;
+    loadDraftAnswers();
+  });
+
+  // 再確認モーダル開閉
+  document.getElementById("btn-open-confirm").addEventListener("click", openConfirmModal);
+  document.getElementById("btn-cancel-modal").addEventListener("click", () => {
+    document.getElementById("confirm-modal").style.display = "none";
+  });
+
+  // 回答確定送信
+  document.getElementById("btn-submit-exam").addEventListener("click", submitExamData);
+
+  // 📜 履歴・リセットモーダルイベント (新規追加)
+  document.getElementById("btn-open-history-modal").addEventListener("click", openHistoryResetModal);
+  document.getElementById("btn-close-history-reset").addEventListener("click", () => {
+    document.getElementById("history-reset-modal").style.display = "none";
+  });
+}
+
+// ==========================================
+// 3. 認証処理 ＆ ダッシュボード初期ロード
+// ==========================================
+function verifyAuth(serialCode, isAuto) {
+  if (!isAuto) showAuthMsg("⏳ 認証処理中...", "#2980b9");
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ action: "checkAuth", serial_code: serialCode })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.isAuthorized) {
+      currentSerialCode = serialCode;
+      localStorage.setItem("beauty_past_exam_serial_code", serialCode);
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+      document.getElementById("user-display-code").innerText = serialCode;
+
+      // 初回の全データロード
+      loadStudentDashboard();
+      loadDraftAnswers();
+    } else {
+      showAuthMsg(data.message || "無効なシリアルコードです。");
+      localStorage.removeItem("beauty_past_exam_serial_code");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showAuthMsg("通信エラーが発生しました。ネット接続を確認してください。");
+  });
+}
+
+function showAuthMsg(msg, color="#e74c3c") {
+  const el = document.getElementById("auth-msg");
+  el.innerText = msg;
+  el.style.color = color;
+  el.style.display = "block";
+}
+
+// 初期ダッシュボードデータのロード
+function loadStudentDashboard() {
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ action: "getStudentDashboard", serial_code: currentSerialCode })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "success") {
+      studentDashboardData = data;
+      renderReviewPickups();
+      renderPdfLinks();
+    }
+  })
+  .catch(err => console.error("Dashboard Load Error:", err));
+}
+
+// ==========================================
+// 4. 55問入力フォーム ＆ 下書き保存
+// ==========================================
+function initExamRoundSelector() {
+  const select = document.getElementById("select-exam-round");
+  select.innerHTML = "";
+  for (let r = 52; r >= 41; r--) {
+    const opt = document.createElement("option");
+    opt.value = String(r);
+    opt.textContent = `第${r}回 国家試験`;
+    select.appendChild(opt);
+  }
+}
+
+function renderQuestionsForm() {
+  const container = document.getElementById("questions-form-container");
+  container.innerHTML = "";
+
+  SUBJECT_DEFINITIONS.forEach(subj => {
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "subject-group";
+
+    let rowsHtml = "";
+    for (let q = subj.start; q <= subj.end; q++) {
+      rowsHtml += `
+        <div class="question-row">
+          <span class="q-label">問${q}</span>
+          <div class="choice-group" data-qidx="${q - 1}">
+            <button class="choice-btn" data-val="1">1</button>
+            <button class="choice-btn" data-val="2">2</button>
+            <button class="choice-btn" data-val="3">3</button>
+            <button class="choice-btn" data-val="4">4</button>
+          </div>
+        </div>
+      `;
+    }
+
+    groupDiv.innerHTML = `
+      <div class="subject-header">
+        <span>${subj.name}</span>
+        <span style="font-size:0.75rem; color:#7f8c8d;">問${subj.start}〜問${subj.end}</span>
+      </div>
+      ${rowsHtml}
+    `;
+
+    container.appendChild(groupDiv);
+  });
+
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest(".choice-btn");
+    if (!btn) return;
+
+    const group = btn.closest(".choice-group");
+    const qIdx = parseInt(group.getAttribute("data-qidx"));
+    const val = btn.getAttribute("data-val");
+
+    if (btn.classList.contains("selected")) {
+      btn.classList.remove("selected");
+      studentAnswers[qIdx] = "";
+    } else {
+      group.querySelectorAll(".choice-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      studentAnswers[qIdx] = val;
+    }
+
+    saveDraftAnswers();
+  });
+}
+
+function saveDraftAnswers() {
+  const key = `beauty_draft_${currentSerialCode}_${currentExamRound}`;
+  localStorage.setItem(key, JSON.stringify(studentAnswers));
+}
+
+function loadDraftAnswers() {
+  const key = `beauty_draft_${currentSerialCode}_${currentExamRound}`;
+  const saved = localStorage.getItem(key);
+  studentAnswers = saved ? JSON.parse(saved) : new Array(55).fill("");
+
+  document.querySelectorAll(".choice-group").forEach((group, idx) => {
+    const val = studentAnswers[idx];
+    group.querySelectorAll(".choice-btn").forEach(btn => {
+      if (btn.getAttribute("data-val") === val) {
+        btn.classList.add("selected");
+      } else {
+        btn.classList.remove("selected");
+      }
+    });
+  });
+}
+
+// ==========================================
+// 5. 回答再確認 ＆ 送信処理
+// ==========================================
+function openConfirmModal() {
+  const unanswered = [];
+  studentAnswers.forEach((ans, i) => {
+    if (!ans) unanswered.push(i + 1);
+  });
+
+  const alertEl = document.getElementById("unanswered-alert");
+  const submitBtn = document.getElementById("btn-submit-exam"); // 送信ボタンを取得
+
+  if (unanswered.length > 0) {
+    // ★ 未回答がある場合：警告を出して送信ボタンを押せないようにロック
+    alertEl.innerText = `⚠️ 未回答が ${unanswered.length} 問あります（問 ${unanswered.slice(0, 5).join(", ")}...）。<br>すべての問題に回答しないと送信できません。`;
+    alertEl.style.display = "block";
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = "0.5";
+    submitBtn.style.cursor = "not-allowed";
+  } else {
+    // ★ 全問回答済みの場合：警告を消して送信ボタンを有効化
+    alertEl.style.display = "none";
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+    submitBtn.style.cursor = "pointer";
+  }
+
+  const tbody = document.getElementById("summary-table-body");
+  tbody.innerHTML = "";
+  for (let i = 0; i < 19; i++) {
+    const q1 = i + 1;
+    const q2 = i + 20;
+    const q3 = i + 39;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>問${q1}</td><td><b>${studentAnswers[q1-1] || "-"}</b></td>
+      <td>${q2 <= 55 ? '問'+q2 : ''}</td><td><b>${q2 <= 55 ? (studentAnswers[q2-1] || "-") : ''}</b></td>
+      <td>${q3 <= 55 ? '問'+q3 : ''}</td><td><b>${q3 <= 55 ? (studentAnswers[q3-1] || "-") : ''}</b></td>
+    `;
+    tbody.appendChild(row);
+  }
+
+  document.getElementById("confirm-modal").style.display = "flex";
+}
+
+function submitExamData() {
+  const btn = document.getElementById("btn-submit-exam");
+  btn.disabled = true;
+  btn.innerText = "⏳ POST送信中...";
+
+  const payload = {
+    action: "submitExam",
+    serial_code: currentSerialCode,
+    exam_round: currentExamRound,
+    exam_type: "past_exam",
+    answers: studentAnswers.join(",")
+  };
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.innerText = "確定して送信";
+    document.getElementById("confirm-modal").style.display = "none";
+
+    if (data.status === "success") {
+      triggerConfetti();
+      alert(`🎉 回答の送信が完了しました！\n総合得点: ${data.scoring.total_score} 点 (${data.scoring.total_accuracy}%)`);
+      
+      loadStudentDashboard();
+      document.querySelector('.tab-btn[data-tab="tab-dashboard"]').click();
+    } else {
+      alert("送信エラー: " + (data.message || "エラーが発生しました。"));
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    btn.disabled = false;
+    btn.innerText = "確定して送信";
+    alert("通信エラーが発生しました。再度送信してください。");
+  });
+}
+
+// ==========================================
+// 6. Chart.js レーダーチャート ＆ 折れ線グラフ描画
+// ==========================================
+function renderDashboardCharts() {
+  if (!studentDashboardData || !studentDashboardData.latest_exam_records) return;
+
+  const records = studentDashboardData.latest_exam_records;
+  const latestRecord = records[currentExamRound] || Object.values(records)[0];
+
+  const mySubAcc = [];
+  const medianSubAcc = [];
+  const subjectLabels = SUBJECT_DEFINITIONS.map(s => s.name);
+
+  const groupData = studentDashboardData.group_data || {};
+  const groupMedians = groupData.medians?.subjects || {};
+
+  for (let i = 1; i <= 10; i++) {
+    const key = "sub_" + ("0" + i).slice(-2);
+    const val = latestRecord ? latestRecord[key] : undefined;
+    mySubAcc.push(val !== undefined ? Number(val) : 0);
+
+    // ★ 修正：データがない場合は 60 ではなく 0 にしてダミー表示を消去
+    medianSubAcc.push(groupMedians[key] !== undefined ? Number(groupMedians[key]) : 0);
+  }
+
+  if (latestRecord) {
+    document.getElementById("badge-total-rank").innerText = getRankLabel(latestRecord.total_accuracy);
+    document.getElementById("badge-total-acc").innerText = `${latestRecord.total_accuracy}%`;
+  }
+
+  // ★ 変更：中央値データが全く存在しない場合は「集団中央値」データセット自体を非表示（空）にする
+  const hasMedianData = Object.keys(groupMedians).length > 0;
+
+  const radarDatasets = [
+    { 
+      label: '自分の正答率', 
+      data: mySubAcc, 
+      backgroundColor: 'rgba(250, 177, 160, 0.3)', 
+      borderColor: 'rgba(211, 84, 0, 1)', 
+      borderWidth: 2 
+    }
+  ];
+
+  // 中央値データが存在するときのみグラフに追加
+  if (hasMedianData) {
+    radarDatasets.push({ 
+      label: '集団中央値', 
+      data: medianSubAcc, 
+      backgroundColor: 'rgba(178, 190, 195, 0.1)', 
+      borderColor: 'rgba(127, 140, 141, 0.8)', 
+      borderWidth: 1, 
+      borderDash: [2] 
+    });
+  }
+
+  if (radarChartInstance) radarChartInstance.destroy();
+  const ctxR = document.getElementById("radarChart").getContext("2d");
+  radarChartInstance = new Chart(ctxR, {
+    type: 'radar',
+    data: {
+      labels: subjectLabels,
+      datasets: radarDatasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } }
+    }
+  });
+
+  const historyLog = studentDashboardData.history_log || [];
+  // ⭕【修正】月(M)と日(D)の先頭の0を除去して「M/D」形式にする処理を追加
+  const timeLabels = historyLog.map(h => {
+    let dateStr = "";
+    if (h.timestamp) {
+      const parts = String(h.timestamp).slice(5, 10).split("-"); // "09-15" -> ["09", "15"]
+      if (parts.length === 2) {
+        dateStr = `${Number(parts[0])}/${Number(parts[1])}`;    // 9/15 に変換
+      } else {
+        dateStr = String(h.timestamp).slice(5, 10);
+      }
+    }
+    return `第${h.exam_round}回 (${dateStr})`;
+  });
+  const historyAcc = historyLog.map(h => h.total_accuracy);
+
+  if (lineChartInstance) lineChartInstance.destroy();
+  const ctxL = document.getElementById("lineChart").getContext("2d");
+  lineChartInstance = new Chart(ctxL, {
+    type: 'line',
+    data: {
+      labels: timeLabels,
+      datasets: [{
+        label: '総合正答率 (%)',
+        data: historyAcc,
+        borderColor: 'rgba(116, 185, 255, 1)',
+        backgroundColor: 'rgba(116, 185, 255, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100 } }
+    }
+  });
+}
+
+function getRankLabel(acc) {
+  if (acc >= 85) return "S (合格圏内)";
+  if (acc >= 75) return "A (順調)";
+  if (acc >= 65) return "B (目安突破)";
+  if (acc >= 55) return "C (あと一歩)";
+  return "D (要復習)";
+}
+
+// ==========================================
+// 7. 間違えた問題ピックアップ判定ロジック
+// ==========================================
+function renderReviewPickups() {
+  const absContainer = document.getElementById("abs-review-list");
+  const togetherContainer = document.getElementById("together-review-list");
+  
+  if (!studentDashboardData) return;
+
+  const records = studentDashboardData.latest_exam_records || {};
+  const groupStats = studentDashboardData.group_data?.exam_stats || {};
+
+  const absItems = [];
+  const togetherItems = [];
+
+  Object.keys(records).forEach(round => {
+    const rec = records[round];
+    const wrongList = (rec.wrong_questions || "").split(",").filter(Boolean);
+    const roundGroupStats = groupStats[round]?.question_correct_rates || {};
+
+    wrongList.forEach(qNumStr => {
+      const qNum = parseInt(qNumStr);
+      const groupRate = roundGroupStats[qNum] !== undefined ? roundGroupStats[qNum] : 55.0;
+
+      if (groupRate > 50.0) {
+        absItems.push({ round, qNum, groupRate, gap: groupRate });
+      } else {
+        togetherItems.push({ round, qNum, groupRate });
+      }
+    });
+  });
+
+  absItems.sort((a, b) => b.gap - a.gap);
+
+  absContainer.innerHTML = absItems.length === 0 ? 
+    '<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:10px;">🎉 現在、絶対復習問題はありません！</div>' :
+    absItems.map(item => `
+      <div class="pickup-item pickup-abs">
+        <b>第${item.round}回 問${item.qNum}</b> <span style="font-size:0.7rem; color:#e74c3c;">(集団正解率: ${item.groupRate}%)</span>
+        <br><span style="font-size:0.7rem; color:#555;">みんなが正解できている重要問題です。優先して確認しましょう。</span>
+      </div>
+    `).join("");
+
+  togetherContainer.innerHTML = togetherItems.length === 0 ? 
+    '<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:10px;">🎉 高難易度の誤答問題はありません！</div>' :
+    togetherItems.map(item => `
+      <div class="pickup-item pickup-together">
+        <b>第${item.round}回 問${item.qNum}</b> <span style="font-size:0.7rem; color:#2980b9;">(集団正解率: ${item.groupRate}%)</span>
+        <br><span style="font-size:0.7rem; color:#555;">集団全体で正答率が低い難易度の高い問題です。</span>
+      </div>
+    `).join("");
+}
+
+// ==========================================
+// 8. PDFアンロック描画
+// ==========================================
+function renderPdfLinks() {
+  const container = document.getElementById("pdf-list-container");
+  container.innerHTML = "";
+
+  const submittedRounds = studentDashboardData?.submitted_rounds || [];
+  const latestRecords = studentDashboardData?.latest_exam_records || {};
+
+  for (let r = 52; r >= 41; r--) {
+    const roundStr = String(r);
+    const isUnlocked = submittedRounds.includes(roundStr);
+    const pdfUrl = latestRecords[roundStr]?.pdf_url || `#`;
+
+    const card = document.createElement("div");
+    card.className = `pdf-link-card ${isUnlocked ? 'unlocked' : ''}`;
+    
+    if (isUnlocked) {
+      card.innerHTML = `
+        <div>
+          <b>第${r}回 国家試験</b>
+          <span style="font-size:0.7rem; color:#27ae60; margin-left:6px;">🔓 提出済・閲覧解禁</span>
+        </div>
+        <a href="${pdfUrl}" target="_blank" style="padding:6px 12px; background:#2ecc71; color:white; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:bold;">PDFを開く</a>
+      `;
+    } else {
+      card.innerHTML = `
+        <div>
+          <b>第${r}回 国家試験</b>
+          <span style="font-size:0.7rem; color:#95a5a6; margin-left:6px;">🔒 未回答 (閲覧不可)</span>
+        </div>
+        <button disabled style="padding:6px 12px; background:#b2bec3; color:white; border:none; border-radius:6px; font-size:0.75rem; font-weight:bold;">鍵表示</button>
+      `;
+    }
+
+    container.appendChild(card);
+  }
+}
+
+// 紙吹雪エフェクト
+function triggerConfetti() {
+  const canvas = document.getElementById("quiz-confetti-canvas");
+  if (canvas && typeof confetti === "function") {
+    const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
+    myConfetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+  }
+}
+
+// 📜 送信履歴モーダル描画 ＆ 個別リセット制御 (新規追加)
+function openHistoryResetModal() {
+  const listContainer = document.getElementById("history-reset-list");
+  listContainer.innerHTML = "";
+
+  const submittedRounds = studentDashboardData?.submitted_rounds || [];
+  const records = studentDashboardData?.latest_exam_records || {};
+
+  if (submittedRounds.length === 0) {
+    listContainer.innerHTML = '<div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:15px;">まだ送信履歴がありません。</div>';
+  } else {
+    submittedRounds.forEach(round => {
+      const rec = records[round];
+      const item = document.createElement("div");
+      item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;";
+      item.innerHTML = `
+        <div>
+          <b>第${round}回 国家試験</b> <span style="font-size:0.7rem; color:#7f8c8d;">(${rec?.timestamp || '送信済み'})</span><br>
+          <span style="font-size:0.75rem; color:#d35400; font-weight:bold;">得点: ${rec?.total_score || 0}点 (${rec?.total_accuracy || 0}%)</span>
+        </div>
+        <button class="btn-del-record" data-round="${round}" style="background:#ff7675; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer;">🗑️ リセット</button>
+      `;
+      listContainer.appendChild(item);
+    });
+
+    // 削除ボタンイベント設定
+    listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const round = e.target.getAttribute("data-round");
+        if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外され、PDFの閲覧も再度ロックされます。`)) {
+          deleteExamRecordAction(round);
+        }
+      });
+    });
+  }
+
+  document.getElementById("history-reset-modal").style.display = "flex";
+}
+
+// GASへの削除APIリクエスト処理 (新規追加)
+function deleteExamRecordAction(examRound) {
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+      action: "deleteExamRecord",
+      serial_code: currentSerialCode,
+      exam_round: examRound
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "success") {
+      alert(`第${examRound}回の記録をリセットしました。`);
+      localStorage.removeItem(`beauty_draft_${currentSerialCode}_${examRound}`);
+      
+      // ダッシュボードデータの再ロードとモーダルを閉じる
+      loadStudentDashboard();
+      document.getElementById("history-reset-modal").style.display = "none";
+    } else {
+      alert("リセット失敗: " + (data.message || "エラーが発生しました。"));
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("通信エラーが発生しました。");
+  });
+}
+
+</script>
+</body>
+</html>
