@@ -404,9 +404,9 @@ h1 {
     <div id="tab-review" class="screen-section">
       <div class="dashboard-card">
         <h3 class="card-title" style="border-color:var(--accent-red); color:#c0392b;">
-          🔥 個人的絶対復習問題
+          🔥 絶対復習問題<br>【圧倒的マイノリティな回答】
         </h3>
-        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率が50％を超えている<br>必ず自分が正解すべき問題（差が大きい順）</p>
+        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率が80％以上の<br>必ず自分が正解すべき問題（差が大きい順）</p>
         <div id="abs-review-list" class="pickup-list">
           <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
         </div>
@@ -414,9 +414,9 @@ h1 {
 
       <div class="dashboard-card">
         <h3 class="card-title" style="border-color:var(--accent-blue); color:#2980b9;">
-          🤝 皆で頑張ろう問題
+          🤝 皆で頑張ろう問題<br>【皆が苦手な問題】
         </h3>
-        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率も50％以下の高難易度問題</p>
+        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率も60％未満の高難易度問題</p>
         <div id="together-review-list" class="pickup-list">
           <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
         </div>
@@ -1022,7 +1022,7 @@ function getRankLabel(acc) {
 }
 
 // ==========================================
-// 7. 間違えた問題ピックアップ判定ロジック
+// 7. 間違えた問題ピックアップ判定ロジック（科目別グループ表示版）
 // ==========================================
 function renderReviewPickups() {
   const absContainer = document.getElementById("abs-review-list");
@@ -1036,50 +1036,93 @@ function renderReviewPickups() {
   const absItems = [];
   const togetherItems = [];
 
-Object.keys(records).forEach(round => {
-  const rec = records[round];
-  
-  // ⭕【型防御】配列・文字列のどちらでも安全に配列へ変換する
-  let wrongList = [];
-  if (Array.isArray(rec.wrong_questions)) {
-    wrongList = rec.wrong_questions.map(String).filter(Boolean);
-  } else if (typeof rec.wrong_questions === "string") {
-    wrongList = rec.wrong_questions.split(",").filter(Boolean);
-  }
+  // 全提出回から間違えた問題を抽出
+  Object.keys(records).forEach(round => {
+    const rec = records[round];
+    
+    let wrongList = [];
+    if (Array.isArray(rec.wrong_questions)) {
+      wrongList = rec.wrong_questions.map(String).filter(Boolean);
+    } else if (typeof rec.wrong_questions === "string") {
+      wrongList = rec.wrong_questions.split(",").filter(Boolean);
+    }
 
-  const roundGroupStats = groupStats[round]?.question_correct_rates || {};
+    const roundGroupStats = groupStats[round]?.question_correct_rates || {};
 
     wrongList.forEach(qNumStr => {
-      const qNum = parseInt(qNumStr);
-      const groupRate = roundGroupStats[qNum] !== undefined ? roundGroupStats[qNum] : 55.0;
+      const qNum = parseInt(qNumStr, 10);
+      const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : 55.0;
 
-      if (groupRate > 50.0) {
-        absItems.push({ round, qNum, groupRate, gap: groupRate });
-      } else {
-        togetherItems.push({ round, qNum, groupRate });
+      // 問題番号(1〜55)から該当科目を取得
+      const subject = SUBJECT_DEFINITIONS.find(s => qNum >= s.start && qNum <= s.end) || { id: 99, name: "その他" };
+
+      const itemData = { round, qNum, groupRate, subjectName: subject.name, subjectId: subject.id };
+
+      if (groupRate >= 80.0) { // ★ 集団正解率 80% 以上（絶対復習問題）
+        absItems.push(itemData);
+      } else if (groupRate < 60.0) { // ★ 集団正解率 60% 未満（皆で頑張ろう問題）
+        togetherItems.push(itemData);
       }
     });
   });
 
-  absItems.sort((a, b) => b.gap - a.gap);
+  // 科目別にグループ化して描画するヘルパー関数
+  function renderGroupedList(items, accentColor, bgLight, emptyMsg, subText) {
+    if (items.length === 0) {
+      return `<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:15px; font-weight:bold;">${emptyMsg}</div>`;
+    }
 
-  absContainer.innerHTML = absItems.length === 0 ? 
-    '<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:10px;">🎉 現在、絶対復習問題はありません！</div>' :
-    absItems.map(item => `
-      <div class="pickup-item pickup-abs">
-        <b>第${item.round}回 問${item.qNum}</b> <span style="font-size:0.7rem; color:#e74c3c;">(集団正解率: ${item.groupRate}%)</span>
-        <br><span style="font-size:0.7rem; color:#555;">みんなが正解できている重要問題です。<br>優先して確認しましょう。</span>
-      </div>
-    `).join("");
+    // 科目ID順、その中で過去問の新しい順（回降順）→問題番号順にソート
+    items.sort((a, b) => a.subjectId - b.subjectId || Number(b.round) - Number(a.round) || a.qNum - b.qNum);
 
-  togetherContainer.innerHTML = togetherItems.length === 0 ? 
-    '<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:10px;">🎉 高難易度の誤答問題はありません！</div>' :
-    togetherItems.map(item => `
-      <div class="pickup-item pickup-together">
-        <b>第${item.round}回 問${item.qNum}</b> <span style="font-size:0.7rem; color:#2980b9;">(集団正解率: ${item.groupRate}%)</span>
-        <br><span style="font-size:0.7rem; color:#555;">集団全体で正答率が低く難易度の高い問題です。</span>
-      </div>
-    `).join("");
+    // 科目ごとに分類
+    const grouped = {};
+    items.forEach(item => {
+      if (!grouped[item.subjectName]) grouped[item.subjectName] = [];
+      grouped[item.subjectName].push(item);
+    });
+
+    let html = "";
+    Object.keys(grouped).forEach(subjName => {
+      const list = grouped[subjName];
+      html += `
+        <div style="margin-bottom:12px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+          <div style="font-size:0.82rem; font-weight:bold; color:#2c3e50; border-left:4px solid ${accentColor}; padding-left:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>${subjName}</span>
+            <span style="font-size:0.7rem; background:${accentColor}; color:white; padding:2px 6px; border-radius:10px;">${list.length}問</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            ${list.map(item => `
+              <div style="background:${bgLight}; border:1px solid ${accentColor}44; border-radius:8px; padding:6px 10px; font-size:0.78rem; display:flex; align-items:center; gap:6px;">
+                <span style="font-weight:bold; color:${accentColor};">第${item.round}回 問${item.qNum}</span>
+                <span style="font-size:0.68rem; background:#fff; border:1px solid ${accentColor}; color:${accentColor}; padding:1px 5px; border-radius:4px; font-weight:bold;">正解率 ${item.groupRate}%</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    });
+
+    return html;
+  }
+
+  // 1. 絶対復習問題の描画
+  absContainer.innerHTML = renderGroupedList(
+    absItems,
+    "#e74c3c", // 赤アクセント
+    "#fff0f0", // 赤背景
+    "🎉 現在、絶対復習問題はありません！",
+    "みんなが正解できている最重要問題です。"
+  );
+
+  // 2. 皆で頑張ろう問題の描画
+  togetherContainer.innerHTML = renderGroupedList(
+    togetherItems,
+    "#2980b9", // 青アクセント
+    "#f0f7ff", // 青背景
+    "🎉 高難易度の誤答問題はありません！",
+    "集団全体で正答率が低く難易度の高い問題です。"
+  );
 }
 
 // ==========================================
