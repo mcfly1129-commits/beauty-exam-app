@@ -807,16 +807,20 @@ function submitExamData() {
     document.getElementById("confirm-modal").style.display = "none";
 
 if (data.status === "success") {
-  // 1. 紙吹雪エフェクトを即時発動
-  triggerConfetti();
+    // 1. 紙吹雪エフェクトを即時発動
+    triggerConfetti();
 
-  // 2. メモリ構造体を安全に確保
-  if (!studentDashboardData) {
-    studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [] };
-  }
-  if (!studentDashboardData.latest_exam_records) studentDashboardData.latest_exam_records = {};
-  if (!studentDashboardData.submitted_rounds) studentDashboardData.submitted_rounds = [];
-  if (!studentDashboardData.history_log) studentDashboardData.history_log = [];
+    // 2. メモリ構造体を安全に確保 ＆ サーバーから返された集団データも保持
+    if (!studentDashboardData) {
+      studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [], group_data: {} };
+    }
+    // サーバーからの最新グループ中央値データを結合
+    if (data.group_data) {
+      studentDashboardData.group_data = data.group_data;
+    }
+    if (!studentDashboardData.latest_exam_records) studentDashboardData.latest_exam_records = {};
+    if (!studentDashboardData.submitted_rounds) studentDashboardData.submitted_rounds = [];
+    if (!studentDashboardData.history_log) studentDashboardData.history_log = [];
 
   // 3. ⭕ 誤答問題リストの型を安全にカンマ区切り文字列へ正規化（型不一致バグを防御）
   let wrongQsStr = "";
@@ -905,17 +909,16 @@ function renderDashboardCharts() {
     }
   }
 
-  const mySubAcc = [];
+const mySubAcc = [];
   const medianSubAcc = [];
   const subjectLabels = SUBJECT_DEFINITIONS.map(s => s.name);
 
-// （抜粋：レーダーチャート用のデータ構築部分）
-  const groupData = studentDashboardData.group_data || {};
+const groupData = studentDashboardData.group_data || {};
   
-  // ⭕ 選択中の回（targetRound）の回別中央値を安全に取得
+  // ⭕ 選択中の回（targetRound）の回別中央値のみを取得（全体の総合中央値へフォールバックさせない）
   const groupExamStats = groupData.exam_stats || {};
   const roundStats = groupExamStats[targetRound] || {};
-  const roundMedians = roundStats.subject_medians || groupData.medians?.subjects || {};
+  const roundMedians = roundStats.subject_medians || {};
 
   for (let i = 1; i <= 10; i++) {
     const key = "sub_" + ("0" + i).slice(-2);
@@ -935,8 +938,8 @@ function renderDashboardCharts() {
     document.getElementById("badge-total-acc").innerText = `--%`;
   }
 
-  // ★ 変更：中央値データが全く存在しない場合は「集団中央値」データセット自体を非表示（空）にする
-  const hasMedianData = Object.keys(groupMedians).length > 0;
+// ★ 変更：中央値データが全く存在しない場合は「集団中央値」データセット自体を非表示（空）にする
+  const hasMedianData = Object.keys(roundMedians).length > 0;
 
   const radarDatasets = [
     { 
