@@ -909,16 +909,21 @@ function renderDashboardCharts() {
   const medianSubAcc = [];
   const subjectLabels = SUBJECT_DEFINITIONS.map(s => s.name);
 
+// （抜粋：レーダーチャート用のデータ構築部分）
   const groupData = studentDashboardData.group_data || {};
-  const groupMedians = groupData.medians?.subjects || {};
+  
+  // ⭕ 選択中の回（targetRound）の回別中央値を安全に取得
+  const groupExamStats = groupData.exam_stats || {};
+  const roundStats = groupExamStats[targetRound] || {};
+  const roundMedians = roundStats.subject_medians || groupData.medians?.subjects || {};
 
   for (let i = 1; i <= 10; i++) {
     const key = "sub_" + ("0" + i).slice(-2);
-    // ⭕ 未提出（latestRecord が undefined）の場合は 0 をセット
     const val = latestRecord ? latestRecord[key] : undefined;
     mySubAcc.push(val !== undefined ? Number(val) : 0);
 
-    medianSubAcc.push(groupMedians[key] !== undefined ? Number(groupMedians[key]) : 0);
+    // ⭕ 選択回ごとの科目中央値を代入
+    medianSubAcc.push(roundMedians[key] !== undefined ? Number(roundMedians[key]) : 0);
   }
 
   // ⭕【修正】バッジ表示の切り替え（未提出時は "-" / "--%"）
