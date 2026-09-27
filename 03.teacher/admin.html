@@ -946,11 +946,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const displayUser = userEmail 
-                 || localStorage.getItem('teacher_google_id_token') 
-                 || localStorage.getItem('beauty_past_exam_teacher_code') 
-                 || "教員";
-  document.getElementById('display-teacher-email').innerText = escapeHTML(displayUser);
+  document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
   document.getElementById('auth-loading').style.display = 'none';
 
   // ==========================================================
@@ -1052,16 +1048,7 @@ function loadTeacherDashboardData(isRecalculate = false) {
     recalcBtn.style.opacity = "0.7";
   }
 
-  // ⭕ トークン取得の多重フォールバック（空の場合は beauty_past_exam_teacher_code や free2026 を適用）
-  const password = localStorage.getItem('teacher_google_id_token')
-                || localStorage.getItem('beauty_past_exam_teacher_code')
-                || "free2026";
-                
-  // 次回以降のために localStorage にも保存
-  if (password) {
-    localStorage.setItem('teacher_google_id_token', password);
-  }
-
+  const password = localStorage.getItem('teacher_google_id_token') || "";
   const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
 
   fetch(GAS_API_URL, {
@@ -1686,12 +1673,11 @@ SUBJECTS_DEFINITION.forEach(sub => {
         }
 
         function handleLogout() {
-    localStorage.removeItem('teacher_isLoggedIn');
-    localStorage.removeItem('teacher_userEmail');
-    localStorage.removeItem('teacher_google_id_token');
-    localStorage.removeItem('beauty_past_exam_teacher_code'); // ⭕ ここを追加！
-    location.reload();
-}
+            localStorage.removeItem('teacher_isLoggedIn');
+            localStorage.removeItem('teacher_userEmail');
+            localStorage.removeItem('teacher_google_id_token');
+            location.reload();
+        }
     </script>
 </body>
 </html>
