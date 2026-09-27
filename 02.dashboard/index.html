@@ -312,6 +312,8 @@
             <ul class="rank-list" id="rank-class-list">
                 <li class="rank-item"><span class="user-yet">データ収集中...</span></li>
             </ul>
+            <!-- ⭕ 但し書き注記を追加 -->
+            <p style="font-size: 0.6rem; color: #95a5a6; margin-top: 3px; margin-bottom: 0;">※クラス登録人数の過半数（50%超）が<br>成果報告を行ったクラスのみ集計対象となります。</p>
         </div>
     </div>
 
@@ -668,7 +670,8 @@ function handleDashboardData(data) {
             classList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span class="rank-name">${safeClassName}</span> <strong class="rank-val">進捗中央値: ${safeValue}%</strong></li>`;
         });
     } else {
-        classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...</span></li>`;
+        // ⭕ 過半数未達成時の案内文言へ変更
+        classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...（登録人数過半数の報告でランク表示）</span></li>`;
     }
 
     // 4. 中央値データの抽出と全科目グラフへの展開
