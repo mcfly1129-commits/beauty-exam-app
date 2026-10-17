@@ -1668,7 +1668,7 @@ function updateHomeReportAreaUI() {
     // 🔴 未報告 または 14日以上報告なし（危険・警告）
     btnEl.classList.add("btn-report-danger");
     commentEl.classList.add("comment-danger");
-    commentEl.innerText = "⚠️ 14日以上報告がありません！成果を報告しましょう";
+    commentEl.innerText = "⚠️ 14日以上報告がありません！\n成果を報告しましょう";
     commentEl.style.display = "block";
     subtextEl.innerText = `前回の報告：${lastDateStr}（14日以上経過）`;
 
@@ -1676,7 +1676,7 @@ function updateHomeReportAreaUI() {
     // 🟡 14日以内に報告あり ＆ 進捗10%未満（注意）
     btnEl.classList.add("btn-report-warning");
     commentEl.classList.add("comment-warning");
-    commentEl.innerText = "⚠️ 進捗が10%未満です。報告をしつつ、もう少し学習を進めましょう！";
+    commentEl.innerText = "⚠️ 進捗が10%未満です。\n報告をしつつ、もう少し学習を進めましょう！";
     commentEl.style.display = "block";
     subtextEl.innerText = `前回の報告：${lastDateStr}（現在の進捗率: ${totalProgress}%）`;
 
