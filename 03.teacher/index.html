@@ -447,7 +447,7 @@
     
     <!-- 成果報告ボタン本体 -->
     <button id="btn-home-submit-report" class="btn-home-report">
-      📤 今日の成果を報告する
+      📤 成果を報告する
     </button>
     
     <!-- 補助注記（最終報告日時の表示など） -->
@@ -1765,7 +1765,7 @@ function executeHomeDataTransmission() {
       alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
       if (btn) {
         btn.disabled = false;
-        btn.innerText = "📤 今日の成果を報告する";
+        btn.innerText = "📤 成果を報告する";
         btn.style.opacity = "1";
       }
     }
@@ -1775,7 +1775,7 @@ function executeHomeDataTransmission() {
     alert("❌ 通信エラーが発生しました。インターネット接続を確認して再度お試しください。");
     if (btn) {
       btn.disabled = false;
-      btn.innerText = "📤 今日の成果を報告する";
+      btn.innerText = "📤 成果を報告する";
       btn.style.opacity = "1";
     }
   });
