@@ -304,6 +304,153 @@ h1 {
   background: #f0fff4;
   border-color: #b7eb8f;
 }
+
+/* ==========================================
+   📱 スマホ画面対応：最新回答サマリー＆🔥🤝問題番号バッジスタイル
+   ========================================== */
+.result-summary-card {
+  background: #ffffff;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.summary-score-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: #fef5ed;
+  padding: 12px 8px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ffe3d1;
+}
+
+.summary-score-item {
+  text-align: center;
+}
+
+.summary-score-label {
+  font-size: 0.72rem;
+  color: #7f8c8d;
+  font-weight: bold;
+}
+
+.summary-score-val {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #d35400;
+}
+
+/* 科目別・間違えた問題番号ブロック */
+.subject-wrong-block {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.subject-wrong-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: 4px;
+}
+
+.wrong-q-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 🔥 絶対復習問題バッジ（集団正解率80%以上） */
+.q-badge-abs {
+  background: #fff0f0;
+  border: 1px solid var(--accent-red);
+  color: #c0392b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 🤝 皆で頑張ろう問題バッジ（集団正解率60%未満） */
+.q-badge-together {
+  background: #f0f7ff;
+  border: 1px solid var(--accent-blue);
+  color: #2980b9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 通常の間違えた問題バッジ */
+.q-badge-normal {
+  background: #f1f2f6;
+  border: 1px solid #ced6e0;
+  color: #57606f;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+/* ==========================================
+   📱 第4タブ：科目別絞り込みフィルタースタイル
+   ========================================== */
+.filter-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 0.78rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.select-subject-filter {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--primary-color);
+  font-size: 0.88rem;
+  font-weight: bold;
+  color: #2c3e50;
+  background-color: #fefaf0;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.select-subject-filter:focus {
+  border-color: var(--accent-orange);
+  background-color: #ffffff;
+}
+
 </style>
 </head>
 <body>
@@ -334,13 +481,15 @@ h1 {
       </div>
     </div>
 
-    <!-- タブメニュー -->
-    <div class="tab-menu">
-      <button class="tab-btn active" data-tab="tab-input">📝回答<br>入力</button>
-      <button class="tab-btn" data-tab="tab-dashboard">📊分析<br>ダッシュ<br>ボード</button>
-      <button class="tab-btn" data-tab="tab-review">❌重要<br>復習</button>
-      <button class="tab-btn" data-tab="tab-pdf">📄解説<br>PDF</button>
-    </div>
+<!-- ========================================== -->
+<!-- 1. タブメニュー（ボタン順序の変更） -->
+<!-- ========================================== -->
+<div class="tab-menu">
+  <button class="tab-btn active" data-tab="tab-input">📝回答<br>入力</button>
+  <button class="tab-btn" data-tab="tab-review">📝回答<br>記録</button>
+  <button class="tab-btn" data-tab="tab-dashboard">📊分析<br>ボード</button>
+  <button class="tab-btn" data-tab="tab-pickup">🔥累積<br>復習</button>
+</div>
 
     <!-- ========================================== -->
     <!-- TAB 1: 回答入力画面 -->
@@ -349,7 +498,7 @@ h1 {
       <div class="exam-select-card">
         <span style="font-size:0.85rem; font-weight:bold;">過去問 実施・閲覧</span>
         <select id="select-exam-round" class="select-round">
-          <!-- JSで41回〜52回を動的生成 -->
+          <!-- JSで41回〜54回を動的生成 -->
         </select>
       </div>
 
@@ -366,76 +515,138 @@ h1 {
       </button>
     </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 2: 分析ダッシュボード -->
-    <!-- ========================================== -->
-    <div id="tab-dashboard" class="screen-section">
-<!-- 最新結果レーダーチャート -->
-<div class="dashboard-card">
-  <h3 class="card-title" id="dashboard-radar-title">🎯 最新結果（正答率 vs 中央値）</h3>
-  <!-- 🔴 style に flex / justify-content / align-items を追加 -->
-  <div style="position: relative; height: 260px; width: 100%; display: flex; justify-content: center; align-items: center;">
-    <canvas id="radarChart"></canvas>
+<!-- ========================================== -->
+<!-- TAB 2: 直近1回分の回答記録サマリー専用画面（旧TAB 3から移動） -->
+<!-- ========================================== -->
+<div id="tab-review" class="screen-section">
+  <!-- 今回回答した過去問の記録サマリー -->
+  <div id="latest-result-summary" class="result-summary-card" style="display: none;">
+    <h3 class="card-title" style="border-color: var(--primary-color); margin-bottom: 10px;">
+      📝 過去問回答記録
+    </h3>
+    <div style="font-size: 0.75rem; color: #7f8c8d; text-align: center; margin-bottom: 8px;">
+      対象: <b id="summary-exam-round" style="color: #d35400;">第--回</b> （送信日時: <span id="summary-exam-time">--</span>）
+    </div>
+
+<!-- 分析ボード風のメインランク・正答率カード -->
+    <div style="background:#fefaf0; border:1px solid #ffe3d1; padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-around; align-items:center; text-align:center;">
+      <div>
+        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold; margin-bottom:2px;">総合ランク</div>
+        <div id="summary-rank-val" style="color:#e67e22; font-size:1.15rem; font-weight:bold; line-height:1.2;">-</div>
+      </div>
+      <div style="border-left:1px solid #ffe3d1; height:30px;"></div>
+      <div>
+        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold; margin-bottom:2px;">正答率</div>
+        <div id="summary-accuracy-num" style="color:#0984e3; font-size:1.15rem; font-weight:bold; line-height:1.2;">--%</div>
+      </div>
+    </div>
+
+    <!-- サブ情報（得点・間違えた数） -->
+    <div style="display:flex; justify-content:space-around; align-items:center; background:#f8f9fa; padding:10px 8px; border-radius:10px; margin-bottom:15px; border:1px solid #eee;">
+      <div style="text-align:center;">
+        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold;">総合得点</div>
+        <div style="font-size:1rem; font-weight:bold; color:#2c3e50;"><span id="summary-score-num">--</span> <small style="font-size:0.7rem;">/55点</small></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold;">間違えた数</div>
+        <div style="font-size:1rem; font-weight:bold; color:#e74c3c;" id="summary-wrong-count">--問</div>
+      </div>
+    </div>
+
+    <div style="font-size: 0.8rem; font-weight: bold; color: #2c3e50; margin-bottom: 6px;">
+      📋 間違えた問題番号一覧
+    </div>
+    <p style="font-size: 0.7rem; color: #7f8c8d; margin-top: 0; margin-bottom: 8px;">
+       🔥：絶対復習問題（集団正解率80%以上）<br>
+       🤝：皆で頑張ろう問題（集団正解率60%未満）
+    </p>
+
+    <!-- JSから科目別の間違えた問題バッジが出力されます -->
+    <div id="summary-wrong-questions-list"></div>
   </div>
-<div id="rank-badge-box" style="display:flex; justify-content:space-around; align-items:center; margin:12px auto 0 auto; max-width:320px; background:#fefaf0; padding:10px 12px; border-radius:12px; font-size:0.85rem; font-weight:bold; text-align:center;">
-  <div style="display:flex; align-items:center; gap:4px;">
-    <span>総合ランク:</span>
-    <span id="badge-total-rank" style="color:#e67e22; font-size:1.05rem; line-height:1;">-</span>
-  </div>
-  <div style="display:flex; align-items:center; gap:4px;">
-    <span>正答率:</span>
-    <span id="badge-total-acc" style="color:#0984e3; font-size:1.05rem; line-height:1;">--%</span>
+
+  <!-- 未回答時・初期状態の案内プレースホルダー -->
+  <div id="latest-result-empty-msg" class="dashboard-card" style="text-align: center; padding: 25px 15px;">
+    <div style="font-size: 2.2rem; margin-bottom: 10px;">📝</div>
+    <div style="font-size: 0.9rem; font-weight: bold; color: #2c3e50; margin-bottom: 6px;">この過去問回答記録はありません</div>
+    <p style="font-size: 0.75rem; color: #7f8c8d; margin: 0; line-height: 1.5;">
+      「📝回答入力」タブから過去問の解答を入力して送信すると、<br>ここに最新の得点・正答率・間違えた問題番号が表示されます。
+    </p>
   </div>
 </div>
-      </div>
 
-      <!-- 時系列折れ線グラフ -->
-      <div class="dashboard-card">
-        <h3 class="card-title">📈 実施履歴の推移<br>（時系列折れ線グラフ）</h3>
-        <div style="position: relative; height: 220px;">
-          <canvas id="lineChart"></canvas>
-        </div>
+<!-- ========================================== -->
+<!-- TAB 3: 全提出回の累積・総合分析ダッシュボード（旧TAB 2から移動） -->
+<!-- ========================================== -->
+<div id="tab-dashboard" class="screen-section">
+  <!-- 最新結果レーダーチャート -->
+  <div class="dashboard-card">
+    <h3 class="card-title" id="dashboard-radar-title">🎯 最新結果（正答率 vs 中央値）</h3>
+    <div style="position: relative; height: 260px; width: 100%; display: flex; justify-content: center; align-items: center;">
+      <canvas id="radarChart"></canvas>
+    </div>
+    <div id="rank-badge-box" style="display:flex; justify-content:space-around; align-items:center; margin:12px auto 0 auto; max-width:320px; background:#fefaf0; padding:10px 12px; border-radius:12px; font-size:0.85rem; font-weight:bold; text-align:center;">
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span>総合ランク:</span>
+        <span id="badge-total-rank" style="color:#e67e22; font-size:1.05rem; line-height:1;">-</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span>正答率:</span>
+        <span id="badge-total-acc" style="color:#0984e3; font-size:1.05rem; line-height:1;">--%</span>
       </div>
     </div>
+  </div>
 
-    <!-- ========================================== -->
-    <!-- TAB 3: 間違えた問題・重要復習ピックアップ -->
-    <!-- ========================================== -->
-    <div id="tab-review" class="screen-section">
-      <div class="dashboard-card">
-        <h3 class="card-title" style="border-color:var(--accent-red); color:#c0392b;">
-          🔥 絶対復習問題<br>【圧倒的マイノリティな回答】
-        </h3>
-        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率が80％以上の<br>必ず自分が正解すべき問題（差が大きい順）</p>
-        <div id="abs-review-list" class="pickup-list">
-          <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
-        </div>
-      </div>
-
-      <div class="dashboard-card">
-        <h3 class="card-title" style="border-color:var(--accent-blue); color:#2980b9;">
-          🤝 皆で頑張ろう問題<br>【皆が苦手な問題】
-        </h3>
-        <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率も60％未満の高難易度問題</p>
-        <div id="together-review-list" class="pickup-list">
-          <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
-        </div>
-      </div>
+  <!-- 時系列折れ線グラフ -->
+  <div class="dashboard-card">
+    <h3 class="card-title">📈 実施履歴の推移<br>（時系列折れ線グラフ）</h3>
+    <div style="position: relative; height: 220px;">
+      <canvas id="lineChart"></canvas>
     </div>
+  </div>
+</div>
 
-    <!-- ========================================== -->
-    <!-- TAB 4: 問題・模範解答解説PDF解禁リンク -->
-    <!-- ========================================== -->
-    <div id="tab-pdf" class="screen-section">
-      <div class="dashboard-card">
-        <h3 class="card-title">📄 模範解答・解説PDF閲覧アンロック</h3>
-        <p style="font-size:0.75rem; color:#7f8c8d; margin-top:-6px;">回答入力を提出完了した過去問のみ、<br>閲覧リンクが解禁されます。</p>
-        <div id="pdf-list-container">
-          <!-- JSで全12回分のPDF状態を動的描画 -->
-        </div>
-      </div>
+<!-- ========================================== -->
+<!-- TAB 4: 累計データからの重要復習ピックアップ画面 -->
+<!-- ========================================== -->
+<div id="tab-pickup" class="screen-section">
+
+    <!-- 🔴【新規追加】10科目別 絞り込みフィルターカード -->
+  <div class="filter-card">
+    <label for="select-subject-filter" class="filter-label">📚 復習する科目で絞り込み</label>
+    <select id="select-subject-filter" class="select-subject-filter">
+      <option value="all">全科目表示 (すべて)</option>
+      <option value="1">1. 関係法規・制度</option>
+      <option value="2">2. 運営管理</option>
+      <option value="3">3. 公衆・環境</option>
+      <option value="4">4. 感染症</option>
+      <option value="5">5. 衛生管理技術</option>
+      <option value="6">6. 人体の構造及び機能</option>
+      <option value="7">7. 皮膚科学</option>
+      <option value="8">8. 香粧品化学</option>
+      <option value="9">9. 文化論</option>
+      <option value="10">10. 美容技術理論</option>
+    </select>
+  </div>
+
+  <div class="dashboard-card">
+    <h3 class="card-title" style="border-color:var(--accent-red); color:#c0392b;">
+      🔥 重要復習問題<br>【少数派な回答】
+    </h3>
+    <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率が80％以上の<br>自分が正解すべき問題（差が大きい順）</p>
+    <div id="abs-review-list" class="pickup-list">
+      <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
     </div>
+  </div>
 
+  <div class="dashboard-card">
+    <h3 class="card-title" style="border-color:var(--accent-blue); color:#2980b9;">
+      🤝 皆で頑張ろう問題<br>【皆が苦手な問題】
+    </h3>
+    <p style="font-size:0.72rem; color:#7f8c8d; margin-top:-6px;">自分が間違えており、<br>かつ集団の正解率も60％未満の高難易度問題</p>
+    <div id="together-review-list" class="pickup-list">
+      <div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:10px;">データ読み込み中...</div>
+    </div>
   </div>
 </div>
 
@@ -471,7 +682,7 @@ h1 {
 <div id="history-reset-modal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-size:1.05rem; text-align:center; color:#2c3e50; margin-top:0;">📜 送信履歴 ＆ データリセット</h3>
-    <p style="font-size:0.75rem; color:#7f8c8d; text-align:center;">送信済みの過去問記録を<br>取り消し（リセット）できます。<br>※リセットするとPDF閲覧リンクも<br>再びロックされます。</p>
+    <p style="font-size:0.75rem; color:#7f8c8d; text-align:center;">送信済みの過去問記録を<br>取り消し（リセット）できます。</p>
     
     <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:15px 0;"></div>
 
@@ -501,7 +712,7 @@ const SUBJECT_DEFINITIONS = [
 
 // アプリ状態管理
 let currentSerialCode = localStorage.getItem("beauty_past_exam_serial_code") || "";
-let currentExamRound = "52"; // デフォルト最新52回
+let currentExamRound = "54"; // デフォルト最新54回
 let studentAnswers = new Array(55).fill(""); // 55問の回答
 let studentDashboardData = null; // GAS保持データ
 
@@ -542,27 +753,37 @@ function setupEventListeners() {
     }
   });
 
-  // タブ切り替え
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
-      
-      e.target.classList.add("active");
-      const targetTab = e.target.getAttribute("data-tab");
-      document.getElementById(targetTab).classList.add("active");
+// タブ切り替え処理の更新（第3タブ: tab-review / 第4タブ: tab-pickup の個別呼び出し）
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
 
-      if (targetTab === "tab-dashboard") renderDashboardCharts();
-      if (targetTab === "tab-review") renderReviewPickups();
-      if (targetTab === "tab-pdf") renderPdfLinks();
-    });
-  });
+    e.target.classList.add("active");
+    const targetTab = e.target.getAttribute("data-tab");
+    document.getElementById(targetTab).classList.add("active");
 
-  // 実施回変更
-  document.getElementById("select-exam-round").addEventListener("change", (e) => {
-    currentExamRound = e.target.value;
-    loadDraftAnswers();
+    if (targetTab === "tab-dashboard") renderDashboardCharts();
+    if (targetTab === "tab-review") renderLatestResultSummary(); // 📝 第3タブ: 最新サマリー描画
+    if (targetTab === "tab-pickup") renderReviewPickups();        // 🔥 第4タブ: 累積復習描画
   });
+});
+
+// 実施回変更イベントの更新
+document.getElementById("select-exam-round").addEventListener("change", (e) => {
+  currentExamRound = e.target.value;
+  loadDraftAnswers();
+  renderDashboardCharts();
+  renderLatestResultSummary(); // 回数を変えたら最新サマリーも連動更新
+});
+
+// 📚 科目絞り込みフィルターの変更イベント登録（第4タブ用）
+const subjectFilterSelect = document.getElementById("select-subject-filter");
+if (subjectFilterSelect) {
+  subjectFilterSelect.addEventListener("change", () => {
+    renderReviewPickups(); // 科目が変更されたらリストを再描画
+  });
+}
 
   // 再確認モーダル開閉
   document.getElementById("btn-open-confirm").addEventListener("click", openConfirmModal);
@@ -639,7 +860,7 @@ function loadStudentDashboard() {
     if (data.status === "success") {
       studentDashboardData = data;
       renderReviewPickups();
-      renderPdfLinks();
+      renderLatestResultSummary();
     }
   })
   .catch(err => console.error("Dashboard Load Error:", err));
@@ -651,7 +872,7 @@ function loadStudentDashboard() {
 function initExamRoundSelector() {
   const select = document.getElementById("select-exam-round");
   select.innerHTML = "";
-  for (let r = 52; r >= 41; r--) {
+  for (let r = 54; r >= 41; r--) {
     const opt = document.createElement("option");
     opt.value = String(r);
     opt.textContent = `第${r}回 国家試験`;
@@ -782,6 +1003,9 @@ function openConfirmModal() {
   document.getElementById("confirm-modal").style.display = "flex";
 }
 
+/**
+ * 📤 回答の確定送信＆最新回答データの上書き同期処理
+ */
 function submitExamData() {
   const btn = document.getElementById("btn-submit-exam");
   btn.disabled = true;
@@ -806,76 +1030,83 @@ function submitExamData() {
     btn.innerText = "確定して送信";
     document.getElementById("confirm-modal").style.display = "none";
 
-if (data.status === "success") {
-    // 1. 紙吹雪エフェクトを即時発動
-    triggerConfetti();
+    if (data.status === "success") {
+      // 1. 🎉 提出成功時の紙吹雪演出を発動
+      triggerConfetti();
 
-    // 2. メモリ構造体を安全に確保 ＆ サーバーから返された集団データも保持
-    if (!studentDashboardData) {
-      studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [], group_data: {} };
-    }
-    // サーバーからの最新グループ中央値データを結合
-    if (data.group_data) {
-      studentDashboardData.group_data = data.group_data;
-    }
-    if (!studentDashboardData.latest_exam_records) studentDashboardData.latest_exam_records = {};
-    if (!studentDashboardData.submitted_rounds) studentDashboardData.submitted_rounds = [];
-    if (!studentDashboardData.history_log) studentDashboardData.history_log = [];
+      // 2. メモリ構造体の安全確保
+      if (!studentDashboardData) {
+        studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [], group_data: {} };
+      }
+      if (data.group_data) {
+        studentDashboardData.group_data = data.group_data;
+      }
+      if (!studentDashboardData.latest_exam_records) studentDashboardData.latest_exam_records = {};
+      if (!studentDashboardData.submitted_rounds) studentDashboardData.submitted_rounds = [];
+      if (!studentDashboardData.history_log) studentDashboardData.history_log = [];
 
-  // 3. ⭕ 誤答問題リストの型を安全にカンマ区切り文字列へ正規化（型不一致バグを防御）
-  let wrongQsStr = "";
-  if (Array.isArray(data.scoring.wrong_questions)) {
-    wrongQsStr = data.scoring.wrong_questions.join(",");
-  } else if (typeof data.scoring.wrong_questions === "string") {
-    wrongQsStr = data.scoring.wrong_questions;
-  }
+      // 3. 誤答問題リストの型を安全にカンマ区切り文字列へ正規化
+      let wrongQsStr = "";
+      if (Array.isArray(data.scoring.wrong_questions)) {
+        wrongQsStr = data.scoring.wrong_questions.join(",");
+      } else if (typeof data.scoring.wrong_questions === "string") {
+        wrongQsStr = data.scoring.wrong_questions;
+      }
 
-  // 4. メモリ上の提出レコードを即時作成
-  const nowIso = new Date().toISOString();
-  studentDashboardData.latest_exam_records[currentExamRound] = {
-    total_score: data.scoring.total_score,
-    total_accuracy: data.scoring.total_accuracy,
-    wrong_questions: wrongQsStr,
-    pdf_url: data.scoring.pdf_url || "",
-    timestamp: nowIso,
-    ...(data.scoring.subject_accuracies || {})
-  };
+      // 4. 🔄 最新の回答データで上書き更新（同じ回を再入力した場合も常に最新回答のみ反映）
+      const nowIso = new Date().toISOString();
+      studentDashboardData.latest_exam_records[currentExamRound] = {
+        total_score: data.scoring.total_score,
+        total_accuracy: data.scoring.total_accuracy,
+        wrong_questions: wrongQsStr,
+        pdf_url: data.scoring.pdf_url || "",
+        timestamp: nowIso,
+        ...(data.scoring.subject_accuracies || {})
+      };
 
-  // 5. 提出済みリストに回を追加
-  if (!studentDashboardData.submitted_rounds.includes(currentExamRound)) {
-    studentDashboardData.submitted_rounds.push(currentExamRound);
-  }
+      // 5. 提出済み回リストに追加（重複排除）
+      if (!studentDashboardData.submitted_rounds.includes(currentExamRound)) {
+        studentDashboardData.submitted_rounds.push(currentExamRound);
+      }
 
-  // 6. ⭕ 折れ線グラフ用ログ（history_log）にも今回送信分を即時追加（グラフ非反映バグを完全解消）
-  studentDashboardData.history_log.push({
-    exam_round: currentExamRound,
-    total_accuracy: data.scoring.total_accuracy,
-    total_score: data.scoring.total_score,
-    timestamp: nowIso
-  });
+      // 6. 📈 折れ線グラフ用履歴（history_log）の上書き更新（同一回の過去ログを最新結果で更新）
+      const existingLogIdx = studentDashboardData.history_log.findIndex(h => String(h.exam_round) === String(currentExamRound));
+      const newLogItem = {
+        exam_round: currentExamRound,
+        total_accuracy: data.scoring.total_accuracy,
+        total_score: data.scoring.total_score,
+        timestamp: nowIso
+      };
+      if (existingLogIdx !== -1) {
+        studentDashboardData.history_log[existingLogIdx] = newLogItem;
+      } else {
+        studentDashboardData.history_log.push(newLogItem);
+      }
 
-  // 7. 🔥【重要】描画処理を行う前に、先にダッシュボードタブを表示状態（display:block）へ切替
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
+      // 7. 📱 送信後、自動的に「回答記録・復習タブ（tab-review）」を表示状態へ切替
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
 
-  const dashBtn = document.querySelector('.tab-btn[data-tab="tab-dashboard"]');
-  const dashSec = document.getElementById("tab-dashboard");
-  if (dashBtn) dashBtn.classList.add("active");
-  if (dashSec) dashSec.classList.add("active");
+      const reviewBtn = document.querySelector('.tab-btn[data-tab="tab-review"]');
+      const reviewSec = document.getElementById("tab-review");
+      if (reviewBtn) reviewBtn.classList.add("active");
+      if (reviewSec) reviewSec.classList.add("active");
 
-  // 8. 🔥 画面を表示状態にした直後に、各グラフやUIを一括再描画
-  renderDashboardCharts();
-  renderReviewPickups();
-  renderPdfLinks();
+// 8. 🔄 UI・サマリーカード・分析ボードが一括で即時描画更新されます
+renderLatestResultSummary(); // 📝 第3タブ: 最新サマリーカードを描画（★この1行を追加）
+renderReviewPickups();        // 🔥 第4タブ: 累積復習描画
+renderDashboardCharts();      // 分析ボード（レーダー・折れ線）の描画更新
 
-  // 9. バックグラウンドでGASサーバーと完全同期
-  loadStudentDashboard();
+      // 9. バックグラウンドでGASサーバー側データと同期
+      loadStudentDashboard();
 
-  // 10. 送信完了通知メッセージ
-  setTimeout(() => {
-    alert(`🎉 回答の送信が完了しました！\n総合得点: ${data.scoring.total_score} 点 (${data.scoring.total_accuracy}%)`);
-  }, 150);
-} else {
+      // 10. 送信完了・結果案内メッセージを表示
+      const wrongCount = wrongQsStr ? wrongQsStr.split(",").filter(Boolean).length : 0;
+      setTimeout(() => {
+        alert(`🎉 回答の送信・データ更新が完了しました！\n\n・対象: 第${currentExamRound}回\n・総合得点: ${data.scoring.total_score} / 55 点 (${data.scoring.total_accuracy}%)\n・間違えた問題: ${wrongCount} 問\n\n最新の過去問記録と間違えた問題（🔥/🤝）をご確認いただけます。`);
+      }, 150);
+
+    } else {
       alert("送信エラー: " + (data.message || "エラーが発生しました。"));
     }
   })
@@ -883,83 +1114,96 @@ if (data.status === "success") {
     console.error(err);
     btn.disabled = false;
     btn.innerText = "確定して送信";
-    alert("通信エラーが発生しました。再度送信してください。");
+    alert("通信エラーが発生しました。ネット接続を確認してください。");
   });
 }
 
-// ==========================================
-// 6. Chart.js レーダーチャート ＆ 折れ線グラフ描画
-// ==========================================
+/**
+ * 📊 【第2タブ】全提出回の累積・総合分析ダッシュボード描画（10科目の平均正答率 ＆ 時系列推移）
+ */
 function renderDashboardCharts() {
-  if (!studentDashboardData || !studentDashboardData.latest_exam_records) return;
+  if (!studentDashboardData) return;
 
-  const records = studentDashboardData.latest_exam_records;
-  
-  // ⭕【修正】代用品を立てず、選択された回（currentExamRound）を直接参照（未提出時は undefined）
-  const targetRound = currentExamRound;
-  const latestRecord = records[targetRound];
+  const records = studentDashboardData.latest_exam_records || {};
+  const submittedRounds = Object.keys(records);
 
-  // ⭕【修正】タイトルを「提出済み」と「未提出」で分岐
   const titleEl = document.getElementById("dashboard-radar-title");
-  if (titleEl) {
-    if (latestRecord) {
-      titleEl.innerHTML = `🎯 【第${targetRound}回】の分析結果<br>（正答率 vs 中央値）`;
-    } else {
-      titleEl.innerHTML = `🎯 【第${targetRound}回】未実施・未提出<br><span style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">（回答を入力して提出するとグラフが表示されます）</span>`;
+  
+  // 1. 未提出／提出済みによるタイトル・バッジの分岐制御
+  if (submittedRounds.length === 0) {
+    if (titleEl) {
+      titleEl.innerHTML = `🎯 累積・総合分析結果（未実施・未提出）<br><span style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">（回答を入力して提出すると総合分析が表示されます）</span>`;
+    }
+    document.getElementById("badge-total-rank").innerHTML = "-";
+    document.getElementById("badge-total-acc").innerText = `--%`;
+  } else {
+    if (titleEl) {
+      titleEl.innerHTML = `🎯 累積・総合分析結果<br>（全${submittedRounds.length}回分の平均正答率 vs 集団中央値）`;
     }
   }
 
-const mySubAcc = [];
+  // 2. 10科目の累積平均正答率の算出
+  const mySubAcc = [];
   const medianSubAcc = [];
   const subjectLabels = SUBJECT_DEFINITIONS.map(s => s.name);
 
-const groupData = studentDashboardData.group_data || {};
-  
-  // ⭕ 選択中の回（targetRound）の回別中央値のみを取得（全体の総合中央値へフォールバックさせない）
-  const groupExamStats = groupData.exam_stats || {};
-  const roundStats = groupExamStats[targetRound] || {};
-  const roundMedians = roundStats.subject_medians || {};
+  const groupData = studentDashboardData.group_data || {};
+  const globalMedians = groupData.medians?.subjects || {};
+
+  let totalAccSum = 0;
 
   for (let i = 1; i <= 10; i++) {
     const key = "sub_" + ("0" + i).slice(-2);
-    const val = latestRecord ? latestRecord[key] : undefined;
-    mySubAcc.push(val !== undefined ? Number(val) : 0);
 
-    // ⭕ 選択回ごとの科目中央値を代入
-    medianSubAcc.push(roundMedians[key] !== undefined ? Number(roundMedians[key]) : 0);
+    if (submittedRounds.length > 0) {
+      // 提出済みの全回における該当科目の正答率平均を計算
+      let subjectAccSum = 0;
+      submittedRounds.forEach(round => {
+        subjectAccSum += Number(records[round][key] || 0);
+      });
+      const avgAcc = Math.round((subjectAccSum / submittedRounds.length) * 10) / 10;
+      mySubAcc.push(avgAcc);
+    } else {
+      mySubAcc.push(0);
+    }
+
+    // 全校集団中央値の取得
+    const groupMedVal = globalMedians[key] !== undefined ? Number(globalMedians[key]) : 0;
+    medianSubAcc.push(groupMedVal);
   }
 
-  // ⭕【修正】バッジ表示の切り替え（未提出時は "-" / "--%"）
-  if (latestRecord) {
-    document.getElementById("badge-total-rank").innerHTML = getRankLabel(latestRecord.total_accuracy);
-    document.getElementById("badge-total-acc").innerText = `${latestRecord.total_accuracy}%`;
-  } else {
-    document.getElementById("badge-total-rank").innerHTML = "-";
-    document.getElementById("badge-total-acc").innerText = `--%`;
+  // 3. 通算総合正答率と総合ランクの算出
+  if (submittedRounds.length > 0) {
+    submittedRounds.forEach(round => {
+      totalAccSum += Number(records[round].total_accuracy || 0);
+    });
+    const overallAvgAcc = Math.round((totalAccSum / submittedRounds.length) * 10) / 10;
+
+    document.getElementById("badge-total-rank").innerHTML = getRankLabel(overallAvgAcc);
+    document.getElementById("badge-total-acc").innerText = `${overallAvgAcc}%`;
   }
 
-// ★ 変更：中央値データが全く存在しない場合は「集団中央値」データセット自体を非表示（空）にする
-  const hasMedianData = Object.keys(roundMedians).length > 0;
+  // 4. レーダーチャートの描画（累積平均正答率 vs 全校集団中央値）
+  const hasMedianData = Object.keys(globalMedians).length > 0;
 
   const radarDatasets = [
-    { 
-      label: '自分の正答率', 
-      data: mySubAcc, 
-      backgroundColor: 'rgba(250, 177, 160, 0.3)', 
-      borderColor: 'rgba(211, 84, 0, 1)', 
-      borderWidth: 2 
+    {
+      label: '累積平均正答率',
+      data: mySubAcc,
+      backgroundColor: 'rgba(250, 177, 160, 0.3)',
+      borderColor: 'rgba(211, 84, 0, 1)',
+      borderWidth: 2
     }
   ];
 
-  // 中央値データが存在するときのみグラフに追加
   if (hasMedianData) {
-    radarDatasets.push({ 
-      label: '集団中央値', 
-      data: medianSubAcc, 
-      backgroundColor: 'rgba(178, 190, 195, 0.1)', 
-      borderColor: 'rgba(127, 140, 141, 0.8)', 
-      borderWidth: 1, 
-      borderDash: [2] 
+    radarDatasets.push({
+      label: '全校集団中央値',
+      data: medianSubAcc,
+      backgroundColor: 'rgba(178, 190, 195, 0.1)',
+      borderColor: 'rgba(127, 140, 141, 0.8)',
+      borderWidth: 1,
+      borderDash: [1]
     });
   }
 
@@ -978,17 +1222,16 @@ const groupData = studentDashboardData.group_data || {};
     }
   });
 
-// ⭕ 履歴データから直近10件のみに絞り込む
+  // 5. 時系列折れ線グラフの描画（実施済みの回ごとの推移）
   const rawHistoryLog = studentDashboardData.history_log || [];
-  const historyLog = rawHistoryLog.slice(-10);
+  const historyLog = rawHistoryLog.slice(-10); // 直近10件を表示
 
-  // ⭕【修正】月(M)と日(D)の先頭の0を除去して「M/D」形式にする処理を追加
-  const timeLabels = historyLog.map(h => {
+const timeLabels = historyLog.map(h => {
     let dateStr = "";
     if (h.timestamp) {
       const parts = String(h.timestamp).slice(5, 10).split("-"); // "09-15" -> ["09", "15"]
       if (parts.length === 2) {
-        dateStr = `${Number(parts[0])}/${Number(parts[1])}`;    // 9/15 に変換
+        dateStr = `${Number(parts[0])}/${Number(parts[1])}`;    // ⭕ parts[0]とparts[1]を正しく指定
       } else {
         dateStr = String(h.timestamp).slice(5, 10);
       }
@@ -1029,14 +1272,155 @@ function getRankLabel(acc) {
   return "D<br>(要復習)";
 }
 
-// ==========================================
-// 7. 間違えた問題ピックアップ判定ロジック（科目別グループ表示版）
-// ==========================================
+/**
+ * 📝 【第3タブ】選択中（最新）の過去問回答記録＆間違えた問題番号のサマリー描画（模範解答付き）
+ */
+function renderLatestResultSummary() {
+  const summaryCard = document.getElementById("latest-result-summary");
+  const emptyMsg = document.getElementById("latest-result-empty-msg");
+  if (!summaryCard) return;
+
+  // データ未読み込み時
+  if (!studentDashboardData || !studentDashboardData.latest_exam_records) {
+    summaryCard.style.display = "none";
+    if (emptyMsg) emptyMsg.style.display = "block";
+    return;
+  }
+
+  const records = studentDashboardData.latest_exam_records || {};
+  const rec = records[currentExamRound];
+
+  // 選択中の回が未提出の場合 ➔ 未回答メッセージを表示
+  if (!rec) {
+    summaryCard.style.display = "none";
+    if (emptyMsg) emptyMsg.style.display = "block";
+    return;
+  }
+
+  // 提出済みのデータが存在する場合 ➔ サマリーカードを表示
+  summaryCard.style.display = "block";
+  if (emptyMsg) emptyMsg.style.display = "none";
+
+  // 基本ヘッダー情報の更新
+  document.getElementById("summary-exam-round").innerText = `第${currentExamRound}回`;
+  const timeStr = rec.timestamp ? formatDisplayTimestamp(rec.timestamp) : "送信済み";
+  document.getElementById("summary-exam-time").innerText = timeStr;
+  document.getElementById("summary-score-num").innerText = rec.total_score !== undefined ? rec.total_score : "--";
+  document.getElementById("summary-accuracy-num").innerText = rec.total_accuracy !== undefined ? `${rec.total_accuracy}%` : "--%";
+  
+  // 対象記録の総合ランクを表示
+  const rankValEl = document.getElementById("summary-rank-val");
+  if (rankValEl) {
+    rankValEl.innerHTML = rec.total_accuracy !== undefined ? getRankLabel(rec.total_accuracy) : "-";
+  }
+
+  // 間違えた問題番号リストの抽出
+  let wrongList = [];
+  if (Array.isArray(rec.wrong_questions)) {
+    wrongList = rec.wrong_questions.map(String).filter(Boolean);
+  } else if (typeof rec.wrong_questions === "string") {
+    wrongList = rec.wrong_questions.split(",").filter(Boolean);
+  }
+
+  document.getElementById("summary-wrong-count").innerText = `${wrongList.length}問`;
+
+  const listContainer = document.getElementById("summary-wrong-questions-list");
+  if (!listContainer) return;
+
+  if (wrongList.length === 0) {
+    listContainer.innerHTML = '<div style="font-size:0.85rem; color:#27ae60; text-align:center; padding:15px; font-weight:bold;">🎉 全問正解です！素晴らしい成果です！</div>';
+    return;
+  }
+
+  // 集団正解率データの取得
+  const groupStats = studentDashboardData.group_data?.exam_stats || {};
+  const roundGroupStats = groupStats[currentExamRound]?.question_correct_rates || {};
+
+  // 1. 模範解答の配列を取得
+  let correctAnswersList = [];
+  if (Array.isArray(rec.correct_answers)) {
+    correctAnswersList = rec.correct_answers;
+  } else if (typeof rec.correct_answers === "string" && rec.correct_answers) {
+    correctAnswersList = rec.correct_answers.split(",");
+  }
+
+  // 間違えた問題を科目（SUBJECT_DEFINITIONS）ごとにグループ化
+  const subjectGrouped = {};
+  
+  wrongList.forEach(qNumStr => {
+    const qNum = parseInt(qNumStr, 10);
+    if (isNaN(qNum)) return;
+
+    const subj = SUBJECT_DEFINITIONS.find(s => qNum >= s.start && qNum <= s.end) || { id: 99, name: "その他" };
+    const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : null;
+    
+    // 該当問の模範解答番号を取得（問題番号は1から始まるため qNum - 1）
+    const modelAns = correctAnswersList[qNum - 1] || "";
+
+    if (!subjectGrouped[subj.name]) {
+      subjectGrouped[subj.name] = { id: subj.id, questions: [] };
+    }
+
+    subjectGrouped[subj.name].questions.push({ qNum, groupRate, modelAns });
+  });
+
+  // 科目順にバッジを生成（🔥 / 🤝 / 通常の判定 ＋ 模範解答表示）
+  let html = "";
+  Object.keys(subjectGrouped)
+    .sort((a, b) => subjectGrouped[a].id - subjectGrouped[b].id)
+    .forEach(subjName => {
+      const group = subjectGrouped[subjName];
+      const badgesHtml = group.questions.map(item => {
+        let badgeClass = "q-badge-normal";
+        let icon = "";
+        
+        // 🔥 絶対復習問題（集団正解率80%以上）
+        if (item.groupRate >= 80.0) {
+          badgeClass = "q-badge-abs";
+          icon = "🔥 ";
+        } 
+        // 🤝 皆で頑張ろう問題（集団正解率60%未満）
+        else if (item.groupRate < 60.0) {
+          badgeClass = "q-badge-together";
+          icon = "🤝 ";
+        }
+
+        // 模範解答テキスト（例: 【正解: 3】）
+        const modelAnsText = item.modelAns ? `<b style="margin-left:3px; color:#d35400;">【正解:${item.modelAns}】</b>` : "";
+
+        const rateText = item.groupRate !== null ? `正解率 ${item.groupRate}%` : "集計中";
+        return `<span class="${badgeClass}">${icon}問${item.qNum} <small style="font-size:0.68rem; opacity:0.85;">(${rateText})</small>${modelAnsText}</span>`;
+      }).join("");
+
+      html += `
+        <div class="subject-wrong-block">
+          <div class="subject-wrong-title">
+            <span>${subjName}</span>
+            <span style="font-size:0.7rem; color:#7f8c8d;">${group.questions.length}問誤答</span>
+          </div>
+          <div class="wrong-q-flex">
+            ${badgesHtml}
+          </div>
+        </div>
+      `;
+    });
+
+  listContainer.innerHTML = html;
+}
+
+/**
+ * 🔥 【第4タブ】累計データからの間違えた問題（🔥絶対復習・🤝皆で頑張ろう）ピックアップ描画（10科目別フィルター対応版）
+ */
 function renderReviewPickups() {
   const absContainer = document.getElementById("abs-review-list");
   const togetherContainer = document.getElementById("together-review-list");
-  
+
+  if (!absContainer || !togetherContainer) return;
   if (!studentDashboardData) return;
+
+  // 📚 選択中の科目フィルター値（all / 1〜10）を取得
+  const filterEl = document.getElementById("select-subject-filter");
+  const selectedSubjectId = filterEl ? filterEl.value : "all";
 
   const records = studentDashboardData.latest_exam_records || {};
   const groupStats = studentDashboardData.group_data?.exam_stats || {};
@@ -1044,10 +1428,10 @@ function renderReviewPickups() {
   const absItems = [];
   const togetherItems = [];
 
-  // 全提出回から間違えた問題を抽出
+  // 全提出回から間違えた問題を抽出・集計
   Object.keys(records).forEach(round => {
     const rec = records[round];
-    
+
     let wrongList = [];
     if (Array.isArray(rec.wrong_questions)) {
       wrongList = rec.wrong_questions.map(String).filter(Boolean);
@@ -1057,14 +1441,28 @@ function renderReviewPickups() {
 
     const roundGroupStats = groupStats[round]?.question_correct_rates || {};
 
-    wrongList.forEach(qNumStr => {
+    // 1. 該当回の模範解答リストを取得
+    let correctAnswersList = [];
+    if (Array.isArray(rec.correct_answers)) {
+      correctAnswersList = rec.correct_answers;
+    } else if (typeof rec.correct_answers === "string" && rec.correct_answers) {
+      correctAnswersList = rec.correct_answers.split(",");
+    }
+    
+wrongList.forEach(qNumStr => {
       const qNum = parseInt(qNumStr, 10);
-      const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : 55.0;
+      const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : null;
 
-      // 問題番号(1〜55)から該当科目を取得
+      // 該当問の模範解答番号を取得（qNum - 1）
+      const modelAns = correctAnswersList[qNum - 1] || "";
+
       const subject = SUBJECT_DEFINITIONS.find(s => qNum >= s.start && qNum <= s.end) || { id: 99, name: "その他" };
+      const itemData = { round, qNum, groupRate, subjectName: subject.name, subjectId: subject.id, modelAns };
 
-      const itemData = { round, qNum, groupRate, subjectName: subject.name, subjectId: subject.id };
+      // 🔍 科目フィルター判定（「全科目表示」でない場合は、一致する科目のみ抽出）
+      if (selectedSubjectId !== "all" && String(subject.id) !== String(selectedSubjectId)) {
+        return; // 対象外の科目はスキップ
+      }
 
       if (groupRate >= 80.0) { // ★ 集団正解率 80% 以上（絶対復習問題）
         absItems.push(itemData);
@@ -1074,16 +1472,14 @@ function renderReviewPickups() {
     });
   });
 
-  // 科目別にグループ化して描画するヘルパー関数
-  function renderGroupedList(items, accentColor, bgLight, emptyMsg, subText) {
+  // 科目別にグループ化して描画するヘルパー関数（バッジ表記バグ修正版）
+  function renderGroupedList(items, accentColor, bgLight, emptyMsg, icon) {
     if (items.length === 0) {
       return `<div style="font-size:0.8rem; color:#27ae60; text-align:center; padding:15px; font-weight:bold;">${emptyMsg}</div>`;
     }
 
-    // 科目ID順、その中で過去問の新しい順（回降順）→問題番号順にソート
     items.sort((a, b) => a.subjectId - b.subjectId || Number(b.round) - Number(a.round) || a.qNum - b.qNum);
 
-    // 科目ごとに分類
     const grouped = {};
     items.forEach(item => {
       if (!grouped[item.subjectName]) grouped[item.subjectName] = [];
@@ -1101,9 +1497,9 @@ function renderReviewPickups() {
           </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
             ${list.map(item => `
-              <div style="background:${bgLight}; border:1px solid ${accentColor}44; border-radius:8px; padding:6px 10px; font-size:0.78rem; display:flex; align-items:center; gap:6px;">
-                <span style="font-weight:bold; color:${accentColor};">第${item.round}回 問${item.qNum}</span>
-                <span style="font-size:0.68rem; background:#fff; border:1px solid ${accentColor}; color:${accentColor}; padding:1px 5px; border-radius:4px; font-weight:bold;">正解率 ${item.groupRate}%</span>
+              <div style="background:${bgLight}; border:1px solid ${accentColor}44; border-radius:8px; padding:6px 10px; font-size:0.78rem; display:flex; align-items:center; gap:6px; white-space:nowrap;">
+                <span style="font-weight:bold; color:${accentColor};">${icon}${item.round}回 問${item.qNum}</span>
+                <span style="font-size:0.68rem; background:#fff; border:1px solid ${accentColor}; color:${accentColor}; padding:1px 5px; border-radius:4px; font-weight:bold;">${item.groupRate !== null ? '正解率 ' + item.groupRate + '%' : '集計中'}</span>
               </div>
             `).join("")}
           </div>
@@ -1114,79 +1510,23 @@ function renderReviewPickups() {
     return html;
   }
 
-  // 1. 絶対復習問題の描画
+  // 1. 絶対復習問題の描画（🔥）
   absContainer.innerHTML = renderGroupedList(
     absItems,
-    "#e74c3c", // 赤アクセント
-    "#fff0f0", // 赤背景
-    "🎉 現在、絶対復習問題はありません！",
-    "みんなが正解できている最重要問題です。"
+    "#e74c3c",
+    "#fff0f0",
+    "🎉 選択された科目に絶対復習問題はありません！",
+    "🔥 "
   );
 
-  // 2. 皆で頑張ろう問題の描画
+  // 2. 皆で頑張ろう問題の描画（🤝）
   togetherContainer.innerHTML = renderGroupedList(
     togetherItems,
-    "#2980b9", // 青アクセント
-    "#f0f7ff", // 青背景
-    "🎉 高難易度の誤答問題はありません！",
-    "集団全体で正答率が低く難易度の高い問題です。"
+    "#2980b9",
+    "#f0f7ff",
+    "🎉 選択された科目に高難易度の誤答問題はありません！",
+    "🤝 "
   );
-}
-
-// ==========================================
-// 8. PDFアンロック描画（修正版）
-// ==========================================
-function renderPdfLinks() {
-  const container = document.getElementById("pdf-list-container");
-  container.innerHTML = "";
-
-  const submittedRounds = studentDashboardData?.submitted_rounds || [];
-  const latestRecords = studentDashboardData?.latest_exam_records || {};
-
-  for (let r = 52; r >= 41; r--) {
-    const roundStr = String(r);
-    const isUnlocked = submittedRounds.includes(roundStr);
-    
-    // ⭕ 提出レコードから pdf_url を取得し、有効なURLか判定
-    const rawPdfUrl = latestRecords[roundStr]?.pdf_url || "";
-    const hasValidUrl = rawPdfUrl && rawPdfUrl !== "#" && rawPdfUrl.startsWith("http");
-
-    const card = document.createElement("div");
-    card.className = `pdf-link-card ${isUnlocked ? 'unlocked' : ''}`;
-    
-    if (isUnlocked) {
-      if (hasValidUrl) {
-        // ⭕ 正しいURLが存在する場合：緑色のボタンで「PDFを開く」
-        card.innerHTML = `
-          <div>
-            <b>第${r}回 過去問</b>
-            <span style="font-size:0.7rem; color:#27ae60; margin-left:6px;"><br>🔓 提出済・閲覧解禁</span>
-          </div>
-          <a href="${rawPdfUrl}" target="_blank" rel="noopener noreferrer" style="padding:6px 12px; background:#2ecc71; color:white; border-radius:6px; font-size:0.75rem; text-decoration:none; font-weight:bold;">PDFを開く</a>
-        `;
-      } else {
-        // ⚠️ 提出済みだがURLが空または未反映の場合
-        card.innerHTML = `
-          <div>
-            <b>第${r}回 過去問</b>
-            <span style="font-size:0.7rem; color:#e67e22; margin-left:6px;"><br>🔓 提出済 (PDF準備中)</span>
-          </div>
-          <button disabled style="padding:6px 12px; background:#b2bec3; color:white; border:none; border-radius:6px; font-size:0.75rem; font-weight:bold; cursor:not-allowed;">準備中</button>
-        `;
-      }
-    } else {
-      // 未提出の場合
-      card.innerHTML = `
-        <div>
-          <b>第${r}回 過去問</b>
-          <span style="font-size:0.7rem; color:#95a5a6; margin-left:6px;"><br>🔒 未回答 (閲覧不可)</span>
-        </div>
-        <button disabled style="padding:6px 12px; background:#b2bec3; color:white; border:none; border-radius:6px; font-size:0.75rem; font-weight:bold;">ロック中</button>
-      `;
-    }
-
-    container.appendChild(card);
-  }
 }
 
 // 紙吹雪エフェクト
@@ -1245,7 +1585,7 @@ if (submittedRounds.length === 0) {
     listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const round = e.target.getAttribute("data-round");
-        if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外され、PDFの閲覧も再度ロックされます。`)) {
+        if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外されます。`)) {
           deleteExamRecordAction(round);
         }
       });
