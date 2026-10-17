@@ -226,6 +226,106 @@
 .speed-history-item:last-child {
     border-bottom: none;
 }
+
+/* ==========================================
+📤 ホーム画面成果報告エリアのスタイル（Step 2）
+========================================== */
+
+/* 成果報告コンテナ（高速学習モードカードの下部に配置） */
+.home-report-area {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px dashed #74b9ff;
+  text-align: center;
+}
+
+/* ⚠️ 注意・警告コメント枠 */
+.home-report-comment {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  line-height: 1.4;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* 黄色用バナー（進捗10%未満） */
+.comment-warning {
+  background-color: #fff9db;
+  color: #d35400;
+  border: 1px solid #ffeaa7;
+}
+
+/* 赤色用バナー（14日以上未報告） */
+.comment-danger {
+  background-color: #fff5f5;
+  color: #c0392b;
+  border: 1px solid #ffc9c9;
+}
+
+/* 📤 成果報告ボタン基本スタイル */
+.btn-home-report {
+  width: 100%;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.btn-home-report:active {
+  transform: scale(0.98);
+}
+
+/* 🔵 通常状態（報告後7日経過〜14日未満 ＆ 進捗10%以上） */
+.btn-report-normal {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+}
+.btn-report-normal:hover {
+  opacity: 0.9;
+}
+
+/* 🟡 注意状態（進捗10%未満） */
+.btn-report-warning {
+  background: linear-gradient(135deg, #ff9f43, #ee5253);
+}
+.btn-report-warning:hover {
+  opacity: 0.9;
+}
+
+/* 🔴 危険・警告状態（14日以上未報告） */
+.btn-report-danger {
+  background: linear-gradient(135deg, #ff7675, #d63031);
+  animation: pulse-danger-btn 2s infinite;
+}
+
+/* 🔴 赤色ボタンの鼓動アニメーション（目立たせる演出） */
+@keyframes pulse-danger-btn {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 118, 117, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 118, 117, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 118, 117, 0);
+  }
+}
+
+/* 前回の報告日時などの補足テキスト */
+.home-report-subtext {
+  font-size: 0.72rem;
+  color: #7f8c8d;
+  margin-top: 6px;
+}
+
 </style>
 <!-- 🎉 紙吹雪ライブラリの追加 -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -339,6 +439,21 @@
             </div>
         </div>
     </div>
+
+      <!-- 🌟 【新規追加】成果報告エリア（Step 1） 🌟 -->
+  <div id="home-report-area" class="home-report-area" style="display: none;">
+    <!-- 注意・警告メッセージ表示枠（黄色または赤色時に表示） -->
+    <div id="home-report-comment" class="home-report-comment" style="display: none;"></div>
+    
+    <!-- 成果報告ボタン本体 -->
+    <button id="btn-home-submit-report" class="btn-home-report">
+      📤 今日の成果を報告する
+    </button>
+    
+    <!-- 補助注記（最終報告日時の表示など） -->
+    <div id="home-report-subtext" class="home-report-subtext"></div>
+  </div>
+
 </div>    
         
     <div class="grid">
@@ -487,6 +602,12 @@ window.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
     const savedEmail = localStorage.getItem('teacher_userEmail');
 
+    // 🌟【追加】成果報告ボタンのクリックイベント登録
+    const btnReport = document.getElementById("btn-home-submit-report");
+    if (btnReport) {
+        btnReport.addEventListener("click", executeHomeDataTransmission);
+    }
+    
     // 2回目以降：認証済みフラグがあれば通信なしで即座にメイン画面を表示
     if (isLoggedIn === 'true' && savedEmail) {
         showAppScreen(savedEmail);
@@ -676,6 +797,9 @@ function initDashboard() {
         
         if (progressBar) progressBar.style.width = percentage + '%';
         if (progressText) progressText.innerText = `${totalSolved} / ${totalQuestions} 問 (${percentage}%)`;
+
+          // 🌟【ここに追加】成果報告ボタンの状態・表示を更新
+          updateHomeReportAreaUI();
     }
 }
 
@@ -899,10 +1023,8 @@ function updateSpeedDashboardBadges() {
     if (wrongEl) wrongEl.innerText = wrongCount;
 }
 
-// 既存の window.onload / page-show と調和するように読み込み登録
-const originalInit = window.onload;
-window.onload = function() {
-  if (originalInit) originalInit();
+// 既存のイベントと競合しない安全な読み込み登録
+window.addEventListener('load', () => {
   updateSpeedDashboardBadges();
 
   // ==========================================================
@@ -911,15 +1033,15 @@ window.onload = function() {
   const speedHistoryList = document.getElementById("speed-history-list");
   if (speedHistoryList) {
     speedHistoryList.addEventListener("click", (e) => {
-        const expBtn = e.target.closest(".btn-speed-exp");
-        const delBtn = e.target.closest(".btn-speed-del-bm");
+      const expBtn = e.target.closest(".btn-speed-exp");
+      const delBtn = e.target.closest(".btn-speed-del-bm");
 
-        if (expBtn) {
-            toggleSpeedHistoryExp(expBtn.getAttribute("data-qid"));
-        } else if (delBtn) {
-            const qId = delBtn.getAttribute("data-qid");
-            removeSpeedHistoryBookmark(qId);
-        }
+      if (expBtn) {
+        toggleSpeedHistoryExp(expBtn.getAttribute("data-qid"));
+      } else if (delBtn) {
+        const qId = delBtn.getAttribute("data-qid");
+        removeSpeedHistoryBookmark(qId);
+      }
     });
   }
   // -- 1. ログイン前画面の各種処理 --
@@ -1017,7 +1139,7 @@ window.onload = function() {
   if (btnSpeedClose) {
     btnSpeedClose.addEventListener('click', closeSpeedQuiz);
   }
-};
+});
 
 window.addEventListener('pageshow', () => {
     updateSpeedDashboardBadges();
@@ -1416,6 +1538,247 @@ function removeSpeedHistoryBookmark(qId) {
 
 function closeSpeedHistoryModal() {
     document.getElementById("speed-history-modal").style.display = "none";
+}
+
+// ==========================================
+// 📤 成果報告ボタンの状態・表示判定ロジック（Step 3）
+// ==========================================
+
+// 🌟【ここに 【修正1】 のコードを一括挿入します】🌟
+const DASHBOARD_SUBJECTS = [
+  { id: '01', name: '関係法規・制度', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'], total: 290 },
+  { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'], total: 120 },
+  { id: '03', name: '公衆・環境', keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'], total: 194 },
+  { id: '04', name: '感染症', keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'], total: 174 },
+  { id: '05', name: '衛生管理技術', keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'], total: 148 },
+  { id: '06', name: '人体の構造及び機能', keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'], total: 311 },
+  { id: '07', name: '皮膚科学', keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'], total: 192 },
+  { id: '08', name: '香粧品化学', keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'], total: 314 },
+  { id: '09', name: '文化論', keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'], total: 120 },
+  { id: '10', name: '美容技術理論', keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'], total: 432 }
+];
+
+function calculateMyCurrentStats() {
+  let progressData = [];
+  let accuracyData = [];
+
+  DASHBOARD_SUBJECTS.forEach(sub => {
+    let totalPercentSum = 0;
+    sub.keys.forEach(key => {
+      totalPercentSum += parseInt(localStorage.getItem('solved_' + key) || 0, 10);
+    });
+    let progPercent = sub.keys.length > 0 ? Math.round(totalPercentSum / sub.keys.length) : 0;
+    if (progPercent > 100) progPercent = 100;
+    progressData.push(progPercent);
+
+    let totalAns = 0;
+    let totalCorrect = 0;
+    sub.keys.forEach(key => {
+      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      Object.keys(stats).forEach(qId => {
+        totalAns += (stats[qId].total || 0);
+        totalCorrect += (stats[qId].correct_count || 0);
+      });
+    });
+    let accPercent = totalAns > 0 ? Math.floor((totalCorrect / totalAns) * 100) : 0;
+    accuracyData.push(accPercent);
+  });
+
+  const totalProgress = Math.round(progressData.reduce((a, b) => a + b, 0) / 10);
+  const totalAccuracy = Math.round(accuracyData.reduce((a, b) => a + b, 0) / 10);
+
+  return {
+    progress: progressData,
+    accuracy: accuracyData,
+    totalProgress: totalProgress,
+    totalAccuracy: totalAccuracy
+  };
+}
+
+// 1. 全科目の総合進捗率（0〜100%）を計算するヘルパー関数
+function calculateTotalProgressPercentage() {
+  const subjects = [
+    { keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'], total: 290 },
+    { keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'], total: 120 },
+    { keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'], total: 194 },
+    { keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'], total: 174 },
+    { keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'], total: 148 },
+    { keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'], total: 311 },
+    { keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'], total: 192 },
+    { keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'], total: 314 },
+    { keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'], total: 120 },
+    { keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'], total: 432 }
+  ];
+
+  let totalSolved = 0;
+  let totalQuestions = 0;
+
+  subjects.forEach(sub => {
+    sub.keys.forEach(key => {
+      totalSolved += parseInt(localStorage.getItem('solved_' + key) || 0, 10);
+    });
+    totalQuestions += sub.total;
+  });
+
+  return (totalQuestions > 0) ? Math.floor((totalSolved / totalQuestions) * 100) : 0;
+}
+
+// 2. 成果報告エリアの状態を判定・更新するメイン関数
+function updateHomeReportAreaUI() {
+  const areaEl = document.getElementById("home-report-area");
+  const commentEl = document.getElementById("home-report-comment");
+  const btnEl = document.getElementById("btn-home-submit-report");
+  const subtextEl = document.getElementById("home-report-subtext");
+
+  if (!areaEl || !btnEl) return;
+
+  const lastSendTime = localStorage.getItem("dashboard_last_send_timestamp");
+  const totalProgress = calculateTotalProgressPercentage();
+  const now = new Date().getTime();
+
+  let diffDays = 999; // 未報告の場合は十分大きい日数
+  if (lastSendTime) {
+    const diffMs = now - parseInt(lastSendTime, 10);
+    diffDays = diffMs / (1000 * 60 * 60 * 24);
+  }
+
+  // 1️⃣ 報告後7日以内の場合 ➔ ボタンエリアごと非表示
+  if (lastSendTime && diffDays < 7) {
+    areaEl.style.display = "none";
+    return;
+  }
+
+  // 7日以上経過または未報告の場合は表示
+  areaEl.style.display = "block";
+
+  // ボタンとコメントのCSSクラス初期化
+  btnEl.className = "btn-home-report";
+  commentEl.className = "home-report-comment";
+  commentEl.style.display = "none";
+
+  // 最終報告日時の表示テキスト作成
+  let lastDateStr = "未報告";
+  if (lastSendTime) {
+    const d = new Date(parseInt(lastSendTime, 10));
+    lastDateStr = `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+  }
+
+  // 2️⃣ 条件判定ロジック
+  if (!lastSendTime || diffDays >= 14) {
+    // 🔴 未報告 または 14日以上報告なし（危険・警告）
+    btnEl.classList.add("btn-report-danger");
+    commentEl.classList.add("comment-danger");
+    commentEl.innerText = "⚠️ 14日以上報告がありません！成果を報告しましょう";
+    commentEl.style.display = "block";
+    subtextEl.innerText = `前回の報告：${lastDateStr}（14日以上経過）`;
+
+  } else if (diffDays < 14 && totalProgress < 10) {
+    // 🟡 14日以内に報告あり ＆ 進捗10%未満（注意）
+    btnEl.classList.add("btn-report-warning");
+    commentEl.classList.add("comment-warning");
+    commentEl.innerText = "⚠️ 進捗が10%未満です。報告をしつつ、もう少し学習を進めましょう！";
+    commentEl.style.display = "block";
+    subtextEl.innerText = `前回の報告：${lastDateStr}（現在の進捗率: ${totalProgress}%）`;
+
+  } else {
+    // 🔵 7日〜14日経過 ＆ 進捗10%以上（順調・通常表示）
+    btnEl.classList.add("btn-report-normal");
+    commentEl.style.display = "none";
+    subtextEl.innerText = `前回の報告：${lastDateStr}`;
+  }
+}
+
+// ==========================================
+// 📤 ホーム画面からの成果報告送信処理（Step 4）
+// ==========================================
+function executeHomeDataTransmission() {
+  const btn = document.getElementById("btn-home-submit-report");
+  const userEmail = localStorage.getItem('teacher_userEmail');
+  const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
+
+  if (!password || !userEmail) {
+    alert("🔒 ログイン情報が見つかりません。一度ログアウトして再ログインしてください。");
+    return;
+  }
+
+  if (!confirm("現在の学習成果（各科目の進捗率・正答率）を報告します。よろしいですか？")) {
+    return;
+  }
+
+  // UIを一時ロック（連打防止）
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳ 成果データを送信中...";
+    btn.style.opacity = "0.7";
+  }
+
+  // 最新の学習データを集計
+  const myData = calculateMyCurrentStats();
+  const dailyChallengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || 0, 10);
+  const dailyTotalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || 0, 10);
+  const dailyMaxStreak = parseInt(localStorage.getItem('daily_max_streak') || 0, 10);
+
+  // 送信用ペイロード構築
+  const payload = {
+    password: password,
+    email: userEmail,
+    progressArray: myData.progress,
+    accuracyArray: myData.accuracy,
+    gmCount: 0, // 必要に応じてGM数を設定
+    totalProgress: myData.totalProgress,
+    totalAccuracy: myData.totalAccuracy,
+    dailyChallengeStreak: dailyChallengeStreak,
+    dailyTotalSuccess: dailyTotalSuccess,
+    dailyMaxStreak: dailyMaxStreak
+  };
+
+  // GASへPOST送信
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("サーバー通信エラーが発生しました。");
+    return res.json();
+  })
+  .then(data => {
+    if (data.status === "success") {
+      const nowMs = new Date().getTime();
+
+      // 最終送信日時およびスナップショットの更新
+      localStorage.setItem('dashboard_last_send_timestamp', nowMs);
+      localStorage.setItem('dashboard_last_sent_progress', myData.totalProgress);
+      localStorage.setItem('dashboard_last_sent_accuracy', myData.totalAccuracy);
+
+      // 送信履歴ログの追加
+      let history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
+      history.push(new Date().toLocaleString('ja-JP'));
+      localStorage.setItem('dashboard_send_history', JSON.stringify(history));
+
+      alert("🎉 成果報告の送信が完了しました！\n（次回報告ボタンは7日後に表示されます）");
+
+      // UIを即座に最新状態（7日以内非表示）へ切り替え
+      updateHomeReportAreaUI();
+
+    } else {
+      alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
+      if (btn) {
+        btn.disabled = false;
+        btn.innerText = "📤 今日の成果を報告する";
+        btn.style.opacity = "1";
+      }
+    }
+  })
+  .catch(err => {
+    console.error("成果報告送信エラー:", err);
+    alert("❌ 通信エラーが発生しました。インターネット接続を確認して再度お試しください。");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "📤 今日の成果を報告する";
+      btn.style.opacity = "1";
+    }
+  });
 }
 
 </script>
