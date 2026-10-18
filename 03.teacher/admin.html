@@ -668,7 +668,7 @@
   <div class="card">
     <h3 class="card-title">
       <span>📊 クラス別：平均進捗率</span>
-      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">努力を可視化（％）</span>
+      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">努力の可視化（％）</span>
     </h3>
     <div class="chart-container">
       <canvas id="progressChart"></canvas>
@@ -679,29 +679,29 @@
   <div class="card">
     <h3 class="card-title">
       <span>🎯 クラス別：平均正答率</span>
-      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">実力を可視化（％）</span>
+      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">実力の可視化（％）</span>
     </h3>
     <div class="chart-container">
       <canvas id="accuracyChart"></canvas>
     </div>
   </div>
 
-  <!-- 🔴【新規追加 3】10科目別：中央値進捗率 -->
+  <!-- 🔴【新規追加 3】科目別：中央値進捗率 -->
   <div class="card">
     <h3 class="card-title">
-      <span>📖 10科目別：中央値進捗率</span>
-      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">科目別の標準努力度（％）</span>
+      <span>📖 科目別：中央値進捗率</span>
+      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">科目別の努力（％）</span>
     </h3>
     <div class="chart-container">
       <canvas id="subjectProgressChart"></canvas>
     </div>
   </div>
 
-  <!-- 🔴【新規追加 4】10科目別：中央値正答率 -->
+  <!-- 🔴【新規追加 4】科目別：中央値正答率 -->
   <div class="card">
     <h3 class="card-title">
-      <span>🎯 10科目別：中央値正答率</span>
-      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">科目別の標準理解度（％）</span>
+      <span>🎯 科目別：中央値正答率</span>
+      <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">科目別の実力（％）</span>
     </h3>
     <div class="chart-container">
       <canvas id="subjectAccuracyChart"></canvas>
@@ -835,7 +835,7 @@
                     <!-- 2. 科目別特徴（レーダーチャート） -->
                     <div class="card">
                         <h3 class="card-title">
-                            <span>🎯 10科目別特徴（全体中央値比較）</span>
+                            <span>🎯 科目別特徴（全体中央値比較）</span>
                         </h3>
                         <div class="chart-container">
                             <canvas id="studentRadarChart"></canvas>
@@ -846,7 +846,7 @@
                 <!-- 10科目数値詳細 -->
                 <div class="subject-score-card">
                     <h3 style="margin-top:0; margin-bottom:10px; font-size:0.9rem; border-left:4px solid var(--secondary-color); padding-left:8px;">
-                        📖 10科目別詳細データ（進捗度・正答率）
+                        📖 科目別詳細データ（進捗度・正答率）
                     </h3>
                     <div class="subject-grid" id="modal-subject-grid">
                         <!-- 動的に挿入 -->
@@ -1194,7 +1194,7 @@ function handleRecalculate() {
             document.getElementById('metric-total-gm').innerText = `${totalGm} 回`;
         }
 
-// 🔴 渡された生徒リスト（フィルター後のデータ）でクラス別平均＆10科目別中央値を集計してグラフ描画
+// 🔴 渡された生徒リスト（フィルター後のデータ）でクラス別平均＆科目別中央値を集計してグラフ描画
 function renderCharts(studentsList = allStudentsRaw) {
   // -------------------------------------------------------------
   // A. クラス別平均データの集計（既存処理）
@@ -1269,7 +1269,7 @@ function renderCharts(studentsList = allStudentsRaw) {
   });
 
   // -------------------------------------------------------------
-  // B. 🔴【新規追加】10科目別：中央値データの集計と描画
+  // B. 🔴【新規追加】科目別：中央値データの集計と描画
   // -------------------------------------------------------------
   const subjectLabels = SUBJECTS_DEFINITION.map(s => s.name);
   const subjectProgressMedians = [];
@@ -1287,7 +1287,7 @@ function renderCharts(studentsList = allStudentsRaw) {
     subjectAccuracyMedians.push(getArrayMedian(accArr));
   });
 
-  // 3. 10科目別：中央値進捗率（パープル）
+  // 3. 科目別：中央値進捗率（パープル）
   if (subjectProgressChartInstance) subjectProgressChartInstance.destroy();
   const ctxSP = document.getElementById('subjectProgressChart').getContext('2d');
   subjectProgressChartInstance = new Chart(ctxSP, {
@@ -1311,7 +1311,7 @@ function renderCharts(studentsList = allStudentsRaw) {
     }
   });
 
-  // 4. 10科目別：中央値正答率（オレンジ）
+  // 4. 科目別：中央値正答率（オレンジ）
   if (subjectAccuracyChartInstance) subjectAccuracyChartInstance.destroy();
   const ctxSA = document.getElementById('subjectAccuracyChart').getContext('2d');
   subjectAccuracyChartInstance = new Chart(ctxSA, {
@@ -1446,8 +1446,8 @@ row.innerHTML = `
 <td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="color:var(--success-color); font-size:1.05rem; margin-right:4px;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${parseInt(student.totalAccuracy || 0)}%)</small></td> 
 <td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td> 
 <td data-label="指導ステータス">${statusBadge}</td> 
-<td data-label="" style="text-align:center;"> 
-  <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button> 
+<td data-label="操作" style="text-align:center;"> 
+  <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
 </td>
 `;
                 tableBody.appendChild(row);
@@ -1491,7 +1491,7 @@ row.innerHTML = `
             const lastDateText = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP') : "一度も提出実績がありません（未報告）";
             document.getElementById('p-lastdate').innerText = escapeHTML(lastDateText);
 
-// 1. 10科目別詳細データの出力
+// 1. 科目別詳細データの出力
 const subjectGrid = document.getElementById('modal-subject-grid');
 subjectGrid.innerHTML = "";
 
