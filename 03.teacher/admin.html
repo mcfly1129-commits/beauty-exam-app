@@ -758,28 +758,35 @@
             </div>
         </div>
 
-        <!-- 📋 学生個別進捗 data 一覧テーブル -->
-        <div class="table-responsive">
-            <table id="student-table">
-                <thead>
-                    <tr>
-                        <th>最終報告日時</th>
-                        <th>学校名</th>
-                        <th>クラス名</th>
-                        <th>識別情報</th>
-                        <th>シリアルコード</th>
-                        <th>総合進捗度</th>
-                        <th>平均正答率</th>
-                        <th>GM達成</th>
-                        <th>指導ステータス</th>
-                        <th style="text-align:center;"></th>
-                    </tr>
-                </thead>
-                <tbody id="student-table-body">
-                    <!-- JavaScriptから動的に出力 -->
-                </tbody>
-            </table>
-        </div>
+<!-- 📋 学生個別進捗 data 一覧テーブル -->
+<div class="table-responsive">
+<table id="student-table">
+<thead>
+<tr>
+<th>最終報告日時</th>
+<th>学校名</th>
+<th>クラス名</th>
+<th>識別情報</th>
+<th>シリアルコード</th>
+<th>総合進捗度</th>
+<th>平均正答率</th>
+<th>GM達成</th>
+<th>指導ステータス</th>
+<th style="text-align:center;"></th>
+</tr>
+</thead>
+<tbody id="student-table-body">
+<!-- JavaScriptから動的に出力 -->
+</tbody>
+</table>
+</div>
+
+<!-- 🔴【新規追加】ページネーションコントロール -->
+<div class="pagination-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 8px 4px; font-size: 0.8rem;">
+<button id="btn-prev-page" class="pagination-btn" style="padding: 6px 12px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: bold;">◀ 前へ</button>
+<span id="display-page-info" style="font-weight: bold; color: var(--primary-color);">1 / 1 ページ (0名)</span>
+<button id="btn-next-page" class="pagination-btn" style="padding: 6px 12px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; font-weight: bold;">次へ ▶</button>
+</div>
         
         <div id="table-status" class="table-status-message" style="display:none;"></div>
     </div>
@@ -914,6 +921,10 @@
         let allStudentsRaw = [ ]; 
         let dashboardSummary = null; 
 
+        // 🔴【新規追加】ページネーション管理変数
+        let currentPage = 1;
+        const PAGE_SIZE = 30; // 1ページあたり30名表示
+
         // チャートのグローバルインスタンス
         let progressChartInstance = null;
         let accuracyChartInstance = null;
@@ -942,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (isLoggedIn !== 'true' || !userEmail) {
     alert("🔒 アクセス権限がありません。再度ログインし直してください。");
-    window.location.href = "index.html"; // パスバグ修正 [cite: 859]
+    window.location.href = "index.html";
     return;
   }
 
@@ -953,55 +964,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // 🛡️【インラインJS完全排除】安全なイベントリスナーの一括紐付け
   // ==========================================================
   
-  // 1. ログアウトボタン（既存の処理）
+  // 1. ログアウトボタン
   const logoutBtn = document.getElementById('btn-logout');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
   }
 
-  // 2. 🆕 モーダルを閉じる×ボタン（追加）
+  // 2. モーダルを閉じる×ボタン
   const closeModalBtn = document.getElementById('btn-close-modal');
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', closeStudentModal);
   }
 
-  // 3. 🆕 学校名絞り込みフィルター（追加）
-  const filterSchool = document.getElementById('filter-school');
-  if (filterSchool) {
-    filterSchool.addEventListener('change', applyFilters);
-  }
-
-  // 4. 🆕 クラス名絞り込みフィルター（追加）
-  const filterClass = document.getElementById('filter-class');
-  if (filterClass) {
-    filterClass.addEventListener('change', applyFilters);
-  }
-
-  // 5. 指導ステータスセレクトボックス（既存の処理）
-  const filterStatus = document.getElementById('filter-status');
-  if (filterStatus) {
-    filterStatus.addEventListener('change', applyFilters);
-  }
-
-  // 6. 並び替えセレクトボックス（既存の処理）
-  const sortKey = document.getElementById('sort-key');
-  if (sortKey) {
-    sortKey.addEventListener('change', applyFilters);
-  }
-
-  // 7. フィルタ解除ボタン（既存の処理）
+  // 3. フィルタ解除ボタン
   const resetFilterBtn = document.getElementById('btn-reset-filter');
   if (resetFilterBtn) {
     resetFilterBtn.addEventListener('click', resetFilters);
   }
 
-  // 8. 🆕 検索インプット（入力監視）
-  const searchStudent = document.getElementById('search-student');
-  if (searchStudent) {
-    searchStudent.addEventListener('input', applyFilters);
-  }
-
-  // 9. 🆕 モーダル背景クリック（背景を押した時だけ閉じる）
+  // 4. モーダル背景クリック
   const studentModal = document.getElementById('student-modal');
   if (studentModal) {
     studentModal.addEventListener('click', (e) => {
@@ -1011,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 10. 🆕 テーブル内の「詳細カルテ」ボタン（イベント委譲による安全な取得）
+  // 5. テーブル内の「詳細カルテ」ボタン
   const tableBody = document.getElementById('student-table-body');
   if (tableBody) {
     tableBody.addEventListener('click', (e) => {
@@ -1023,10 +1004,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 11. 統計データ手動再計算ボタンの安全なイベントバインド
+  // 6. 統計データ手動再計算ボタン
   const recalcBtn = document.getElementById('btn-recalculate');
   if (recalcBtn) {
     recalcBtn.addEventListener('click', handleRecalculate);
+  }
+
+  // 7. ページネーション前へ・次へボタン
+  const btnPrev = document.getElementById("btn-prev-page");
+  const btnNext = document.getElementById("btn-next-page");
+
+  if (btnPrev) {
+    btnPrev.addEventListener("click", () => {
+      if (currentPage > 1) {
+        currentPage--;
+        applyFilters();
+        document.getElementById("student-table")?.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener("click", () => {
+      currentPage++;
+      applyFilters();
+      document.getElementById("student-table")?.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
+  // 8. ⭕【統合・修正箇所】検索・フィルター入力時は1ページ目に戻して自動再検索
+  const resetPageAndFilter = () => {
+    currentPage = 1;
+    applyFilters();
+  };
+
+  ['filter-school', 'filter-class', 'filter-status', 'sort-key'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', resetPageAndFilter);
+  });
+
+  const searchStudent = document.getElementById('search-student');
+  if (searchStudent) {
+    searchStudent.addEventListener('input', resetPageAndFilter);
   }
 
   // 📡 API経由の実データロードを開始
@@ -1370,7 +1389,7 @@ function renderCharts(studentsList = allStudentsRaw) {
             const targetStatus = document.getElementById('filter-status').value;
 
             const tableBody = document.getElementById('student-table-body');
-            tableBody.innerHTML = "";
+            tableBody.innerHTML = ""; // 🔴【必須追加】描画前に必ずテーブルの内容をクリア
 
             let visibleCount = 0;
             const now = new Date().getTime();
@@ -1433,55 +1452,74 @@ function renderCharts(studentsList = allStudentsRaw) {
                 return 0;
             });
 
-            // 3. ソート処理が施された配列を行として出力
-            filteredList.forEach(student => {
-                const progress = parseInt(student.totalProgress || 0);
-                let alertClass = "";
-                let statusBadge = "";
+// 1. ページ数の計算と制限
+const totalStudentsCount = filteredList.length;
+const totalPages = Math.ceil(totalStudentsCount / PAGE_SIZE) || 1;
 
-                if (!student.timestamp || progress < 10) {
-                    alertClass = "row-alert-danger";
-                    statusBadge = '<span class="badge badge-danger">🔴 要個別指導</span>';
-                }
-                else if (student.timestamp) {
-                    const sendTime = new Date(student.timestamp).getTime();
-                    if (now - sendTime > 14 * 24 * 60 * 60 * 1000) {
-                        alertClass = "row-alert-warning";
-                        statusBadge = '<span class="badge badge-warning">🟡 停滞(14日超過)</span>';
-                    } else {
-                        statusBadge = '<span class="badge badge-success">🟢 順調</span>';
-                    }
-                }
+if (currentPage > totalPages) currentPage = totalPages;
+if (currentPage < 1) currentPage = 1;
 
-                visibleCount++;
+// 2. 表示範囲の切り出し (0〜30件目、30〜60件目...)
+const startIndex = (currentPage - 1) * PAGE_SIZE;
+const pageData = filteredList.slice(startIndex, startIndex + PAGE_SIZE);
 
-                const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
+// 3. ページネーションUIテキストおよびボタン状態の更新
+const pageInfoEl = document.getElementById("display-page-info");
+if (pageInfoEl) {
+pageInfoEl.innerText = `${currentPage} / ${totalPages} ページ (${totalStudentsCount}名)`;
+}
+const btnPrev = document.getElementById("btn-prev-page");
+const btnNext = document.getElementById("btn-next-page");
+if (btnPrev) btnPrev.disabled = (currentPage <= 1);
+if (btnNext) btnNext.disabled = (currentPage >= totalPages);
 
-// 🔴 努力（進捗）と実力（正答率）の総合ランクを算出
-const overallProgRank = getSelfGrowthRank(progress, 'progress'); 
+// 4. 切り出した 1ページ分(pageData: 30件)のみを行として出力
+pageData.forEach(student => {
+const progress = parseInt(student.totalProgress || 0);
+let alertClass = "";
+let statusBadge = "";
+
+if (!student.timestamp || progress < 10) {
+alertClass = "row-alert-danger";
+statusBadge = '<span class="badge badge-danger">🔴 要個別指導</span>';
+}
+else if (student.timestamp) {
+const sendTime = new Date(student.timestamp).getTime();
+if (now - sendTime > 14 * 24 * 60 * 60 * 1000) {
+alertClass = "row-alert-warning";
+statusBadge = '<span class="badge badge-warning">🟡 停滞(14日超過)</span>';
+} else {
+statusBadge = '<span class="badge badge-success">🟢 順調</span>';
+}
+}
+
+visibleCount++;
+
+const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
+
+const overallProgRank = getSelfGrowthRank(progress, 'progress');
 const overallAccRank = getSelfGrowthRank(student.totalAccuracy || 0, 'accuracy');
-const row = document.createElement('tr'); 
-row.className = alertClass; 
+const row = document.createElement('tr');
+row.className = alertClass;
 row.innerHTML = `
-<td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td> 
-<td data-label="学校名">${escapeHTML(student.school || '不明')}</td> 
-<td data-label="クラス名">${escapeHTML(student.className || '不明')}</td> 
-<td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td> 
-<td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td> 
-<!-- 🔴 変更: 努力と実力のアルファベットを数値の左側にカラーで表示します -->
-<td data-label="総合進捗度" style="text-align:center; font-weight:bold;"><span style="color:var(--secondary-color); font-size:1.05rem; margin-right:4px;">${overallProgRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${progress}%)</small></td> 
-<td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="color:var(--success-color); font-size:1.05rem; margin-right:4px;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${parseInt(student.totalAccuracy || 0)}%)</small></td> 
-<td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td> 
-<td data-label="指導ステータス">${statusBadge}</td> 
-<td data-label="操作" style="text-align:center;"> 
-  <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
+<td data-label="最終報告日時" style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
+<td data-label="学校名">${escapeHTML(student.school || '不明')}</td>
+<td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
+<td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td>
+<td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
+<td data-label="総合進捗度" style="text-align:center; font-weight:bold;"><span style="color:var(--secondary-color); font-size:1.05rem; margin-right:4px;">${overallProgRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${progress}%)</small></td>
+<td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="color:var(--success-color); font-size:1.05rem; margin-right:4px;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${parseInt(student.totalAccuracy || 0)}%)</small></td>
+<td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td>
+<td data-label="指導ステータス">${statusBadge}</td>
+<td data-label="操作" style="text-align:center;">
+<button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
 </td>
 `;
-                tableBody.appendChild(row);
-            });
+tableBody.appendChild(row);
+});
 
   const tableStatus = document.getElementById('table-status');
-  if (visibleCount === 0) {
+  if (totalStudentsCount === 0) { // 🔴 0件の判定を totalStudentsCount に修正
     tableStatus.innerHTML = '🔍 条件に合致する学生データが見つかりません。';
     tableStatus.style.display = 'block';
   } else {
@@ -1494,14 +1532,15 @@ row.innerHTML = `
 }
 
         // 🔄 フィルター初期化
-        function resetFilters() {
-            document.getElementById('filter-school').value = "";
-            document.getElementById('filter-class').value = "";
-            document.getElementById('search-student').value = "";
-            document.getElementById('filter-status').value = "";
-            document.getElementById('sort-key').value = "time-desc"; // 🆕 ソートキーを初期値に戻す
-            applyFilters();
-        }
+function resetFilters() {
+  document.getElementById('filter-school').value = "";
+  document.getElementById('filter-class').value = "";
+  document.getElementById('search-student').value = "";
+  document.getElementById('filter-status').value = "";
+  document.getElementById('sort-key').value = "time-desc";
+  currentPage = 1; // 🔴【追加】1ページ目に戻す
+  applyFilters();
+}
 
         // ==========================================
         // 👨‍🏫 【ミクロ詳細カルテ・モーダル制御】
