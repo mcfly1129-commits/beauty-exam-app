@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>【検証用】学習ホーム</title>
 <!-- 🔒 クリックジャッキング ＆ XSS防御用 CSPメタタグ -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-src https://drive.google.com https://docs.google.com https://forms.gle;">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <!-- Google Identity Services ライブラリは不要なため削除 -->
 <style>
