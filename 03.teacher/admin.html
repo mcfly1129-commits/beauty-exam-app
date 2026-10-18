@@ -607,6 +607,11 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 
+<!-- 🔒 セキュリティヘッダ（クリックジャッキング ＆ XSS防御用 CSP） -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-ancestors 'none';">
+
 </head>
 <body>
 
@@ -948,17 +953,16 @@ function getArrayMedian(arr) {
 
 // 📅 初期起動処理
 document.addEventListener('DOMContentLoaded', () => {
-  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
-  const userEmail = localStorage.getItem('teacher_userEmail');
+  // 🔒 ログイン状態とトークンの存在チェック（localStorage / sessionStorage 両対応）
+  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn') || sessionStorage.getItem('teacher_isLoggedIn');
+  const token = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token');
 
-  if (isLoggedIn !== 'true' || !userEmail) {
+  // 1. クライアント側にトークンすら存在しない場合は即座に送還
+  if (isLoggedIn !== 'true' || !token) {
     alert("🔒 アクセス権限がありません。再度ログインし直してください。");
-    window.location.href = "index.html";
+    handleLogout();
     return;
   }
-
-  document.getElementById('display-teacher-email').innerText = escapeHTML(userEmail);
-  document.getElementById('auth-loading').style.display = 'none';
 
   // ==========================================================
   // 🛡️【インラインJS完全排除】安全なイベントリスナーの一括紐付け
@@ -1067,7 +1071,8 @@ function loadTeacherDashboardData(isRecalculate = false) {
     recalcBtn.style.opacity = "0.7";
   }
 
-  const password = localStorage.getItem('teacher_google_id_token') || "";
+// 🔒 トークン取得の安全化（localStorage / sessionStorage の双方向フォールバック）
+const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
   const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
 
   fetch(GAS_API_URL, {
@@ -1085,12 +1090,21 @@ function loadTeacherDashboardData(isRecalculate = false) {
     if (!response.ok) throw new Error("API通信エラーが発生しました。");
     return response.json();
   })
-  .then(res => {
+.then(res => {
+    // 🔒 1. サーバー側（GAS）で教員権限（isAuthorized）が確認できなかった場合は即座に遮断
     if (res.status === "error" || res.isAuthorized === false) {
       alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
       handleLogout();
       return;
     }
+
+    // 🔓 2. サーバー認可成功時、画面カバー（#auth-loading）を非表示化してメールアドレスを表示
+    const userEmail = localStorage.getItem('teacher_userEmail') || sessionStorage.getItem('teacher_userEmail') || "";
+    const emailEl = document.getElementById('display-teacher-email');
+    if (emailEl) emailEl.innerText = escapeHTML(userEmail);
+
+    const authLoadingEl = document.getElementById('auth-loading');
+    if (authLoadingEl) authLoadingEl.style.display = 'none';
 
     allStudentsRaw = res.students || [ ];
     dashboardSummary = res.dashboard || null;
@@ -1102,15 +1116,21 @@ function loadTeacherDashboardData(isRecalculate = false) {
       alert("🎉 最新のスプレッドシート履歴から、統計データの再計算と反映が完了しました！");
     }
   })
-  .catch(err => {
-    console.error("データ取得エラー:", err);
-    const tableStatus = document.getElementById('table-status');
-    if (tableStatus) {
-      tableStatus.innerHTML = '<span style="color:var(--danger-color);">⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。</span>';
-      tableStatus.style.display = 'block';
-    }
-    showLoading(false);
-  })
+.catch(err => {
+  console.error("データ取得エラー:", err);
+
+  // ⭕ 通信エラー発生時も画面カバー（#auth-loading）を解除してエラー内容を表示
+  const authLoadingEl = document.getElementById('auth-loading');
+  if (authLoadingEl) authLoadingEl.style.display = 'none';
+
+  const tableStatus = document.getElementById('table-status');
+  if (tableStatus) {
+    tableStatus.textContent = "⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。";
+    tableStatus.style.color = "var(--danger-color)";
+    tableStatus.style.display = 'block';
+  }
+  showLoading(false);
+})
   .finally(() => {
     // ボタン状態の復元
     if (recalcBtn) {
@@ -1391,7 +1411,6 @@ function renderCharts(studentsList = allStudentsRaw) {
             const tableBody = document.getElementById('student-table-body');
             tableBody.innerHTML = ""; // 🔴【必須追加】描画前に必ずテーブルの内容をクリア
 
-            let visibleCount = 0;
             const now = new Date().getTime();
 
             // 1. 先にフィルター条件に合致する生徒のみをシャローコピー配列に抽出
@@ -1493,8 +1512,6 @@ statusBadge = '<span class="badge badge-success">🟢 順調</span>';
 }
 }
 
-visibleCount++;
-
 const timeStr = student.timestamp ? new Date(student.timestamp).toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : "未送信";
 
 const overallProgRank = getSelfGrowthRank(progress, 'progress');
@@ -1518,13 +1535,14 @@ row.innerHTML = `
 tableBody.appendChild(row);
 });
 
-  const tableStatus = document.getElementById('table-status');
-  if (totalStudentsCount === 0) { // 🔴 0件の判定を totalStudentsCount に修正
-    tableStatus.innerHTML = '🔍 条件に合致する学生データが見つかりません。';
-    tableStatus.style.display = 'block';
-  } else {
-    tableStatus.style.display = 'none';
-  }
+const tableStatus = document.getElementById('table-status');
+if (totalStudentsCount === 0) {
+  // 🔒 DOM-based XSS リスク排除のため textContent へ変更
+  tableStatus.textContent = '🔍 条件に合致する学生データが見つかりません。';
+  tableStatus.style.display = 'block';
+} else {
+  tableStatus.style.display = 'none';
+}
 
   // 🔴 フィルター結果（filteredList）をもとにサマリー数値とグラフをリアルタイム連動更新！
   calculateQuickMetrics(filteredList);
@@ -1738,12 +1756,22 @@ SUBJECTS_DEFINITION.forEach(sub => {
             });
         }
 
-        function handleLogout() {
-            localStorage.removeItem('teacher_isLoggedIn');
-            localStorage.removeItem('teacher_userEmail');
-            localStorage.removeItem('teacher_google_id_token');
-            location.reload();
-        }
-    </script>
+// 🔒 ログアウト処理（認証トークン・セッション情報の全破棄と安全なリダイレクト）
+function handleLogout() {
+  // 1. localStorage からの教員認証情報の全破棄
+  localStorage.removeItem('teacher_isLoggedIn');
+  localStorage.removeItem('teacher_userEmail');
+  localStorage.removeItem('teacher_google_id_token');
+
+  // 2. sessionStorage 内のキャッシュ・トークンの完全クリア
+  sessionStorage.removeItem('teacher_isLoggedIn');
+  sessionStorage.removeItem('teacher_userEmail');
+  sessionStorage.removeItem('teacher_google_id_token');
+  sessionStorage.clear();
+
+  // 3. ログイン画面へ安全にリダイレクト
+  window.location.href = "index.html";
+}
+</script>
 </body>
 </html>
