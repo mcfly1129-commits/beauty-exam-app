@@ -1197,7 +1197,7 @@ function handleRecalculate() {
 // 🔴 渡された生徒リスト（フィルター後のデータ）でクラス別平均＆科目別中央値を集計してグラフ描画
 function renderCharts(studentsList = allStudentsRaw) {
   // -------------------------------------------------------------
-  // A. クラス別平均データの集計（既存処理）
+  // A. クラス別平均データの集計
   // -------------------------------------------------------------
   const classData = {};
   studentsList.forEach(student => {
@@ -1210,20 +1210,42 @@ function renderCharts(studentsList = allStudentsRaw) {
     classData[clsKey].count++;
   });
 
-  const classLabels = [];
-  const avgProgressList = [];
-  const avgAccuracyList = [];
-
-  Object.keys(classData).forEach(key => {
-    classLabels.push(key);
+  // 配列化して平均値を算出
+  let classList = Object.keys(classData).map(key => {
     const item = classData[key];
-    avgProgressList.push(Math.round(item.progressSum / item.count));
-    avgAccuracyList.push(Math.round(item.accuracySum / item.count));
+    return {
+      label: key,
+      avgProgress: Math.round(item.progressSum / item.count),
+      avgAccuracy: Math.round(item.accuracySum / item.count)
+    };
+  });
+
+  // 🔴【項目数制限】件数が多い場合は上位10件（進捗率順）に制限する
+  const MAX_ITEMS = 10;
+  if (classList.length > MAX_ITEMS) {
+    classList.sort((a, b) => b.avgProgress - a.avgProgress);
+    classList = classList.slice(0, MAX_ITEMS);
+  }
+
+  const classLabels = classList.map(item => item.label);
+  const avgProgressList = classList.map(item => item.avgProgress);
+  const avgAccuracyList = classList.map(item => item.avgAccuracy);
+
+  // 🔴【高さを固定値に設定】左右・全カードの高さを320pxに揃える
+  const progressCanvas = document.getElementById('progressChart');
+  const accuracyCanvas = document.getElementById('accuracyChart');
+  const subjectProgressCanvas = document.getElementById('subjectProgressChart');
+  const subjectAccuracyCanvas = document.getElementById('subjectAccuracyChart');
+
+  [progressCanvas, accuracyCanvas, subjectProgressCanvas, subjectAccuracyCanvas].forEach(canvas => {
+    if (canvas && canvas.parentElement) {
+      canvas.parentElement.style.height = `320px`;
+    }
   });
 
   // 1. クラス別：平均進捗率比較（ブルー）
   if (progressChartInstance) progressChartInstance.destroy();
-  const ctxP = document.getElementById('progressChart').getContext('2d');
+  const ctxP = progressCanvas.getContext('2d');
   progressChartInstance = new Chart(ctxP, {
     type: 'bar',
     data: {
@@ -1234,20 +1256,25 @@ function renderCharts(studentsList = allStudentsRaw) {
         backgroundColor: 'rgba(52, 152, 219, 0.7)',
         borderColor: 'rgba(52, 152, 219, 1)',
         borderWidth: 1,
-        borderRadius: 6
+        borderRadius: 6,
+        barPercentage: 0.6,
+        categoryPercentage: 0.8
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       indexAxis: 'y',
-      scales: { x: { min: 0, max: 100 } }
+      scales: {
+        x: { min: 0, max: 100 },
+        y: { ticks: { autoSkip: false } }
+      }
     }
   });
 
   // 2. クラス別：平均正答率比較（グリーン）
   if (accuracyChartInstance) accuracyChartInstance.destroy();
-  const ctxA = document.getElementById('accuracyChart').getContext('2d');
+  const ctxA = accuracyCanvas.getContext('2d');
   accuracyChartInstance = new Chart(ctxA, {
     type: 'bar',
     data: {
