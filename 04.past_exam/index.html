@@ -660,6 +660,12 @@ h1 {
     
     <div id="unanswered-alert" style="display:none; background:#ffe0e0; color:#c0392b; padding:8px; border-radius:6px; font-size:0.75rem; text-align:center; font-weight:bold; margin-bottom:10px;"></div>
 
+<!-- 🔴【新規追加】回答送信中プログレスバー -->
+<div id="submit-progress-container" style="display: none; margin-top: 12px; background: #eee; border-radius: 8px; height: 22px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+  <div id="submit-progress-bar" style="background: linear-gradient(90deg, #ff9f43, #ee5253); width: 0%; height: 100%; transition: width 0.15s ease; border-radius: 8px 0 0 8px;"></div>
+  <span id="submit-progress-text" style="position: absolute; width: 100%; left: 0; top: 0; font-size: 0.75rem; color: #2c3e50; font-weight: bold; line-height: 22px; text-align: center;">現在送信中... 0%</span>
+</div>
+
     <div style="max-height:240px; overflow-y:auto;">
       <table class="summary-table" id="summary-table">
         <thead>
@@ -685,6 +691,12 @@ h1 {
     <p style="font-size:0.75rem; color:#7f8c8d; text-align:center;">送信済みの過去問記録を<br>取り消し（リセット）できます。</p>
     
     <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:15px 0;"></div>
+
+<!-- 🔴【新規追加】リセット通信中プログレスバー -->
+<div id="reset-progress-container" style="display: none; margin-bottom: 12px; background: #eee; border-radius: 8px; height: 22px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+  <div id="reset-progress-bar" style="background: linear-gradient(90deg, #ff7675, #d63031); width: 0%; height: 100%; transition: width 0.15s ease; border-radius: 8px 0 0 8px;"></div>
+  <span id="reset-progress-text" style="position: absolute; width: 100%; left: 0; top: 0; font-size: 0.75rem; color: #2c3e50; font-weight: bold; line-height: 22px; text-align: center;">リセット処理中... 0%</span>
+</div>
 
     <button id="btn-close-history-reset" style="width:100%; padding:10px; background:#e4e7eb; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">閉じる</button>
   </div>
@@ -971,7 +983,7 @@ function openConfirmModal() {
 
   if (unanswered.length > 0) {
     // ★ 未回答がある場合：警告を出して送信ボタンを押せないようにロック
-    alertEl.innerText = `⚠️ 未回答が ${unanswered.length} 問あります（問 ${unanswered.slice(0, 5).join(", ")}...）。<br>すべての問題に回答しないと送信できません。`;
+    alertEl.innerText = `⚠️ 未回答が ${unanswered.length} 問あります（問 ${unanswered.slice(0, 5).join(", ")}...）。\nすべての問題に回答しないと送信できません。`;
     alertEl.style.display = "block";
     submitBtn.disabled = true;
     submitBtn.style.opacity = "0.5";
@@ -1004,12 +1016,40 @@ function openConfirmModal() {
 }
 
 /**
- * 📤 回答の確定送信＆最新回答データの上書き同期処理
+ * 📤 回答の確定送信＆最新回答データの上書き同期処理（プログレスバー連動版）
  */
 function submitExamData() {
   const btn = document.getElementById("btn-submit-exam");
+  const progressContainer = document.getElementById("submit-progress-container");
+  const progressBar = document.getElementById("submit-progress-bar");
+  const progressText = document.getElementById("submit-progress-text");
+
+  // UIのロックとプログレスバー表示開始
   btn.disabled = true;
-  btn.innerText = "⏳ 送信中...";
+  btn.innerText = "⏳ サーバーと通信中...";
+  if (progressContainer) progressContainer.style.display = "block";
+
+  // ⏱️ カウントアップタイマー＆疑似進捗プログレスバー設定
+  let currentPercent = 0;
+  let secondsElapsed = 0;
+  const messages = [
+    "解答データを送信中...",
+    "スプレッドシートに記録中...",
+    "自動採点・正答率を計算中...",
+    "通信の返答を待っています...",
+    "まもなく完了します..."
+  ];
+
+  const progressTimer = setInterval(() => {
+    secondsElapsed++;
+    if (currentPercent < 95) {
+      const increment = Math.max(1, Math.floor((95 - currentPercent) / 3));
+      currentPercent = Math.min(95, currentPercent + increment);
+    }
+    const msgIndex = Math.min(Math.floor(secondsElapsed / 3), messages.length - 1);
+    if (progressBar) progressBar.style.width = currentPercent + "%";
+    if (progressText) progressText.innerText = `⏳ ${messages[msgIndex]} (${currentPercent}% / ${secondsElapsed}秒経過)`;
+  }, 1000);
 
   const payload = {
     action: "submitExam",
@@ -1026,94 +1066,77 @@ function submitExamData() {
   })
   .then(res => res.json())
   .then(data => {
-    btn.disabled = false;
-    btn.innerText = "確定して送信";
-    document.getElementById("confirm-modal").style.display = "none";
+    // 🎉 送信完了時にメーターを100%にする
+    clearInterval(progressTimer);
+    if (progressBar) progressBar.style.width = "100%";
+    if (progressText) progressText.innerText = "🎉 送信完了しました！ 100%";
 
-    if (data.status === "success") {
-      // 1. 🎉 提出成功時の紙吹雪演出を発動
-      triggerConfetti();
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerText = "確定して送信";
+      document.getElementById("confirm-modal").style.display = "none";
+      if (progressContainer) progressContainer.style.display = "none";
 
-      // 2. メモリ構造体の安全確保
-      if (!studentDashboardData) {
-        studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [], group_data: {} };
-      }
-      if (data.group_data) {
-        studentDashboardData.group_data = data.group_data;
-      }
-      if (!studentDashboardData.latest_exam_records) studentDashboardData.latest_exam_records = {};
-      if (!studentDashboardData.submitted_rounds) studentDashboardData.submitted_rounds = [];
-      if (!studentDashboardData.history_log) studentDashboardData.history_log = [];
+      if (data.status === "success") {
+        // 🎉 提出成功時の処理
+        triggerConfetti();
 
-      // 3. 誤答問題リストの型を安全にカンマ区切り文字列へ正規化
-      let wrongQsStr = "";
-      if (Array.isArray(data.scoring.wrong_questions)) {
-        wrongQsStr = data.scoring.wrong_questions.join(",");
-      } else if (typeof data.scoring.wrong_questions === "string") {
-        wrongQsStr = data.scoring.wrong_questions;
-      }
+        if (!studentDashboardData) {
+          studentDashboardData = { latest_exam_records: {}, submitted_rounds: [], history_log: [], group_data: {} };
+        }
+        if (data.group_data) studentDashboardData.group_data = data.group_data;
 
-      // 4. 🔄 最新の回答データで上書き更新（同じ回を再入力した場合も常に最新回答のみ反映）
-      const nowIso = new Date().toISOString();
-      studentDashboardData.latest_exam_records[currentExamRound] = {
-        total_score: data.scoring.total_score,
-        total_accuracy: data.scoring.total_accuracy,
-        wrong_questions: wrongQsStr,
-        pdf_url: data.scoring.pdf_url || "",
-        timestamp: nowIso,
-        ...(data.scoring.subject_accuracies || {})
-      };
+        let wrongQsStr = Array.isArray(data.scoring.wrong_questions)
+          ? data.scoring.wrong_questions.join(",")
+          : (data.scoring.wrong_questions || "");
 
-      // 5. 提出済み回リストに追加（重複排除）
-      if (!studentDashboardData.submitted_rounds.includes(currentExamRound)) {
-        studentDashboardData.submitted_rounds.push(currentExamRound);
-      }
+        const nowIso = new Date().toISOString();
+        studentDashboardData.latest_exam_records[currentExamRound] = {
+          total_score: data.scoring.total_score,
+          total_accuracy: data.scoring.total_accuracy,
+          wrong_questions: wrongQsStr,
+          pdf_url: data.scoring.pdf_url || "",
+          timestamp: nowIso,
+          ...(data.scoring.subject_accuracies || {})
+        };
 
-      // 6. 📈 折れ線グラフ用履歴（history_log）の上書き更新（同一回の過去ログを最新結果で更新）
-      const existingLogIdx = studentDashboardData.history_log.findIndex(h => String(h.exam_round) === String(currentExamRound));
-      const newLogItem = {
-        exam_round: currentExamRound,
-        total_accuracy: data.scoring.total_accuracy,
-        total_score: data.scoring.total_score,
-        timestamp: nowIso
-      };
-      if (existingLogIdx !== -1) {
-        studentDashboardData.history_log[existingLogIdx] = newLogItem;
+        if (!studentDashboardData.submitted_rounds.includes(currentExamRound)) {
+          studentDashboardData.submitted_rounds.push(currentExamRound);
+        }
+
+        const existingLogIdx = studentDashboardData.history_log.findIndex(h => String(h.exam_round) === String(currentExamRound));
+        const newLogItem = { exam_round: currentExamRound, total_accuracy: data.scoring.total_accuracy, total_score: data.scoring.total_score, timestamp: nowIso };
+        if (existingLogIdx !== -1) {
+          studentDashboardData.history_log[existingLogIdx] = newLogItem;
+        } else {
+          studentDashboardData.history_log.push(newLogItem);
+        }
+
+        // タブ切替と再描画
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
+        document.querySelector('.tab-btn[data-tab="tab-review"]')?.classList.add("active");
+        document.getElementById("tab-review")?.classList.add("active");
+
+        renderLatestResultSummary();
+        renderReviewPickups();
+        renderDashboardCharts();
+
+        loadStudentDashboard();
+
+        const wrongCount = wrongQsStr ? wrongQsStr.split(",").filter(Boolean).length : 0;
+        alert(`🎉 回答の送信・データ更新が完了しました！\n\n・対象: 第${currentExamRound}回\n・総合得点: ${data.scoring.total_score} / 55 点 (${data.scoring.total_accuracy}%)\n・間違えた問題: ${wrongCount} 問`);
       } else {
-        studentDashboardData.history_log.push(newLogItem);
+        alert("送信エラー: " + (data.message || "エラーが発生しました。"));
       }
-
-      // 7. 📱 送信後、自動的に「回答記録・復習タブ（tab-review）」を表示状態へ切替
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
-
-      const reviewBtn = document.querySelector('.tab-btn[data-tab="tab-review"]');
-      const reviewSec = document.getElementById("tab-review");
-      if (reviewBtn) reviewBtn.classList.add("active");
-      if (reviewSec) reviewSec.classList.add("active");
-
-// 8. 🔄 UI・サマリーカード・分析ボードが一括で即時描画更新されます
-renderLatestResultSummary(); // 📝 第3タブ: 最新サマリーカードを描画（★この1行を追加）
-renderReviewPickups();        // 🔥 第4タブ: 累積復習描画
-renderDashboardCharts();      // 分析ボード（レーダー・折れ線）の描画更新
-
-      // 9. バックグラウンドでGASサーバー側データと同期
-      loadStudentDashboard();
-
-      // 10. 送信完了・結果案内メッセージを表示
-      const wrongCount = wrongQsStr ? wrongQsStr.split(",").filter(Boolean).length : 0;
-      setTimeout(() => {
-        alert(`🎉 回答の送信・データ更新が完了しました！\n\n・対象: 第${currentExamRound}回\n・総合得点: ${data.scoring.total_score} / 55 点 (${data.scoring.total_accuracy}%)\n・間違えた問題: ${wrongCount} 問\n\n最新の過去問記録と間違えた問題（🔥/🤝）をご確認いただけます。`);
-      }, 150);
-
-    } else {
-      alert("送信エラー: " + (data.message || "エラーが発生しました。"));
-    }
+    }, 500);
   })
   .catch(err => {
-    console.error(err);
+    clearInterval(progressTimer);
+    if (progressContainer) progressContainer.style.display = "none";
     btn.disabled = false;
     btn.innerText = "確定して送信";
+    console.error(err);
     alert("通信エラーが発生しました。ネット接続を確認してください。");
   });
 }
@@ -1336,12 +1359,16 @@ function renderLatestResultSummary() {
   const groupStats = studentDashboardData.group_data?.exam_stats || {};
   const roundGroupStats = groupStats[currentExamRound]?.question_correct_rates || {};
 
-  // 1. 模範解答の配列を取得
+// 1. 模範解答の配列を取得（データが存在しない場合のフォールバック追加）
   let correctAnswersList = [];
-  if (Array.isArray(rec.correct_answers)) {
+  if (rec && Array.isArray(rec.correct_answers)) {
     correctAnswersList = rec.correct_answers;
-  } else if (typeof rec.correct_answers === "string" && rec.correct_answers) {
+  } else if (rec && typeof rec.correct_answers === "string" && rec.correct_answers) {
     correctAnswersList = rec.correct_answers.split(",");
+  } else if (studentDashboardData?.group_data?.exam_stats?.[currentExamRound]?.correct_answers) {
+    // 💡 提出直後などで rec に含まれない場合は全体統計データから補填
+    const ca = studentDashboardData.group_data.exam_stats[currentExamRound].correct_answers;
+    correctAnswersList = Array.isArray(ca) ? ca : (typeof ca === "string" ? ca.split(",") : []);
   }
 
   // 間違えた問題を科目（SUBJECT_DEFINITIONS）ごとにグループ化
@@ -1595,8 +1622,37 @@ if (submittedRounds.length === 0) {
   document.getElementById("history-reset-modal").style.display = "flex";
 }
 
-// GASへの削除APIリクエスト処理 (新規追加)
+/**
+ * GASへの削除APIリクエスト処理（プログレスバー連動版）
+ */
 function deleteExamRecordAction(examRound) {
+  const progressContainer = document.getElementById("reset-progress-container");
+  const progressBar = document.getElementById("reset-progress-bar");
+  const progressText = document.getElementById("reset-progress-text");
+
+  if (progressContainer) progressContainer.style.display = "block";
+
+  // ⏱️ タイマー設定
+  let currentPercent = 0;
+  let secondsElapsed = 0;
+  const messages = [
+    "リセット要求を送信中...",
+    "スプレッドシートの記録を削除中...",
+    "分析データを更新中...",
+    "まもなく完了します..."
+  ];
+
+  const progressTimer = setInterval(() => {
+    secondsElapsed++;
+    if (currentPercent < 95) {
+      const increment = Math.max(1, Math.floor((95 - currentPercent) / 3));
+      currentPercent = Math.min(95, currentPercent + increment);
+    }
+    const msgIndex = Math.min(Math.floor(secondsElapsed / 3), messages.length - 1);
+    if (progressBar) progressBar.style.width = currentPercent + "%";
+    if (progressText) progressText.innerText = `⏳ ${messages[msgIndex]} (${currentPercent}% / ${secondsElapsed}秒経過)`;
+  }, 1000);
+
   fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
@@ -1608,18 +1664,26 @@ function deleteExamRecordAction(examRound) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.status === "success") {
-      alert(`第${examRound}回の記録をリセットしました。`);
-      localStorage.removeItem(`beauty_draft_${currentSerialCode}_${examRound}`);
-      
-      // ダッシュボードデータの再ロードとモーダルを閉じる
-      loadStudentDashboard();
-      document.getElementById("history-reset-modal").style.display = "none";
-    } else {
-      alert("リセット失敗: " + (data.message || "エラーが発生しました。"));
-    }
+    clearInterval(progressTimer);
+    if (progressBar) progressBar.style.width = "100%";
+    if (progressText) progressText.innerText = "🎉 リセット完了！ 100%";
+
+    setTimeout(() => {
+      if (progressContainer) progressContainer.style.display = "none";
+
+      if (data.status === "success") {
+        alert(`第${examRound}回の記録をリセットしました。`);
+        localStorage.removeItem(`beauty_draft_${currentSerialCode}_${examRound}`);
+        loadStudentDashboard();
+        document.getElementById("history-reset-modal").style.display = "none";
+      } else {
+        alert("リセット失敗: " + (data.message || "エラーが発生しました。"));
+      }
+    }, 500);
   })
   .catch(err => {
+    clearInterval(progressTimer);
+    if (progressContainer) progressContainer.style.display = "none";
     console.error(err);
     alert("通信エラーが発生しました。");
   });
