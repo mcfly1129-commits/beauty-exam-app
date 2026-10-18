@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>美容師国家試験 4択過去問 記録蓄積分析Webアプリ</title>
+
+<!-- 🔒 セキュリティキャッシュ無効化 -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<!-- 🔒 セキュリティヘッダ（クリックジャッキング ＆ XSS防御用 CSP） -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-ancestors 'none';">
+
 <!-- 外部ライブラリ (Chart.js & Confetti) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -413,7 +424,7 @@ h1 {
    ========================================== */
 .filter-card {
   background: #ffffff;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e4e7eb; /* ⭕ 明示的なカラーコード指定、または var(--primary-color) */
   border-radius: 12px;
   padding: 12px 15px;
   margin-bottom: 15px;
@@ -703,6 +714,22 @@ h1 {
 </div>
 
 <script>
+// 🔒 XSS対策：文字コードを安全に無害化（エスケープ）する共通関数
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"'`]/g, function(match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '`': '&#x60;'
+    };
+    return escapeMap[match];
+  });
+}
+
 // ==========================================
 // 1. 全体定数 ＆ 設定
 // ==========================================
@@ -722,8 +749,8 @@ const SUBJECT_DEFINITIONS = [
   { id: 10, name: "美容技術理論", start: 44, end: 55 }        // ★ 変更 (44〜55)
 ];
 
-// アプリ状態管理
-let currentSerialCode = localStorage.getItem("beauty_past_exam_serial_code") || "";
+// 🔒 起動時のシリアルコード取得（localStorage / sessionStorage の双方向フォールバック）
+let currentSerialCode = localStorage.getItem("beauty_past_exam_serial_code") || sessionStorage.getItem("beauty_past_exam_serial_code") || "";
 let currentExamRound = "54"; // デフォルト最新54回
 let studentAnswers = new Array(55).fill(""); // 55問の回答
 let studentDashboardData = null; // GAS保持データ
@@ -757,13 +784,24 @@ function setupEventListeners() {
     verifyAuth(code, false);
   });
 
-  // ログアウトボタン
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    if (confirm("ログアウトしますか？")) {
-      localStorage.removeItem("beauty_past_exam_serial_code");
-      location.reload();
-    }
-  });
+// 🔒 ログアウト処理（シリアルコード・セッション情報の完全クリア）
+document.getElementById('btn-logout')?.addEventListener('click', () => {
+  if (confirm("🔒 ログアウトしますか？")) {
+    // 1. localStorage からのシリアルコード削除
+    localStorage.removeItem('beauty_past_exam_serial_code');
+
+    // 2. sessionStorage 内のキャッシュ・認証トークン・下書きデータの完全クリア
+    sessionStorage.removeItem('beauty_past_exam_serial_code');
+    sessionStorage.clear();
+
+    // 3. JavaScript メモリ内の認証状態をリセット
+    currentSerialCode = "";
+    studentDashboardData = null;
+
+    // 4. 画面を初期表示（ログイン／シリアルコード入力フォーム）へ安全に再読み込み
+    window.location.href = window.location.pathname;
+  }
+});
 
 // タブ切り替え処理の更新（第3タブ: tab-review / 第4タブ: tab-pickup の個別呼び出し）
 document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -816,6 +854,7 @@ if (subjectFilterSelect) {
 // ==========================================
 // 3. 認証処理 ＆ ダッシュボード初期ロード
 // ==========================================
+// 🔒 サーバー認可通信＆画面描画制御（フロント判定に依存せずGAS検証を必須化）
 function verifyAuth(serialCode, isAuto) {
   if (!isAuto) showAuthMsg("⏳ 認証処理中...", "#2980b9");
 
@@ -824,32 +863,46 @@ function verifyAuth(serialCode, isAuto) {
     headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({ action: "checkAuth", serial_code: serialCode })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error("サーバー通信エラーが発生しました。");
+    return res.json();
+  })
   .then(data => {
-if (data.isAuthorized) {
-  currentSerialCode = serialCode;
-  localStorage.setItem("beauty_past_exam_serial_code", serialCode);
-  
-  // 先にログイン成功画面を表示させる
-  document.getElementById("auth-section").style.display = "none";
-  document.getElementById("main-content").style.display = "block";
-  document.getElementById("user-display-code").innerText = serialCode;
+    // 🔒 1. サーバー（GAS）側で認証・認可が成功した場合のみメインコンテンツを開示
+    if (data.isAuthorized) {
+      currentSerialCode = serialCode;
+      
+      // localStorage / sessionStorage に安全に保存
+      localStorage.setItem("beauty_past_exam_serial_code", serialCode);
+      sessionStorage.setItem("beauty_past_exam_serial_code", serialCode);
 
-  // ⭕ 万が一描画データに異常があってもログイン画面自体はフリーズさせない
-  try {
-    loadStudentDashboard();
-    loadDraftAnswers();
-  } catch (err) {
-    console.error("ダッシュボード初期描画エラー:", err);
-  }
-} else {
-      showAuthMsg(data.message || "無効なシリアルコードです。");
+      // 認可成功時のみ認証画面を隠し、メインアプリ画面を開示（表示文字列もエスケープ適用）
+      document.getElementById("auth-section").style.display = "none";
+      document.getElementById("main-content").style.display = "block";
+      document.getElementById("user-display-code").innerText = serialCode;
+
+      try {
+        loadStudentDashboard();
+        loadDraftAnswers();
+      } catch (err) {
+        console.error("ダッシュボード初期描画エラー:", err);
+      }
+    } else {
+      // 🔒 2. 認可失敗時：認証情報を全ストレージから破棄し、ログインフォームを表示維持
       localStorage.removeItem("beauty_past_exam_serial_code");
+      sessionStorage.removeItem("beauty_past_exam_serial_code");
+      
+      document.getElementById("main-content").style.display = "none";
+      document.getElementById("auth-section").style.display = "block";
+      showAuthMsg(data.message || "🔒 無効なシリアルコードです。認証に失敗しました。");
     }
   })
   .catch(err => {
-    console.error(err);
-    showAuthMsg("通信エラーが発生しました。ネット接続を確認してください。");
+    console.error("認証エラー:", err);
+    // 🔒 通信エラー時も不整合を防ぐため認証画面を表示維持
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("auth-section").style.display = "block";
+    showAuthMsg("⚠️ 通信エラーが発生しました。ネット接続を確認してください。");
   });
 }
 
@@ -860,20 +913,34 @@ function showAuthMsg(msg, color="#e74c3c") {
   el.style.display = "block";
 }
 
-// 初期ダッシュボードデータのロード
+// 🔒 ダッシュボードデータロード（GASでの認可・データ返却検証）
 function loadStudentDashboard() {
   fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
     body: JSON.stringify({ action: "getStudentDashboard", serial_code: currentSerialCode })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error("データ取得エラーが発生しました。");
+    return res.json();
+  })
   .then(data => {
-    if (data.status === "success") {
-      studentDashboardData = data;
-      renderReviewPickups();
-      renderLatestResultSummary();
+    // 🔒 認可エラーや無効コード応答の場合はストレージを消去して安全に送還
+    if (data.status === "error") {
+      alert("❌ 認証エラー: " + (data.message || "無効なシリアルコードです。"));
+      localStorage.removeItem("beauty_past_exam_serial_code");
+      sessionStorage.removeItem("beauty_past_exam_serial_code");
+      location.reload();
+      return;
     }
+
+if (data.status === "success") {
+  studentDashboardData = data;
+  // 🔒 画面の全コンポーネント（復習・サマリー・分析グラフ）を一括再描画
+  renderReviewPickups();
+  renderLatestResultSummary();
+  renderDashboardCharts();
+}
   })
   .catch(err => console.error("Dashboard Load Error:", err));
 }
@@ -1514,14 +1581,19 @@ wrongList.forEach(qNumStr => {
     });
 
     let html = "";
-    Object.keys(grouped).forEach(subjName => {
-      const list = grouped[subjName];
-      html += `
-        <div style="margin-bottom:12px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-          <div style="font-size:0.82rem; font-weight:bold; color:#2c3e50; border-left:4px solid ${accentColor}; padding-left:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-            <span>${subjName}</span>
-            <span style="font-size:0.7rem; background:${accentColor}; color:white; padding:2px 6px; border-radius:10px;">${list.length}問</span>
-          </div>
+Object.keys(grouped).forEach(subjName => {
+  const list = grouped[subjName];
+  
+  // 🔒 科目名・問数の文字エスケープ処理
+  const safeSubjName = escapeHTML(String(subjName));
+  const safeCount = escapeHTML(String(list.length));
+
+  html += `
+  <div style="margin-bottom:12px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; padding:10px; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+  <div style="font-size:0.82rem; font-weight:bold; color:#2c3e50; border-left:4px solid ${accentColor}; padding-left:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+  <span>${safeSubjName}</span>
+  <span style="font-size:0.7rem; background:${accentColor}; color:white; padding:2px 6px; border-radius:10px;">${safeCount}問</span>
+  </div>
           <div style="display:flex; flex-wrap:wrap; gap:6px;">
             ${list.map(item => `
               <div style="background:${bgLight}; border:1px solid ${accentColor}44; border-radius:8px; padding:6px 10px; font-size:0.78rem; display:flex; align-items:center; gap:6px; white-space:nowrap;">
@@ -1592,21 +1664,27 @@ if (submittedRounds.length === 0) {
     listContainer.innerHTML = '<div style="font-size:0.8rem; color:#95a5a6; text-align:center; padding:15px;">まだ送信履歴がありません。</div>';
   } else {
     // 🔴 .slice().reverse() を追加して最新の提出回から順に描画
-    submittedRounds.slice().reverse().forEach(round => {
-      const rec = records[round];
-      const timeStr = formatDisplayTimestamp(rec?.timestamp);
+submittedRounds.slice().reverse().forEach(round => {
+  const rec = records[round];
+  const timeStr = formatDisplayTimestamp(rec?.timestamp);
 
-      const item = document.createElement("div");
-      item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;";
-      item.innerHTML = `
-        <div>
-          <b>第${round}回 過去問</b> <span style="font-size:0.7rem; color:#7f8c8d;"><br>(${timeStr})</span><br>
-          <span style="font-size:0.75rem; color:#d35400; font-weight:bold;">得点: ${rec?.total_score || 0}点 (${rec?.total_accuracy || 0}%)</span>
-        </div>
-        <button class="btn-del-record" data-round="${round}" style="background:#ff7675; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer;">リセット</button>
-      `;
-      listContainer.appendChild(item);
-    });
+  // 🔒 動的挿入要素の文字エスケープ処理
+  const safeRound = escapeHTML(String(round));
+  const safeTimeStr = escapeHTML(String(timeStr));
+  const safeScore = escapeHTML(String(rec?.total_score || 0));
+  const safeAccuracy = escapeHTML(String(rec?.total_accuracy || 0));
+
+  const item = document.createElement("div");
+  item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee; font-size:0.8rem;";
+  item.innerHTML = `
+  <div>
+  <b>第${safeRound}回 過去問</b> <span style="font-size:0.7rem; color:#7f8c8d;"><br>(${safeTimeStr})</span><br>
+  <span style="font-size:0.75rem; color:#d35400; font-weight:bold;">得点: ${safeScore}点 (${safeAccuracy}%)</span>
+  </div>
+  <button class="btn-del-record" data-round="${safeRound}" style="background:#ff7675; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer;">リセット</button>
+  `;
+  listContainer.appendChild(item);
+});
 
     // 削除ボタンイベント設定
     listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
@@ -1671,12 +1749,34 @@ function deleteExamRecordAction(examRound) {
     setTimeout(() => {
       if (progressContainer) progressContainer.style.display = "none";
 
-      if (data.status === "success") {
-        alert(`第${examRound}回の記録をリセットしました。`);
-        localStorage.removeItem(`beauty_draft_${currentSerialCode}_${examRound}`);
-        loadStudentDashboard();
-        document.getElementById("history-reset-modal").style.display = "none";
-      } else {
+if (data.status === "success") {
+  // 1. 下書きのローカルストレージ消去
+  localStorage.removeItem(`beauty_draft_${currentSerialCode}_${examRound}`);
+
+  // 2. メモリ上のデータから該当回を即座に削除（即時反映用）
+  if (studentDashboardData) {
+    if (studentDashboardData.submitted_rounds) {
+      studentDashboardData.submitted_rounds = studentDashboardData.submitted_rounds.filter(r => String(r) !== String(examRound));
+    }
+    if (studentDashboardData.latest_exam_records) {
+      delete studentDashboardData.latest_exam_records[examRound];
+    }
+    if (studentDashboardData.history_log) {
+      studentDashboardData.history_log = studentDashboardData.history_log.filter(h => String(h.exam_round) !== String(examRound));
+    }
+  }
+
+  // 3. モーダルを閉じ、全画面（分析グラフ・サマリー・復習）を即座に再描画
+  document.getElementById("history-reset-modal").style.display = "none";
+  renderLatestResultSummary();
+  renderReviewPickups();
+  renderDashboardCharts();
+
+  // 4. サーバーからの最新データ再取得（バックグラウンド同期）
+  loadStudentDashboard();
+
+  alert(`🎉 第${examRound}回の記録をリセットしました。`);
+} else {
         alert("リセット失敗: " + (data.message || "エラーが発生しました。"));
       }
     }, 500);
