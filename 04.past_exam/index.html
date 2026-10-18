@@ -1208,6 +1208,35 @@ function submitExamData() {
   });
 }
 
+// 60%の位置に赤色の点線（合格ライン）を描画するカスタムプラグイン
+const passLinePlugin = {
+  id: 'passLine',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales: { y } } = chart;
+    if (!y || !chartArea) return; // ⭕ chartArea が未作成の場合は安全にスキップ
+    const { left, right } = chartArea;
+    
+    const yVal = y.getPixelForValue(60);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([2]); // 6px間隔の点線
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#e74c3c'; // 基準線の色（赤系）
+
+    ctx.moveTo(left, yVal);
+    ctx.lineTo(right, yVal);
+    ctx.stroke();
+
+    // 基準線の上にテキストラベルを表示
+    ctx.fillStyle = '#e74c3c';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('60% 合格ライン', left + 5, yVal - 5);
+
+    ctx.restore();
+  }
+};
+
 /**
  * 📊 【第2タブ】全提出回の累積・総合分析ダッシュボード描画（10科目の平均正答率 ＆ 時系列推移）
  */
@@ -1330,28 +1359,29 @@ const timeLabels = historyLog.map(h => {
   });
   const historyAcc = historyLog.map(h => h.total_accuracy);
 
-  if (lineChartInstance) lineChartInstance.destroy();
-  const ctxL = document.getElementById("lineChart").getContext("2d");
-  lineChartInstance = new Chart(ctxL, {
-    type: 'line',
-    data: {
-      labels: timeLabels,
-      datasets: [{
-        label: '総合正答率 (%)',
-        data: historyAcc,
-        borderColor: 'rgba(116, 185, 255, 1)',
-        backgroundColor: 'rgba(116, 185, 255, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { min: 0, max: 100 } }
-    }
-  });
+if (lineChartInstance) lineChartInstance.destroy();
+const ctxL = document.getElementById("lineChart").getContext("2d");
+lineChartInstance = new Chart(ctxL, {
+type: 'line',
+data: {
+labels: timeLabels,
+datasets: [{
+label: '総合正答率 (%)',
+data: historyAcc,
+borderColor: 'rgba(116, 185, 255, 1)',
+backgroundColor: 'rgba(116, 185, 255, 0.1)',
+borderWidth: 2,
+fill: true,
+tension: 0.2
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+scales: { y: { min: 0, max: 100 } }
+},
+plugins: [passLinePlugin] // ★ ここにプラグインを追加！
+});
 }
 
 function getRankLabel(acc) {
