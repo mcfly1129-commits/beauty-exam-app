@@ -7,7 +7,7 @@
 <!-- Google Identity Services ライブラリは不要なため削除 -->
 <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
-        .container { max-width: 600px; margin: 0 auto; }
+        .container { max-width: 600px; margin: 0 auto; box-sizing: border-box; }
 
         h1 { font-size: 1.4rem; text-align: center; color: #fab1a0; margin-top: 0; margin-bottom: 15px; }
         .subtitle { font-size: 0.9rem; text-align: center; color: #7f8c8d; margin-bottom: 20px; }
@@ -18,8 +18,14 @@
             padding: 20px; margin-bottom: 25px; text-align: center;
         }
 
-        /* --- ボタン設定 --- */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* --- ボタン設定（PC/スマホ共通で綺麗に2列に収まるよう修正） --- */
+.grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+    max-width: 600px; 
+    margin: 0 auto; 
+}
         .btn-subject {
             background: white; border: 2px solid #fab1a0; border-radius: 12px;
             padding: 10px; text-align: center; text-decoration: none;
@@ -326,6 +332,40 @@
   margin-top: 6px;
 }
 
+/* ==========================================
+   ⏳ 成果報告プログレスバースタイル（新規追加）
+   ========================================== */
+.upload-progress-container {
+  margin-top: 12px;
+  background: #e9ecef;
+  border-radius: 8px;
+  height: 22px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.upload-progress-bar {
+  background: linear-gradient(90deg, #74b9ff, #0984e3);
+  width: 0%;
+  height: 100%;
+  transition: width 0.15s ease;
+  border-radius: 8px 0 0 8px;
+}
+
+.upload-progress-text {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  top: 0;
+  font-size: 0.75rem;
+  color: #2c3e50;
+  font-weight: bold;
+  line-height: 22px;
+  text-align: center;
+  pointer-events: none;
+}
+
 </style>
 <!-- 🎉 紙吹雪ライブラリの追加 -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -441,20 +481,26 @@
     </div>
 
       <!-- 🌟 【新規追加】成果報告エリア（Step 1） 🌟 -->
-  <div id="home-report-area" class="home-report-area" style="display: none;">
-    <!-- 注意・警告メッセージ表示枠（黄色または赤色時に表示） -->
+   <div id="home-report-area" class="home-report-area" style="display: none;">
+    <!-- 注意・警告メッセージ表示枠 -->
     <div id="home-report-comment" class="home-report-comment" style="display: none;"></div>
-    
+
     <!-- 成果報告ボタン本体 -->
     <button id="btn-home-submit-report" class="btn-home-report">
       📤 成果を報告する
     </button>
-    
+
+    <!-- 送信進捗プログレスバー -->
+    <div id="upload-progress-container" class="upload-progress-container" style="display: none;">
+      <div id="upload-progress-bar" class="upload-progress-bar"></div>
+      <span id="upload-progress-text" class="upload-progress-text">現在送信中... 0%</span>
+    </div>
+
     <!-- 補助注記（最終報告日時の表示など） -->
     <div id="home-report-subtext" class="home-report-subtext"></div>
   </div>
 
-</div>    
+</div> <!-- .speed-training-card の閉じタグ -->
         
     <div class="grid">
         <a href="01.test_others/01_test_regulations.html" class="btn-subject">01 ⚖️<br>関係法規・制度</a>
@@ -476,7 +522,7 @@
         </a>
     </div>
 
-    <div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
+    <div class="update-log-area" style="max-width: 500px; margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
         <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴・開発状況など</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">本アプリの最新の修容内容などは、<br>以下のドキュメントで公開しています。</p>
         <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
@@ -602,7 +648,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
     const savedEmail = localStorage.getItem('teacher_userEmail');
 
-    // 🌟【追加】成果報告ボタンのクリックイベント登録
+    // 🌟 成果報告ボタンのクリックイベント登録
     const btnReport = document.getElementById("btn-home-submit-report");
     if (btnReport) {
         btnReport.addEventListener("click", executeHomeDataTransmission);
@@ -1688,11 +1734,15 @@ function updateHomeReportAreaUI() {
   }
 }
 
-// ==========================================
-// 📤 ホーム画面からの成果報告送信処理（Step 4）
-// ==========================================
+/**
+ * 📤 ホーム画面からの成果報告送信処理（プログレスバー＆タイマー連動版）
+ */
 function executeHomeDataTransmission() {
   const btn = document.getElementById("btn-home-submit-report");
+  const progressContainer = document.getElementById("upload-progress-container");
+  const progressBar = document.getElementById("upload-progress-bar");
+  const progressText = document.getElementById("upload-progress-text");
+
   const userEmail = localStorage.getItem('teacher_userEmail');
   const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
 
@@ -1705,12 +1755,55 @@ function executeHomeDataTransmission() {
     return;
   }
 
-  // UIを一時ロック（連打防止）
+  // UIの初期化（ボタンのロック ＆ プログレスバーの表示開始）
   if (btn) {
     btn.disabled = true;
-    btn.innerText = "⏳ 成果データを送信中...";
+    btn.innerText = "⏳ サーバーと通信を開始...";
     btn.style.opacity = "0.7";
   }
+  if (progressContainer) {
+    progressContainer.style.display = "block";
+  }
+
+  // ⏱️ 経過秒数と動的メッセージを用いた疑似カウントアップタイマー
+  let currentPercent = 0;
+  let secondsElapsed = 0;
+  const messages = [
+    "データを送信しています...",
+    "スプレッドシートに書き込み中...",
+    "最新の集計処理を実行中...",
+    "通信の返答を待っています...",
+    "まもなく完了します。そのままお待ちください..."
+  ];
+
+  const progressTimer = setInterval(() => {
+    secondsElapsed++;
+
+    // 95%までは徐々に増加
+    if (currentPercent < 95) {
+      const increment = Math.max(1, Math.floor((95 - currentPercent) / 3));
+      currentPercent = Math.min(95, currentPercent + increment);
+    }
+
+    // メッセージの切替（3秒ごと）
+    const msgIndex = Math.min(Math.floor(secondsElapsed / 3), messages.length - 1);
+
+    if (progressBar) progressBar.style.width = currentPercent + "%";
+    if (progressText) progressText.innerText = `⏳ ${messages[msgIndex]} (${currentPercent}% / ${secondsElapsed}秒経過)`;
+  }, 1000);
+
+  // UI復旧用ヘルパー関数
+  const resetTransmissionUI = () => {
+    clearInterval(progressTimer);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "📤 成果を報告する";
+      btn.style.opacity = "1";
+    }
+    if (progressContainer) {
+      progressContainer.style.display = "none";
+    }
+  };
 
   // 最新の学習データを集計
   const myData = calculateMyCurrentStats();
@@ -1724,7 +1817,7 @@ function executeHomeDataTransmission() {
     email: userEmail,
     progressArray: myData.progress,
     accuracyArray: myData.accuracy,
-    gmCount: 0, // 必要に応じてGM数を設定
+    gmCount: 0,
     totalProgress: myData.totalProgress,
     totalAccuracy: myData.totalAccuracy,
     dailyChallengeStreak: dailyChallengeStreak,
@@ -1744,6 +1837,11 @@ function executeHomeDataTransmission() {
   })
   .then(data => {
     if (data.status === "success") {
+      // 🎉 送信完了時にメーターを100%にする
+      clearInterval(progressTimer);
+      if (progressBar) progressBar.style.width = "100%";
+      if (progressText) progressText.innerText = "🎉 送信完了しました！ 100%";
+
       const nowMs = new Date().getTime();
 
       // 最終送信日時およびスナップショットの更新
@@ -1756,28 +1854,21 @@ function executeHomeDataTransmission() {
       history.push(new Date().toLocaleString('ja-JP'));
       localStorage.setItem('dashboard_send_history', JSON.stringify(history));
 
-      alert("🎉 成果報告の送信が完了しました！\n（次回報告ボタンは7日後に表示されます）");
-
-      // UIを即座に最新状態（7日以内非表示）へ切り替え
-      updateHomeReportAreaUI();
+      setTimeout(() => {
+        alert("🎉 成果報告の送信が完了しました！\n（次回報告ボタンは7日後に表示されます）");
+        if (progressContainer) progressContainer.style.display = "none";
+        updateHomeReportAreaUI();
+      }, 500);
 
     } else {
       alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
-      if (btn) {
-        btn.disabled = false;
-        btn.innerText = "📤 成果を報告する";
-        btn.style.opacity = "1";
-      }
+      resetTransmissionUI();
     }
   })
   .catch(err => {
     console.error("成果報告送信エラー:", err);
     alert("❌ 通信エラーが発生しました。インターネット接続を確認して再度お試しください。");
-    if (btn) {
-      btn.disabled = false;
-      btn.innerText = "📤 成果を報告する";
-      btn.style.opacity = "1";
-    }
+    resetTransmissionUI();
   });
 }
 
