@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>【検証用】学習ホーム</title>
+<!-- 🔒 クリックジャッキング ＆ XSS防御用 CSPメタタグ -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net;">
+<meta http-equiv="X-Frame-Options" content="DENY">
 <!-- Google Identity Services ライブラリは不要なため削除 -->
 <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
@@ -687,70 +690,73 @@ document.getElementById('login-screen').style.display = 'block';
 // ⭕ Googleサインインのボタン生成は不要なため、すべて削除してシンプルな表示切り替えのみにします。
 }
 
-// ログイン成功時の処理
-function showAppScreen(email) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app-screen').style.display = 'block';
-    document.getElementById('display-user-email').innerText = email;
-    
-    // メインの進捗計算ロジックを発動
-    initDashboard();
-    
-    // ★ 追加：ヘッダー実績バッジの数値を最新化
-    renderHeaderDailyStats();
-}
-
-// 🔑 簡易パスワード（シリアルコード）でGASに直接問い合わせるログイン処理
+// 🔑 簡易パスワード（シリアルコード）でGASに直接問い合わせるログイン処理（セキュリティ強化版）
 function handlePasswordLogin() {
-const passwordInput = document.getElementById('login-password');
-if (!passwordInput) return;
+  const passwordInput = document.getElementById('login-password');
+  if (!passwordInput) return;
 
-const password = passwordInput.value.trim();
+  const password = passwordInput.value.trim();
 
-if (!password) {
-showError("❌ ログインパスワードを入力してください。");
-return;
-}
+  if (!password) {
+    showError("🔒 ログイン情報を入力してください。");
+    return;
+  }
 
-showError("⏳ 管理名簿（ライセンス）を照合中... \nしばらくお待ちください。");
+  showError("⏳ ログイン情報を照合中...\nしばらくお待ちください。");
 
-try {
-// 🔒【POST化】パスワードをURLパラメータに結合せず、POSTリクエストのボディに安全に隠して送信します
-fetch(GAS_API_URL, {
-  method: "POST",
-  headers: { "Content-Type": "text/plain" },
-  body: JSON.stringify({
-    action: "checkPasswordAuth",
-    password: password
-  })
-})
-.then(res => {
-if (!res.ok) throw new Error("サーバー通信エラー");
-return res.json();
-})
-.then(data => {
-if (data.isAuthorized) {
-// ⭕ 認証成功：パスワードをトークンの代わりに保存し、メイン画面を起動 [cite: 96, 97]
-localStorage.setItem('teacher_google_id_token', password); // パスワードをトークンとして代用
-localStorage.setItem('teacher_isLoggedIn', 'true');
-localStorage.setItem('teacher_userEmail', data.email); // A列に登録したキーをemail欄にそのまま代入 [cite: 20, 97]
+  try {
+    fetch(GAS_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "checkPasswordAuth",
+        password: password
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("サーバー通信エラー");
+      return res.json();
+    })
+    .then(data => {
+      if (data.isAuthorized) {
+        //利便性を優先 守る価値のない事項にセキュリティ向上は悪手 パスワード（トークン）、ログインフラグ、ユーザー表示情報をすべて localStorage に保存
+        localStorage.setItem('teacher_google_id_token', password);
+        localStorage.setItem('teacher_isLoggedIn', 'true');
+        
+// 修正後（RAWデータを保存・引渡しし、表示関数側で一括エスケープ）
+const userEmail = data.email || "user@example.com";
+localStorage.setItem('teacher_userEmail', userEmail); 
 document.getElementById('login-error-msg').style.display = 'none';
+showAppScreen(userEmail);
+      } else {
+        // 🔒 認証情報推測防止: 具体的な失敗理由を出さず抽象化メッセージに統一
+        showError("🔒 ログインIDまたはパスワードが正しくありません。");
+      }
+    })
+    .catch(err => {
+      console.error("認証エラー:", err);
+      showError("🔒 認証処理中に通信エラーが発生しました。ネット接続を確認してください。");
+    });
 
-showAppScreen(data.email); // アプリ（メイン画面）を起動 [cite: 97]
-} else {
-// ❌ 認証失敗
-showError(data.message || "❌ パスワードが間違っているか、管理名簿に登録されていません。");
+  } catch (e) {
+    showError("🔒 認証処理中にエラーが発生しました。");
+    console.error(e);
+  }
 }
-})
-.catch(err => {
-console.error("認証エラー:", err);
-showError("❌ 認証処理中に通信エラーが発生しました。ネット接続を確認してください。");
-});
 
-} catch (e) {
-showError("❌ 認証処理中にエラーが発生しました。");
-console.error(e);
-}
+// ログイン成功時の表示処理（XSS防止強化版）
+function showAppScreen(email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app-screen').style.display = 'block';
+  
+  // 🔒 出力エスケープを確実に適用
+  const emailEl = document.getElementById('display-user-email');
+  if (emailEl) {
+    emailEl.innerText = escapeHTML(email);
+  }
+
+  initDashboard();
+  renderHeaderDailyStats();
 }
 
 function showError(msg) {
@@ -759,10 +765,11 @@ function showError(msg) {
     errorEl.style.display = 'block';
 }
 
+// ログアウト時は localStorage をクリアして再読み込み
 function handleLogout() {
     localStorage.removeItem('teacher_isLoggedIn');
     localStorage.removeItem('teacher_userEmail');
-    localStorage.removeItem('teacher_google_id_token'); // トークンもクリア
+    localStorage.removeItem('teacher_google_id_token');
     location.reload();
 }
 
@@ -1042,6 +1049,10 @@ const SUBJECT_KEY_TO_JA = {
 
 // バッジと件数をリアルタイム描画する処理
 function updateSpeedDashboardBadges() {
+if (typeof ALL_QUESTIONS_DATABASE === "undefined") {
+        console.warn("質問データベースが読み込まれていません。");
+        return;
+    }
     // 1. お気に入り数のバッジ
     const favIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
     const favEl = document.getElementById("speed-fav-badge");
@@ -1193,6 +1204,7 @@ window.addEventListener('pageshow', () => {
 
 // ⭐ 1. お気に入り問題の抽出
 function getSpeedBookmarkQuestions() {
+if (typeof ALL_QUESTIONS_DATABASE === "undefined") return []; // ガード追加
     const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
     const results = [];
     for (const subjectKey in ALL_QUESTIONS_DATABASE) {
@@ -1210,6 +1222,7 @@ function getSpeedBookmarkQuestions() {
 
 // ❌ 2. 弱点（間違えた問題）の抽出（苦手順順）
 function getSpeedWrongQuestions() {
+    if (typeof ALL_QUESTIONS_DATABASE === "undefined") return []; // ガード追加
     const results = [];
     for (const subjectKey in ALL_QUESTIONS_DATABASE) {
         const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
@@ -1232,6 +1245,8 @@ function getSpeedWrongQuestions() {
 
 // ⚡ 3. スピード特訓問題の選出（未経験優先・3問）
 function getSpeedSpecialTrainingQuestions() {
+    // 🌟【追記】データベースが読み込まれていない場合は安全に空配列を返す
+    if (typeof ALL_QUESTIONS_DATABASE === "undefined") return [];
     const unlearnedPool = [];
     const wrongPool = [];
     const completedPool = [];
@@ -1538,6 +1553,7 @@ function openSpeedHistoryModal(mode) {
         const safeText = escapeHTML(q.text);
         const safeExp = escapeHTML(q.exp);
         const safeSource = escapeHTML(q.source || "アプリオリジナル");
+        const safeUnitName = escapeHTML(q.unitName); // 🌟【追記】エスケープ処理
         
         let metaBadgeHtml = "";
         if (mode === "wrong") {
@@ -1547,7 +1563,7 @@ function openSpeedHistoryModal(mode) {
         const itemHtml = `
             <div class="speed-history-item" style="border-bottom:1px solid #f1f2f6; padding:12px 0;">
                 <div style="font-size:0.75rem; color:#7f8c8d; display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span>[${idx+1}] 【${subjectJa}】 ${q.unitName}</span>
+                    <span>[${idx+1}] 【${subjectJa}】 ${safeUnitName}</span>
                     <span>${safeSource}</span>
                 </div>
                 <div style="font-size:0.9rem; font-weight:bold; color:#2c3e50; margin-bottom:8px; line-height:1.4;">${safeText}</div>
@@ -1860,11 +1876,17 @@ function executeHomeDataTransmission() {
         updateHomeReportAreaUI();
       }, 500);
 
+} else {
+    alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
+    
+    // パスワードが無効化されていた場合は自動ログアウトさせて再入力を促す
+    if (data.message && data.message.includes("認証")) {
+      handleLogout();
     } else {
-      alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
       resetTransmissionUI();
     }
-  })
+  }
+})
   .catch(err => {
     console.error("成果報告送信エラー:", err);
     alert("❌ 通信エラーが発生しました。インターネット接続を確認して再度お試しください。");
