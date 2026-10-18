@@ -528,7 +528,7 @@
     <div class="update-log-area" style="max-width: 500px; margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
         <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴・開発状況など</h3>
         <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">本アプリの最新の修容内容などは、<br>以下のドキュメントで公開しています。</p>
-        <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
+        <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
     </div>
 
  <button class="btn-form" id="btn-feedback-form">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
@@ -645,6 +645,16 @@ const GOOGLE_CLIENT_ID = "285598257375-qkvp6gjjr0h7k2uqkdo8iclmveh2omor.apps.goo
 
 // ★設定：Google Apps Script (GAS) のWebアプリURL
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
+
+// 🔒 クリックジャッキング対策（Frame-busting: 他サイトのiframe内での埋め込み表示を強制解除）
+try {
+  if (window.top !== window.self) {
+    window.top.location = window.self.location;
+  }
+} catch (e) {
+  // クロスオリジン制限等で top.location へのアクセスが拒否された場合でもエラー停止させない
+  console.warn("Frame-busting execution blocked:", e);
+}
 
 // 画面読み込み時の認証判定
 window.addEventListener('DOMContentLoaded', () => {
@@ -1114,12 +1124,12 @@ window.addEventListener('load', () => {
       document.getElementById('privacy-modal').style.display = 'flex';
     });
   }
-  const btnFeedbackForm = document.getElementById('btn-feedback-form');
-  if (btnFeedbackForm) {
-    btnFeedbackForm.addEventListener('click', () => {
-      window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank');
-    });
-  } 
+const btnFeedbackForm = document.getElementById('btn-feedback-form');
+if (btnFeedbackForm) {
+  btnFeedbackForm.addEventListener('click', () => {
+    window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank', 'noopener,noreferrer');
+  });
+}
   const historyModal = document.getElementById('history-modal');
   if (historyModal) {
     historyModal.addEventListener('click', (e) => {
