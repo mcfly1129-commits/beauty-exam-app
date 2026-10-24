@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>美容師筆記 過去問 記録蓄積分析Webアプリ 教員用管理画面</title>
+<title>過去問 記録アプリ『管理画面』</title>
 <!-- 外部ライブラリ (Chart.js) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -312,7 +312,7 @@ h1 {
 <body>
 
 <div class="container">
-  <h1>美容師筆記 過去問<br>教員用管理・分析ポータル</h1>
+  <h1>過去問 記録アプリ『管理画面』</h1>
   <p class="subtitle">全学生の取り組み状況・通算正答率・誤答問題を一括管理</p>
 
   <!-- 🔒 認証エリア -->
@@ -403,11 +403,11 @@ h1 {
 
     <!-- タブ切替 -->
     <div style="display:flex; gap:6px; margin-bottom:10px; border-bottom:2px solid #ffeaa7; padding-bottom:4px;">
-      <button id="btn-tab-students" class="btn-secondary" style="background:var(--primary-color);">📋 受講生 進捗一覧</button>
+      <button id="btn-tab-students" class="btn-secondary" style="background:var(--primary-color);">📋 学生 進捗一覧</button>
       <button id="btn-tab-item-analysis" class="btn-secondary" style="background:#b2bec3;">📊 設問別(問1〜55)正解率分析</button>
     </div>
 
-    <!-- VIEW 1: 受講生一覧テーブル（スマホ最適化 ＆ ページネーション） -->
+    <!-- VIEW 1: 学生一覧テーブル（スマホ最適化 ＆ ページネーション） -->
     <div id="view-students-container">
       <div class="table-wrapper">
         <table class="student-table">
@@ -894,7 +894,7 @@ function renderSummaryBadges() {
 }
 
 // ==========================================
-// 5. 受講生一覧テーブル ＆ ページネーション
+// 5. 学生一覧テーブル ＆ ページネーション
 // ==========================================
 function renderStudentTable() {
   const tbody = document.getElementById("student-table-body");
@@ -973,7 +973,7 @@ function renderStudentTable() {
   document.getElementById("btn-next-page").disabled = (currentPage >= totalPages);
 
   if (pageData.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="color:#95a5a6; padding:20px;">条件に一致する受講生はいません。</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="color:#95a5a6; padding:20px;">条件に一致する学生はいません。</td></tr>';
     return;
   }
 
