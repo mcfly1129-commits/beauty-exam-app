@@ -1,9 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学習ホーム</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>美容師国家試験 2択学習アプリ（ログイン不要版）</title>
+
+  <!-- ========================================== -->
+  <!-- セキュリティ対策ヘッダ（IPA基準対応） -->
+  <!-- ========================================== -->
+<!-- 1. Content Security Policy (XSS・不正リソース読み込み対策) -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+    worker-src 'self' blob:;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: https:;
+    font-src 'self' data:;
+    connect-src 'self' https://cdn.jsdelivr.net;
+    frame-ancestors 'none';
+    form-action 'none';
+  ">
+
+  <!-- 2. クリックジャッキング対策 (他サイトのiframe内呼び出しを拒否) -->
+  <meta http-equiv="X-Frame-Options" content="DENY">
+
+  <!-- 3. 機密情報キャッシュ対策 (ブラウザバックや共有端末での残存防止) -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+
+  <!-- Canvas Confetti -->
+  <script src="[suspicious link removed]"></script>
     <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -313,11 +339,12 @@
         <a href="01.others/04_tech_theory.html" class="btn-subject">10 ✂️<br>美容技術理論</a>
     </div>
 
-    <div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
-        <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴・開発状況など</h3>
-        <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">本アプリの最新の修容内容などは、<br>以下のドキュメントで公開しています。</p>
-        <a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
-    </div>
+<div class="update-log-area" style="margin: 30px auto 10px auto; padding: 15px; background: #fff; border: 1px solid #fab1a0; border-radius: 10px; text-align: center;">
+<h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📢 更新履歴・開発状況など</h3>
+<p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 10px;">本アプリの最新の修容内容などは、<br>以下のドキュメントで公開しています。</p>
+<!-- 🔒 リバースタブナビング（親ウィンドウ乗っ取り）対策：rel="noopener noreferrer" を追加 -->
+<a href="https://drive.google.com/file/d/1nSvD4t9tVTprOre2N0_4Y59wl2bX_LMX/view?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #3498db; font-weight: bold; text-decoration: none;">＞＞ 更新履歴などを確認</a>
+</div>
 
         <button class="btn-form" id="btn-feedback-form">✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)</button>
 
@@ -399,6 +426,35 @@
 </div>
 
 <script>
+// ==========================================================
+// 🔒 セキュリティ基盤処理（IPA基準：クリックジャッキング ＆ XSS防御）
+// ==========================================================
+
+// 1. クリックジャッキング対策（Frame-busting：他サイトのiframe内での埋め込み表示を強制解除）
+try {
+  if (window.top !== window.self) {
+    window.top.location = window.self.location;
+  }
+} catch (e) {
+  // クロスオリジン制限等で top.location へのアクセスが拒否された場合でも動作を止めない
+  console.warn("Frame-busting execution blocked:", e);
+}
+
+// 2. XSS（クロスサイト・スクリプティング）対策：動的文字列を安全に無害化するエスケープ関数
+function escapeHTML(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[&<>"'`]/g, function(match) {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      '`': '&#x60;'
+    };
+    return escapeMap[match];
+  });
+}
 
 // ==========================================
 // 📊 元の進捗ダッシュボードロジック（関数化して維持）
@@ -786,9 +842,10 @@ window.onload = function() {
     document.getElementById('btn-speed-play-wrong')?.addEventListener('click', () => startSpeedQuiz('wrong'));
     document.getElementById('btn-speed-history-wrong')?.addEventListener('click', () => openSpeedHistoryModal('wrong'));
 
-    // 2. フィードバックおよび規約・ライセンス
-    document.getElementById('btn-feedback-form')?.addEventListener('click', () => window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank'));
-    document.getElementById('btn-terms-open-footer')?.addEventListener('click', openTermsModal);
+// 2. フィードバックおよび規約・ライセンス
+// 🔒 タブジャッキング対策：第3引数に 'noopener,noreferrer' を明示指定
+document.getElementById('btn-feedback-form')?.addEventListener('click', () => window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank', 'noopener,noreferrer'));
+document.getElementById('btn-terms-open-footer')?.addEventListener('click', openTermsModal);
     document.getElementById('btn-license-open-footer')?.addEventListener('click', openLicenseModal);
 
     // 3. 各モーダルの閉じるボタン群
@@ -969,9 +1026,7 @@ function shuffleArray(array) {
         [array[i], array[r]] = [array[r], array[i]];
     }
 }
-
-// 🎉 高速学習画面（z-index:2000）の最前面で舞う紙吹雪演出エフェクト関数
-// 🎉 高速学習画面（z-index:2000）の最前面で舞う紙吹雪演出エフェクト関数（スマホ最適化版）
+// 🎉 高速学習画面（z-index:2000）の最前面で舞う紙吹雪演出エフェクト関数（安全・スマホ最適化版）
 function triggerFeverEffect() {
     const canvas = document.getElementById("speed-confetti-canvas");
     if (canvas) {
@@ -1222,38 +1277,41 @@ function openSpeedHistoryModal(mode) {
     }
 
     questions.forEach((q, idx) => {
-        const subjectJa = SUBJECT_KEY_TO_JA[q.subjectKey] || "その他";
-        const safeText = escapeHTML(q.text);
-        const safeExp = escapeHTML(q.exp);
-        const safeSource = escapeHTML(q.source || "アプリオリジナル");
-        
-        let metaBadgeHtml = "";
-        if (mode === "wrong") {
-            metaBadgeHtml = `<span style="background:#fff3f3; color:#ff7675; font-size:0.7rem; padding:2px 6px; border-radius:4px; font-weight:bold; margin-right:4px;">❌ 誤答 ${q.wrongCount}回</span>`;
-        }
+const subjectJa = SUBJECT_KEY_TO_JA[q.subjectKey] || "その他";
+const safeText = escapeHTML(q.text);
+const safeExp = escapeHTML(q.exp);
+const safeSource = escapeHTML(q.source || "アプリオリジナル");
+const safeUnitName = escapeHTML(q.unitName || ""); // 🔒 XSS対策：単元名を安全にエスケープ
+const safeQId = escapeHTML(String(q.id || ""));     // 🔒 XSS対策：属性値やIDに埋め込むIDをエスケープ
 
-        const itemHtml = `
-            <div class="speed-history-item" style="border-bottom:1px solid #f1f2f6; padding:12px 0;">
-                <div style="font-size:0.75rem; color:#7f8c8d; display:flex; justify-content:space-between; margin-bottom:4px;">
-                    <span>[${idx+1}] 【${subjectJa}】 ${q.unitName}</span>
-                    <span>${safeSource}</span>
-                </div>
-                <div style="font-size:0.9rem; font-weight:bold; color:#2c3e50; margin-bottom:8px; line-height:1.4;">${safeText}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        ${metaBadgeHtml}
-                        <span style="font-size:0.75rem; font-weight:bold; color:${q.answer ? '#ff7675':'#74b9ff'}">[正答: ${q.answer ? '〇':'×'}]</span>
-                    </div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="btn-speed-exp" data-qid="${q.id}" style="background:#e4e7eb; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">解説を見る</button>
-                        ${mode === 'bookmark' ? `<button class="btn-speed-del-bm" data-qid="${q.id}" style="background:#fff3f3; color:#ff7675; border:1px solid #ffccd5; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">削除</button>` : ''}
-                    </div>
-                </div>
-                <div id="speed-hist-exp-${q.id}" style="display:none; background:#faf9f6; font-size:0.8rem; line-height:1.4; color:#57606f; padding:8px; border-radius:6px; border-left:3px solid #fab1a0; margin-top:8px;">${safeExp}</div>
-            </div>
-        `;
-        listEl.insertAdjacentHTML('beforeend', itemHtml);
-    });
+let metaBadgeHtml = "";
+if (mode === "wrong") {
+const safeWrongCount = escapeHTML(String(q.wrongCount || 0));
+metaBadgeHtml = `<span style="background:#fff3f3; color:#ff7675; font-size:0.7rem; padding:2px 6px; border-radius:4px; font-weight:bold; margin-right:4px;">❌ 誤答 ${safeWrongCount}回</span>`;
+}
+
+const itemHtml = `
+<div class="speed-history-item" style="border-bottom:1px solid #f1f2f6; padding:12px 0;">
+<div style="font-size:0.75rem; color:#7f8c8d; display:flex; justify-content:space-between; margin-bottom:4px;">
+<span>[${idx+1}] 【${subjectJa}】 ${safeUnitName}</span>
+<span>${safeSource}</span>
+</div>
+<div style="font-size:0.9rem; font-weight:bold; color:#2c3e50; margin-bottom:8px; line-height:1.4;">${safeText}</div>
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<div>
+${metaBadgeHtml}
+<span style="font-size:0.75rem; font-weight:bold; color:${q.answer ? '#ff7675':'#74b9ff'}">[正答: ${q.answer ? '〇':'×'}]</span>
+</div>
+<div style="display:flex; gap:6px;">
+<button class="btn-speed-exp" data-qid="${safeQId}" style="background:#e4e7eb; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">解説を見る</button>
+${mode === 'bookmark' ? `<button class="btn-speed-del-bm" data-qid="${safeQId}" style="background:#fff3f3; color:#ff7675; border:1px solid #ffccd5; padding:4px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer;">削除</button>` : ''}
+</div>
+</div>
+<div id="speed-hist-exp-${safeQId}" style="display:none; background:#faf9f6; font-size:0.8rem; line-height:1.4; color:#57606f; padding:8px; border-radius:6px; border-left:3px solid #fab1a0; margin-top:8px;">${safeExp}</div>
+</div>
+`;
+listEl.insertAdjacentHTML('beforeend', itemHtml);
+});
 }
 
 function toggleSpeedHistoryExp(qId) {
