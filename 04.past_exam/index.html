@@ -382,7 +382,7 @@ h1 {
   gap: 6px;
 }
 
-/* 🔥 絶対復習問題バッジ（集団正解率80%以上） */
+/* 🔥 重要復習問題バッジ（集団正解率80%以上） */
 .q-badge-abs {
   background: #fff0f0;
   border: 1px solid var(--accent-red);
@@ -568,7 +568,7 @@ h1 {
       📋 間違えた問題番号一覧
     </div>
     <p style="font-size: 0.7rem; color: #7f8c8d; margin-top: 0; margin-bottom: 8px;">
-       🔥：絶対復習問題（集団正解率80%以上）<br>
+       🔥：重要復習問題（集団正解率80%以上）<br>
        🤝：皆で頑張ろう問題（集団正解率60%未満）
     </p>
 
@@ -1498,7 +1498,7 @@ function renderLatestResultSummary() {
         let badgeClass = "q-badge-normal";
         let icon = "";
         
-        // 🔥 絶対復習問題（集団正解率80%以上）
+        // 🔥 重要復習問題（集団正解率80%以上）
         if (item.groupRate >= 80.0) {
           badgeClass = "q-badge-abs";
           icon = "🔥 ";
@@ -1533,7 +1533,7 @@ function renderLatestResultSummary() {
 }
 
 /**
- * 🔥 【第4タブ】累計データからの間違えた問題（🔥絶対復習・🤝皆で頑張ろう）ピックアップ描画（10科目別フィルター対応版）
+ * 🔥 【第4タブ】累計データからの間違えた問題（🔥重要復習・🤝皆で頑張ろう）ピックアップ描画（10科目別フィルター対応版）
  */
 function renderReviewPickups() {
   const absContainer = document.getElementById("abs-review-list");
@@ -1588,7 +1588,7 @@ wrongList.forEach(qNumStr => {
         return; // 対象外の科目はスキップ
       }
 
-      if (groupRate >= 80.0) { // ★ 集団正解率 80% 以上（絶対復習問題）
+      if (groupRate >= 80.0) { // ★ 集団正解率 80% 以上（重要復習問題）
         absItems.push(itemData);
       } else if (groupRate < 60.0) { // ★ 集団正解率 60% 未満（皆で頑張ろう問題）
         togetherItems.push(itemData);
@@ -1639,12 +1639,12 @@ Object.keys(grouped).forEach(subjName => {
     return html;
   }
 
-  // 1. 絶対復習問題の描画（🔥）
+  // 1. 重要復習問題の描画（🔥）
   absContainer.innerHTML = renderGroupedList(
     absItems,
     "#e74c3c",
     "#fff0f0",
-    "🎉 選択された科目に絶対復習問題はありません！",
+    "🎉 選択された科目に重要復習問題はありません！",
     "🔥 "
   );
 
