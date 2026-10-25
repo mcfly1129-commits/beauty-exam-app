@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2択学習アプリ『管理画面』</title>
+    <title>【管理画面】2択学習アプリ</title>
     <!-- 📊 グラフ描画ライブラリ (Chart.js) [cite: 96] -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -1524,11 +1524,11 @@ row.innerHTML = `
 <td data-label="クラス名">${escapeHTML(student.className || '不明')}</td>
 <td data-label="識別情報" style="font-weight:bold;">${escapeHTML(student.studentName || '名無しの学生')}</td>
 <td data-label="シリアルコード"><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || '')}</code></td>
-<td data-label="総合進捗度" style="text-align:center; font-weight:bold;"><span style="color:var(--secondary-color); font-size:1.05rem; margin-right:4px;">${overallProgRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${progress}%)</small></td>
-<td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="color:var(--success-color); font-size:1.05rem; margin-right:4px;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">(${parseInt(student.totalAccuracy || 0)}%)</small></td>
+<td data-label="総合進捗度" style="text-align:center; font-weight:bold;"><span style="display:inline-flex; align-items:center; justify-content:center; width:90px;"><span style="color:var(--secondary-color); font-size:1.05rem; width:20px; text-align:center; display:inline-block;">${overallProgRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal; width:50px; text-align:right; display:inline-block;">(${progress}%)</small></span></td>
+<td data-label="平均正答率" style="text-align:center; font-weight:bold;"><span style="display:inline-flex; align-items:center; justify-content:center; width:90px;"><span style="color:var(--success-color); font-size:1.05rem; width:20px; text-align:center; display:inline-block;">${overallAccRank}</span><small style="font-size:0.7rem; color:#7f8c8d; font-weight:normal; width:50px; text-align:right; display:inline-block;">(${parseInt(student.totalAccuracy || 0)}%)</small></span></td>
 <td data-label="GM達成" style="text-align:center;">${parseInt(student.gmCount || 0)}</td>
 <td data-label="指導ステータス">${statusBadge}</td>
-<td data-label="操作" style="text-align:center;">
+<td data-label="" style="text-align:center;">
 <button class="btn-detail" data-email="${escapeHTML(student.email)}">詳細カルテ</button>
 </td>
 `;
@@ -1588,15 +1588,15 @@ SUBJECTS_DEFINITION.forEach(sub => {
   // 🎯 実力（正答率）ランクの算出（進捗率が10%超の場合のみ判定、10%以下の場合は '-' ）
   const accRank = (stat.progress > 10) ? getSelfGrowthRank(stat.accuracy, 'accuracy') : '-';
 
-  const gridItem = document.createElement('div');
-  gridItem.className = "subject-score-item";
-  gridItem.innerHTML = `
-    <h4>${sub.id} ${escapeHTML(sub.name)}</h4>
-    <div class="scores" style="display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; margin-top: 6px;">
-      <div>進捗: <strong style="color:var(--secondary-color); font-size: 0.95rem; margin-right: 2px;">${progRank}</strong> <small style="color:#7f8c8d; font-size: 0.7rem;">(${stat.progress}%)</small></div>
-      <div>正答: <strong style="color:var(--success-color); font-size: 0.95rem; margin-right: 2px;">${accRank}</strong> <small style="color:#7f8c8d; font-size: 0.7rem;">(${stat.accuracy}%)</small></div>
-    </div>
-  `;
+const gridItem = document.createElement('div');
+gridItem.className = "subject-score-item";
+gridItem.innerHTML = `
+  <h4>${sub.id} ${escapeHTML(sub.name)}</h4>
+  <div class="scores" style="display: flex; flex-direction: column; gap: 3px; font-size: 0.78rem; margin-top: 6px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;"><span>進捗:</span><span style="display:inline-flex; align-items:center; justify-content:flex-end;"><strong style="color:var(--secondary-color); font-size: 0.95rem; width: 20px; text-align: center; display: inline-block;">${progRank}</strong><small style="color:#7f8c8d; font-size: 0.7rem; width: 45px; text-align: right; display: inline-block;">(${stat.progress}%)</small></span></div>
+    <div style="display: flex; align-items: center; justify-content: space-between;"><span>正答:</span><span style="display:inline-flex; align-items:center; justify-content:flex-end;"><strong style="color:var(--success-color); font-size: 0.95rem; width: 20px; text-align: center; display: inline-block;">${accRank}</strong><small style="color:#7f8c8d; font-size: 0.7rem; width: 45px; text-align: right; display: inline-block;">(${stat.accuracy}%)</small></span></div>
+  </div>
+`;
   subjectGrid.appendChild(gridItem);
 });
 
