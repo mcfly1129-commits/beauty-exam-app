@@ -13,7 +13,7 @@
 <!-- 🔒 セキュリティヘッダ（クリックジャッキング ＆ XSS防御用 CSP） -->
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="X-XSS-Protection" content="1; mode=block">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-ancestors 'none'; object-src 'none';">
 
 <!-- 外部ライブラリ (Chart.js) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -392,14 +392,14 @@ h1 {
   <h1>過去問 記録アプリ『管理画面』</h1>
   <p class="subtitle">全学生の取り組み状況・正答率・誤答問題を一括管理</p>
 
-  <!-- 🔒 認証エリア -->
+<!-- 🔒 認証エリア -->
   <div id="auth-section" class="auth-box">
     <div style="font-size:0.9rem; font-weight:bold; color:#d35400; margin-bottom:10px;">🔒 教員専用アクセス認証</div>
-    <input type="password" id="input-teacher-code" class="input-text" placeholder="教員用シリアルコードを入力">
+    <!-- 🔒 IPA基準 1.4：共有端末等でのブラウザ自動補完・クレデンシャル記憶の防止 -->
+    <input type="password" id="input-teacher-code" class="input-text" placeholder="教員シリアルコードを入力" autocomplete="off">
     <button id="btn-teacher-login" class="btn-primary">ログインして管理画面を開く</button>
     <div id="auth-msg" style="font-size:0.75rem; color:var(--accent-red); margin-top:10px; display:none;"></div>
   </div>
-
   <!-- 🔓 メイン管理コンテンツ -->
   <div id="main-content" style="display: none;">
 
@@ -703,9 +703,15 @@ h1 {
 // ==========================================
 // 1. 設定 ＆ グローバル変数
 // ==========================================
+// 🔒 IPA基準 1.9：クリックジャッキング多層防御（Frame-busting: 悪意あるiframe内での実行を強制遮断）
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
+// === 共通設定 ===
 const GAS_API_URL = "https://script.google.com/macros/s/AKfycbysw9mSZvCVm0EEwNgHIRdQg0rOqehardW-oRojn1eoxLOCaRkmuLTH_drPr5zGDJkbnQ/exec";
 
-let currentTeacherCode = localStorage.getItem("beauty_past_exam_teacher_code") || "";
+let currentTeacherCode = sessionStorage.getItem("beauty_past_exam_teacher_code") || "";
 let teacherDataStore = null;
 
 // 🎯 【新規追加】個別詳細カルテ用チャートのインスタンス変数
@@ -873,9 +879,9 @@ function getRankLabel(accuracy) {
   return '<span style="color:#c0392b;">D (要復習)</span>';
 }
 
-// 🧮 通算総合正答率（全提出回の合算）＆ 真の最新回を計算するロジック
+// 💡 修正前後の差分：引数の型保証と不正な構造に対するガード節を厳格化
 function calculateTotalStats(student) {
-  if (!student || !student.examRecords) {
+  if (!student || typeof student !== 'object' || !student.examRecords || typeof student.examRecords !== 'object') {
     return { overallAccuracy: 0, latestAccuracy: "-", latestRound: "", totalScoreSum: 0, totalQuestions: 0 };
   }
 
@@ -892,12 +898,19 @@ function calculateTotalStats(student) {
   const totalQuestions = rounds.length * 55;
   const overallAccuracy = totalQuestions > 0 ? Math.round((totalScoreSum / totalQuestions) * 1000) / 10 : 0;
 
-  // 💡 修正：提出日時（submitTime / timestamp）の新しい順にソートして「真の最新回」を特定する
-  const sortedRoundsByTime = rounds.sort((a, b) => {
-    const timeA = new Date(student.examRecords[a].submitTime || student.examRecords[a].timestamp || 0);
-    const timeB = new Date(student.examRecords[b].submitTime || student.examRecords[b].timestamp || 0);
-    return timeB - timeA; // 新しい日時が先頭に来るように降順ソート
-  });
+// 💡 修正前後の差分：タイムスタンプが不正・欠損している場合でも安全に比較できるようにフォールバックを追加
+const sortedRoundsByTime = rounds.sort((a, b) => {
+  const rawA = student.examRecords[a].submitTime || student.examRecords[a].timestamp;
+  const rawB = student.examRecords[b].submitTime || student.examRecords[b].timestamp;
+  const timeA = rawA ? new Date(rawA).getTime() : 0;
+  const timeB = rawB ? new Date(rawB).getTime() : 0;
+  
+  // 日時が無効な場合は回番号（数値）の大小でフォールバック比較
+  if (isNaN(timeA) || isNaN(timeB)) {
+    return Number(b) - Number(a);
+  }
+  return timeB - timeA;
+});
 
   const latestRound = sortedRoundsByTime[0] || "";
   const latestRec = latestRound ? student.examRecords[latestRound] : null;
@@ -935,7 +948,7 @@ function setupEventListeners() {
 document.getElementById("btn-logout").addEventListener("click", () => {
   if (confirm("ログアウトしますか？")) {
     // 🔒 認証情報・セッション情報の完全破棄（IPA基準：共有端末での残存防止）
-    localStorage.removeItem("beauty_past_exam_teacher_code");
+    sessionStorage.removeItem('teacher_serial_code');
     sessionStorage.clear();
 
     // 🔒 メモリ内に保持されている教員データ・学生名簿の明示的クリア
@@ -1030,28 +1043,30 @@ const resetPageAndRender = () => {
     }
   });
 
-// 🟢【修正後】フィルターの閲覧対象回と、過去問分析・皆が苦手な問題の回選択を双方向連動させる
-  document.getElementById("filter-round").addEventListener("change", (e) => {
-    const val = e.target.value;
-    document.getElementById("analysis-round-select").value = val; // 過去問分析側を連動
-    
-    // 💡 追加：科目別分析側の回選択セレクトボックスも連動
-    const subjectRoundEl = document.getElementById("analysis-subject-round-select");
-    if (subjectRoundEl && subjectRoundEl.value !== val) {
-      subjectRoundEl.value = val;
+// 💡 修正前後の差分：値が既に一致している場合のガード節を追加し、イベントの無駄な連鎖発火を防止
+document.getElementById("filter-round").addEventListener("change", (e) => {
+  const val = e.target.value;
+
+  const analysisRoundEl = document.getElementById("analysis-round-select");
+  if (analysisRoundEl && analysisRoundEl.value !== val) {
+    analysisRoundEl.value = val;
+  }
+  
+  const subjectRoundEl = document.getElementById("analysis-subject-round-select");
+  if (subjectRoundEl && subjectRoundEl.value !== val) {
+    subjectRoundEl.value = val;
+  }
+  
+  const togetherSelect = document.getElementById("together-round-select");
+  if (togetherSelect && togetherSelect.value !== val) {
+    togetherSelect.value = val;
+    if (typeof renderTogetherProblemsView === "function") {
+      renderTogetherProblemsView();
     }
-    
-    // 💡 追加：皆が苦手な問題側のセレクトボックスも連動させ、再描画する
-    const togetherSelect = document.getElementById("together-round-select");
-    if (togetherSelect) {
-      togetherSelect.value = val;
-      if (typeof renderTogetherProblemsView === "function") {
-        renderTogetherProblemsView();
-      }
-    }
-    
-    resetPageAndRender();
-  });
+  }
+  
+  resetPageAndRender();
+});
 
 document.getElementById("analysis-round-select").addEventListener("change", (e) => {
     const val = e.target.value;
@@ -1294,6 +1309,14 @@ function initRoundSelectors() {
 function verifyTeacherAuth(code, isAuto) {
   if (!isAuto) showAuthMsg("⏳ 教員権限を照合中...", "#2980b9");
 
+  // 🔒 連打・多重送信防止（ログインボタンのロック）
+  const loginBtn = document.getElementById("btn-teacher-login");
+  if (loginBtn && !isAuto) {
+    loginBtn.disabled = true;
+    loginBtn.style.opacity = "0.6";
+    loginBtn.style.cursor = "not-allowed";
+  }
+
   fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
@@ -1303,7 +1326,7 @@ function verifyTeacherAuth(code, isAuto) {
   .then(data => {
     if (data.isAuthorized) {
       currentTeacherCode = code;
-      localStorage.setItem("beauty_past_exam_teacher_code", code);
+      sessionStorage.setItem('teacher_serial_code', code);
 
       document.getElementById("auth-section").style.display = "none";
       document.getElementById("main-content").style.display = "block";
@@ -1313,25 +1336,36 @@ function verifyTeacherAuth(code, isAuto) {
     } else {
       // 🔒 認可失敗時：残存トークンを完全破棄し、画面を非表示維持（フェイルセーフ）
       currentTeacherCode = "";
-      localStorage.removeItem("beauty_past_exam_teacher_code");
+      sessionStorage.removeItem('teacher_serial_code');
       sessionStorage.clear();
       document.getElementById("main-content").style.display = "none";
       document.getElementById("auth-section").style.display = "block";
       showAuthMsg(data.message || "教員権限がありません。");
     }
   })
-  .catch(err => {
+.catch(err => {
     console.error("Auth Error:", err);
-    // 🔒 通信エラー時も不正表示を防ぐためログイン画面を維持
+    // 🔒 通信エラー時、残留セッションを完全破棄した上でログイン画面を強制表示（フェイルセーフ）
+    sessionStorage.removeItem('beauty_past_exam_teacher_code');
+    sessionStorage.clear();
+    currentTeacherCode = "";
     document.getElementById("main-content").style.display = "none";
     document.getElementById("auth-section").style.display = "block";
     showAuthMsg("通信エラーが発生しました。ネット接続をご確認ください。");
+  })
+  .finally(() => {
+    // 🔒 通信終了後にログインボタンのロックを確実に解除
+    if (loginBtn && !isAuto) {
+      loginBtn.disabled = false;
+      loginBtn.style.opacity = "1";
+      loginBtn.style.cursor = "pointer";
+    }
   });
 }
 
 function showAuthMsg(msg, color="var(--accent-red)") {
   const el = document.getElementById("auth-msg");
-  el.innerText = msg;
+  el.textContent = msg; // innerText / innerHTML よりさらに安全な textContent に統一
   el.style.color = color;
   el.style.display = "block";
 }
@@ -1360,7 +1394,7 @@ function loadTeacherDashboard() {
     } else {
       // 🔒 サーバー側で認可エラーとなった場合の安全なセッション消去と初期化
       alert("データ読み込みエラー: " + (data.message || "エラーが発生しました。"));
-      localStorage.removeItem("beauty_past_exam_teacher_code");
+      sessionStorage.removeItem('teacher_serial_code');
       sessionStorage.clear();
       currentTeacherCode = "";
       location.reload();
@@ -1664,15 +1698,13 @@ tr.innerHTML = `
   });
 }
 
-// 🎯 【新規追加】個別詳細カルテ内のグラフを描画する関数
+// 💡 修正前後の差分：Chart.jsインスタンスの破棄処理を明示的かつ確実に実行してメモリリークを防止
 function renderModalCharts(student) {
   const records = student.examRecords || {};
   
-  // 💡 修正：全提出回を古い順（昇順）にソートした上で、直近最大5回分に絞り込む
   const allRounds = Object.keys(records).sort((a, b) => Number(a) - Number(b));
   const rounds = allRounds.slice(-5);
 
-  // 1. 10科目別の平均正答率を算出（全提出回ベース、または直近5回ベース。今回は全提出回の累積平均として計算）
   const subjectLabels = [
     "関係法規・制度", "運営管理", "公衆・環境", "感染症", "衛生管理技術",
     "人体の構造及び機能", "皮膚科学", "香粧品化学", "文化論", "美容技術理論"
@@ -1698,8 +1730,11 @@ function renderModalCharts(student) {
     }
   }
 
-  // レーダーチャート描画
-  if (modalRadarChartInstance) modalRadarChartInstance.destroy();
+  // 1. レーダーチャートの安全な破棄と再生成
+  if (modalRadarChartInstance) {
+    modalRadarChartInstance.destroy();
+    modalRadarChartInstance = null;
+  }
   const ctxR = document.getElementById("modalRadarChart").getContext("2d");
   modalRadarChartInstance = new Chart(ctxR, {
     type: 'radar',
@@ -1721,7 +1756,6 @@ function renderModalCharts(student) {
     }
   });
 
-// 💡 修正：回数順ではなく、実際に送信された日時（timestamp）の古い順に時系列ソートして直近最大10件を抽出
   const historyArray = Object.keys(records).map(r => {
     const rec = records[r] || {};
     return {
@@ -1729,9 +1763,9 @@ function renderModalCharts(student) {
       accuracy: Number(rec.totalAccuracy || 0),
       timestamp: rec.submitTime || rec.timestamp || ""
     };
-  }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // 古い順にソート
+  }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-  const targetHistory = historyArray.slice(-10); // 直近最大10件に絞り込み
+  const targetHistory = historyArray.slice(-10);
 
   const timeLabels = targetHistory.map(h => {
     let datePart = "";
@@ -1742,8 +1776,12 @@ function renderModalCharts(student) {
     return `第${h.round}回${datePart}`;
   });
   const historyAcc = targetHistory.map(h => h.accuracy);
-// 折れ線グラフ描画
-  if (modalLineChartInstance) modalLineChartInstance.destroy();
+
+  // 2. 折れ線グラフの安全な破棄と再生成
+  if (modalLineChartInstance) {
+    modalLineChartInstance.destroy();
+    modalLineChartInstance = null;
+  }
   const ctxL = document.getElementById("modalLineChart").getContext("2d");
   modalLineChartInstance = new Chart(ctxL, {
     type: 'line',
@@ -1765,7 +1803,7 @@ function renderModalCharts(student) {
       scales: { y: { min: 0, max: 100 } },
       plugins: { legend: { display: false } }
     },
-    plugins: [passLinePlugin] // ★ 60%合格ラインを描画するプラグインを追加
+    plugins: [passLinePlugin]
   });
 }
 
@@ -1797,15 +1835,22 @@ function openStudentDetailModal(serialCode) {
 if (rounds.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="color:#95a5a6; padding:12px;">提出された過去問記録はありません。</td></tr>';
   } else {
-    rounds.forEach(r => {
+rounds.forEach(r => {
       const rec = records[r];
       
-      let wrongList = [];
-      if (Array.isArray(rec.wrongQuestions)) {
-        wrongList = rec.wrongQuestions.map(String).filter(Boolean);
-      } else if (typeof rec.wrongQuestions === 'string' && rec.wrongQuestions.trim() !== '') {
-        wrongList = rec.wrongQuestions.split(',').filter(Boolean);
+      // 💡 修正前後の差分：wrongQuestions のパース処理を安全かつ一貫したロジックに統一
+      function parseWrongQuestions(wrongData) {
+        if (Array.isArray(wrongData)) {
+          return wrongData.map(Number).filter(q => !isNaN(q) && q > 0);
+        }
+        if (typeof wrongData === 'string' && wrongData.trim() !== '') {
+          return wrongData.split(',').map(q => parseInt(q.trim(), 10)).filter(q => !isNaN(q) && q > 0);
+        }
+        return [];
       }
+
+      // ✅ parseWrongQuestions を呼び出して wrongList に格納する
+      const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
       // 回ごとの集団正解率データから「重要復習問題」を抽出してカウント
       let roundAbsCount = 0;
@@ -1992,11 +2037,11 @@ function renderItemAnalysis() {
 
 const sortedWorst = [...qList].sort((a, b) => a.rate - b.rate).slice(0, 5);
 
-// 🔒 XSS対策：問番号・順位・正解率数値の厳格化
+// 🔒 XSS対策：すべての数値を明示的に数値型変換・エスケープして挿入
 worstContainer.innerHTML = sortedWorst.map((item, idx) => {
-  const safeRank = idx + 1;
-  const safeQNum = Number(item.qNum) || 0;
-  const safeRate = Number(item.rate) || 0;
+  const safeRank = escapeHTML(String(idx + 1));
+  const safeQNum = escapeHTML(String(Number(item.qNum) || 0));
+  const safeRate = escapeHTML(String(Number(item.rate) || 0));
   return `
 <b>${safeRank}位: 問${safeQNum}</b> (正解率: <span style="color:var(--accent-red); font-weight:bold;">${safeRate}%</span>) &nbsp;&nbsp;
   `;
@@ -2122,8 +2167,8 @@ tableRowsHtml.push(`
 <tr>
 <td><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
 <td><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
-<td><b>${targetDisplayLabel}</b></td>
-<td><b style="color:#d35400; font-size:0.9rem;">${safeSubAcc}%</b></td>
+<td><b>${escapeHTML(targetDisplayLabel)}</b></td>
+<td><b style="color:#d35400; font-size:0.9rem;">${escapeHTML(String(safeSubAcc))}%</b></td>
 </tr>
 `);
   });
@@ -2267,12 +2312,17 @@ if (sortedRounds.length === 0) {
                 📌 第${r}回 <span style="font-weight:normal; color:#7f8c8d;">(${hardInThisRound.length}問該当)</span>
               </div>
               <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                ${hardInThisRound.map(item => `
-                  <div style="background:#ffffff; border:1px solid #74b9ff; color:#2980b9; padding:3px 7px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
-                    <span>問${item.qNum}</span>
-                    <span style="font-size:0.65rem; background:#e0f2fe; color:#0369a1; padding:1px 4px; border-radius:4px;">${item.rate}%</span>
-                  </div>
-                `).join("")}
+${hardInThisRound.map(item => {
+  // 🔒 XSS対策：問番号・正解率数値の厳格な型保証（IPA基準 1.5.1）
+  const safeQ = Number(item.qNum) || 0;
+  const safeRate = Number(item.rate) || 0;
+  return `
+<div style="background:#ffffff; border:1px solid #74b9ff; color:#2980b9; padding:3px 7px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
+<span>問${safeQ}</span>
+<span style="font-size:0.65rem; background:#e0f2fe; color:#0369a1; padding:1px 4px; border-radius:4px;">${safeRate}%</span>
+</div>
+  `;
+}).join("")}
               </div>
             </div>
           `;
@@ -2356,14 +2406,20 @@ if (totalSubmitsAll === 0) {
       if (hardQuestions.length === 0) {
         badgesHtml = '<div style="font-size:0.75rem; color:#27ae60; padding:4px 0;">🎉 この科目に正解率60%未満の苦手な問題はありません！</div>';
       } else {
-        badgesHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">' +
-          hardQuestions.map(item => `
-            <div style="background:#ffffff; border:1px solid #74b9ff; color:#2980b9; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
-              <span>第${r}回 問${item.qNum}</span>
-              <span style="font-size:0.68rem; background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px;">正解率 ${item.rate}%</span>
-            </div>
-          `).join("") +
-        '</div>';
+// 🔒 XSS対策：回数・問番号・正解率数値の厳格な型保証（IPA基準 1.5.1）
+const safeR = escapeHTML(String(r));
+badgesHtml = '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">' +
+hardQuestions.map(item => {
+  const safeQ = Number(item.qNum) || 0;
+  const safeRate = Number(item.rate) || 0;
+  return `
+<div style="background:#ffffff; border:1px solid #74b9ff; color:#2980b9; padding:4px 8px; border-radius:6px; font-size:0.78rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;">
+<span>第${safeR}回 問${safeQ}</span>
+<span style="font-size:0.68rem; background:#e0f2fe; color:#0369a1; padding:1px 5px; border-radius:4px;">正解率 ${safeRate}%</span>
+</div>
+  `;
+}).join("") +
+'</div>';
       }
 
       htmlOutput += `
