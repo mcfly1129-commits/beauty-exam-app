@@ -545,12 +545,12 @@
     </div>
 </div>
 
-<!-- 📄 ライセンス表記モーダル構造（新規追加） -->
+<!-- 📄 ライセンス表記モーダル構造 -->
 <div id="license-modal" class="modal-overlay" onclick="document.getElementById('license-modal').style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-title">サードパーティ・ライセンス表記</div>
-        <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0;">
-            <p style="margin-top:0;">本アプリケーションでは、以下のオープンソースライブラリを使用しています。</p>
+        <div class="modal-title">オープンソース・ライセンス情報</div>
+        <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0; max-height: 50vh; overflow-y: auto;">
+            <p style="margin-top:0;">本アプリケーションでは、以下のオープンソースソフトウェアおよびライブラリを使用しています。各ソフトウェアのライセンス条項に基づき表示を行います。</p>
             <hr style="border: 0; border-top: 1px dashed #fab1a0; margin: 10px 0;">
             <p style="margin: 5px 0;"><strong>Chart.js</strong><br>
             Copyright (c) 2014-2022 Chart.js Contributors<br>
@@ -567,26 +567,27 @@
 <!-- 📜 利用規約モーダル構造 -->
 <div id="terms-modal" class="modal-overlay" onclick="document.getElementById('terms-modal').style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-title">Webアプリ利用規約</div>
+        <div class="modal-title">利用規約</div>
         <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0; max-height: 50vh; overflow-y: auto;">
-            <p style="margin-top:0;"><strong>第1条（目的および本サービスの性質）</strong><br>
-            本アプリケーション（以下「本サービス」）は、国家試験対策および学習支援を目的とした補助教材です。本サービスは学習の成果や合格を保証するものではありません。</p>
+            <p style="margin-top:0;">本利用規約（以下、「本規約」といいます。）は、本アプリケーションの提供条件および利用者の皆様と当方との間の権利義務関係を定めるものです。</p>
+            
+            <p><strong>第1条（適用）</strong><br>
+            本規約は、利用者と当方との間の本サービスの利用に関わる一切の関係に適用されるものとします。</p>
 
             <p><strong>第2条（学習データの保存と免責）</strong><br>
-            1. 本サービスは、通信コスト削減およびデータ保護のため、ユーザーの学習履歴および進捗データ（以下「学習データ」）を利用端末のブラウザ内（`localStorage`）にのみ保存します。<br>
-            2. ユーザーが以下の操作または環境下で本サービスを利用した場合、学習データが自動的に削除、破損、または読み込み不可となる場合があります。当社（運営者）は、失われた学習データの復旧義務およびこれによって生じた一切の損害について責任を負いません。
-            <br> ・ブラウザの閲覧履歴、キャッシュ、ストレージデータの削除
-            <br> ・利用端末または利用ブラウザの変更
-            <br> ・プライベートブラウズ（シークレットモード）での利用
-            <br> ・端末のストレージ容量不足による自動消去
-            <br> ・iOS/Safari等の仕様（ITP機能等）による一定期間未アクセスでの自動削除</p>
+            1. 本アプリでは、利用者の学習進捗データおよび成果報告データを、お使いの端末のブラウザ内記憶領域（<code>localStorage</code>）ならびに当方指定のGoogleスプレッドシート（Google Apps Script経由）に保存・蓄積します。<br>
+            2. ブラウザのキャッシュクリアや端末の故障等によりデータが消失した場合について、当方は一切の責任を負わないものとします。<br>
+            3. 生徒成長ダッシュボードおよび教師管理画面で表示される統計データは、システム運用の状況により誤差が生じる場合があります。</p>
 
-            <p><strong>第3条（送信制限およびシステム免責）</strong><br>
-            1. 成果報告機能における送信制限（7日間制限）等について、通信環境の不具合、セッション切れ（トークン有効期限切れ）、誤操作等により送信が完了しなかった場合であっても、当社は送信ロックの個別解除および提出遅延等に関する損害賠償や責任を負いません。<br>
-            2. 保守点検やサーバー障害等により本サービスが一時的に停止した場合であっても、当社は一切の責任を負いません。</p>
+            <p><strong>第3条（禁止事項）</strong><br>
+            利用者は、本サービスの利用にあたり、以下の行為をしてはなりません。<br>
+            ・法令または公序良俗に違反する行為<br>
+            ・犯罪行為に関連する行為<br>
+            ・サーバーまたはネットワークの機能を破壊または妨害する行為<br>
+            ・本サービスの運営を妨害するおそれのある行為</p>
 
-            <p><strong>第4条（規約の変更）</strong><br>
-            当社は、必要と判断した場合には、ユーザーへの事前の通知なく本規約を変更することができるものとします。</p>
+            <p><strong>第4条（サービスの提供の停止等）</strong><br>
+            当方は、システムの保守点検、サーバー障害、その他やむを得ない事由により、利用者に事前に通知することなく本サービスの提供を停止または中断することができるものとします。</p>
         </div>
         <button class="modal-close-btn" onclick="document.getElementById('terms-modal').style.display='none'">閉じる</button>
     </div>
@@ -597,23 +598,13 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-title">プライバシーポリシー</div>
         <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0; max-height: 50vh; overflow-y: auto;">
-            <p style="margin-top:0;"><strong>1. 収集する個人情報</strong><br>
-            本サービスでは、Google認証を通じて以下の情報を取得します。<br>
-            ・Googleアカウントの電子メールアドレス<br>
-            ・Google発行の認証用IDトークン<br>
-            ・アプリ内での学習スコアおよび進捗データ</p>
-
-            <p><strong>2. 情報の利用目的</strong><br>
-            取得した個人情報は、以下の目的でのみ利用します。<br>
-            ・学校名簿等のホワイトリストと照合した認証・アクセス制御のため<br>
-            ・成果報告時のデータ送信、全国ランキング・統計データの算出のため<br>
-            ・不正アクセスの防止およびシステムセキュリティ維持のため</p>
-
-            <p><strong>3. データの管理と第三者提供</strong><br>
-            当社は、法令に基づく場合を除き、取得した個人情報をユーザーの同意なく第三者に提供・開示することはありません。</p>
-
-            <p><strong>4. サードパーティ製ライブラリの利用</strong><br>
-            本サービスでは、グラフ描画や演出のためにサードパーティ製ライブラリ（Chart.js、canvas-confetti等）を使用していますが、これらに個人情報が渡されることはありません。</p>
+            <p style="margin-top:0;">当方は、本サービスにおける利用者情報の取扱いについて、以下の通りプライバシーポリシーを定めます。</p>
+            
+            <p><strong>1. 収集する情報と利用目的</strong><br>
+            本サービスでは、学習進捗状況の管理およびサービス品質向上のために必要な最小限のデータ（ログイン用パスワード・学習スコア・解答履歴）を取得・利用します。法令に基づく場合を除き、取得した情報を第三者に開示・提供することはありません。</p>
+            
+            <p><strong>2. 安全管理措置</strong><br>
+            当方は、情報の漏洩、滅失またはき損の防止その他収集した情報の安全管理のために必要かつ適切な措置を講じます。</p>
         </div>
         <button class="modal-close-btn" onclick="document.getElementById('privacy-modal').style.display='none'">閉じる</button>
     </div>
