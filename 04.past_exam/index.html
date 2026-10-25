@@ -542,7 +542,7 @@ h1 {
 <!-- 分析ボード風のメインランク・正答率カード -->
     <div style="background:#fefaf0; border:1px solid #ffe3d1; padding:12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-around; align-items:center; text-align:center;">
       <div>
-        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold; margin-bottom:2px;">総合ランク</div>
+        <div style="font-size:0.72rem; color:#7f8c8d; font-weight:bold; margin-bottom:2px;">ランク</div>
         <div id="summary-rank-val" style="color:#e67e22; font-size:1.15rem; font-weight:bold; line-height:1.2;">-</div>
       </div>
       <div style="border-left:1px solid #ffe3d1; height:30px;"></div>
@@ -598,11 +598,11 @@ h1 {
     </div>
     <div id="rank-badge-box" style="display:flex; justify-content:space-around; align-items:center; margin:12px auto 0 auto; max-width:320px; background:#fefaf0; padding:10px 12px; border-radius:12px; font-size:0.85rem; font-weight:bold; text-align:center;">
       <div style="display:flex; align-items:center; gap:4px;">
-        <span>総合ランク:</span>
+        <span>総合<br>ランク</span>
         <span id="badge-total-rank" style="color:#e67e22; font-size:1.05rem; line-height:1;">-</span>
       </div>
       <div style="display:flex; align-items:center; gap:4px;">
-        <span>正答率:</span>
+        <span>総合<br>正答率</span>
         <span id="badge-total-acc" style="color:#0984e3; font-size:1.05rem; line-height:1;">--%</span>
       </div>
     </div>
@@ -1448,7 +1448,7 @@ function renderLatestResultSummary() {
   if (!listContainer) return;
 
   if (wrongList.length === 0) {
-    listContainer.innerHTML = '<div style="font-size:0.85rem; color:#27ae60; text-align:center; padding:15px; font-weight:bold;">🎉 全問正解です！素晴らしい成果です！</div>';
+    listContainer.innerHTML = '<div style="font-size:0.85rem; color:#27ae60; text-align:center; padding:15px; font-weight:bold;">🎉 全問正解です！<br>素晴らしい成果です！</div>';
     return;
   }
 
@@ -1644,7 +1644,7 @@ Object.keys(grouped).forEach(subjName => {
     absItems,
     "#e74c3c",
     "#fff0f0",
-    "🎉 選択された科目に重要復習問題はありません！",
+    "🎉 選択された科目に<br>重要復習問題はありません！",
     "🔥 "
   );
 
@@ -1653,7 +1653,7 @@ Object.keys(grouped).forEach(subjName => {
     togetherItems,
     "#2980b9",
     "#f0f7ff",
-    "🎉 選択された科目に高難易度の誤答問題はありません！",
+    "🎉 選択された科目に<br>高難易度の誤答問題はありません！",
     "🤝 "
   );
 }
