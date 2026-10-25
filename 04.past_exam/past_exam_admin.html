@@ -322,13 +322,64 @@ h1 {
 }
 .q-rate-box.hard { background: #fff0f0; border-color: #ff7675; color: #c0392b; font-weight: bold; }
 .q-rate-box.easy { background: #f0fff4; border-color: #b7eb8f; color: #27ae60; font-weight: bold; }
+
+/* 📱 スマホ用アコーディオンテーブル設計 (@media) ※学生一覧テーブルのみに限定 */
+@media (max-width: 800px) {
+  #view-students-container .student-table, 
+  #view-students-container .student-table thead, 
+  #view-students-container .student-table tbody, 
+  #view-students-container .student-table th, 
+  #view-students-container .student-table td, 
+  #view-students-container .student-table tr {
+    display: block;
+  }
+
+  #view-students-container .student-table thead {
+    display: none; /* スマホではヘッダーを非表示 */
+  }
+
+  #view-students-container .student-table tbody tr {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  }
+
+  #view-students-container .student-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 💡 縦位置を上揃えにして複数行のテキストが崩れないようにする */
+    padding: 8px 0;
+    border: none;
+    border-bottom: 1px dashed #f1f2f6;
+    text-align: right;
+    gap: 10px; /* ラベルとデータの間に適度な余白を持たせる */
+  }
+
+  #view-students-container .student-table td:last-child {
+    border-bottom: none;
+    padding-top: 10px;
+    justify-content: center;
+  }
+
+  #view-students-container .student-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 0.8rem;
+    text-align: left;
+  }
+}
+
 </style>
 </head>
 <body>
 
 <div class="container">
   <h1>過去問 記録アプリ『管理画面』</h1>
-  <p class="subtitle">全学生の取り組み状況・通算正答率・誤答問題を一括管理</p>
+  <p class="subtitle">全学生の取り組み状況・正答率・誤答問題を一括管理</p>
 
   <!-- 🔒 認証エリア -->
   <div id="auth-section" class="auth-box">
@@ -389,7 +440,7 @@ h1 {
         </div>
         <div>
           <label style="font-size:0.7rem; color:#7f8c8d;">閲覧対象回</label>
-          <select id="filter-round" class="select-box"><option value="">全回一覧</option></select>
+          <select id="filter-round" class="select-box"><option value="">全回集計</option></select>
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
@@ -424,10 +475,10 @@ h1 {
     </div>
 
 <!-- タブ切替 -->
-<div style="display:flex; gap:6px; margin-bottom:10px; border-bottom:2px solid #ffeaa7; padding-bottom:4px; overflow-x:auto;">
-  <button id="btn-tab-students" class="btn-secondary" style="background:var(--primary-color); white-space:nowrap;">学生 一覧</button>
-  <button id="btn-tab-analysis" class="btn-secondary" style="background:#b2bec3; white-space:nowrap;">過去問・科目分析</button>
-  <button id="btn-tab-together" class="btn-secondary" style="background:#b2bec3; white-space:nowrap;">皆が苦手な問題</button>
+<div style="display:flex; gap:6px; margin-bottom:10px; border-bottom:2px solid #ffeaa7; padding-bottom:4px; width:100%; box-sizing:border-box;">
+  <button id="btn-tab-students" class="btn-secondary" style="flex:1; background:var(--primary-color); white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.75rem;">学生 一覧</button>
+  <button id="btn-tab-analysis" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">過去問・科目分析</button>
+  <button id="btn-tab-together" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">皆が苦手な問題</button>
 </div>
 
     <!-- VIEW 1: 学生一覧テーブル（スマホ最適化 ＆ ページネーション） -->
@@ -439,7 +490,7 @@ h1 {
               <th>コード/識別情報</th>
               <th>学校/クラス</th>
               <th>実施回数</th>
-              <th>通算正答率 (合算)</th>
+              <th>総合正答率</th>
               <th>指導ステータス</th>
               <th></th>
             </tr>
@@ -484,7 +535,7 @@ h1 {
       </div>
 
       <div style="background:#fff3f3; border:1px solid #ffccd5; padding:10px; border-radius:10px; margin-bottom:10px;">
-        <div style="font-size:0.78rem; font-weight:bold; color:var(--accent-red); margin-bottom:4px;">⚠️ 全体正解率ワースト5問題（要注意問）</div>
+        <div style="font-size:0.78rem; font-weight:bold; color:var(--accent-red); margin-bottom:4px;">⚠️ 全体正解率ワースト5問題（要注意問題）</div>
         <div id="worst-questions-list" style="font-size:0.72rem; color:#2c3e50; line-height:1.4;">集計データがありません</div>
       </div>
 
@@ -495,21 +546,26 @@ h1 {
 
 <!-- ② 10科目別 正解率セクション -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
-        <div style="font-size:0.82rem; font-weight:bold;">📚 10科目別 正解率・達成度分析 (全回合算)</div>
-        <select id="analysis-subject-select" class="select-box" style="width:180px;">
-          <!-- 💡 「全科目」の選択肢を追加 -->
-          <option value="sub_all">全科目 (総合平均)</option>
-          <option value="sub_01">1. 関係法規・制度</option>
-          <option value="sub_02">2. 運営管理</option>
-          <option value="sub_03">3. 公衆・環境</option>
-          <option value="sub_04">4. 感染症</option>
-          <option value="sub_05">5. 衛生管理技術</option>
-          <option value="sub_06">6. 人体の構造及び機能</option>
-          <option value="sub_07">7. 皮膚科学</option>
-          <option value="sub_08">8. 香粧品化学</option>
-          <option value="sub_09">9. 文化論</option>
-          <option value="sub_10">10. 美容技術理論</option>
-        </select>
+        <div style="font-size:0.82rem; font-weight:bold;">📚 10科目別 正解率・達成度分析</div>
+        <div style="display:flex; gap:6px;">
+          <select id="analysis-subject-select" class="select-box" style="width:160px;">
+            <option value="sub_all">全科目 (総合平均)</option>
+            <option value="sub_01">1. 関係法規・制度</option>
+            <option value="sub_02">2. 運営管理</option>
+            <option value="sub_03">3. 公衆・環境</option>
+            <option value="sub_04">4. 感染症</option>
+            <option value="sub_05">5. 衛生管理技術</option>
+            <option value="sub_06">6. 人体の構造及び機能</option>
+            <option value="sub_07">7. 皮膚科学</option>
+            <option value="sub_08">8. 香粧品化学</option>
+            <option value="sub_09">9. 文化論</option>
+            <option value="sub_10">10. 美容技術理論</option>
+          </select>
+          <!-- 💡 追加：科目別分析用の回選択セレクトボックス -->
+          <select id="analysis-subject-round-select" class="select-box" style="width:130px;">
+            <option value="">全回集計</option>
+          </select>
+        </div>
       </div>
 
       <!-- サマリーカード -->
@@ -533,7 +589,7 @@ h1 {
               <th>コード/識別情報</th>
               <th>学校/クラス</th>
               <th>集計対象</th>
-              <th>選択科目の正答率</th>
+              <th>正答率</th>
             </tr>
           </thead>
           <tbody id="subject-analysis-tbody">
@@ -551,11 +607,15 @@ h1 {
         <p style="font-size:0.75rem; color:#7f8c8d; margin:0 0 10px 0;">
           全学生の集団正解率が60%未満となっている<br>「皆が苦手な問題」を10科目ごとに集計し、<br>担当教員が重点的に指導すべき問題を可視化します。
         </p>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:4px;">
-          <label style="font-size:0.75rem; font-weight:bold; color:#2c3e50;">対象回の絞り込み:</label>
-          <select id="together-round-select" class="select-box" style="width:195px;">
-            <option value="">全回一覧（各回個別に抽出）</option>
-          </select>
+        <!-- 💡 スマホ・PC共通で左に選択、右に総計バッジを確実に配置するレイアウト -->
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0; flex:1;">
+            <label style="font-size:0.75rem; font-weight:bold; color:#2c3e50; white-space:nowrap;">対象回の絞り込み:</label>
+            <select id="together-round-select" class="select-box" style="width:170px; max-width:100%;">
+              <option value="">全回集計（各回個別に抽出）</option>
+            </select>
+          </div>
+          <span id="together-total-count-badge" style="font-size:0.72rem; background:#2980b9; color:white; padding:3px 10px; border-radius:10px; font-weight:bold; display:inline-block; white-space:nowrap; flex-shrink:0;">総計 0問 該当</span>
         </div>
       </div>
 
@@ -573,14 +633,18 @@ h1 {
       <button id="btn-close-detail-modal" style="background:#e4e7eb; border:none; padding:4px 10px; border-radius:6px; cursor:pointer; font-weight:bold;">閉じる</button>
     </div>
 
-    <!-- 上部ステータス表示エリア（通算正答率を削除し、重要復習問題数を右側に表示） -->
-    <div style="background:#fafafa; padding:8px 10px; border-radius:8px; margin:8px 0; font-size:0.78rem; line-height:1.6; display:flex; justify-content:space-between; align-items:flex-end;">
-      <div>
+<!-- 上部ステータス表示エリア（総合ランク・正答率を追加） -->
+    <div style="background:#fafafa; padding:10px; border-radius:8px; margin:8px 0; font-size:0.78rem; line-height:1.6; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <div style="flex:1; min-width:180px;">
         <div><b>シリアルコード:</b> <span id="modal-student-code">-</span></div>
         <div><b>所属:</b> <span id="modal-student-belong">-</span></div>
         <div><b>最終活動日時:</b> <span id="modal-student-lasttime">-</span></div>
+        <div style="margin-top:4px; display:flex; gap:10px; flex-wrap:wrap;">
+          <span><b>総合ランク:</b> <span id="modal-student-rank" style="color:#e67e22; font-weight:bold;">-</span></span>
+          <span><b>総合正答率:</b> <span id="modal-student-acc" style="color:#0984e3; font-weight:bold;">--%</span></span>
+        </div>
       </div>
-      <div style="text-align:right; flex-shrink:0;">
+      <div style="text-align:right; background:#fff; border:1px solid var(--border-color); padding:6px 12px; border-radius:6px; flex-shrink:0;">
         <div style="font-size:0.7rem; color:#7f8c8d; font-weight:bold;">重要復習問題</div>
         <div style="font-size:1.05rem; font-weight:bold; color:var(--accent-red);"><span id="modal-student-abs-count">0</span> 問</div>
       </div>
@@ -601,8 +665,25 @@ h1 {
     <!-- 下部：重要復習問題の一覧（バッジ化して見やすく表示） -->
     <div style="font-size:0.82rem; font-weight:bold; margin-top:12px; color:var(--accent-red);">🔥 重要復習問題 一覧</div>
     <div style="font-size:0.68rem; color:#7f8c8d; margin-bottom:4px;">※本人が誤答し、かつ集団正解率が80%以上の要復習問</div>
-    <div id="modal-wrong-questions-box" style="background:#fff5f5; border:1px solid #ffccd5; padding:8px; border-radius:8px; min-height:48px; max-height:120px; overflow-y:auto;">
+    <div id="modal-wrong-questions-box" style="background:#fff5f5; border:1px solid #ffccd5; padding:8px; border-radius:8px; min-height:48px; max-height:120px; overflow-y:auto; margin-bottom:12px;">
       なし
+    </div>
+
+    <!-- 🎯 【新規追加】個別詳細カルテ用グラフエリア -->
+    <div style="font-size:0.82rem; font-weight:bold; margin-top:14px; color:#2c3e50; border-top:1px solid var(--border-color); padding-top:10px;">📊 学生の累積分析・推移グラフ</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+      <div style="background:white; border:1px solid var(--border-color); border-radius:8px; padding:10px;">
+        <div style="font-size:0.75rem; font-weight:bold; color:#2c3e50; margin-bottom:6px; text-align:center;">🎯 科目別平均正答率レーダー</div>
+        <div style="position: relative; height: 200px; width: 100%;">
+          <canvas id="modalRadarChart"></canvas>
+        </div>
+      </div>
+      <div style="background:white; border:1px solid var(--border-color); border-radius:8px; padding:10px;">
+        <div style="font-size:0.75rem; font-weight:bold; color:#2c3e50; margin-bottom:6px; text-align:center;">📈 実施履歴の推移</div>
+        <div style="position: relative; height: 180px; width: 100%;">
+          <canvas id="modalLineChart"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -615,6 +696,37 @@ const GAS_API_URL = "https://script.google.com/macros/s/AKfycbysw9mSZvCVm0EEwNgH
 
 let currentTeacherCode = localStorage.getItem("beauty_past_exam_teacher_code") || "";
 let teacherDataStore = null;
+
+// 🎯 【新規追加】個別詳細カルテ用チャートのインスタンス変数
+let modalRadarChartInstance = null;
+let modalLineChartInstance = null;
+
+// 💡 60%合格ラインを描画するChart.jsプラグイン
+const passLinePlugin = {
+  id: 'passLinePlugin',
+  afterDraw(chart) {
+    if (chart.scales.y) {
+      const ctx = chart.ctx;
+      const yAxis = chart.scales.y;
+      const yVal = yAxis.getPixelForValue(60);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart.chartArea.left, yVal);
+      ctx.lineTo(chart.chartArea.right, yVal);
+      ctx.strokeStyle = '#ff7675'; // 赤色の点線
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+
+      // ラベル文字の描画
+      ctx.fillStyle = '#ff7675';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('60% 合格ライン', chart.chartArea.left + 5, yVal - 5);
+      ctx.restore();
+    }
+  }
+};
 
 // 💡 追加：55問の科目マッピング（問1〜問55に対応する科目ID: 1〜10）
 const QUESTION_SUBJECT_MAP = [
@@ -688,7 +800,7 @@ function getAlertStatusCode(student) {
   // 1. 14日以上経過は赤（最優先）
   if (diffDays >= 14) return "alert-red";
 
-  // 2. 通算正答率の計算（提出履歴がある場合のみ）
+  // 2. 正答率の計算（提出履歴がある場合のみ）
   let isLowAccuracy = false;
   if (student.submittedRoundsCount > 0) {
     const stats = calculateTotalStats(student);
@@ -697,7 +809,7 @@ function getAlertStatusCode(student) {
     }
   }
 
-  // 3. 🟡 注意の条件: 7日以上経過、または通算正答率60%未満
+  // 3. 🟡 注意の条件: 7日以上経過、または正答率60%未満
   if (diffDays >= 7 || isLowAccuracy) {
     return "alert-yellow";
   }
@@ -740,13 +852,23 @@ function getAlertBadge(student) {
   return '<span class="badge-alert alert-green">🟢 順調</span>';
 }
 
-// 🧮 通算総合正答率（全提出回の合算）計算ロジック
+// 💡 修正：学生用アプリと統一したランク判定基準とラベル名
+function getRankLabel(accuracy) {
+  const acc = Number(accuracy || 0);
+  if (acc >= 80) return '<span style="color:#27ae60;">S (合格圏内)</span>';
+  if (acc >= 70) return '<span style="color:#2980b9;">A (順調)</span>';
+  if (acc >= 60) return '<span style="color:#f39c12;">B (目安突破)</span>';
+  if (acc >= 54) return '<span style="color:#d35400;">C (あと一歩)</span>';
+  return '<span style="color:#c0392b;">D (要復習)</span>';
+}
+
+// 🧮 通算総合正答率（全提出回の合算）＆ 真の最新回を計算するロジック
 function calculateTotalStats(student) {
   if (!student || !student.examRecords) {
     return { overallAccuracy: 0, latestAccuracy: "-", latestRound: "", totalScoreSum: 0, totalQuestions: 0 };
   }
 
-  const rounds = Object.keys(student.examRecords).sort((a, b) => Number(b) - Number(a));
+  const rounds = Object.keys(student.examRecords);
   if (rounds.length === 0) {
     return { overallAccuracy: 0, latestAccuracy: "-", latestRound: "", totalScoreSum: 0, totalQuestions: 0 };
   }
@@ -759,7 +881,14 @@ function calculateTotalStats(student) {
   const totalQuestions = rounds.length * 55;
   const overallAccuracy = totalQuestions > 0 ? Math.round((totalScoreSum / totalQuestions) * 1000) / 10 : 0;
 
-  const latestRound = rounds[0]; // ← [0] を補正
+  // 💡 修正：提出日時（submitTime / timestamp）の新しい順にソートして「真の最新回」を特定する
+  const sortedRoundsByTime = rounds.sort((a, b) => {
+    const timeA = new Date(student.examRecords[a].submitTime || student.examRecords[a].timestamp || 0);
+    const timeB = new Date(student.examRecords[b].submitTime || student.examRecords[b].timestamp || 0);
+    return timeB - timeA; // 新しい日時が先頭に来るように降順ソート
+  });
+
+  const latestRound = sortedRoundsByTime[0] || "";
   const latestRec = latestRound ? student.examRecords[latestRound] : null;
   const latestAccuracy = latestRec ? `${latestRec.totalAccuracy}%` : "-";
 
@@ -884,6 +1013,12 @@ const resetPageAndRender = () => {
     const val = e.target.value;
     document.getElementById("analysis-round-select").value = val; // 過去問分析側を連動
     
+    // 💡 追加：科目別分析側の回選択セレクトボックスも連動
+    const subjectRoundEl = document.getElementById("analysis-subject-round-select");
+    if (subjectRoundEl && subjectRoundEl.value !== val) {
+      subjectRoundEl.value = val;
+    }
+    
     // 💡 追加：皆が苦手な問題側のセレクトボックスも連動させ、再描画する
     const togetherSelect = document.getElementById("together-round-select");
     if (togetherSelect) {
@@ -896,6 +1031,29 @@ const resetPageAndRender = () => {
     resetPageAndRender();
   });
 
+document.getElementById("analysis-round-select").addEventListener("change", (e) => {
+    const val = e.target.value;
+    document.getElementById("filter-round").value = val; // 上側（フィルター）を連動
+    
+    // 💡 科目別分析側の回選択セレクトボックスも連動
+    const subjectRoundEl = document.getElementById("analysis-subject-round-select");
+    if (subjectRoundEl && subjectRoundEl.value !== val) {
+      subjectRoundEl.value = val;
+    }
+
+    // 💡 皆が苦手な問題側も連動
+    const togetherSelect = document.getElementById("together-round-select");
+    if (togetherSelect && togetherSelect.value !== val) {
+      togetherSelect.value = val;
+      if (typeof renderTogetherProblemsView === "function") {
+        renderTogetherProblemsView();
+      }
+    }
+
+    renderItemAnalysis();
+    renderSubjectAnalysis();
+  });
+
   document.getElementById("analysis-round-select").addEventListener("change", (e) => {
     const val = e.target.value;
     document.getElementById("filter-round").value = val; // 上側（フィルター）を連動
@@ -905,6 +1063,41 @@ const resetPageAndRender = () => {
 
   document.getElementById("analysis-subject-select").addEventListener("change", renderSubjectAnalysis);
   document.getElementById("analysis-item-subject-select").addEventListener("change", renderItemAnalysis);
+
+// 💡 追加・修正：科目別分析の回セレクトボックス変更時のリスナー（双方向連動対応）
+  const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
+  if (subjectRoundSelect) {
+    subjectRoundSelect.addEventListener("change", (e) => {
+      const val = e.target.value;
+
+      // 1. 上部フィルター側を同期
+      const filterRoundEl = document.getElementById("filter-round");
+      if (filterRoundEl && filterRoundEl.value !== val) {
+        filterRoundEl.value = val;
+      }
+
+      // 2. 過去問分析側を同期
+      const analysisRoundEl = document.getElementById("analysis-round-select");
+      if (analysisRoundEl && analysisRoundEl.value !== val) {
+        analysisRoundEl.value = val;
+      }
+
+      // 3. 皆が苦手な問題側を同期
+      const togetherSelect = document.getElementById("together-round-select");
+      if (togetherSelect && togetherSelect.value !== val) {
+        togetherSelect.value = val;
+        if (typeof renderTogetherProblemsView === "function") {
+          renderTogetherProblemsView();
+        }
+      }
+
+      // 4. 学生一覧・サマリー・各分析の再描画
+      renderStudentTable();
+      renderSummaryBadges();
+      renderItemAnalysis();
+      renderSubjectAnalysis();
+    });
+  }
 
   // 🟢 ここに先ほどの「科目連動コード」を挿入します
   const itemSubSelect = document.getElementById("analysis-item-subject-select");
@@ -941,9 +1134,20 @@ if (itemSubSelect && subAnalysisSelect) {
     });
   }
 
-  document.getElementById("btn-close-detail-modal").addEventListener("click", () => {
+document.getElementById("btn-close-detail-modal").addEventListener("click", () => {
     document.getElementById("student-detail-modal").style.display = "none";
   });
+
+  // 💡 追加：モーダルの背景（オーバーレイ）をクリックしたときにモーダルを閉じる
+  const detailModal = document.getElementById("student-detail-modal");
+  if (detailModal) {
+    detailModal.addEventListener("click", (e) => {
+      // クリックされたのが背景（オーバーレイそのもの）である場合のみ閉じる
+      if (e.target === detailModal) {
+        detailModal.style.display = "none";
+      }
+    });
+  }
 }
 
 // 画面位置をテーブル上部に移動させるヘルパー関数（setupEventListenersの外に配置）
@@ -990,6 +1194,10 @@ function resetFilters() {
   const subAnalysisSelect = document.getElementById("analysis-subject-select");
   if (subAnalysisSelect) subAnalysisSelect.value = "sub_all";
 
+  // 💡 追加：科目別分析の回選択も「全回集計」にリセット
+  const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
+  if (subjectRoundSelect) subjectRoundSelect.value = "";
+
   currentPage = 1;
   renderStudentTable();
   renderSummaryBadges();
@@ -1013,10 +1221,12 @@ function initRoundSelectors() {
   const roundFilter = document.getElementById("filter-round");
   const analysisSelect = document.getElementById("analysis-round-select");
   const togetherRoundSelect = document.getElementById("together-round-select");
+  const subjectRoundSelect = document.getElementById("analysis-subject-round-select"); // 💡 追加
 
-  roundFilter.innerHTML = '<option value="">全回一覧</option>';
-  analysisSelect.innerHTML = '<option value="">全回一覧</option>';
-  if (togetherRoundSelect) togetherRoundSelect.innerHTML = '<option value="">全回一覧（各回個別に抽出）</option>';
+  roundFilter.innerHTML = '<option value="">全回集計</option>';
+  analysisSelect.innerHTML = '<option value="">全回集計</option>';
+  if (togetherRoundSelect) togetherRoundSelect.innerHTML = '<option value="">全回集計（各回個別に抽出）</option>';
+  if (subjectRoundSelect) subjectRoundSelect.innerHTML = '<option value="">全回集計</option>'; // 💡 追加
 
   for (let r = 54; r >= 41; r--) {
     const opt = document.createElement("option");
@@ -1024,32 +1234,37 @@ function initRoundSelectors() {
     opt.textContent = `第${r}回過去問`;
     roundFilter.appendChild(opt.cloneNode(true));
     analysisSelect.appendChild(opt);
-    if (togetherRoundSelect) togetherRoundSelect.appendChild(opt.cloneNode(true)); // 💡 追加
+    if (togetherRoundSelect) togetherRoundSelect.appendChild(opt.cloneNode(true));
+    if (subjectRoundSelect) subjectRoundSelect.appendChild(opt.cloneNode(true)); // 💡 追加
   }
 
-// 💡 追加：皆が苦手な問題ビューの回選択変更イベント（上部のフィルターとも双方向連動）
+// 💡 皆が苦手な問題ビューの回選択変更イベント（双方向連動対応）
   if (togetherRoundSelect) {
     togetherRoundSelect.addEventListener("change", (e) => {
       const val = e.target.value;
       
-      // 💡 上部のフィルター側も同期させる
+      // 1. 上部のフィルター側を同期
       const filterRoundEl = document.getElementById("filter-round");
-      if (filterRoundEl) {
+      if (filterRoundEl && filterRoundEl.value !== val) {
         filterRoundEl.value = val;
       }
       
-      // 💡 過去問分析側のセレクトボックスも同期させる
+      // 2. 過去問分析側を同期
       const analysisRoundEl = document.getElementById("analysis-round-select");
-      if (analysisRoundEl) {
+      if (analysisRoundEl && analysisRoundEl.value !== val) {
         analysisRoundEl.value = val;
       }
 
-      // 学生一覧やサマリーのフィルター状態も更新する
-      if (typeof resetPageAndRender === "function") {
-        // ※ resetPageAndRender が定義されているスコープに合わせて調整、なければ個別更新
+      // 3. 科目別分析側を同期
+      const subjectRoundEl = document.getElementById("analysis-subject-round-select");
+      if (subjectRoundEl && subjectRoundEl.value !== val) {
+        subjectRoundEl.value = val;
       }
+
       renderStudentTable();
       renderSummaryBadges();
+      renderItemAnalysis();
+      renderSubjectAnalysis();
 
       if (typeof renderTogetherProblemsView === "function") {
         renderTogetherProblemsView();
@@ -1246,7 +1461,7 @@ function renderSummaryBadges() {
         alertCount++;
       }
     } else {
-      // 全回一覧の場合：従来通りの集計
+      // 全回集計の場合：従来通りの集計
       if (roundsCount > 0) {
         activeStudentCount++;
       }
@@ -1361,31 +1576,28 @@ function renderStudentTable() {
     const stats = calculateTotalStats(s);
     const statusBadge = getAlertBadge(s);
 
-    // ⭕ 改善点: 閲覧対象回が指定されている場合の表示切り分け（未提出なら「未実施」を表示）
+// 💡 修正：フィルター（閲覧対象回）に関わらず、常に通算総合正答率・総合ランク・真の最新回情報を表示する
     let accuracyDisplay = "-";
-    if (selectedRound) {
-      const rec = s.examRecords && s.examRecords[selectedRound];
-      if (rec) {
-        accuracyDisplay = `<b style="font-size:0.9rem; color:#d35400;">${rec.totalAccuracy}%</b><br><small style="font-size:0.68rem; color:#7f8c8d;">(第${selectedRound}回 得点: ${rec.totalScore}点)</small>`;
-      } else {
-        accuracyDisplay = `<span style="color:#95a5a6; font-size:0.75rem;">第${selectedRound}回 未実施</span>`;
-      }
+    if (s.submittedRoundsCount > 0) {
+      const rankHtml = getRankLabel(stats.overallAccuracy);
+      // 💡 修正：スマホで見やすいよう、正答率・ランク・最新回情報をdivで綺麗にブロック分けして整列させる
+      accuracyDisplay = `
+        <div style="text-align:right;">
+          <div><b style="font-size:0.9rem; color:#d35400;">${stats.overallAccuracy}%</b> &nbsp; ${rankHtml}</div>
+          ${stats.latestRound ? `<div style="font-size:0.68rem; color:#7f8c8d; margin-top:2px;">(最新: 第${stats.latestRound}回 ${stats.latestAccuracy})</div>` : ''}
+        </div>
+      `;
     } else {
-      if (s.submittedRoundsCount > 0) {
-        accuracyDisplay = `<b style="font-size:0.9rem; color:#d35400;">${stats.overallAccuracy}%</b>`;
-        if (stats.latestRound) {
-          accuracyDisplay += `<br><small style="font-size:0.68rem; color:#7f8c8d;">(最新: 第${stats.latestRound}回 ${stats.latestAccuracy})</small>`;
-        }
-      }
+      accuracyDisplay = `<span style="color:#95a5a6; font-size:0.75rem;">未実施</span>`;
     }
 
     tr.innerHTML = `
-      <td><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
-      <td>${escapeHTML(s.schoolName || '-')}<br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
-      <td><b>${s.submittedRoundsCount || 0}</b> / 14回分</td>
-      <td>${accuracyDisplay}</td>
-      <td>${statusBadge}</td>
-      <td><button class="btn-secondary btn-open-detail" data-code="${escapeHTML(s.serialCode)}">詳細カルテ</button></td>
+      <td data-label="コード/識別情報"><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
+      <td data-label="学校/クラス"><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
+      <td data-label="過去問経験数"><b>${s.submittedRoundsCount || 0}</b> / 14回分</td>
+      <td data-label="正答率">${accuracyDisplay}</td>
+      <td data-label="指導ステータス">${statusBadge}</td>
+      <td data-label=""><button class="btn-secondary btn-open-detail" data-code="${escapeHTML(s.serialCode)}">詳細カルテ</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1395,6 +1607,111 @@ function renderStudentTable() {
       const code = e.target.getAttribute("data-code");
       openStudentDetailModal(code);
     });
+  });
+}
+
+// 🎯 【新規追加】個別詳細カルテ内のグラフを描画する関数
+function renderModalCharts(student) {
+  const records = student.examRecords || {};
+  
+  // 💡 修正：全提出回を古い順（昇順）にソートした上で、直近最大5回分に絞り込む
+  const allRounds = Object.keys(records).sort((a, b) => Number(a) - Number(b));
+  const rounds = allRounds.slice(-5);
+
+  // 1. 10科目別の平均正答率を算出（全提出回ベース、または直近5回ベース。今回は全提出回の累積平均として計算）
+  const subjectLabels = [
+    "関係法規・制度", "運営管理", "公衆・環境", "感染症", "衛生管理技術",
+    "人体の構造及び機能", "皮膚科学", "香粧品化学", "文化論", "美容技術理論"
+  ];
+  const mySubAcc = [];
+
+  for (let i = 1; i <= 10; i++) {
+    const key = "sub_" + ("0" + i).slice(-2);
+    if (allRounds.length > 0) {
+      let sum = 0;
+      let count = 0;
+      allRounds.forEach(r => {
+        const rec = records[r];
+        if (rec && rec[key] !== undefined) {
+          sum += Number(rec[key] || 0);
+          count++;
+        }
+      });
+      const avg = count > 0 ? Math.round((sum / count) * 10) / 10 : 0;
+      mySubAcc.push(avg);
+    } else {
+      mySubAcc.push(0);
+    }
+  }
+
+  // レーダーチャート描画
+  if (modalRadarChartInstance) modalRadarChartInstance.destroy();
+  const ctxR = document.getElementById("modalRadarChart").getContext("2d");
+  modalRadarChartInstance = new Chart(ctxR, {
+    type: 'radar',
+    data: {
+      labels: subjectLabels,
+      datasets: [{
+        label: '学生の平均正答率 (%)',
+        data: mySubAcc,
+        backgroundColor: 'rgba(250, 177, 160, 0.3)',
+        borderColor: 'rgba(211, 84, 0, 1)',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+// 💡 修正：回数順ではなく、実際に送信された日時（timestamp）の古い順に時系列ソートして直近最大10件を抽出
+  const historyArray = Object.keys(records).map(r => {
+    const rec = records[r] || {};
+    return {
+      round: r,
+      accuracy: Number(rec.totalAccuracy || 0),
+      timestamp: rec.submitTime || rec.timestamp || ""
+    };
+  }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // 古い順にソート
+
+  const targetHistory = historyArray.slice(-10); // 直近最大10件に絞り込み
+
+  const timeLabels = targetHistory.map(h => {
+    let datePart = "";
+    const match = String(h.timestamp).match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+    if (match) {
+      datePart = ` (${Number(match[2])}/${Number(match[3])})`;
+    }
+    return `第${h.round}回${datePart}`;
+  });
+  const historyAcc = targetHistory.map(h => h.accuracy);
+// 折れ線グラフ描画
+  if (modalLineChartInstance) modalLineChartInstance.destroy();
+  const ctxL = document.getElementById("modalLineChart").getContext("2d");
+  modalLineChartInstance = new Chart(ctxL, {
+    type: 'line',
+    data: {
+      labels: timeLabels,
+      datasets: [{
+        label: '総合正答率 (%)',
+        data: historyAcc,
+        borderColor: 'rgba(116, 185, 255, 1)',
+        backgroundColor: 'rgba(116, 185, 255, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100 } },
+      plugins: { legend: { display: false } }
+    },
+    plugins: [passLinePlugin] // ★ 60%合格ラインを描画するプラグインを追加
   });
 }
 
@@ -1408,6 +1725,10 @@ function openStudentDetailModal(serialCode) {
   document.getElementById("modal-student-code").innerText = student.serialCode;
   document.getElementById("modal-student-belong").innerText = `${student.schoolName || '-'} ${student.className || '-'} (学生 ${student.studentNumber || '-'})`;
   document.getElementById("modal-student-lasttime").innerText = formatDisplayTime(student.lastSubmitTime);
+  
+  // 💡 追加：総合ランクと正答率をモーダル上部に反映
+  document.getElementById("modal-student-rank").innerHTML = student.submittedRoundsCount > 0 ? getRankLabel(stats.overallAccuracy) : "-";
+  document.getElementById("modal-student-acc").innerText = student.submittedRoundsCount > 0 ? `${stats.overallAccuracy}%` : "--%";
 
   const tbody = document.getElementById("modal-detail-table-body");
   tbody.innerHTML = "";
@@ -1476,11 +1797,14 @@ if (rounds.length === 0) {
     '</div>';
   }
 
+// 🎯 【新規追加】個別詳細カルテ用のグラフを描画
+  renderModalCharts(student);
+
   document.getElementById("student-detail-modal").style.display = "flex";
 }
 
 // ==========================================
-// 6. 設問別正解率分析（科目絞り込み ＆ 全回一覧対応版）
+// 6. 設問別正解率分析（科目絞り込み ＆ 全回集計対応版）
 // ==========================================
 function renderItemAnalysis() {
   const container = document.getElementById("question-rates-grid");
@@ -1492,7 +1816,7 @@ function renderItemAnalysis() {
     return;
   }
 
-  const selectedRound = document.getElementById("analysis-round-select").value; // "" (全回一覧) または "54", "53"...
+  const selectedRound = document.getElementById("analysis-round-select").value; // "" (全回集計) または "54", "53"...
   const selectedItemSubject = document.getElementById("analysis-item-subject-select").value; 
 
   const selectedSchool = document.getElementById("filter-school").value;
@@ -1529,7 +1853,7 @@ function renderItemAnalysis() {
     if (!s.examRecords) return;
 
     if (selectedRound === "") {
-      // 💡 「全回一覧」の場合は、全提出回のデータをすべて合算する
+      // 💡 「全回集計」の場合は、全提出回のデータをすべて合算する
       Object.keys(s.examRecords).forEach(r => {
         const rec = s.examRecords[r];
         targetSubmitCount++;
@@ -1624,7 +1948,7 @@ function renderItemAnalysis() {
 }
 
 // ==========================================
-// 7. 科目別 正答率分析（全回合算対応版）
+// 7. 科目別 正答率分析（全回集計対応版）
 // ==========================================
 function renderSubjectAnalysis() {
   const tbody = document.getElementById("subject-analysis-tbody");
@@ -1637,16 +1961,15 @@ function renderSubjectAnalysis() {
     return;
   }
 
-  const selectedSubjectKey = document.getElementById("analysis-subject-select").value; // 例: "sub_01"
+  const selectedSubjectKey = document.getElementById("analysis-subject-select").value;
+  const selectedSubjectRound = document.getElementById("analysis-subject-round-select")?.value || ""; // 💡 追加：専用の回選択値を取得
 
-  // 1. 学生一覧と同じフィルター条件を取得
   const selectedSchool = document.getElementById("filter-school").value;
   const selectedClass = document.getElementById("filter-class").value;
   const selectedStatus = document.getElementById("filter-status").value;
   const selectedRoundFilter = document.getElementById("filter-round").value;
   const searchKey = document.getElementById("input-search-student").value.trim().toLowerCase();
 
-  // 2. フィルターを適用した生徒の絞り込み
   let filteredStudents = teacherDataStore.students.filter(s => {
     if (!s.serialCode || s.serialCode.trim() === "") return false;
 
@@ -1667,36 +1990,33 @@ function renderSubjectAnalysis() {
     return true;
   });
 
-  // 3. 絞り込まれた生徒から、選択科目データの集計とテーブル行の作成
   let totalAccSum = 0;
   let targetDataCount = 0;
   const tableRowsHtml = [];
 
   filteredStudents.forEach(s => {
     const records = s.examRecords || {};
-    const rounds = Object.keys(records).sort((a, b) => Number(b) - Number(a)); // 回数順
+    const rounds = Object.keys(records).sort((a, b) => Number(b) - Number(a));
     
     if (rounds.length === 0) return;
 
     let subAcc = 0;
     let targetDisplayLabel = "";
 
-    // 💡 変更点: 「閲覧対象回」が指定されている場合
-    if (selectedRoundFilter) {
-      const rec = records[selectedRoundFilter];
+    // 💡 変更点: selectedRoundFilter ではなく、科目別専用の selectedSubjectRound を判定に使用
+    if (selectedSubjectRound) {
+      const rec = records[selectedSubjectRound];
       if (!rec) return;
 
       if (selectedSubjectKey === "sub_all") {
-        // 全科目の総合平均（totalAccuracy）を使用
         subAcc = Number(rec.totalAccuracy || 0);
-        targetDisplayLabel = `第${selectedRoundFilter}回`;
+        targetDisplayLabel = `第${selectedSubjectRound}回`;
       } else {
         if (rec[selectedSubjectKey] === undefined) return;
         subAcc = Number(rec[selectedSubjectKey]);
-        targetDisplayLabel = `第${selectedRoundFilter}回`;
+        targetDisplayLabel = `第${selectedSubjectRound}回`;
       }
     } else {
-      // 全回合算平均の計算
       let sum = 0;
       let count = 0;
       rounds.forEach(r => {
@@ -1704,11 +2024,9 @@ function renderSubjectAnalysis() {
         if (!rec) return;
 
         if (selectedSubjectKey === "sub_all") {
-          // 💡 sub_all の場合は各回の総合正答率（totalAccuracy）を合算
           sum += Number(rec.totalAccuracy || 0);
           count++;
         } else {
-          // 個別科目の場合
           if (rec[selectedSubjectKey] !== undefined) {
             sum += Number(rec[selectedSubjectKey]);
             count++;
@@ -1734,12 +2052,10 @@ function renderSubjectAnalysis() {
     `);
   });
 
-  // 4. サマリー数値の更新
   const groupAvg = targetDataCount > 0 ? Math.round((totalAccSum / targetDataCount) * 10) / 10 : 0;
   avgAccEl.innerText = `${groupAvg}%`;
   targetCountEl.innerText = `${targetDataCount}件`;
 
-  // 5. テーブル描画
   if (tableRowsHtml.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="color:#95a5a6; padding:15px;">条件に一致する提出データはありません。</td></tr>';
   } else {
@@ -1754,6 +2070,10 @@ function renderTogetherProblemsView() {
   const container = document.getElementById("together-subjects-list");
   if (!container) return;
   container.innerHTML = "";
+
+  // 💡 追加：総該当数を表示するバッジ要素の取得
+  const totalCountBadge = document.getElementById("together-total-count-badge");
+  if (totalCountBadge) totalCountBadge.innerText = "";
 
   if (!teacherDataStore || !teacherDataStore.students) {
     container.innerHTML = '<div style="color:#95a5a6; text-align:center; padding:20px;">学生データが存在しません。</div>';
@@ -1802,9 +2122,10 @@ function renderTogetherProblemsView() {
   ];
 
   let htmlOutput = "";
+  let grandTotalCount = 0; // 💡 総合計カウント用変数
 
   if (selectedRound === "") {
-    // 💡 【全回一覧（各回個別に抽出）の場合】
+    // 💡 【全回集計（各回個別に抽出）の場合】
     const allRoundsSet = new Set();
     filteredStudents.forEach(s => {
       if (s.examRecords) {
@@ -1813,8 +2134,11 @@ function renderTogetherProblemsView() {
     });
     const sortedRounds = Array.from(allRoundsSet).sort((a, b) => Number(b) - Number(a));
 
-    if (sortedRounds.length === 0) {
+if (sortedRounds.length === 0) {
       container.innerHTML = '<div style="color:#95a5a6; text-align:center; padding:20px;">選択された条件に該当する提出データがありません。</div>';
+      if (totalCountBadge) {
+        totalCountBadge.innerText = "総計 0問 該当";
+      }
       return;
     }
 
@@ -1855,11 +2179,12 @@ function renderTogetherProblemsView() {
           const rate = Math.round((correctCounts[q] / subs) * 1000) / 10;
           if (rate < 60.0) {
             hardInThisRound.push({ qNum: q, rate: rate });
-            totalHardCountForSubj++;
           }
         }
 
         if (hardInThisRound.length > 0) {
+          totalHardCountForSubj += hardInThisRound.length; // 💡 ここだけで正確に加算
+          grandTotalCount += hardInThisRound.length;
           roundBadgesHtml += `
             <div style="margin-top:6px; margin-bottom:4px;">
               <div style="font-size:0.75rem; font-weight:bold; color:#2980b9; border-bottom:1px dashed #cbd5e1; padding-bottom:2px; margin-bottom:4px;">
@@ -1926,8 +2251,11 @@ function renderTogetherProblemsView() {
       }
     });
 
-    if (totalSubmitsAll === 0) {
+if (totalSubmitsAll === 0) {
       container.innerHTML = `<div style="color:#95a5a6; text-align:center; padding:20px;">第${r}回の提出データがありません。</div>`;
+      if (totalCountBadge) {
+        totalCountBadge.innerText = "総計 0問 該当";
+      }
       return;
     }
 
@@ -1939,6 +2267,10 @@ function renderTogetherProblemsView() {
         if (rate < 60.0) {
           hardQuestions.push({ qNum: q, rate: rate });
         }
+      }
+
+      if (hardQuestions.length > 0) {
+        grandTotalCount += hardQuestions.length; // 💡 特定回選択時の総計への加算漏れを解消
       }
 
       const badgeBg = hardQuestions.length > 0 ? "#f0f7ff" : "#fafafa";
@@ -1970,6 +2302,14 @@ function renderTogetherProblemsView() {
     });
   }
 
+// 💡 画面上のバッジに総該当数を反映（データがない場合でも「0問 該当」と文字を維持してデザイン崩れを防ぐ）
+  if (totalCountBadge) {
+    const count = typeof grandTotalCount === 'number' ? grandTotalCount : 0;
+    totalCountBadge.innerText = `総計 ${count}問 該当`;
+    totalCountBadge.style.display = "inline-block"; // 確実に表示させる
+  }
+
+  // 💡 生成した科目別カードのHTMLをコンテナに描画する
   container.innerHTML = htmlOutput;
 }
 
