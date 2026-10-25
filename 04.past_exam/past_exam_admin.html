@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>過去問 記録アプリ『管理画面』</title>
+
+<!-- 🔒 セキュリティキャッシュ無効化（IPA基準：共有PC等での機密データ残存防止） -->
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<!-- 🔒 セキュリティヘッダ（クリックジャッキング ＆ XSS防御用 CSP） -->
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-XSS-Protection" content="1; mode=block">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net; frame-ancestors 'none';">
+
 <!-- 外部ライブラリ (Chart.js) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -921,12 +932,23 @@ function setupEventListeners() {
     verifyTeacherAuth(code, false);
   });
 
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    if (confirm("ログアウトしますか？")) {
-      localStorage.removeItem("beauty_past_exam_teacher_code");
-      location.reload();
-    }
-  });
+document.getElementById("btn-logout").addEventListener("click", () => {
+  if (confirm("ログアウトしますか？")) {
+    // 🔒 認証情報・セッション情報の完全破棄（IPA基準：共有端末での残存防止）
+    localStorage.removeItem("beauty_past_exam_teacher_code");
+    sessionStorage.clear();
+
+    // 🔒 メモリ内に保持されている教員データ・学生名簿の明示的クリア
+    currentTeacherCode = "";
+    teacherDataStore = null;
+
+    // 🔒 入力欄の初期化と初期画面へ安全にリロード
+    const inputEl = document.getElementById("input-teacher-code");
+    if (inputEl) inputEl.value = "";
+
+    location.reload();
+  }
+});
 
   document.getElementById("btn-recalc").addEventListener("click", recalculateData);
 
@@ -1050,13 +1072,6 @@ document.getElementById("analysis-round-select").addEventListener("change", (e) 
       }
     }
 
-    renderItemAnalysis();
-    renderSubjectAnalysis();
-  });
-
-  document.getElementById("analysis-round-select").addEventListener("change", (e) => {
-    const val = e.target.value;
-    document.getElementById("filter-round").value = val; // 上側（フィルター）を連動
     renderItemAnalysis();
     renderSubjectAnalysis();
   });
@@ -1292,17 +1307,25 @@ function verifyTeacherAuth(code, isAuto) {
 
       document.getElementById("auth-section").style.display = "none";
       document.getElementById("main-content").style.display = "block";
-      document.getElementById("display-teacher-name").innerText = escapeHTML(code);
+      document.getElementById("display-teacher-name").textContent = code;
 
       loadTeacherDashboard();
     } else {
-      showAuthMsg(data.message || "教員権限がありません。");
+      // 🔒 認可失敗時：残存トークンを完全破棄し、画面を非表示維持（フェイルセーフ）
+      currentTeacherCode = "";
       localStorage.removeItem("beauty_past_exam_teacher_code");
+      sessionStorage.clear();
+      document.getElementById("main-content").style.display = "none";
+      document.getElementById("auth-section").style.display = "block";
+      showAuthMsg(data.message || "教員権限がありません。");
     }
   })
   .catch(err => {
-    console.error(err);
-    showAuthMsg("通信エラーが発生しました。");
+    console.error("Auth Error:", err);
+    // 🔒 通信エラー時も不正表示を防ぐためログイン画面を維持
+    document.getElementById("main-content").style.display = "none";
+    document.getElementById("auth-section").style.display = "block";
+    showAuthMsg("通信エラーが発生しました。ネット接続をご確認ください。");
   });
 }
 
@@ -1314,6 +1337,9 @@ function showAuthMsg(msg, color="var(--accent-red)") {
 }
 
 function loadTeacherDashboard() {
+  // 🔒 認証コードがない場合は通信せずに中断
+  if (!currentTeacherCode) return;
+
   fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
@@ -1326,22 +1352,42 @@ function loadTeacherDashboard() {
       populateFilterDropdowns();
       renderSummaryBadges();
       renderStudentTable();
-      
+
       // 💡 追加：データロード完了時に「皆が苦手な問題」の集計も裏で準備しておく
       if (typeof renderTogetherProblemsView === "function") {
         renderTogetherProblemsView();
       }
     } else {
+      // 🔒 サーバー側で認可エラーとなった場合の安全なセッション消去と初期化
       alert("データ読み込みエラー: " + (data.message || "エラーが発生しました。"));
+      localStorage.removeItem("beauty_past_exam_teacher_code");
+      sessionStorage.clear();
+      currentTeacherCode = "";
+      location.reload();
     }
   })
-  .catch(err => console.error(err));
+  .catch(err => {
+    console.error("Dashboard Load Error:", err);
+    alert("データ取得中に通信エラーが発生しました。ネット接続をご確認ください。");
+  });
 }
 
 function recalculateData() {
+  // 🔒 教員コードが存在しない場合のガード
+  if (!currentTeacherCode) return;
+
+  if (!confirm("GAS側で全生徒の最新提出状況と中央値の再集計を実行します。\nよろしいですか？")) {
+    return;
+  }
+
   const btn = document.getElementById("btn-recalc");
-  btn.disabled = true;
-  btn.innerText = "⏳ 再集計中...";
+  // 🔒 連打・多重送信防止（ボタンロック・スタイル変更）
+  if (btn) {
+    btn.disabled = true;
+    btn.innerText = "⏳ 再集計中...";
+    btn.style.opacity = "0.6";
+    btn.style.cursor = "not-allowed";
+  }
 
   fetch(GAS_API_URL, {
     method: "POST",
@@ -1350,8 +1396,6 @@ function recalculateData() {
   })
   .then(res => res.json())
   .then(data => {
-    btn.disabled = false;
-    btn.innerText = "🔄 手動再集計";
     if (data.status === "success") {
       alert("🎉 全体の中央値および問題別正解率の再集計が完了しました！");
       teacherDataStore = data;
@@ -1365,9 +1409,16 @@ function recalculateData() {
   })
   .catch(err => {
     console.error(err);
-    btn.disabled = false;
-    btn.innerText = "🔄 手動再集計";
-    alert("通信エラーが発生しました。");
+    alert("通信エラーが発生しました。ネット接続をご確認ください。");
+  })
+  .finally(() => {
+    // 🔒 成功・失敗にかかわらず確実にボタンのロックを解除
+    if (btn) {
+      btn.disabled = false;
+      btn.innerText = "🔄 手動再集計";
+      btn.style.opacity = "1";
+      btn.style.cursor = "pointer";
+    }
   });
 }
 
@@ -1591,14 +1642,17 @@ function renderStudentTable() {
       accuracyDisplay = `<span style="color:#95a5a6; font-size:0.75rem;">未実施</span>`;
     }
 
-    tr.innerHTML = `
-      <td data-label="コード/識別情報"><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
-      <td data-label="学校/クラス"><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
-      <td data-label="過去問経験数"><b>${s.submittedRoundsCount || 0}</b> / 14回分</td>
-      <td data-label="正答率">${accuracyDisplay}</td>
-      <td data-label="指導ステータス">${statusBadge}</td>
-      <td data-label=""><button class="btn-secondary btn-open-detail" data-code="${escapeHTML(s.serialCode)}">詳細カルテ</button></td>
-    `;
+// 🔒 XSS対策：過去問経験数（数値）の厳格な型保証
+const safeRoundsCount = Number(s.submittedRoundsCount) || 0;
+
+tr.innerHTML = `
+<td data-label="コード/識別情報"><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
+<td data-label="学校/クラス"><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
+<td data-label="過去問経験数"><b>${safeRoundsCount}</b> / 14回分</td>
+<td data-label="正答率">${accuracyDisplay}</td>
+<td data-label="指導ステータス">${statusBadge}</td>
+<td data-label=""><button class="btn-secondary btn-open-detail" data-code="${escapeHTML(s.serialCode)}">詳細カルテ</button></td>
+`;
     tbody.appendChild(tr);
   });
 
@@ -1765,15 +1819,22 @@ if (rounds.length === 0) {
         }
       });
 
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><b>第${r}回</b></td>
-        <td><b style="color:var(--accent-red);">${roundAbsCount} 問</b></td>
-        <td><b>${rec.totalScore}</b> / 55点</td>
-        <td><b>${rec.totalAccuracy}%</b></td>
-        <td><span style="color:var(--accent-red); font-weight:bold;">${wrongList.length} 問</span></td>
-      `;
-      tbody.appendChild(tr);
+const tr = document.createElement("tr");
+// 🔒 XSS対策：回数・得点・問数のエスケープおよび数値保証（IPA基準 1.5.1）
+const safeRound = escapeHTML(String(r));
+const safeAbsCount = Number(roundAbsCount) || 0;
+const safeTotalScore = Number(rec.totalScore) || 0;
+const safeTotalAcc = Number(rec.totalAccuracy) || 0;
+const safeWrongCount = Number(wrongList.length) || 0;
+
+tr.innerHTML = `
+<td><b>第${safeRound}回</b></td>
+<td><b style="color:var(--accent-red);">${safeAbsCount} 問</b></td>
+<td><b>${safeTotalScore}</b> / 55点</td>
+<td><b>${safeTotalAcc}%</b></td>
+<td><span style="color:var(--accent-red); font-weight:bold;">${safeWrongCount} 問</span></td>
+`;
+tbody.appendChild(tr);
     });
   }
 
@@ -1788,13 +1849,19 @@ if (rounds.length === 0) {
     // 回順・問順で並び替え
     absReviewItems.sort((a, b) => Number(b.round) - Number(a.round) || a.qNum - b.qNum);
     
-    wrongBox.innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:5px;">' + 
-      absReviewItems.map(item => `
-        <span style="background:#ffffff; border:1px solid #ff7675; color:#c0392b; padding:3px 7px; border-radius:6px; font-size:0.72rem; font-weight:bold; display:inline-block;">
-          第${item.round}回 問${item.qNum} <small style="font-weight:normal; color:#7f8c8d;">(${item.rate}%)</small>
-        </span>
-      `).join('') + 
-    '</div>';
+// 🔒 XSS対策：動的バッジ要素のエスケープ無害化処理
+wrongBox.innerHTML = '<div style="display:flex; flex-wrap:wrap; gap:5px;">' +
+absReviewItems.map(item => {
+  const safeR = escapeHTML(String(item.round));
+  const safeQ = Number(item.qNum) || 0;
+  const safeRate = Number(item.rate) || 0;
+  return `
+<span style="background:#ffffff; border:1px solid #ff7675; color:#c0392b; padding:3px 7px; border-radius:6px; font-size:0.72rem; font-weight:bold; display:inline-block;">
+第${safeR}回 問${safeQ} <small style="font-weight:normal; color:#7f8c8d;">(${safeRate}%)</small>
+</span>
+  `;
+}).join('') +
+'</div>';
   }
 
 // 🎯 【新規追加】個別詳細カルテ用のグラフを描画
@@ -1923,11 +1990,17 @@ function renderItemAnalysis() {
     return;
   }
 
-  const sortedWorst = [...qList].sort((a, b) => a.rate - b.rate).slice(0, 5);
-  
-  worstContainer.innerHTML = sortedWorst.map((item, idx) => `
-    <b>${idx+1}位: 問${item.qNum}</b> (正解率: <span style="color:var(--accent-red); font-weight:bold;">${item.rate}%</span>) &nbsp;&nbsp;
-  `).join("");
+const sortedWorst = [...qList].sort((a, b) => a.rate - b.rate).slice(0, 5);
+
+// 🔒 XSS対策：問番号・順位・正解率数値の厳格化
+worstContainer.innerHTML = sortedWorst.map((item, idx) => {
+  const safeRank = idx + 1;
+  const safeQNum = Number(item.qNum) || 0;
+  const safeRate = Number(item.rate) || 0;
+  return `
+<b>${safeRank}位: 問${safeQNum}</b> (正解率: <span style="color:var(--accent-red); font-weight:bold;">${safeRate}%</span>) &nbsp;&nbsp;
+  `;
+}).join("");
 
   qList.forEach(item => {
     const q = item.qNum;
@@ -2042,14 +2115,17 @@ function renderSubjectAnalysis() {
     totalAccSum += subAcc;
     targetDataCount++;
 
-    tableRowsHtml.push(`
-      <tr>
-        <td><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
-        <td><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
-        <td><b>${targetDisplayLabel}</b></td>
-        <td><b style="color:#d35400; font-size:0.9rem;">${subAcc}%</b></td>
-      </tr>
-    `);
+// 🔒 XSS対策：正答率数値の型保証
+const safeSubAcc = Number(subAcc) || 0;
+
+tableRowsHtml.push(`
+<tr>
+<td><b>${escapeHTML(s.serialCode)}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">No.${escapeHTML(s.studentNumber || '-')}</span></td>
+<td><b>${escapeHTML(s.schoolName || '-')}</b><br><span style="font-size:0.68rem; color:#7f8c8d;">${escapeHTML(s.className || '-')}</span></td>
+<td><b>${targetDisplayLabel}</b></td>
+<td><b style="color:#d35400; font-size:0.9rem;">${safeSubAcc}%</b></td>
+</tr>
+`);
   });
 
   const groupAvg = targetDataCount > 0 ? Math.round((totalAccSum / targetDataCount) * 10) / 10 : 0;
