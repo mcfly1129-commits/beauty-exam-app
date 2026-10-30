@@ -17,19 +17,16 @@
     img-src 'self' data: https:;
     font-src 'self' data:;
     connect-src 'self' https://cdn.jsdelivr.net;
+    frame-src 'self' https://drive.google.com https://docs.google.com https://forms.gle;
     frame-ancestors 'none';
-    form-action 'none';
+    form-action 'self' https://forms.gle;
   ">
 
-  <!-- 2. クリックジャッキング対策 (他サイトのiframe内呼び出しを拒否) -->
-  <meta http-equiv="X-Frame-Options" content="DENY">
-
-  <!-- 3. 機密情報キャッシュ対策 (ブラウザバックや共有端末での残存防止) -->
+  <!-- 2. 機密情報キャッシュ対策 (ブラウザバックや共有端末での残存防止) -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
 
   <!-- Canvas Confetti -->
-  <script src="[suspicious link removed]"></script>
     <style>
         body { font-family: sans-serif; background: #fefaf0; padding: 20px; color: #2d3436; }
         .container { max-width: 600px; margin: 0 auto; }
@@ -250,7 +247,7 @@
     border-bottom: none;
 }
 </style>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
   <script src="js/questions_database.js"></script>
 </head>
 
@@ -411,7 +408,7 @@
 <div id="first-agree-modal" class="terms-modal-overlay">
     <div class="terms-modal-content">
         <div class="terms-title">アプリ利用開始のご確認</div>
-        <p style="font-size: 0.85rem; margin-bottom: 12px;">本アプリをご利用いただく前に、利用規約をご確認ください。</p>
+        <p style="font-size: 0.85rem; margin-bottom: 12px;">本アプリをご利用いただく前に、<br>利用規約をご確認ください。</p>
         <div class="terms-body" style="background:#fefaf0; padding:10px; border-radius:8px; border:1px solid #ffeaa7;">
             <p>※本アプリは端末内（ローカルストレージ）のみに学習データを保存します。キャッシュ消去等によるデータ消失の責任は負いかねます。</p>
             <p>※掲載問題・解説の無断転載やリバースエンジニアリングを禁止します。</p>
@@ -454,6 +451,17 @@ function escapeHTML(str) {
     };
     return escapeMap[match];
   });
+}
+
+// 🛡️ 3. ローカルストレージのデータを安全に読み込むヘルパー関数（破損によるクラッシュ防止）
+function safeJsonParse(key, fallback) {
+  try {
+    const item = localStorage.getItem(key);
+    return item !== null ? JSON.parse(item) : fallback;
+  } catch (e) {
+    console.warn(`LocalStorage parse error for key "${key}":`, e);
+    return fallback;
+  }
 }
 
 // ==========================================
@@ -800,14 +808,14 @@ const SUBJECT_KEY_TO_JA = {
 // バッジと件数をリアルタイム描画する処理
 function updateSpeedDashboardBadges() {
     // 1. お気に入り数のバッジ
-    const favIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+    const favIds = safeJsonParse("beauty_app_all_bookmarked_ids", []);
     const favEl = document.getElementById("speed-fav-badge");
     if (favEl) favEl.innerText = favIds.length;
 
     // 2. 弱点克服（間違えた問題数）のバッジ
     let wrongCount = 0;
     for (const subjectKey in ALL_QUESTIONS_DATABASE) {
-        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
+        const stats = safeJsonParse("beauty_app_question_stats_" + subjectKey, {});
         const pool = ALL_QUESTIONS_DATABASE[subjectKey].questionPool;
         for (const unit in pool) {
             pool[unit].forEach(q => {
@@ -884,15 +892,14 @@ if (speedHistoryList) {
     });
 }
 
-// JS (window.onload 内に追加): 背景領域をクリックした時のみ閉じる
-const termsModal = document.getElementById('terms-modal');
-if (termsModal) {
-    termsModal.addEventListener('click', (e) => {
-        if (e.target === termsModal) {
-            closeTermsModal();
+// モーダル背景の共通クリック制御の例
+document.querySelectorAll('.terms-modal-overlay, .modal-overlay, .speed-history-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
         }
     });
-}
+});
 
 const licenseModal = document.getElementById('license-modal');
 if (licenseModal) {
@@ -958,7 +965,7 @@ function getSpeedBookmarkQuestions() {
 function getSpeedWrongQuestions() {
     const results = [];
     for (const subjectKey in ALL_QUESTIONS_DATABASE) {
-        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
+        const stats = safeJsonParse("beauty_app_question_stats_" + subjectKey, {});
         const pool = ALL_QUESTIONS_DATABASE[subjectKey].questionPool;
         for (const unitName in pool) {
             pool[unitName].forEach(q => {
@@ -984,7 +991,7 @@ function getSpeedSpecialTrainingQuestions() {
 
     for (const subjectKey in ALL_QUESTIONS_DATABASE) {
         const pool = ALL_QUESTIONS_DATABASE[subjectKey].questionPool;
-        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
+        const stats = safeJsonParse("beauty_app_question_stats_" + subjectKey, {});
 
         for (const unitName in pool) {
             pool[unitName].forEach(q => {
@@ -1212,7 +1219,7 @@ function submitSpeedAnswer(userAns) {
             triggerFeverEffect();
         }
 
-        nextBtn.innerText = "🔄 続けて解く (次の3問)";
+        nextBtn.innerText = "🔄 続けて解く\n (次の3問)";
         nextBtn.style.background = "#0984e3";
     } else {
         nextBtn.innerText = "次の問題へ";
