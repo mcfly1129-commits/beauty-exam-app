@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>成長ダッシュボード</title>
-    <!-- 📊 レーダーチャート描画用の標準ライブラリ (Chart.js) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成長ダッシュボード</title>
+<!-- 🔒 クリックジャッキング対策（Frame-busting） -->
+<script>try { if (window.top !== window.self) window.top.location = window.self.location; } catch (e) {}</script>
+<!-- 📊 レーダーチャート描画用の標準ライブラリ (Chart.js) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary-color: #74b9ff;
@@ -452,19 +454,20 @@ let progressChartInstance = null;
 let accuracyChartInstance = null;
 let selfHistoryChartInstance = null; // ★追加
 
-// 📅 画面読み込み時の初期化
+// 📅 画面読み込み時の初期化（認証キー・複数ストレージ保持チェック強化）
 document.addEventListener('DOMContentLoaded', () => {
-  // 先生用ホームで保存された認証情報を引き継ぐ
-  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn');
-  const userEmail = localStorage.getItem('teacher_userEmail');
+  // 先生用ホームで保存された認証情報およびログインキー（シリアルコード）を引き継ぐ
+  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn') || sessionStorage.getItem('teacher_isLoggedIn');
+  const userEmail = localStorage.getItem('teacher_userEmail') || sessionStorage.getItem('teacher_userEmail');
+  const token = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token');
 
-  if (isLoggedIn !== 'true' || !userEmail) {
-    alert("🔒 アクセス権限がありません。ログインし直してください。");
-    window.location.href = "../03.teacher/index.html";
+  if (isLoggedIn !== 'true' || !userEmail || !token) {
+    alert("🔒 アクセス権限または認証キーが見つかりません。ログインし直してください。");
+    handleLogout();
     return;
   }
 
-  document.getElementById('display-email').innerText = userEmail;
+  document.getElementById('display-email').innerText = escapeHTML(userEmail);
 
   // 1. ローカルデータの集計
   const myData = calculateMyCurrentStats();
@@ -642,37 +645,32 @@ function handleDashboardData(data) {
     const gmCount = data.global_metrics ? data.global_metrics.grand_master_count : 0;
     document.getElementById('gm-total-count').innerText = `${gmCount} 回`;
 
-// 2. 個人ランキングトップ5の反映（🔒 XSS対策版）
-    const progList = document.getElementById('rank-progress-list');
-    progList.innerHTML = "";
-    if (data.ranking && data.ranking.accuracy_top5 && data.ranking.accuracy_top5.length > 0) { // ⭕ accuracy_top5 に変更
-        data.ranking.accuracy_top5.forEach((r, idx) => {
-            // 外部入力テキストを事前に無害化
-            const safeSchool = escapeHTML(r.school || '');
-            const safeClass = escapeHTML(r.className || '');
-            const safeValue = escapeHTML(String(r.value || 0));
+// 個人ランキングトップ5の反映（配列化して一括生成）
+const progList = document.getElementById('rank-progress-list');
+if (data.ranking && data.ranking.accuracy_top5 && data.ranking.accuracy_top5.length > 0) {
+  const itemsHtml = data.ranking.accuracy_top5.map((r, idx) => {
+    const safeSchool = escapeHTML(r.school || '');
+    const safeClass = escapeHTML(r.className || '');
+    const safeValue = escapeHTML(String(r.value || 0));
+    return `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span class="rank-name">${safeSchool} ${safeClass} (個人)</span> <strong class="rank-val">総合正答率: ${safeValue}%</strong></li>`;
+  }).join('');
+  progList.innerHTML = itemsHtml;
+} else {
+  progList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">現在ランキング対象者がいません</span></li>`;
+}
 
-            progList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span class="rank-name">${safeSchool} ${safeClass} (個人)</span> <strong class="rank-val">総合正答率: ${safeValue}%</strong></li>`;
-        });
-    } else {
-        progList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">現在ランキング対象者がいません</span></li>`;
-    }
-
-    // 3. 優秀クラス対抗の反映（🔒 XSS対策版）
-    const classList = document.getElementById('rank-class-list');
-    classList.innerHTML = "";
-    if (data.class_ranking && data.class_ranking.top_classes && data.class_ranking.top_classes.length > 0) {
-        data.class_ranking.top_classes.forEach((c, idx) => {
-            // 外部入力テキストを事前に無害化
-            const safeClassName = escapeHTML(c.name || '');
-            const safeValue = escapeHTML(String(c.value || 0));
-
-            classList.innerHTML += `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span class="rank-name">${safeClassName}</span> <strong class="rank-val">進捗中央値: ${safeValue}%</strong></li>`;
-        });
-    } else {
-        // ⭕ 過半数未達成時の案内文言へ変更
-        classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...（クラス登録人数過半数の報告でランク表示）</span></li>`;
-    }
+// 優秀クラス対抗の反映（配列化して一括生成）
+const classList = document.getElementById('rank-class-list');
+if (data.class_ranking && data.class_ranking.top_classes && data.class_ranking.top_classes.length > 0) {
+  const classItemsHtml = data.class_ranking.top_classes.map((c, idx) => {
+    const safeClassName = escapeHTML(c.name || '');
+    const safeValue = escapeHTML(String(c.value || 0));
+    return `<li class="rank-item"><span class="rank-num">${idx+1}位</span> <span class="rank-name">${safeClassName}</span> <strong class="rank-val">進捗中央値: ${safeValue}%</strong></li>`;
+  }).join('');
+  classList.innerHTML = classItemsHtml;
+} else {
+  classList.innerHTML = `<li class="rank-item"><span style="color:#95a5a6;">データ収集中...（クラス登録人数過半数の報告でランク表示）</span></li>`;
+}
 
     // 4. 中央値データの抽出と全科目グラフへの展開
     const globalMedianProgress = (data.median && Array.isArray(data.median.progress)) ? data.median.progress : Array(10).fill(0);
@@ -993,16 +991,15 @@ if (res.status === "success") {
                 location.reload();
             }, 15000);
 
+              } else {
+        // 🔒 現行認証方式に合わせたエラーメッセージ制御および認可エラー時のセッションクリア
+        alert("🔒 成果報告エラー: " + (res.message || "認証またはアクセス権限の不備により送信できませんでした。再ログインをお試しください。"));
+        if (res.message && (res.message.includes("権限") || res.message.includes("名簿") || res.message.includes("ログイン"))) {
+          handleLogout();
         } else {
-            if (res.message && res.message.includes("認証トークン")) {
-                alert("🔒 送信失敗（セッション切れ）\n\nログインから1時間以上が経過したため、Googleの認証チケットの有効期限が切れました。\n一度ログアウト（または再読み込み）してログインし直してから、再度送信してください。");
-            } else if (res.message && res.message.includes("アクセス権限")) {
-                alert("❌ アクセス拒否\n\nこのGoogleアカウントは学校の名簿（ホワイトリスト）に登録されていません。許可されたGoogleアカウントでログインしてください。");
-            } else {
-                alert("❌ サーバーエラー: " + res.message);
-            }
-            resetTransmissionUI(progressTimer);
+          resetTransmissionUI(progressTimer);
         }
+      }
     })
     .catch(err => {
         clearInterval(progressTimer);
@@ -1055,15 +1052,14 @@ function checkTransmissionLock() {
  * 📜 送信履歴の描画
  */
 function renderSendHistory() {
-    const history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
-    document.getElementById('send-history-count').innerText = `${history.length}回`;
-    
-    const listEl = document.getElementById('send-history-list');
-    listEl.innerHTML = "";
-    // ⭕ slice() でシャローコピーを作成してから反転させることで、元の配列を破壊しない
-    history.slice().reverse().forEach((time, index) => {
-        listEl.innerHTML += `<div>第 ${history.length - index} 回報告: ${escapeHTML(time)} (送信済)</div>`;
-    });
+  const history = JSON.parse(localStorage.getItem('dashboard_send_history')) || [];
+  document.getElementById('send-history-count').innerText = `${history.length}回`;
+
+  const listEl = document.getElementById('send-history-list');
+  const historyHtml = history.slice().reverse().map((time, index) => {
+    return `<div>第 ${history.length - index} 回報告: ${escapeHTML(time)} (送信済)</div>`;
+  }).join('');
+  listEl.innerHTML = historyHtml;
 }
 
 /**
