@@ -977,6 +977,14 @@ const resetPageAndRender = () => {
       renderItemAnalysis();
       renderSubjectAnalysis();
     }
+
+    // 💡 【追加】「皆が苦手な問題」タブが表示中であれば、フィルター変更時に即時再集計する
+    const togetherContainer = document.getElementById("view-together-container");
+    if (togetherContainer && togetherContainer.style.display !== "none") {
+      if (typeof renderTogetherProblemsView === "function") {
+        renderTogetherProblemsView();
+      }
+    }
   };
   document.getElementById("filter-school").addEventListener("change", resetPageAndRender);
   document.getElementById("filter-class").addEventListener("change", resetPageAndRender);
@@ -1057,15 +1065,18 @@ document.getElementById("filter-round").addEventListener("change", (e) => {
     subjectRoundEl.value = val;
   }
   
+  // 💡 【修正】皆が苦手な問題側のセレクトボックスを確実に同期し、描画関数を呼び出す
   const togetherSelect = document.getElementById("together-round-select");
   if (togetherSelect && togetherSelect.value !== val) {
     togetherSelect.value = val;
-    if (typeof renderTogetherProblemsView === "function") {
-      renderTogetherProblemsView();
-    }
   }
   
   resetPageAndRender();
+
+  // 💡 【追加】閲覧対象回が変わった際、皆が苦手な問題ビューの再描画を確実に実行
+  if (typeof renderTogetherProblemsView === "function") {
+    renderTogetherProblemsView();
+  }
 });
 
 document.getElementById("analysis-round-select").addEventListener("change", (e) => {
@@ -1209,22 +1220,18 @@ function resetFilters() {
   document.getElementById("sort-key").value = "time-desc";
   document.getElementById("filter-round").value = "";
   
-  // 💡 追加：「過去問・科目分析」側の回選択も初期値にリセット
   const analysisRoundSelect = document.getElementById("analysis-round-select");
   if (analysisRoundSelect) analysisRoundSelect.value = "";
 
-  // 💡 追加：「皆が苦手な問題」側の選択も初期値にリセット
   const togetherRoundSelect = document.getElementById("together-round-select");
   if (togetherRoundSelect) togetherRoundSelect.value = "";
   
-  // 科目選択も初期値にリセット
   const itemSubSelect = document.getElementById("analysis-item-subject-select");
   if (itemSubSelect) itemSubSelect.value = "";
 
   const subAnalysisSelect = document.getElementById("analysis-subject-select");
   if (subAnalysisSelect) subAnalysisSelect.value = "sub_all";
 
-  // 💡 追加：科目別分析の回選択も「全回集計」にリセット
   const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
   if (subjectRoundSelect) subjectRoundSelect.value = "";
 
@@ -1238,7 +1245,7 @@ function resetFilters() {
     renderSubjectAnalysis();
   }
 
-  // 💡 追加：皆が苦手な問題ビューが表示中なら再描画
+  // 💡 【追加】フィルタ解除時に「皆が苦手な問題」ビューが表示中であれば、リセット状態（全回集計）で再描画する
   const togetherContainer = document.getElementById("view-together-container");
   if (togetherContainer && togetherContainer.style.display !== "none") {
     if (typeof renderTogetherProblemsView === "function") {
