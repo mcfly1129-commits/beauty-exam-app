@@ -93,6 +93,10 @@
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: bold;
+            max-width: 180px;          /* 長すぎるコードがはみ出したり潰れないように制限 */
+            overflow: hidden;
+            text-overflow: ellipsis;   /* はみ出た場合は「...」にする */
+            white-space: nowrap;
         }
 
         .btn-logout {
@@ -615,12 +619,20 @@
 </head>
 <body>
 
-    <!-- 🔒 認証保護画面カバー -->
-    <div id="auth-loading">
-        <div>🔒 認証状態を確認しています...</div>
+<!-- 🔒 過去問アプリ風の教員ログイン認証ボックス -->
+    <div class="container" id="auth-section" style="max-width: 450px; margin-top: 60px;">
+        <h1 style="font-size: 1.3rem; text-align: center; color: var(--primary-color); margin-bottom: 4px;">【管理画面】2択学習アプリ</h1>
+        <p style="font-size: 0.75rem; text-align: center; color: var(--text-muted); margin-bottom: 20px;">教員専用アクセス認証</p>
+        <div style="background: white; border: 2px dashed var(--secondary-color); padding: 25px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+            <div style="font-size: 0.85rem; font-weight: bold; color: var(--primary-color); margin-bottom: 12px;">🔒 教員用シリアルコード / パスワード</div>
+            <input type="password" id="input-teacher-password" placeholder="コードを入力" autocomplete="off" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; box-sizing: border-box; text-align: center;">
+            <button id="btn-teacher-login" style="width: 100%; padding: 12px; background: var(--secondary-color); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 0.95rem; cursor: pointer;">ログインして管理画面を開く</button>
+            <div id="auth-msg" style="font-size: 0.75rem; color: var(--danger-color); margin-top: 10px; display: none;"></div>
+        </div>
     </div>
 
-    <div class="container">
+    <!-- 🔓 メイン管理コンテンツ（初期状態は非表示） -->
+    <div class="container" id="main-content" style="display: none;">
         <!-- 👑 ヘッダーエリア -->
         <header>
             <div class="header-title-area">
@@ -953,15 +965,32 @@ function getArrayMedian(arr) {
 
 // 📅 初期起動処理
 document.addEventListener('DOMContentLoaded', () => {
-  // 🔒 ログイン状態とトークンの存在チェック（localStorage / sessionStorage 両対応）
-  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn') || sessionStorage.getItem('teacher_isLoggedIn');
-  const token = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token');
+  const savedToken = sessionStorage.getItem('teacher_google_id_token');
+  const isLoggedIn = sessionStorage.getItem('teacher_isLoggedIn');
 
-  // 1. クライアント側にトークンすら存在しない場合は即座に送還
-  if (isLoggedIn !== 'true' || !token) {
-    alert("🔒 アクセス権限がありません。再度ログインし直してください。");
-    handleLogout();
-    return;
+  // 1. ログインボタンが押されたときのイベント設定
+  const loginBtn = document.getElementById('btn-teacher-login');
+  if (loginBtn) {
+    loginBtn.addEventListener('click', () => {
+      const pwd = document.getElementById('input-teacher-password').value.trim();
+      if (!pwd) {
+        showAuthMsg("パスワードを入力してください。");
+        return;
+      }
+      // 入力されたパスワードを保存して認証チェックへ
+      sessionStorage.setItem('teacher_google_id_token', pwd);
+      sessionStorage.setItem('teacher_isLoggedIn', 'true');
+      verifyAndLoadData(pwd);
+    });
+  }
+
+  // 2. 既にログイン情報が保存されている場合は自動で認証を試みる
+  if (isLoggedIn === 'true' && savedToken) {
+    verifyAndLoadData(savedToken);
+  } else {
+    // 3. 未ログインの場合は「ログイン画面」を表示し、メイン画面を隠す
+    document.getElementById('auth-section').style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
   }
 
   // ==========================================================
@@ -1052,12 +1081,12 @@ document.addEventListener('DOMContentLoaded', () => {
     searchStudent.addEventListener('input', resetPageAndFilter);
   }
 
-  // 📡 API経由の実データロードを開始
-  loadTeacherDashboardData();
+  // ⭕ 無条件の loadTeacherDashboardData() は削除し、
+  // 自動ログイン時の verifyAndLoadData() またはログインボタン押下時に一本化します
 });
 
 /**
- * 📡 API経由の実データロード（教員用ダッシュボードデータロード）
+ * 📡 API経由の実データロード（教員用ダッシュボードデータロード＆再計算）
  * @param {boolean} [isRecalculate=false] - サーバー側（GAS）で全体サマリー再集計を強制実行するかどうか
  */
 function loadTeacherDashboardData(isRecalculate = false) {
@@ -1071,8 +1100,8 @@ function loadTeacherDashboardData(isRecalculate = false) {
     recalcBtn.style.opacity = "0.7";
   }
 
-// 🔒 トークン取得の安全化（localStorage / sessionStorage の双方向フォールバック）
-const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
+// 🔒 トークン取得の安全化（共有端末対策としてsessionStorageに限定）
+  const password = sessionStorage.getItem('teacher_google_id_token') || "";
   const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
 
   fetch(GAS_API_URL, {
@@ -1090,23 +1119,24 @@ const password = localStorage.getItem('teacher_google_id_token') || sessionStora
     if (!response.ok) throw new Error("API通信エラーが発生しました。");
     return response.json();
   })
-.then(res => {
-    // 🔒 1. サーバー側（GAS）で教員権限（isAuthorized）が確認できなかった場合は即座に遮断
+  .then(res => {
     if (res.status === "error" || res.isAuthorized === false) {
       alert("❌ 認証エラー: 閲覧資格がありません。ログインし直してください。");
       handleLogout();
       return;
     }
 
-    // 🔓 2. サーバー認可成功時、画面カバー（#auth-loading）を非表示化してメールアドレスを表示
-    const userEmail = localStorage.getItem('teacher_userEmail') || sessionStorage.getItem('teacher_userEmail') || "";
-    const emailEl = document.getElementById('display-teacher-email');
-    if (emailEl) emailEl.innerText = escapeHTML(userEmail);
-
+    // 画面カバーを非表示にし、バッジにシリアルコードを表示
     const authLoadingEl = document.getElementById('auth-loading');
     if (authLoadingEl) authLoadingEl.style.display = 'none';
 
-    allStudentsRaw = res.students || [ ];
+    const currentToken = password || "シリアルコード";
+    const emailEl = document.getElementById('display-teacher-email');
+    if (emailEl) {
+      emailEl.innerText = escapeHTML(currentToken);
+    }
+
+    allStudentsRaw = res.students || [];
     dashboardSummary = res.dashboard || null;
 
     renderDashboardAndTable();
@@ -1116,23 +1146,21 @@ const password = localStorage.getItem('teacher_google_id_token') || sessionStora
       alert("🎉 最新のスプレッドシート履歴から、統計データの再計算と反映が完了しました！");
     }
   })
-.catch(err => {
-  console.error("データ取得エラー:", err);
+  .catch(err => {
+    console.error("データ取得エラー:", err);
 
-  // ⭕ 通信エラー発生時も画面カバー（#auth-loading）を解除してエラー内容を表示
-  const authLoadingEl = document.getElementById('auth-loading');
-  if (authLoadingEl) authLoadingEl.style.display = 'none';
+    const authLoadingEl = document.getElementById('auth-loading');
+    if (authLoadingEl) authLoadingEl.style.display = 'none';
 
-  const tableStatus = document.getElementById('table-status');
-  if (tableStatus) {
-    tableStatus.textContent = "⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。";
-    tableStatus.style.color = "var(--danger-color)";
-    tableStatus.style.display = 'block';
-  }
-  showLoading(false);
-})
+    const tableStatus = document.getElementById('table-status');
+    if (tableStatus) {
+      tableStatus.textContent = "⚠️ データ取得に失敗しました。GASのデプロイ状態、WebアプリURLをご確認ください。";
+      tableStatus.style.color = "var(--danger-color)";
+      tableStatus.style.display = 'block';
+    }
+    showLoading(false);
+  })
   .finally(() => {
-    // ボタン状態の復元
     if (recalcBtn) {
       recalcBtn.disabled = false;
       recalcBtn.innerText = "🔄 最新データに更新（再計算）";
@@ -1756,22 +1784,77 @@ gridItem.innerHTML = `
             });
         }
 
-// 🔒 ログアウト処理（認証トークン・セッション情報の全破棄と安全なリダイレクト）
+// 🔒 ログアウト処理（認証情報の完全破棄と管理画面ログインへの復帰）
 function handleLogout() {
-  // 1. localStorage からの教員認証情報の全破棄
-  localStorage.removeItem('teacher_isLoggedIn');
-  localStorage.removeItem('teacher_userEmail');
-  localStorage.removeItem('teacher_google_id_token');
-
-  // 2. sessionStorage 内のキャッシュ・トークンの完全クリア
-  sessionStorage.removeItem('teacher_isLoggedIn');
-  sessionStorage.removeItem('teacher_userEmail');
-  sessionStorage.removeItem('teacher_google_id_token');
+  // 1. ストレージ情報の完全クリア
+  localStorage.clear();
   sessionStorage.clear();
 
-  // 3. ログイン画面へ安全にリダイレクト
-  window.location.href = "index.html";
+  // 2. 学生用画面へ飛ばさず、現在の管理画面（自分自身）を再読み込みしてログイン画面に戻す
+  window.location.reload();
 }
+
+// 🔒 認証＆データロード用ヘルパー関数
+function verifyAndLoadData(token, isRecalculate = false) {
+  showAuthMsg("⏳ 認証を確認中...", "var(--secondary-color)");
+  
+  const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+      action: actionName,
+      password: token
+    })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("API通信エラーが発生しました。");
+    return response.json();
+  })
+  .then(res => {
+    if (res.status === "error" || res.isAuthorized === false) {
+      throw new Error("認証に失敗しました。");
+    }
+
+// 認証成功：ログイン画面を隠し、メインコンテンツを表示
+    document.getElementById('auth-section').style.display = 'none';
+    document.getElementById('main-content').style.display = 'block';
+
+// 🔴 ログインに入力されたシリアルコード（またはトークン）を取得してバッジに表示
+    const currentToken = sessionStorage.getItem('teacher_google_id_token') || "シリアルコード";
+    const emailEl = document.getElementById('display-teacher-email');
+    if (emailEl) emailEl.innerText = escapeHTML(currentToken);
+
+    allStudentsRaw = res.students || [];
+    dashboardSummary = res.dashboard || null;
+
+    renderDashboardAndTable();
+
+    if (isRecalculate) {
+      alert("🎉 データの再計算が完了しました！");
+    }
+  })
+  .catch(err => {
+    console.error("認証エラー:", err);
+    showAuthMsg("❌ 認証エラー: シリアルコード（パスワード）が正しくありません。");
+    localStorage.clear();
+    sessionStorage.clear();
+    document.getElementById('auth-section').style.display = 'block';
+    document.getElementById('main-content').style.display = 'none';
+  });
+}
+
+function showAuthMsg(msg, color = "var(--danger-color)") {
+  const el = document.getElementById('auth-msg');
+  if (el) {
+    el.textContent = msg;
+    el.style.color = color;
+    el.style.display = 'block';
+  }
+}
+
 </script>
 </body>
 </html>
