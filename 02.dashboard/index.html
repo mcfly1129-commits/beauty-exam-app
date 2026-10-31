@@ -616,18 +616,29 @@ function fetchGlobalDashboardData(myData) {
         document.getElementById('growth-accuracy').innerHTML = `<span class="value-zero">未報告</span>`;
     }
 
-// 🚀 iPhoneのブロックを回避するため、fetch通信でGASからデータを安全に取得する
-    fetch(GAS_API_URL + "?action=getDashboard", {
-        method: "GET"
+  // 🔒【POST化＋認可キー付与】シリアルコードを添えてPOSTリクエストでデータを安全に取得
+  const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+      action: "getDashboardData",
+      password: password
     })
-    .then(response => {
-        if (!response.ok) throw new Error("データの取得に失敗しました。");
-        return response.json();
-    })
-    .then(data => {
-        // 無事にデータが届いたら、既存の描画ロジックへそのまま流し込む
-        handleDashboardData(data);
-    })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("データの取得に失敗しました。");
+    return response.json();
+  })
+  .then(data => {
+    if (data.status === "error") {
+      console.error("ダッシュボードデータ取得エラー:", data.message);
+      return;
+    }
+    // 無事にデータが届いたら、既存の描画ロジックへそのまま流し込む
+    handleDashboardData(data);
+  })
     .catch(err => {
         console.error("ユーザーデータ取得エラー:", err);
         // 通信エラー時のセーフティとして、グラフの枠だけは自分のデータで描画しておく
