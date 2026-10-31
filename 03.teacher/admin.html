@@ -869,6 +869,12 @@
     </div>
 
     <script>
+
+// 移行期のおすすめクリーンアップ
+['teacher_isLoggedIn', 'teacher_userEmail', 'teacher_google_id_token'].forEach(key => {
+    localStorage.removeItem(key);
+});
+
         // 全科目の定義
         const SUBJECTS_DEFINITION = [
             { id: '01', name: '関係法規' },
@@ -953,9 +959,9 @@ function getArrayMedian(arr) {
 
 // 📅 初期起動処理
 document.addEventListener('DOMContentLoaded', () => {
-  // 🔒 ログイン状態とトークンの存在チェック（localStorage / sessionStorage 両対応）
-  const isLoggedIn = localStorage.getItem('teacher_isLoggedIn') || sessionStorage.getItem('teacher_isLoggedIn');
-  const token = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token');
+// 🔒 ログイン状態とトークンの存在チェック（共有端末対策のため sessionStorage のみに限定）
+  const isLoggedIn = sessionStorage.getItem('teacher_isLoggedIn');
+  const token = sessionStorage.getItem('teacher_google_id_token');
 
   // 1. クライアント側にトークンすら存在しない場合は即座に送還
   if (isLoggedIn !== 'true' || !token) {
@@ -1072,7 +1078,7 @@ function loadTeacherDashboardData(isRecalculate = false) {
   }
 
 // 🔒 トークン取得の安全化（localStorage / sessionStorage の双方向フォールバック）
-const password = localStorage.getItem('teacher_google_id_token') || sessionStorage.getItem('teacher_google_id_token') || "";
+const password = sessionStorage.getItem('teacher_google_id_token') || "";
   const actionName = isRecalculate ? "recalculateTeacherData" : "getTeacherData";
 
   fetch(GAS_API_URL, {
@@ -1099,7 +1105,7 @@ const password = localStorage.getItem('teacher_google_id_token') || sessionStora
     }
 
     // 🔓 2. サーバー認可成功時、画面カバー（#auth-loading）を非表示化してメールアドレスを表示
-    const userEmail = localStorage.getItem('teacher_userEmail') || sessionStorage.getItem('teacher_userEmail') || "";
+    const userEmail = sessionStorage.getItem('teacher_userEmail') || "";
     const emailEl = document.getElementById('display-teacher-email');
     if (emailEl) emailEl.innerText = escapeHTML(userEmail);
 
@@ -1758,18 +1764,13 @@ gridItem.innerHTML = `
 
 // 🔒 ログアウト処理（認証トークン・セッション情報の全破棄と安全なリダイレクト）
 function handleLogout() {
-  // 1. localStorage からの教員認証情報の全破棄
-  localStorage.removeItem('teacher_isLoggedIn');
-  localStorage.removeItem('teacher_userEmail');
-  localStorage.removeItem('teacher_google_id_token');
-
-  // 2. sessionStorage 内のキャッシュ・トークンの完全クリア
+  // sessionStorage 内のキャッシュ・トークンの完全クリア
   sessionStorage.removeItem('teacher_isLoggedIn');
   sessionStorage.removeItem('teacher_userEmail');
   sessionStorage.removeItem('teacher_google_id_token');
   sessionStorage.clear();
 
-  // 3. ログイン画面へ安全にリダイレクト
+  // ログイン画面へ安全にリダイレクト
   window.location.href = "index.html";
 }
 </script>
