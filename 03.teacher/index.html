@@ -637,19 +637,26 @@
 
 <!-- 🔒 プライバシーポリシーモーダル構造 -->
 <div id="privacy-modal" class="modal-overlay" onclick="document.getElementById('privacy-modal').style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-title">プライバシーポリシー</div>
-        <div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0; max-height: 50vh; overflow-y: auto;">
-            <p style="margin-top:0;">当方は、本サービスにおける利用者情報の取扱いについて、以下の通りプライバシーポリシーを定めます。</p>
-            
-            <p><strong>1. 収集する情報と利用目的</strong><br>
-            本サービスでは、学習進捗状況の管理およびサービス品質向上のために必要な最小限のデータ（ログイン用パスワード・学習スコア・解答履歴）を取得・利用します。法令に基づく場合を除き、取得した情報を第三者に開示・提供することはありません。</p>
-            
-            <p><strong>2. 安全管理措置</strong><br>
-            当方は、情報の漏洩、滅失またはき損の防止その他収集した情報の安全管理のために必要かつ適切な措置を講じます。</p>
-        </div>
-        <button class="modal-close-btn" onclick="document.getElementById('privacy-modal').style.display='none'">閉じる</button>
-    </div>
+<div class="modal-content" onclick="event.stopPropagation()">
+<div class="modal-title">プライバシーポリシー</div>
+<div style="font-size: 0.8rem; color: #2d3436; line-height: 1.6; margin-top: 10px; background: #fefaf0; padding: 12px; border-radius: 8px; border: 1px dashed #fab1a0; max-height: 50vh; overflow-y: auto;">
+<p style="margin-top:0;">当方は、本サービスにおける利用者情報の取扱いについて、以下の通りプライバシーポリシーを定めます。</p>
+
+<p><strong>1. 個人情報の不保持（完全匿名設計）</strong><br>
+当サービスでは、利用者の氏名、生年月日、住所、電話番号、メールアドレス等の個人情報は一切取得・保持いたしません。</p>
+
+<p><strong>2. 取得・管理するデータと利用目的</strong><br>
+本サービスでは、学習機能の提供、進捗管理、および動作安定化・セキュリティ向上を目的として、以下の匿名データのみを取得・利用します。<br>
+・ログイン用シリアルコード（匿名識別ID）<br>
+・学習履歴・解答スコア・達成度データ<br>
+・端末内のローカルストレージ（学習状態の保持目的）<br>
+・アクセスログ（動作安定化および不正アクセス防止目的）</p>
+
+<p><strong>3. 第三者提供および安全管理措置</strong><br>
+取得したデータ（匿名情報）を法令に基づく場合を除き第三者に提供することはありません。また、データの漏洩や紛失を防ぐため、適切かつ安全な管理措置を講じます。</p>
+</div>
+<button class="modal-close-btn" onclick="document.getElementById('privacy-modal').style.display='none'">閉じる</button>
+</div>
 </div>
 
 <script>
