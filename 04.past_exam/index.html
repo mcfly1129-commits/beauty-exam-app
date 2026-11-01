@@ -17,7 +17,7 @@
 
 <!-- 外部ライブラリ (Chart.js & Confetti) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" integrity="sha384-sPwMflxqfAN+Q5mvlkLmHiX3PORGbZSXHiSGPTXT9VHCD/AB+b+r+vJWsqprv+7k" crossorigin="anonymous"></script>
 <style>
 :root {
   --primary-color: #fab1a0;
@@ -680,9 +680,9 @@ h1 {
     <label for="select-subject-filter" class="filter-label">📚 復習する科目で絞り込み</label>
     <select id="select-subject-filter" class="select-subject-filter">
       <option value="all">全科目表示 (すべて)</option>
-      <option value="1">1. 関係法規・制度</option>
+      <option value="1">1. 法規・制度</option>
       <option value="2">2. 運営管理</option>
-      <option value="3">3. 公衆・環境</option>
+      <option value="3">3. 公衆衛生・環境衛生</option>
       <option value="4">4. 感染症</option>
       <option value="5">5. 衛生管理技術</option>
       <option value="6">6. 人体の構造及び機能</option>
@@ -1412,13 +1412,13 @@ function renderDashboardCharts() {
   // 1. 未提出／提出済みによるタイトル・バッジの分岐制御
   if (submittedRounds.length === 0) {
     if (titleEl) {
-      titleEl.innerHTML = `🎯 累積・総合分析結果（未実施・未提出）<br><span style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">（回答を入力して提出すると総合分析が表示されます）</span>`;
+      titleEl.innerHTML = `🎯 累積・総合分析（未実施・未提出）<br><span style="font-size:0.7rem; color:#7f8c8d; font-weight:normal;">（回答を入力して提出すると総合分析が表示されます）</span>`;
     }
     document.getElementById("badge-total-rank").innerHTML = "-";
     document.getElementById("badge-total-acc").innerText = `--%`;
   } else {
     if (titleEl) {
-      titleEl.innerHTML = `🎯 累積・総合分析結果<br>（全${submittedRounds.length}回分の平均正答率 vs 集団中央値）`;
+      titleEl.innerHTML = `🎯 累積・総合分析<br>（全${submittedRounds.length}回分の平均正答率 vs 集団中央値）`;
     }
   }
 
