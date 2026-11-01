@@ -384,6 +384,21 @@ h1 {
   }
 }
 
+/* 💡 【追加】ワースト5問題用の横スクロールコンテナ */
+.worst-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  white-space: nowrap;
+  padding-bottom: 4px;
+}
+.worst-scroll-container::-webkit-scrollbar {
+  height: 4px;
+}
+.worst-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
 </style>
 </head>
 <body>
@@ -450,7 +465,7 @@ h1 {
           </select>
         </div>
         <div>
-          <label style="font-size:0.7rem; color:#7f8c8d;">閲覧対象回</label>
+          <label style="font-size:0.7rem; color:#7f8c8d;">比較基準回</label>
           <select id="filter-round" class="select-box"><option value="">全回集計</option></select>
         </div>
       </div>
@@ -487,9 +502,10 @@ h1 {
 
 <!-- タブ切替 -->
 <div style="display:flex; gap:6px; margin-bottom:10px; border-bottom:2px solid #ffeaa7; padding-bottom:4px; width:100%; box-sizing:border-box;">
-  <button id="btn-tab-students" class="btn-secondary" style="flex:1; background:var(--primary-color); white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.75rem;">学生 一覧</button>
-  <button id="btn-tab-analysis" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">過去問・科目分析</button>
-  <button id="btn-tab-together" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">皆が苦手な問題</button>
+  <button id="btn-tab-students" class="btn-secondary" style="flex:1; background:var(--primary-color); white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.75rem;">学生一覧<br>-個別指導-</button>
+  <button id="btn-tab-analysis" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">問題分析<br>-教科担当-</button>
+  <button id="btn-tab-together" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">苦手問題<br>-教科担当-</button>
+  <button id="btn-tab-statistics" class="btn-secondary" style="flex:1; background:#b2bec3; white-space:nowrap; text-align:center; padding:8px 4px; font-size:0.72rem;">統計分析<br>-担任チーフ-</button>
 </div>
 
     <!-- VIEW 1: 学生一覧テーブル（スマホ最適化 ＆ ページネーション） -->
@@ -547,7 +563,10 @@ h1 {
 
       <div style="background:#fff3f3; border:1px solid #ffccd5; padding:10px; border-radius:10px; margin-bottom:10px;">
         <div style="font-size:0.78rem; font-weight:bold; color:var(--accent-red); margin-bottom:4px;">⚠️ 全体正解率ワースト5問題（要注意問題）</div>
-        <div id="worst-questions-list" style="font-size:0.72rem; color:#2c3e50; line-height:1.4;">集計データがありません</div>
+        <!-- 💡 横スクロールコンテナでラップ -->
+        <div class="worst-scroll-container">
+          <div id="worst-questions-list" style="font-size:0.72rem; color:#2c3e50; display:inline-block; white-space:nowrap;">集計データがありません</div>
+        </div>
       </div>
 
       <div id="question-rates-grid" class="question-rate-grid"></div>
@@ -557,7 +576,7 @@ h1 {
 
 <!-- ② 10科目別 正解率セクション -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
-        <div style="font-size:0.82rem; font-weight:bold;">📚 10科目別 正解率・達成度分析</div>
+        <div style="font-size:0.82rem; font-weight:bold;">📚 科目別 正解率・達成度分析</div>
         <div style="display:flex; gap:6px;">
           <select id="analysis-subject-select" class="select-box" style="width:160px;">
             <option value="sub_all">全科目 (総合平均)</option>
@@ -611,22 +630,30 @@ h1 {
 
     </div>
 
-    <!-- VIEW 3: 🤝 皆が苦手な問題（科目別）コンテナ【新規追加】 -->
+<!-- VIEW 3: 🤝 皆が苦手な問題（科目別）コンテナ【統計分析タブ仕様に統一】 -->
     <div id="view-together-container" style="display:none;">
-      <div class="control-card" style="background:#f0f7ff; border-color:#74b9ff;">
-        <h3 style="font-size:0.9rem; color:#2980b9; margin-top:0; margin-bottom:6px;">🤝 皆が苦手な問題【科目別指導サポート】</h3>
-        <p style="font-size:0.75rem; color:#7f8c8d; margin:0 0 10px 0;">
-          全学生の集団正解率が60%未満となっている<br>「皆が苦手な問題」を10科目ごとに集計し、<br>担当教員が重点的に指導すべき問題を可視化します。
-        </p>
-        <!-- 💡 スマホ・PC共通で左に選択、右に総計バッジを確実に配置するレイアウト -->
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:4px;">
-          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-width:0; flex:1;">
-            <label style="font-size:0.75rem; font-weight:bold; color:#2c3e50; white-space:nowrap;">対象回の絞り込み:</label>
-            <select id="together-round-select" class="select-box" style="width:170px; max-width:100%;">
-              <option value="">全回集計（各回個別に抽出）</option>
-            </select>
+      <div class="control-card" style="background:#f0f7ff; border-color:#74b9ff; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+          
+          <!-- 左側：タイトル ＆ 総計バッジ -->
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <h3 style="font-size:0.9rem; color:#2980b9; margin:0;">🤝 皆が苦手な問題</h3>
+            <span id="together-total-count-badge" style="font-size:0.72rem; background:#2980b9; color:white; padding:3px 10px; border-radius:10px; font-weight:bold; display:inline-block; white-space:nowrap;">総計 0問 該当</span>
           </div>
-          <span id="together-total-count-badge" style="font-size:0.72rem; background:#2980b9; color:white; padding:3px 10px; border-radius:10px; font-weight:bold; display:inline-block; white-space:nowrap; flex-shrink:0;">総計 0問 該当</span>
+
+          <!-- 中央〜右側：説明文（必要に応じて配置）および 一番右端の比較基準回セレクトボックス -->
+          <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-left:auto;">
+            <div style="font-size:0.75rem; color:#7f8c8d; line-height:1.4; text-align:left;">
+              集団正解率が60%未満となっている<br>「皆が苦手な問題」を科目別に集計し、<br>担当教員が重点的に指導すべき問題を可視化します。
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <label style="font-size:0.75rem; font-weight:bold; color:#2c3e50; white-space:nowrap;">比較基準回:</label>
+              <select id="together-round-select" class="select-box" style="width:170px; max-width:100%;">
+                <option value="">全回集計（各回個別に抽出）</option>
+              </select>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -635,6 +662,65 @@ h1 {
         <div style="color:#95a5a6; text-align:center; padding:20px;">データを読み込んでいます...</div>
       </div>
     </div>
+
+<!-- VIEW 4: 📊 統計・分布分析コンテナ【新規追加】 -->
+    <div id="view-statistics-container" style="display:none;">
+      <div class="control-card" style="background:#fef9e7; border-color:#f39c12; margin-bottom:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;">
+          <h3 style="font-size:0.9rem; color:#d35400; margin:0;">📊 統計分析</h3>
+                  <p style="font-size:0.75rem; color:#7f8c8d; margin:0;">
+          科目別および全科目の「平均点」「中央値」「歪度」を<br>確認でき、絞り込み対象者の中央値と<br>比較基準回データの中央値も<br>レーダーチャートで比較確認できます。<br>※「負の歪度（歪度＜0、平均点＜中央値）」を<br>統計学的な目標としたい
+        </p>
+          <!-- 💡 追加：上部に配置する比較基準回のセレクトボックス -->
+          <div style="display:flex; align-items:center; gap:6px;">
+            <label style="font-size:0.75rem; font-weight:bold; color:#2c3e50; white-space:nowrap;">比較基準回:</label>
+            <select id="statistics-round-select-top" class="select-box" style="width:150px; max-width:100%;">
+              <option value="">全回集計</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ① 統計数値テーブル -->
+      <div style="font-size:0.82rem; font-weight:bold; margin-bottom:6px;">📈 統計テーブル</div>
+      <div class="table-wrapper" style="margin-bottom:12px;">
+        <table class="student-table">
+          <thead>
+            <tr style="background:#f1f2f6;">
+              <th>問題番号(科目)</th>
+              <th>平均点</th>
+              <th>中央値</th>
+              <th>歪度</th>
+            </tr>
+          </thead>
+          <tbody id="statistics-table-body">
+            <tr><td colspan="4" style="color:#95a5a6; padding:15px;">データを読み込んでいます...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 💡 統計テーブルとレーダーチャートの間に配置する回選択フィルター専用カード -->
+      <div class="control-card" style="background:#ffffff; border:1px solid var(--border-color); margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; padding:10px 12px;">
+        <label style="font-size:0.78rem; font-weight:bold; color:#2c3e50; white-space:nowrap;">📅 比較基準回:</label>
+        <select id="statistics-round-select-bottom" class="select-box" style="width:200px; max-width:100%;">
+          <option value="">全回集計</option>
+        </select>
+      </div>
+
+      <!-- ② レーダーチャート表示エリア（画像2の再現） -->
+      <div style="background:white; border:1px solid var(--border-color); border-radius:12px; padding:12px; box-shadow:0 2px 5px rgba(0,0,0,0.03);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+          <div style="font-size:0.82rem; font-weight:bold; color:#2c3e50;">🎯 中央値(正答率)レーダーチャート</div>
+          <div style="font-size:0.7rem; display:flex; gap:12px; align-items:center;">
+            <span><span style="display:inline-block; width:12px; height:3px; background:#0984e3; vertical-align:middle; margin-right:4px;"></span><b>絞り込み対象者<br>の中央値(正答率)</b></span>
+            <span><span style="display:inline-block; width:12px; height:3px; background:#d63031; vertical-align:middle; margin-right:4px;"></span><b>比較基準回データ【全校】<br>の中央値(正答率)</b></span>
+          </div>
+        </div>
+        <div style="position: relative; height: 300px; width: 100%;">
+          <canvas id="groupComparisonRadarChart"></canvas>
+        </div>
+      </div>
+    </div>    
 
 <!-- 🔍 学生個別成績モーダル -->
 <div id="student-detail-modal" class="modal-overlay">
@@ -681,10 +767,10 @@ h1 {
     </div>
 
     <!-- 🎯 【新規追加】個別詳細カルテ用グラフエリア -->
-    <div style="font-size:0.82rem; font-weight:bold; margin-top:14px; color:#2c3e50; border-top:1px solid var(--border-color); padding-top:10px;">📊 学生の累積分析・推移グラフ</div>
+    <div style="font-size:0.82rem; font-weight:bold; margin-top:14px; color:#2c3e50; border-top:1px solid var(--border-color); padding-top:10px;">📊 学生の累積分析</div>
     <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
       <div style="background:white; border:1px solid var(--border-color); border-radius:8px; padding:10px;">
-        <div style="font-size:0.75rem; font-weight:bold; color:#2c3e50; margin-bottom:6px; text-align:center;">🎯 科目別平均正答率レーダー</div>
+        <div style="font-size:0.75rem; font-weight:bold; color:#2c3e50; margin-bottom:6px; text-align:center;">🎯 科目別『平均正答率』</div>
         <div style="position: relative; height: 200px; width: 100%;">
           <canvas id="modalRadarChart"></canvas>
         </div>
@@ -978,6 +1064,14 @@ const resetPageAndRender = () => {
       renderSubjectAnalysis();
     }
 
+    // 💡 【追加】統計・分布分析タブが表示中であれば、フィルター変更時に自動再集計
+    const statsContainer = document.getElementById("view-statistics-container");
+    if (statsContainer && statsContainer.style.display !== "none") {
+      if (typeof renderStatisticsView === "function") {
+        renderStatisticsView();
+      }
+    }
+
     // 💡 【追加】「皆が苦手な問題」タブが表示中であれば、フィルター変更時に即時再集計する
     const togetherContainer = document.getElementById("view-together-container");
     if (togetherContainer && togetherContainer.style.display !== "none") {
@@ -1051,94 +1145,137 @@ const resetPageAndRender = () => {
     }
   });
 
-// 💡 修正前後の差分：値が既に一致している場合のガード節を追加し、イベントの無駄な連鎖発火を防止
-document.getElementById("filter-round").addEventListener("change", (e) => {
-  const val = e.target.value;
+// -----------------------------------------------------------------
+  // 💡 修正後：すべてのタブ切替イベントを完全に同期・排他制御する
+  // -----------------------------------------------------------------
 
-  const analysisRoundEl = document.getElementById("analysis-round-select");
-  if (analysisRoundEl && analysisRoundEl.value !== val) {
-    analysisRoundEl.value = val;
+  const tabStudents = document.getElementById("btn-tab-students");
+  const tabAnalysis = document.getElementById("btn-tab-analysis");
+  const tabTogether = document.getElementById("btn-tab-together");
+  const tabStatistics = document.getElementById("btn-tab-statistics");
+
+  const viewStudents = document.getElementById("view-students-container");
+  const viewAnalysis = document.getElementById("view-analysis-container");
+  const viewTogether = document.getElementById("view-together-container");
+  const viewStatistics = document.getElementById("view-statistics-container");
+
+  // 共通のタブ非表示・ボタン色リセットヘルパー
+  function hideAllTabs() {
+    if (viewStudents) viewStudents.style.display = "none";
+    if (viewAnalysis) viewAnalysis.style.display = "none";
+    if (viewTogether) viewTogether.style.display = "none";
+    if (viewStatistics) viewStatistics.style.display = "none";
+
+    if (tabStudents) tabStudents.style.background = "#b2bec3";
+    if (tabAnalysis) tabAnalysis.style.background = "#b2bec3";
+    if (tabTogether) tabTogether.style.background = "#b2bec3";
+    if (tabStatistics) tabStatistics.style.background = "#b2bec3";
   }
-  
-  const subjectRoundEl = document.getElementById("analysis-subject-round-select");
-  if (subjectRoundEl && subjectRoundEl.value !== val) {
-    subjectRoundEl.value = val;
+
+  if (tabStudents) {
+    tabStudents.addEventListener("click", () => {
+      hideAllTabs();
+      if (viewStudents) viewStudents.style.display = "block";
+      tabStudents.style.background = "var(--primary-color)";
+    });
   }
-  
-  // 💡 【修正】皆が苦手な問題側のセレクトボックスを確実に同期し、描画関数を呼び出す
-  const togetherSelect = document.getElementById("together-round-select");
-  if (togetherSelect && togetherSelect.value !== val) {
-    togetherSelect.value = val;
-  }
-  
-  resetPageAndRender();
 
-  // 💡 【追加】閲覧対象回が変わった際、皆が苦手な問題ビューの再描画を確実に実行
-  if (typeof renderTogetherProblemsView === "function") {
-    renderTogetherProblemsView();
-  }
-});
-
-document.getElementById("analysis-round-select").addEventListener("change", (e) => {
-    const val = e.target.value;
-    document.getElementById("filter-round").value = val; // 上側（フィルター）を連動
-    
-    // 💡 科目別分析側の回選択セレクトボックスも連動
-    const subjectRoundEl = document.getElementById("analysis-subject-round-select");
-    if (subjectRoundEl && subjectRoundEl.value !== val) {
-      subjectRoundEl.value = val;
-    }
-
-    // 💡 皆が苦手な問題側も連動
-    const togetherSelect = document.getElementById("together-round-select");
-    if (togetherSelect && togetherSelect.value !== val) {
-      togetherSelect.value = val;
-      if (typeof renderTogetherProblemsView === "function") {
-        renderTogetherProblemsView();
-      }
-    }
-
-    renderItemAnalysis();
-    renderSubjectAnalysis();
-  });
-
-  document.getElementById("analysis-subject-select").addEventListener("change", renderSubjectAnalysis);
-  document.getElementById("analysis-item-subject-select").addEventListener("change", renderItemAnalysis);
-
-// 💡 追加・修正：科目別分析の回セレクトボックス変更時のリスナー（双方向連動対応）
-  const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
-  if (subjectRoundSelect) {
-    subjectRoundSelect.addEventListener("change", (e) => {
-      const val = e.target.value;
-
-      // 1. 上部フィルター側を同期
-      const filterRoundEl = document.getElementById("filter-round");
-      if (filterRoundEl && filterRoundEl.value !== val) {
-        filterRoundEl.value = val;
-      }
-
-      // 2. 過去問分析側を同期
-      const analysisRoundEl = document.getElementById("analysis-round-select");
-      if (analysisRoundEl && analysisRoundEl.value !== val) {
-        analysisRoundEl.value = val;
-      }
-
-      // 3. 皆が苦手な問題側を同期
-      const togetherSelect = document.getElementById("together-round-select");
-      if (togetherSelect && togetherSelect.value !== val) {
-        togetherSelect.value = val;
-        if (typeof renderTogetherProblemsView === "function") {
-          renderTogetherProblemsView();
-        }
-      }
-
-      // 4. 学生一覧・サマリー・各分析の再描画
-      renderStudentTable();
-      renderSummaryBadges();
+  if (tabAnalysis) {
+    tabAnalysis.addEventListener("click", () => {
+      hideAllTabs();
+      if (viewAnalysis) viewAnalysis.style.display = "block";
+      tabAnalysis.style.background = "var(--primary-color)";
       renderItemAnalysis();
       renderSubjectAnalysis();
     });
   }
+
+  if (tabTogether) {
+    tabTogether.addEventListener("click", () => {
+      hideAllTabs();
+      if (viewTogether) viewTogether.style.display = "block";
+      tabTogether.style.background = "var(--primary-color)";
+      if (typeof renderTogetherProblemsView === "function") {
+        renderTogetherProblemsView();
+      }
+    });
+  }
+
+  if (tabStatistics) {
+    tabStatistics.addEventListener("click", () => {
+      hideAllTabs();
+      if (viewStatistics) viewStatistics.style.display = "block";
+      tabStatistics.style.background = "var(--primary-color)";
+      if (typeof renderStatisticsView === "function") {
+        renderStatisticsView();
+      }
+    });
+  }
+
+// 💡 全てのタブ・フィルターの回選択セレクトボックスを双方向同期する共通関数
+function syncAllRoundSelectors(val) {
+  const selectors = [
+    document.getElementById("filter-round"),
+    document.getElementById("analysis-round-select"),
+    document.getElementById("analysis-subject-round-select"),
+    document.getElementById("together-round-select"),
+    document.getElementById("statistics-round-select-top"),
+    document.getElementById("statistics-round-select-bottom")
+  ];
+
+  selectors.forEach(sel => {
+    if (sel && sel.value !== val) {
+      sel.value = val;
+    }
+  });
+
+  currentPage = 1;
+  renderStudentTable();
+  renderSummaryBadges();
+  renderItemAnalysis();
+  renderSubjectAnalysis();
+  
+  if (typeof renderTogetherProblemsView === "function") {
+    renderTogetherProblemsView();
+  }
+  if (typeof renderStatisticsView === "function") {
+    renderStatisticsView();
+  }
+}
+
+// 💡 各セレクトボックスの変更イベントに共通同期関数を安全に一括バインド
+const roundFilterEl = document.getElementById("filter-round");
+if (roundFilterEl) {
+  roundFilterEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+const analysisRoundEl = document.getElementById("analysis-round-select");
+if (analysisRoundEl) {
+  analysisRoundEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+const subjectRoundSelectEl = document.getElementById("analysis-subject-round-select");
+if (subjectRoundSelectEl) {
+  subjectRoundSelectEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+const togetherRoundSelectEl = document.getElementById("together-round-select");
+if (togetherRoundSelectEl) {
+  togetherRoundSelectEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+const statsTopSelectEl = document.getElementById("statistics-round-select-top");
+if (statsTopSelectEl) {
+  statsTopSelectEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+const statsBottomSelectEl = document.getElementById("statistics-round-select-bottom");
+if (statsBottomSelectEl) {
+  statsBottomSelectEl.addEventListener("change", (e) => syncAllRoundSelectors(e.target.value));
+}
+
+  document.getElementById("analysis-subject-select").addEventListener("change", renderSubjectAnalysis);
+  document.getElementById("analysis-item-subject-select").addEventListener("change", renderItemAnalysis);
 
   // 🟢 ここに先ほどの「科目連動コード」を挿入します
   const itemSubSelect = document.getElementById("analysis-item-subject-select");
@@ -1235,6 +1372,13 @@ function resetFilters() {
   const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
   if (subjectRoundSelect) subjectRoundSelect.value = "";
 
+  // 💡 【追加】統計分析ビュー側の回選択セレクトボックスもリセット
+  const statsTopSelect = document.getElementById("statistics-round-select-top");
+  if (statsTopSelect) statsTopSelect.value = "";
+
+  const statsBottomSelect = document.getElementById("statistics-round-select-bottom");
+  if (statsBottomSelect) statsBottomSelect.value = "";
+
   currentPage = 1;
   renderStudentTable();
   renderSummaryBadges();
@@ -1245,11 +1389,18 @@ function resetFilters() {
     renderSubjectAnalysis();
   }
 
-  // 💡 【追加】フィルタ解除時に「皆が苦手な問題」ビューが表示中であれば、リセット状態（全回集計）で再描画する
   const togetherContainer = document.getElementById("view-together-container");
   if (togetherContainer && togetherContainer.style.display !== "none") {
     if (typeof renderTogetherProblemsView === "function") {
       renderTogetherProblemsView();
+    }
+  }
+
+  // 💡 【追加】統計分析ビューが表示中であれば、リセット状態で再描画する
+  const statsContainer = document.getElementById("view-statistics-container");
+  if (statsContainer && statsContainer.style.display !== "none") {
+    if (typeof renderStatisticsView === "function") {
+      renderStatisticsView();
     }
   }
 }
@@ -1258,12 +1409,16 @@ function initRoundSelectors() {
   const roundFilter = document.getElementById("filter-round");
   const analysisSelect = document.getElementById("analysis-round-select");
   const togetherRoundSelect = document.getElementById("together-round-select");
-  const subjectRoundSelect = document.getElementById("analysis-subject-round-select"); // 💡 追加
+  const subjectRoundSelect = document.getElementById("analysis-subject-round-select");
+  const statsTopSelect = document.getElementById("statistics-round-select-top");       // 💡 追加
+  const statsBottomSelect = document.getElementById("statistics-round-select-bottom");
 
   roundFilter.innerHTML = '<option value="">全回集計</option>';
   analysisSelect.innerHTML = '<option value="">全回集計</option>';
   if (togetherRoundSelect) togetherRoundSelect.innerHTML = '<option value="">全回集計（各回個別に抽出）</option>';
-  if (subjectRoundSelect) subjectRoundSelect.innerHTML = '<option value="">全回集計</option>'; // 💡 追加
+  if (subjectRoundSelect) subjectRoundSelect.innerHTML = '<option value="">全回集計</option>';
+  if (statsTopSelect) statsTopSelect.innerHTML = '<option value="">全回集計</option>';       // 💡 追加
+  if (statsBottomSelect) statsBottomSelect.innerHTML = '<option value="">全回集計</option>';
 
   for (let r = 54; r >= 41; r--) {
     const opt = document.createElement("option");
@@ -1272,41 +1427,9 @@ function initRoundSelectors() {
     roundFilter.appendChild(opt.cloneNode(true));
     analysisSelect.appendChild(opt);
     if (togetherRoundSelect) togetherRoundSelect.appendChild(opt.cloneNode(true));
-    if (subjectRoundSelect) subjectRoundSelect.appendChild(opt.cloneNode(true)); // 💡 追加
-  }
-
-// 💡 皆が苦手な問題ビューの回選択変更イベント（双方向連動対応）
-  if (togetherRoundSelect) {
-    togetherRoundSelect.addEventListener("change", (e) => {
-      const val = e.target.value;
-      
-      // 1. 上部のフィルター側を同期
-      const filterRoundEl = document.getElementById("filter-round");
-      if (filterRoundEl && filterRoundEl.value !== val) {
-        filterRoundEl.value = val;
-      }
-      
-      // 2. 過去問分析側を同期
-      const analysisRoundEl = document.getElementById("analysis-round-select");
-      if (analysisRoundEl && analysisRoundEl.value !== val) {
-        analysisRoundEl.value = val;
-      }
-
-      // 3. 科目別分析側を同期
-      const subjectRoundEl = document.getElementById("analysis-subject-round-select");
-      if (subjectRoundEl && subjectRoundEl.value !== val) {
-        subjectRoundEl.value = val;
-      }
-
-      renderStudentTable();
-      renderSummaryBadges();
-      renderItemAnalysis();
-      renderSubjectAnalysis();
-
-      if (typeof renderTogetherProblemsView === "function") {
-        renderTogetherProblemsView();
-      }
-    });
+    if (subjectRoundSelect) subjectRoundSelect.appendChild(opt.cloneNode(true));
+    if (statsTopSelect) statsTopSelect.appendChild(opt.cloneNode(true));       // 💡 追加
+    if (statsBottomSelect) statsBottomSelect.appendChild(opt.cloneNode(true));
   }
 }
 
@@ -1514,7 +1637,7 @@ function renderSummaryBadges() {
   const selectedRound = document.getElementById("filter-round").value;
   const searchKey = document.getElementById("input-search-student").value.trim().toLowerCase();
 
-  // ⭕ 改善点: 閲覧対象回（selectedRound）による生徒の除外を行わず、全生徒を対象に残す
+  // ⭕ 改善点: 比較基準回（selectedRound）による生徒の除外を行わず、全生徒を対象に残す
   let baseFiltered = teacherDataStore.students.filter(s => {
     if (!s.serialCode || s.serialCode.trim() === "") return false;
 
@@ -1597,7 +1720,7 @@ function renderStudentTable() {
   const searchKey = document.getElementById("input-search-student").value.trim().toLowerCase();
   const sortKey = document.getElementById("sort-key").value;
 
-  // ⭕ 改善点: 閲覧対象回（selectedRound）による生徒の除外を行わない
+  // ⭕ 改善点: 比較基準回（selectedRound）による生徒の除外を行わない
   let filtered = teacherDataStore.students.filter(s => {
     if (!s.serialCode || s.serialCode.trim() === "") return false;
 
@@ -1668,7 +1791,7 @@ function renderStudentTable() {
     const stats = calculateTotalStats(s);
     const statusBadge = getAlertBadge(s);
 
-// 💡 修正：フィルター（閲覧対象回）に関わらず、常に通算総合正答率・総合ランク・真の最新回情報を表示する
+// 💡 修正：フィルター（比較基準回）に関わらず、常に通算総合正答率・総合ランク・真の最新回情報を表示する
     let accuracyDisplay = "-";
     if (s.submittedRoundsCount > 0) {
       const rankHtml = getRankLabel(stats.overallAccuracy);
@@ -1844,19 +1967,8 @@ if (rounds.length === 0) {
   } else {
 rounds.forEach(r => {
       const rec = records[r];
-      
-      // 💡 修正前後の差分：wrongQuestions のパース処理を安全かつ一貫したロジックに統一
-      function parseWrongQuestions(wrongData) {
-        if (Array.isArray(wrongData)) {
-          return wrongData.map(Number).filter(q => !isNaN(q) && q > 0);
-        }
-        if (typeof wrongData === 'string' && wrongData.trim() !== '') {
-          return wrongData.split(',').map(q => parseInt(q.trim(), 10)).filter(q => !isNaN(q) && q > 0);
-        }
-        return [];
-      }
 
-      // ✅ parseWrongQuestions を呼び出して wrongList に格納する
+      // ✅ グローバルに定義されている共通の parseWrongQuestions をそのまま呼び出す
       const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
       // 回ごとの集団正解率データから「重要復習問題」を抽出してカウント
@@ -2050,7 +2162,7 @@ worstContainer.innerHTML = sortedWorst.map((item, idx) => {
   const safeQNum = escapeHTML(String(Number(item.qNum) || 0));
   const safeRate = escapeHTML(String(Number(item.rate) || 0));
   return `
-<b>${safeRank}位: 問${safeQNum}</b> (正解率: <span style="color:var(--accent-red); font-weight:bold;">${safeRate}%</span>) &nbsp;&nbsp;
+<span style="display:inline-block; margin-right:16px;"><b>${safeRank}位: 問${safeQNum}</b> (正解率: <span style="color:var(--accent-red); font-weight:bold;">${safeRate}%</span>)</span>
   `;
 }).join("");
 
@@ -2161,7 +2273,7 @@ function renderSubjectAnalysis() {
 
       if (count === 0) return;
       subAcc = Math.round((sum / count) * 10) / 10;
-      targetDisplayLabel = `全${count}回<br>平均`;
+      targetDisplayLabel = `全${count}回平均`;
     }
 
     totalAccSum += subAcc;
@@ -2450,6 +2562,272 @@ hardQuestions.map(item => {
 
   // 💡 生成した科目別カードのHTMLをコンテナに描画する
   container.innerHTML = htmlOutput;
+}
+
+// ==========================================
+// 9. 📊 統計・分布分析ビュー（平均・中央値・歪度・レーダー）
+// ==========================================
+let groupComparisonRadarChartInstance = null;
+
+// 数値配列から平均値を算出
+function calculateMean(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const sum = arr.reduce((acc, val) => acc + val, 0);
+  return Math.round((sum / arr.length) * 10) / 10;
+}
+
+// 数値配列から中央値を算出
+function calculateMedian(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const sorted = arr.slice().sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return Math.round(((sorted[mid - 1] + sorted[mid]) / 2) * 10) / 10;
+  }
+  return Math.round(sorted[mid] * 10) / 10;
+}
+
+// 数値配列から歪度（Skewness）を算出（調整済みFisher-Pearsonモーメント法）
+function calculateSkewness(arr) {
+  if (!arr || arr.length < 3) return 0.0;
+  const n = arr.length;
+  const mean = arr.reduce((acc, val) => acc + val, 0) / n;
+  
+  let m2 = 0;
+  let m3 = 0;
+  arr.forEach(val => {
+    const diff = val - mean;
+    m2 += Math.pow(diff, 2);
+    m3 += Math.pow(diff, 3);
+  });
+
+  const variance = m2 / n;
+  if (variance === 0) return 0.0;
+
+  const stdDev = Math.sqrt(variance);
+  const skew = (m3 / n) / Math.pow(stdDev, 3);
+  
+  // 標本歪度の調整係数
+  const adjustedSkew = (Math.sqrt(n * (n - 1)) / (n - 2)) * skew;
+  return isNaN(adjustedSkew) ? 0.0 : Math.round(adjustedSkew * 10) / 10;
+}
+
+function renderStatisticsView() {
+  const tbody = document.getElementById("statistics-table-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  if (!teacherDataStore || !teacherDataStore.students) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:#95a5a6; padding:15px;">学生データが存在しません。</td></tr>';
+    return;
+  }
+
+  // フィルター条件の取得
+  const selectedSchool = document.getElementById("filter-school").value;
+  const selectedClass = document.getElementById("filter-class").value;
+  const selectedStatus = document.getElementById("filter-status").value;
+  const selectedRoundFilter = document.getElementById("filter-round").value;
+  const searchKey = document.getElementById("input-search-student").value.trim().toLowerCase();
+
+  let filteredStudents = teacherDataStore.students.filter(s => {
+    if (!s.serialCode || s.serialCode.trim() === "") return false;
+    if (selectedSchool && s.schoolName !== selectedSchool) return false;
+    if (selectedClass && s.className !== selectedClass) return false;
+    if (selectedRoundFilter && !s.examRecords[selectedRoundFilter]) return false;
+    if (selectedStatus) {
+      const statusCode = getAlertStatusCode(s);
+      if (selectedStatus !== statusCode) return false;
+    }
+    if (searchKey) {
+      const codeMatch = String(s.serialCode || '').toLowerCase().includes(searchKey);
+      const numMatch = String(s.studentNumber || '').toLowerCase().includes(searchKey);
+      if (!codeMatch && !numMatch) return false;
+    }
+    return true;
+  });
+
+  // 科目定義（10科目＋合計）
+  const SUBJECT_RANGES = [
+    { id: 1, name: "① 問01～07 (法規)", start: 1, end: 7, maxScore: 7 },
+    { id: 2, name: "② 問08～10 (運営)", start: 8, end: 10, maxScore: 3 },
+    { id: 3, name: "③ 問11～15 (公衆・環境)", start: 11, end: 15, maxScore: 5 },
+    { id: 4, name: "④ 問16～20 (感染症)", start: 16, end: 20, maxScore: 5 },
+    { id: 5, name: "⑤ 問21～25 (管理技術)", start: 21, end: 25, maxScore: 5 },
+    { id: 6, name: "⑥ 問26～30 (人体)", start: 26, end: 30, maxScore: 5 },
+    { id: 7, name: "⑦ 問31～35 (皮膚科学)", start: 31, end: 35, maxScore: 5 },
+    { id: 8, name: "⑧ 問36～40 (香粧品)", start: 36, end: 40, maxScore: 5 },
+    { id: 9, name: "⑨ 問41～43 (文化論)", start: 41, end: 43, maxScore: 3 },
+    { id: 10, name: "⑩ 問44～55 (技術理論)", start: 44, end: 55, maxScore: 12 }
+  ];
+
+  // 生徒ごとの代表データを収集（比較基準回が指定されていればその回、なければ最新回または平均）
+  // ここでは選択中の回、または各生徒の最新提出データを集計対象とする
+  const groupScoresBySubject = {};
+  const groupTotals = [];
+  const allStudentsTotals = [];
+
+  for (let i = 1; i <= 10; i++) groupScoresBySubject[i] = [];
+
+// 🎯 修正：中央値レーダーチャート比較の赤線用データは、学校・クラスの絞り込みを受けないようにする
+  const baseCompareStudents = teacherDataStore.students.filter(s => {
+    if (!s.serialCode || s.serialCode.trim() === "") return false;
+    return true;
+  });
+
+  const allSubValues = {};
+  for (let i = 1; i <= 10; i++) allSubValues[i] = [];
+
+  baseCompareStudents.forEach(s => {
+    const recs = s.examRecords || {};
+    // 比較基準回（selectedRoundFilter）が指定されていればその回のみ、未指定なら全回を対象にする
+    const targetRounds = selectedRoundFilter ? [selectedRoundFilter] : Object.keys(recs);
+    
+    targetRounds.forEach(r => {
+      if (!recs[r]) return;
+      const rec = recs[r];
+      let wrongList = parseWrongQuestions(rec.wrongQuestions);
+      SUBJECT_RANGES.forEach(subj => {
+        let correctCount = 0;
+        for (let q = subj.start; q <= subj.end; q++) {
+          if (!wrongList.includes(q)) correctCount++;
+        }
+        allSubValues[subj.id].push(correctCount);
+      });
+    });
+  });
+
+  const overallAllSubMedians = [];
+  for (let i = 1; i <= 10; i++) {
+    // 100分率（%）に換算してレーダー用にする場合、あるいは得点そのままでも可。ここでは画像2に合わせて正答率(%)ベースで計算
+    const med = calculateMedian(allSubValues[i]);
+    const maxScore = SUBJECT_RANGES[i-1].maxScore;
+    overallAllSubMedians.push(Math.round((med / maxScore) * 1000) / 10);
+  }
+
+  // フィルター後グループの集計
+  filteredStudents.forEach(s => {
+    const recs = s.examRecords || {};
+    const targetRound = selectedRoundFilter || Object.keys(recs).sort((a,b)=>Number(b)-Number(a))[0];
+    if (!targetRound || !recs[targetRound]) return;
+
+    const rec = recs[targetRound];
+    let wrongList = parseWrongQuestions(rec.wrongQuestions);
+    let studentTotalScore = 0;
+
+    SUBJECT_RANGES.forEach(subj => {
+      let correctCount = 0;
+      for (let q = subj.start; q <= subj.end; q++) {
+        if (!wrongList.includes(q)) correctCount++;
+      }
+      groupScoresBySubject[subj.id].push(correctCount);
+      studentTotalScore += correctCount;
+    });
+    groupTotals.push(studentTotalScore);
+  });
+
+  // テーブル行の生成
+  let tableHtml = "";
+  const groupSubMediansForRadar = [];
+
+  SUBJECT_RANGES.forEach(subj => {
+    const scores = groupScoresBySubject[subj.id];
+    const mean = calculateMean(scores);
+    const median = calculateMedian(scores);
+    const skew = calculateSkewness(scores);
+
+    const maxScore = subj.maxScore;
+    groupSubMediansForRadar.push(Math.round((median / maxScore) * 1000) / 10);
+
+    tableHtml += `
+      <tr>
+        <td style="text-align:left;"><b>${escapeHTML(subj.name)}</b></td>
+        <td><b>${mean}</b>点</td>
+        <td><b>${median}</b>点</td>
+        <td><b>${skew}</b></td>
+      </tr>
+    `;
+  });
+
+  // 合計行
+  const totalMean = calculateMean(groupTotals);
+  const totalMedian = calculateMedian(groupTotals);
+  const totalSkew = calculateSkewness(groupTotals);
+
+  tableHtml += `
+    <tr style="background:#fef9e7; font-weight:bold;">
+      <td style="text-align:left;">合計 (55問)</td>
+      <td>${totalMean}点</td>
+      <td>${totalMedian}点</td>
+      <td>${totalSkew}</td>
+    </tr>
+  `;
+
+  tbody.innerHTML = tableHtml;
+
+  // レーダーチャートの描画・更新
+  renderGroupComparisonRadar(groupSubMediansForRadar, overallAllSubMedians);
+}
+
+// 助長用パーサ関数がない場合は安全に定義
+function parseWrongQuestions(wrongData) {
+  if (Array.isArray(wrongData)) return wrongData.map(Number).filter(q => !isNaN(q) && q > 0);
+  if (typeof wrongData === 'string' && wrongData.trim() !== '') {
+    return wrongData.split(',').map(q => parseInt(q.trim(), 10)).filter(q => !isNaN(q) && q > 0);
+  }
+  return [];
+}
+
+// グループ中央値 vs 全体中央値のレーダーチャート描画
+function renderGroupComparisonRadar(groupData, overallData) {
+  if (groupComparisonRadarChartInstance) {
+    groupComparisonRadarChartInstance.destroy();
+    groupComparisonRadarChartInstance = null;
+  }
+
+  const ctx = document.getElementById("groupComparisonRadarChart").getContext("2d");
+  const labels = [
+    "① 関係法規・制度", "② 運営管理", "③ 公衆・環境", "④ 感染症", "⑤ 衛生管理技術",
+    "⑥ 人体の構造及び機能", "⑦ 皮膚科学", "⑧ 香粧品化学", "⑨ 文化論", "⑩ 美容技術理論"
+  ];
+
+  groupComparisonRadarChartInstance = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'この対象者の中央値',
+          data: groupData,
+          backgroundColor: 'rgba(9, 132, 227, 0.2)',
+          borderColor: '#0984e3',
+          borderWidth: 2,
+          pointBackgroundColor: '#0984e3'
+        },
+        {
+          label: '全体の中央値',
+          data: overallData,
+          backgroundColor: 'rgba(214, 48, 49, 0.1)',
+          borderColor: '#d63031',
+          borderWidth: 2,
+          pointBackgroundColor: '#d63031'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0,
+          max: 100,
+          ticks: { stepSize: 25 }
+        }
+      },
+      plugins: {
+        legend: { display: false }
+      }
+    }
+  });
 }
 
 </script>
