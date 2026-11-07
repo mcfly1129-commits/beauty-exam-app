@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>美容師国家試験Pro - クイズ解答</title>
   <link rel="stylesheet" href="../css/style.css">
-  <!-- Supabase JS SDK (CDN) -->
+  <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -18,11 +18,8 @@
 
     <h3 id="question-text" style="font-size:18px; margin-bottom:20px;">問題文を読み込み中...</h3>
 
-    <div id="options-container">
-      <!-- 選択肢ボタンがここに動的挿入されます -->
-    </div>
+    <div id="options-container"></div>
 
-    <!-- 正否と解説エリア（選択後に表示） -->
     <div id="explanation-area" class="alert" style="margin-top:20px;">
       <h4 id="result-badge" style="margin-bottom:8px;"></h4>
       <p id="explanation-text"></p>
@@ -30,7 +27,7 @@
     </div>
   </div>
 
-  <!-- 結果発表画面（初期状態は非表示） -->
+  <!-- 結果発表画面 -->
   <div class="card" id="result-card" style="display:none; text-align:center;">
     <h2>🎉 テスト終了！</h2>
     <p class="subtitle">お疲れ様でした。結果は以下の通りです。</p>
@@ -48,18 +45,15 @@
   <script src="../js/auth.js"></script>
   <script src="../js/sync_queue.js"></script>
   <script src="../js/quiz_engine.js"></script>
-  <!-- 難読化問題データベース（master/js/ に配置予定） -->
   <script src="../js/questions_database.js"></script>
-  
+
   <script>
     let engine = null;
 
-    // URLパラメータからモードと科目を取得
-    const urlParams = new URLSearchParams(window.location.search);
+const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode') || '2choice';
-    const subject = urlParams.get('subject') || 'public_hygiene';
+    const subject = urlParams.get('subject') || 'test_koshuese_unit_ver01_2026'; // 👈 実際のデータベースキーに変更
 
-    // 仮の問題データ（questions_database.js が配置されるまでのテスト用サンプル）
     const sampleQuestions = [
       {
         id: 1,
@@ -78,26 +72,50 @@
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-      // ログイン状態チェック
       const user = getCurrentUser();
       if (!user) {
         window.location.href = '../index.html';
         return;
       }
 
-      // 問題データのセットアップ（グローバル変数があれば使用、なければサンプル）
-      const questions = (window.questionsDatabase && window.questionsDatabase[subject]) 
-        ? window.questionsDatabase[subject] 
-        : sampleQuestions;
+// データベースから該当科目のデータを取得し、クイズエンジン用にフォーマットを変換
+      const dbEntry = window.ALL_QUESTIONS_DATABASE && window.ALL_QUESTIONS_DATABASE[subject];
+      let questions = [];
 
-      // クイズエンジンの初期化
+      // 無効なパラメータ（存在しない科目キー）が渡された場合のエラー処理
+      if (!dbEntry || !dbEntry.questionPool) {
+        document.getElementById('quiz-mode-title').innerText = 'エラー';
+        document.getElementById('question-text').innerText = `指定された科目キー「${subject}」のデータが見つかりませんでした。`;
+        document.getElementById('options-container').innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #ff4d4f; font-weight: bold; margin-bottom: 16px;">正しいURLパラメータを指定するか、学習ホームから再度アクセスしてください。</p>
+            <a href="./index.html" class="btn" style="display: inline-block; text-decoration: none;">学習ホームに戻る</a>
+          </div>
+        `;
+        document.getElementById('explanation-area').style.display = 'none';
+        return;
+      }
+
+      let idCounter = 1;
+      for (const categoryName in dbEntry.questionPool) {
+        const rawList = dbEntry.questionPool[categoryName];
+        rawList.forEach(item => {
+          questions.push({
+            id: item.id || idCounter++,
+            question: `【${categoryName}】${item.text}`,
+            options: ["○ 正しい", "× 誤り"],
+            answer: item.answer ? 0 : 1, // trueなら0(○), falseなら1(×)
+            explanation: item.exp
+          });
+        });
+      }
+
       engine = new QuizEngine(mode, subject, questions);
 
       document.getElementById('quiz-mode-title').innerText = (mode === '2choice' ? '⚡ 2択学習モード' : '📝 4択過去問モード');
       renderQuestion();
     });
 
-    // 問題の描画
     function renderQuestion() {
       const q = engine.getCurrentQuestion();
       document.getElementById('quiz-progress').innerText = `第 ${engine.currentIndex + 1} / ${engine.questions.length} 問`;
@@ -116,12 +134,10 @@
       });
     }
 
-    // 選択肢をタップした時の処理
     function handleSelectOption(selectedIndex) {
       const result = engine.submitAnswer(selectedIndex);
       const buttons = document.querySelectorAll('.option-btn');
 
-      // ボタンの無効化と色の付け替え
       buttons.forEach((btn, idx) => {
         btn.disabled = true;
         if (idx === result.correctAnswer) {
@@ -131,7 +147,6 @@
         }
       });
 
-      // 解説エリアの表示
       const expArea = document.getElementById('explanation-area');
       const badge = document.getElementById('result-badge');
       const text = document.getElementById('explanation-text');
@@ -148,12 +163,10 @@
       expArea.style.display = 'block';
     }
 
-    // 次へボタンのクリック処理
     document.getElementById('next-btn').addEventListener('click', async () => {
       if (engine.nextQuestion()) {
         renderQuestion();
       } else {
-        // 全問終了
         const finalData = await engine.finishQuiz();
         document.getElementById('quiz-card').style.display = 'none';
         document.getElementById('final-score').innerText = finalData.score;
