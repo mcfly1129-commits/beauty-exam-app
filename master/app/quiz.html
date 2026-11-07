@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美容師国家試験Pro - クイズ解答</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- Supabase JS SDK (CDN) -->
+  <script src="[suspicious link removed]"></script>
+</head>
+<body>
+  <!-- クイズ実行画面 -->
+  <div class="card" id="quiz-card">
+    <div style="display:flex; justify-content:space-between; color:var(--text-muted); font-size:14px; margin-bottom:12px;">
+      <span id="quiz-mode-title">モード</span>
+      <span id="quiz-progress">第 1 / 10 問</span>
+    </div>
+
+    <h3 id="question-text" style="font-size:18px; margin-bottom:20px;">問題文を読み込み中...</h3>
+
+    <div id="options-container">
+      <!-- 選択肢ボタンがここに動的挿入されます -->
+    </div>
+
+    <!-- 正否と解説エリア（選択後に表示） -->
+    <div id="explanation-area" class="alert" style="margin-top:20px;">
+      <h4 id="result-badge" style="margin-bottom:8px;"></h4>
+      <p id="explanation-text"></p>
+      <button class="btn" id="next-btn" style="margin-top:16px;">次の問題へ</button>
+    </div>
+  </div>
+
+  <!-- 結果発表画面（初期状態は非表示） -->
+  <div class="card" id="result-card" style="display:none; text-align:center;">
+    <h2>🎉 テスト終了！</h2>
+    <p class="subtitle">お疲れ様でした。結果は以下の通りです。</p>
+
+    <div style="font-size:48px; font-weight:bold; color:var(--primary-color); margin:20px 0;">
+      <span id="final-score">0</span> <span style="font-size:24px;">点</span>
+    </div>
+    <p id="final-detail" style="margin-bottom:24px; color:var(--text-muted);"></p>
+
+    <a href="./index.html" class="btn">学習ホームに戻る</a>
+  </div>
+
+  <!-- スクリプト類 -->
+  <script src="../js/supabase_client.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sync_queue.js"></script>
+  <script src="../js/quiz_engine.js"></script>
+  <!-- 難読化問題データベース（master/js/ に配置予定） -->
+  <script src="../js/questions_database.js"></script>
+  
+  <script>
+    let engine = null;
+
+    // URLパラメータからモードと科目を取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode') || '2choice';
+    const subject = urlParams.get('subject') || 'public_hygiene';
+
+    // 仮の問題データ（questions_database.js が配置されるまでのテスト用サンプル）
+    const sampleQuestions = [
+      {
+        id: 1,
+        question: "【公衆衛生】地域保健法に基づき設置されている機関は保健所である。",
+        options: ["○ 正しい", "× 誤り"],
+        answer: 0,
+        explanation: "正解は「○ 正しい」です。地域保健法に基づき都道府県や特定市などに保健所が設置されています。"
+      },
+      {
+        id: 2,
+        question: "【公衆衛生】理容師・美容師の免許を交付する主体の正しい組み合わせを選べ。",
+        options: ["1. 厚生労働大臣", "2. 都道府県知事", "3. 保健所長", "4. 理容美容師試験研修センター長"],
+        answer: 0,
+        explanation: "正解は「1. 厚生労働大臣」です。厚生労働大臣が指定試験機関・指定登録機関に事務を行わせています。"
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // ログイン状態チェック
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // 問題データのセットアップ（グローバル変数があれば使用、なければサンプル）
+      const questions = (window.questionsDatabase && window.questionsDatabase[subject]) 
+        ? window.questionsDatabase[subject] 
+        : sampleQuestions;
+
+      // クイズエンジンの初期化
+      engine = new QuizEngine(mode, subject, questions);
+
+      document.getElementById('quiz-mode-title').innerText = (mode === '2choice' ? '⚡ 2択学習モード' : '📝 4択過去問モード');
+      renderQuestion();
+    });
+
+    // 問題の描画
+    function renderQuestion() {
+      const q = engine.getCurrentQuestion();
+      document.getElementById('quiz-progress').innerText = `第 ${engine.currentIndex + 1} / ${engine.questions.length} 問`;
+      document.getElementById('question-text').innerText = q.question;
+      document.getElementById('explanation-area').style.display = 'none';
+
+      const container = document.getElementById('options-container');
+      container.innerHTML = '';
+
+      q.options.forEach((optText, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = optText;
+        btn.onclick = () => handleSelectOption(index);
+        container.appendChild(btn);
+      });
+    }
+
+    // 選択肢をタップした時の処理
+    function handleSelectOption(selectedIndex) {
+      const result = engine.submitAnswer(selectedIndex);
+      const buttons = document.querySelectorAll('.option-btn');
+
+      // ボタンの無効化と色の付け替え
+      buttons.forEach((btn, idx) => {
+        btn.disabled = true;
+        if (idx === result.correctAnswer) {
+          btn.classList.add('correct');
+        } else if (idx === selectedIndex && !result.isCorrect) {
+          btn.classList.add('incorrect');
+        }
+      });
+
+      // 解説エリアの表示
+      const expArea = document.getElementById('explanation-area');
+      const badge = document.getElementById('result-badge');
+      const text = document.getElementById('explanation-text');
+
+      if (result.isCorrect) {
+        expArea.className = 'alert alert-success';
+        badge.innerText = '⭕ 正解！';
+      } else {
+        expArea.className = 'alert alert-danger';
+        badge.innerText = '❌ 不正解...';
+      }
+
+      text.innerText = result.explanation;
+      expArea.style.display = 'block';
+    }
+
+    // 次へボタンのクリック処理
+    document.getElementById('next-btn').addEventListener('click', async () => {
+      if (engine.nextQuestion()) {
+        renderQuestion();
+      } else {
+        // 全問終了
+        const finalData = await engine.finishQuiz();
+        document.getElementById('quiz-card').style.display = 'none';
+        document.getElementById('final-score').innerText = finalData.score;
+        document.getElementById('final-detail').innerText = `全 ${finalData.total_questions} 問中 ${finalData.correct_count} 問正解`;
+        document.getElementById('result-card').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
