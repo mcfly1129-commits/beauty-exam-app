@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>美容師国家試験Pro - 管理者ポータル</title>
   <link rel="stylesheet" href="../css/style.css">
-  <!-- Supabase JS SDK (CDN) -->
+  <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -14,7 +14,6 @@
     <p class="subtitle">シリアルコードの発行・管理および成績ログの確認が行えます</p>
   </div>
 
-  <!-- 新規シリアルコード発行カード -->
   <div class="card">
     <h3>🔑 新規シリアルコードの発行</h3>
     <form id="create-code-form" style="margin-top:16px;">
@@ -38,7 +37,6 @@
     </form>
   </div>
 
-  <!-- 発行済みシリアルコード一覧カード -->
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="margin:0;">📋 発行済みコード一覧</h3>
@@ -62,7 +60,6 @@
     </div>
   </div>
 
-  <!-- 最新の回答・成績ログカード -->
   <div class="card">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="margin:0;">📈 最新の生徒成績ログ (直近20件)</h3>
@@ -86,7 +83,6 @@
     </div>
   </div>
 
-  <!-- スクリプト類 -->
   <script src="../js/supabase_client.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -94,7 +90,6 @@
       loadExamLogs();
     });
 
-    // シリアルコード一覧の読み込み
     async function loadSerialCodes() {
       const supabase = getSupabaseClient();
       const tbody = document.getElementById('codes-table-body');
@@ -125,7 +120,6 @@
       `).join('');
     }
 
-    // 回答ログ一覧の読み込み
     async function loadExamLogs() {
       const supabase = getSupabaseClient();
       const tbody = document.getElementById('logs-table-body');
@@ -161,7 +155,6 @@
       }).join('');
     }
 
-    // シリアルコード作成処理
     document.getElementById('create-code-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const supabase = getSupabaseClient();
