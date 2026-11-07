@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美容師国家試験Pro - 管理者ポータル</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- Supabase JS SDK (CDN) -->
+  <script src="[suspicious link removed]"></script>
+</head>
+<body>
+  <div class="card">
+    <h2>🛠️ 教員・管理者ポータル</h2>
+    <p class="subtitle">シリアルコードの発行・管理および成績ログの確認が行えます</p>
+  </div>
+
+  <!-- 新規シリアルコード発行カード -->
+  <div class="card">
+    <h3>🔑 新規シリアルコードの発行</h3>
+    <form id="create-code-form" style="margin-top:16px;">
+      <div class="form-group">
+        <label for="new-code">シリアルコード文字列</label>
+        <input type="text" id="new-code" placeholder="例: BEAUTY-2026-SCHOOL-A" required>
+      </div>
+
+      <div class="form-group">
+        <label for="school-name">学校名・クラス名</label>
+        <input type="text" id="school-name" placeholder="例: ○○美容専門学校 Aクラス" required>
+      </div>
+
+      <div class="form-group">
+        <label for="max-uses">利用可能人数（上限）</label>
+        <input type="text" id="max-uses" value="50" required>
+      </div>
+
+      <button type="submit" class="btn" id="create-btn">コードを発行・登録する</button>
+      <div id="create-msg" class="alert" style="margin-top:12px;"></div>
+    </form>
+  </div>
+
+  <!-- 発行済みシリアルコード一覧カード -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0;">📋 発行済みコード一覧</h3>
+      <button onclick="loadSerialCodes()" class="btn-outline" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">更新</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border-color); background-color:var(--bg-color);">
+            <th style="padding:8px;">コード</th>
+            <th style="padding:8px;">学校・クラス名</th>
+            <th style="padding:8px;">利用状況</th>
+            <th style="padding:8px;">状態</th>
+          </tr>
+        </thead>
+        <tbody id="codes-table-body">
+          <tr><td colspan="4" style="padding:12px; text-align:center; color:var(--text-muted);">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 最新の回答・成績ログカード -->
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0;">📈 最新の生徒成績ログ (直近20件)</h3>
+      <button onclick="loadExamLogs()" class="btn-outline" style="width:auto; padding:6px 12px; font-size:12px; margin:0;">更新</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--border-color); background-color:var(--bg-color);">
+            <th style="padding:8px;">日時</th>
+            <th style="padding:8px;">コード</th>
+            <th style="padding:8px;">モード</th>
+            <th style="padding:8px;">得点</th>
+          </tr>
+        </thead>
+        <tbody id="logs-table-body">
+          <tr><td colspan="4" style="padding:12px; text-align:center; color:var(--text-muted);">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- スクリプト類 -->
+  <script src="../js/supabase_client.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSerialCodes();
+      loadExamLogs();
+    });
+
+    // シリアルコード一覧の読み込み
+    async function loadSerialCodes() {
+      const supabase = getSupabaseClient();
+      const tbody = document.getElementById('codes-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:12px; text-align:center;">読み込み中...</td></tr>';
+
+      const { data, error } = await supabase
+        .from('serial_codes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error || !data) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:12px; color:red;">取得失敗: ${error ? error.message : 'データなし'}</td></tr>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:12px; text-align:center;">登録済みのコードはありません。</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => `
+        <tr style="border-bottom:1px solid var(--border-color);">
+          <td style="padding:8px; font-weight:bold;">${item.code}</td>
+          <td style="padding:8px;">${item.school_name}</td>
+          <td style="padding:8px;">${item.used_count} / ${item.max_uses} 名</td>
+          <td style="padding:8px;">${item.is_active ? '🟢 有効' : '🔴 停止'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // 回答ログ一覧の読み込み
+    async function loadExamLogs() {
+      const supabase = getSupabaseClient();
+      const tbody = document.getElementById('logs-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" style="padding:12px; text-align:center;">読み込み中...</td></tr>';
+
+      const { data, error } = await supabase
+        .from('exam_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error || !data) {
+        tbody.innerHTML = `<tr><td colspan="4" style="padding:12px; color:red;">取得失敗: ${error ? error.message : 'データなし'}</td></tr>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="padding:12px; text-align:center;">成績ログはまだありません。</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => {
+        const dateStr = new Date(item.created_at).toLocaleString('ja-JP', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+        const modeBadge = item.mode === '2choice' ? '⚡ 2択' : '📝 4択';
+        return `
+          <tr style="border-bottom:1px solid var(--border-color);">
+            <td style="padding:8px; font-size:12px;">${dateStr}</td>
+            <td style="padding:8px;">${item.serial_code}</td>
+            <td style="padding:8px;">${modeBadge}</td>
+            <td style="padding:8px; font-weight:bold; color:var(--primary-color);">${item.score} 点</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // シリアルコード作成処理
+    document.getElementById('create-code-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const supabase = getSupabaseClient();
+      const code = document.getElementById('new-code').value.trim().toUpperCase();
+      const school = document.getElementById('school-name').value.trim();
+      const maxUses = parseInt(document.getElementById('max-uses').value, 10) || 1;
+      const msgDiv = document.getElementById('create-msg');
+      const createBtn = document.getElementById('create-btn');
+
+      msgDiv.style.display = 'none';
+      createBtn.disabled = true;
+
+      const { error } = await supabase.from('serial_codes').insert([
+        { code: code, school_name: school, max_uses: maxUses }
+      ]);
+
+      createBtn.disabled = false;
+
+      if (error) {
+        msgDiv.className = 'alert alert-danger';
+        msgDiv.innerText = '登録失敗: ' + error.message;
+        msgDiv.style.display = 'block';
+      } else {
+        msgDiv.className = 'alert alert-success';
+        msgDiv.innerText = `シリアルコード [ ${code} ] を正常に発行しました！`;
+        msgDiv.style.display = 'block';
+        document.getElementById('create-code-form').reset();
+        loadSerialCodes();
+      }
+    });
+  </script>
+</body>
+</html>
