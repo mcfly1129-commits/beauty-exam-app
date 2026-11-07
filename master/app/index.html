@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美容師国家試験Pro - 学習ホーム</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <!-- Supabase JS SDK (CDN) -->
+  <script src="[suspicious link removed]"></script>
+</head>
+<body>
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 id="user-welcome" style="margin:0;">ようこそ！</h2>
+      <button onclick="logout()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; margin:0;">ログアウト</button>
+    </div>
+    <p id="user-school" class="subtitle" style="margin-bottom: 16px;"></p>
+  </div>
+
+  <!-- 学習モード選択カード -->
+  <div class="card">
+    <h3>学習モードを選択</h3>
+    
+    <div style="margin-top: 16px;">
+      <a href="./quiz.html?mode=2choice&subject=public_hygiene" class="btn" style="margin-bottom: 12px; text-decoration: none;">
+        ⚡ 2択高速学習モード（サクサク暗記）
+      </a>
+      <a href="./quiz.html?mode=4choice&subject=public_hygiene" class="btn btn-outline" style="text-decoration: none;">
+        📝 4択過去問実践記録モード（本試験形式）
+      </a>
+    </div>
+  </div>
+
+  <!-- 将来の拡張用（ダッシュボードリンク） -->
+  <div class="card" style="text-align: center;">
+    <h3>📊 成長ダッシュボード</h3>
+    <p class="subtitle">これまでの回答履歴と弱点分析を確認できます</p>
+    <button class="btn btn-outline" onclick="alert('ダッシュボード機能は準備中です')" style="margin-top: 8px;">ダッシュボードを開く</button>
+  </div>
+
+  <!-- JavaScriptモジュール -->
+  <script src="../js/supabase_client.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/sync_queue.js"></script>
+  <script>
+    // ログイン状態の確認
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      if (!user) {
+        // 未ログイン時はログイン画面へリダイレクト
+        window.location.href = '../index.html';
+        return;
+      }
+
+      // ユーザー情報の表示
+      document.getElementById('user-welcome').innerText = `${user.student_name} 様`;
+      document.getElementById('user-school').innerText = `所属: ${user.school_name}`;
+
+      // オンライン復帰時の未送信ログ同期チェック
+      if (typeof flushOfflineQueue === 'function') {
+        flushOfflineQueue();
+      }
+    });
+  </script>
+</body>
+</html>
