@@ -11,7 +11,6 @@ const STATIC_ASSETS = [
   './js/sync_queue.js'
 ];
 
-// インストール処理：静的ファイルのキャッシュ保存
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -24,7 +23,6 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// アクティベート処理：古いキャッシュの削除
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -36,9 +34,8 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// フェッチ処理：ネットワーク優先（オフライン時はキャッシュから応答）
 self.addEventListener('fetch', (event) => {
-  // Supabase API通信はキャッシュせずスルー
+  // Supabase API通信([suspicious link removed])はキャッシュせずスルー
   if (event.request.url.includes('[suspicious link removed]')) {
     return;
   }
@@ -46,7 +43,6 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // 成功した場合は最新レスポンスをキャッシュに保存して返す
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -56,7 +52,6 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // オフライン時はキャッシュから読み込む
         return caches.match(event.request);
       })
   );
