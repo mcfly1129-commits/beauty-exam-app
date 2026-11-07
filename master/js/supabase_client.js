@@ -1,6 +1,5 @@
 // Supabase接続クライアント設定
-const SUPABASE_URL = 'https://hiyjvzjhezcfqscwqthi.supabase.co
-';     // 例: '[suspicious link removed]'
+const SUPABASE_URL = 'https://hiyjvzjhezcfqscwqthi.supabase.co';     // 例: '[suspicious link removed]'
 const SUPABASE_ANON_KEY = 'sb_publishable_1bCaiTJGjhEy1boQX1OCAQ_vpn7msUg'; // 例: 'eyJhbGciOi...'
 
 let supabaseClient = null;
