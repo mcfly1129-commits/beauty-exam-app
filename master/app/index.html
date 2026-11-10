@@ -10,15 +10,9 @@
       background-color: #fefaf0;
       color: #2d3436;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
+      max-width: 600px; /* 追加 */
+      margin: 0 auto;   /* 0 から 0 auto に変更 */
       padding: 12px;
-      box-sizing: border-box;
-    }
-
-    /* ▼ 追加：PC表示時に中央に寄せるための全体コンテナ */
-    .app-container {
-      max-width: 600px;
-      margin: 0 auto;
       box-sizing: border-box;
     }
 
@@ -231,9 +225,6 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-
-<!-- ▼ 追加：全体を囲む開始タグ -->
-  <div class="app-container">
 
   <!-- ログインユーザーヘッダー -->
   <div class="user-info-bar">
@@ -938,6 +929,5 @@
       });
     }
   </script>
-  </div> <!-- ▲ 追加：全体を囲む閉じタグ -->
 </body>
 </html>
