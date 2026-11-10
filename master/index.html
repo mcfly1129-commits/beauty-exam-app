@@ -1,77 +1,65 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美容師国家試験Pro - ログイン</title>
-  <link rel="manifest" href="./manifest.json">
-  <link rel="stylesheet" href="./css/style.css">
-  <!-- Supabase JS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美容師国家試験Pro - ログイン</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="./css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="card">
+<div class="container" style="margin-top: 40px;">
+  <div style="text-align: center; margin-bottom: 20px;">
     <h2>美容師国家試験Pro</h2>
     <p class="subtitle">シリアルコードと氏名を入力して学習を開始してください</p>
-
-    <form id="login-form">
-      <div class="form-group">
-        <label for="serial-code">シリアルコード</label>
-        <input type="text" id="serial-code" placeholder="例: BEAUTY-2026-PASS" required autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label for="student-name">お名前 / 学籍番号</label>
-        <input type="text" id="student-name" placeholder="例: 美容 太郎" required>
-      </div>
-
-      <button type="submit" class="btn" id="submit-btn">ログインして学習を始める</button>
-      <div id="error-message" class="alert alert-danger"></div>
-    </form>
   </div>
 
-  <!-- JavaScriptモジュール -->
-  <script src="./js/supabase_client.js"></script>
-  <script src="./js/auth.js"></script>
-  <script>
-    // ログイン状態チェック（ログイン済みなら自動で学習画面へ）
-    document.addEventListener('DOMContentLoaded', () => {
-      const user = getCurrentUser();
-      if (user) {
-        window.location.href = '/master/app/index.html';
-      }
-    });
+  <form id="login-form">
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem;">シリアルコード</label>
+      <input type="text" id="serial-code" placeholder="例: BEAUTY-2026-PASS" required autocomplete="off" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
+    </div>
 
-    // フォーム送信処理
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const code = document.getElementById('serial-code').value;
-      const name = document.getElementById('student-name').value;
-      const errorDiv = document.getElementById('error-message');
-      const submitBtn = document.getElementById('submit-btn');
+    <div style="margin-bottom: 20px;">
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 0.85rem;">お名前 / 学籍番号</label>
+      <input type="text" id="student-name" placeholder="例: 美容 太郎" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px;">
+    </div>
 
-      errorDiv.style.display = 'none';
-      submitBtn.disabled = true;
-      submitBtn.innerText = '認証中...';
+    <button type="submit" class="btn" id="submit-btn">ログインして学習を始める</button>
+    <div id="error-message" style="display: none; color: red; font-size: 0.8rem; margin-top: 10px; text-align: center;"></div>
+  </form>
+</div>
 
-      const result = await loginWithSerialCode(code, name);
+<script src="./js/supabase_client.js"></script>
+<script src="./js/auth.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = getCurrentUser();
+  if (user) {
+    window.location.href = './app/index.html';
+  }
+});
 
-      if (result.success) {
-        window.location.href = '/master/app/index.html';
-      } else {
-        errorDiv.innerText = result.message;
-        errorDiv.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'ログインして学習を始める';
-      }
-    });
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = document.getElementById('serial-code').value;
+  const name = document.getElementById('student-name').value;
+  const submitBtn = document.getElementById('submit-btn');
 
-    // Service Workerの登録 (PWA用)
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').then(() => {
-        console.log('[PWA] Service Worker Registered');
-      });
-    }
-  </script>
+  submitBtn.disabled = true;
+  submitBtn.innerText = '認証中...';
+
+  const result = await loginWithSerialCode(code, name);
+  if (result.success) {
+    window.location.href = './app/index.html';
+  } else {
+    document.getElementById('error-message').innerText = result.message;
+    document.getElementById('error-message').style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.innerText = 'ログインして学習を始める';
+  }
+});
+</script>
 </body>
 </html>
