@@ -69,8 +69,8 @@ function getCurrentUser() {
   return data ? JSON.parse(data) : null;
 }
 
-// ログアウト処理の遷移先を修正
+// ログアウト処理 (遷移先を絶対パス /master/index.html に統一)
 function logout() {
   localStorage.removeItem(STORAGE_KEY_USER);
-  window.location.href = '/master/index.html'; // 👈 '/master/index.html' に変更
+  window.location.href = '/master/index.html';
 }
