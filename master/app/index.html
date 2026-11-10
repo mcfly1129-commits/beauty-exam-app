@@ -1,176 +1,133 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美容師国家試験Pro - 学習ホーム</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <style>
-    /* 元アプリのオリジナルデザイン・カラー復元 */
-    body {
-      background-color: #fefaf0;
-      color: #2d3436;
-    }
-    
-    .user-info-bar {
-      background: #ffffff;
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    /* 進捗モニター */
-    .dashboard-monitor {
-      background: #ffffff;
-      border: 2px dashed #fab1a0;
-      border-radius: 15px;
-      padding: 16px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    /* あなた専用 高速学習モードカード */
-    .speed-training-card {
-      background: #ffffff;
-      border: 2px solid #74b9ff;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(116, 185, 255, 0.2);
-    }
-    .speed-training-title {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #0984e3;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .speed-card-hero {
-      background: linear-gradient(135deg, #74b9ff, #0984e3);
-      color: white;
-      padding: 14px;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-bottom: 12px;
-      transition: transform 0.2s;
-    }
-    .speed-card-hero:active {
-      transform: scale(0.98);
-    }
-    .speed-row-sub {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .speed-sub-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-    }
-    .speed-sub-title {
-      font-size: 0.8rem;
-      font-weight: bold;
-      color: #475569;
-    }
-    .speed-sub-count {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin: 4px 0 8px 0;
-    }
-    .btn-play-orange {
-      background: #ff9f43;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-    .btn-play-red {
-      background: #ff7675;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    /* 科目選択グリッド */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .btn-subject {
-      background: #ffffff;
-      border: 2px solid #fab1a0;
-      border-radius: 12px;
-      padding: 12px 8px;
-      text-align: center;
-      text-decoration: none;
-      color: #2d3436;
-      font-weight: bold;
-      font-size: 0.85rem;
-      min-height: 65px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      transition: all 0.2s;
-    }
-    .btn-subject:hover {
-      border-color: #ff7675;
-      transform: translateY(-2px);
-    }
-
-    /* タブ切り替え */
-    .tab-group {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
-      background: #e2e8f0;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.9rem;
-      cursor: pointer;
-      text-align: center;
-      color: #475569;
-    }
-    .tab-btn.active {
-      background: #4f46e5;
-      color: #ffffff;
-    }
-  </style>
-
-  <!-- Supabase & Confetti SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美容師国家試験Pro - 学習ホーム</title>
+<link rel="stylesheet" href="../css/style.css">
+<style>
+.tab-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  background: #f1f2f6;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+}
+.tab-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn-subject {
+  background: #ffffff;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: bold;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  transition: transform 0.1s;
+}
+.btn-subject:active {
+  transform: scale(0.98);
+}
+.speed-training-card {
+  background: #ffffff;
+  border: 2px solid var(--accent-blue);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.speed-training-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #0984e3;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.speed-card-hero {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  color: white;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+.speed-row-sub {
+  display: flex;
+  gap: 10px;
+}
+.speed-sub-box {
+  flex: 1;
+  background: #f8f9fa;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+.speed-sub-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.speed-sub-count {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.btn-play-orange {
+  background: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px;
+  width: 100%;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.btn-play-red {
+  background: #ff7675;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px;
+  width: 100%;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+<div class="container">
 
-  <!-- ログインユーザーヘッダー -->
-  <div class="user-info-bar">
+  <!-- ユーザー情報ヘッダー -->
+  <div style="background: white; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 16px;">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <div>
         <span style="font-size: 0.75rem; color: #64748b;">🔑 ログイン中:</span>
         <h3 id="user-welcome" style="margin: 0; font-size: 1.05rem; color: #1e293b;">読み込み中...</h3>
-        <span id="user-school" style="font-size: 0.75rem; color: #64748b;"></span>
       </div>
-      <button onclick="logout()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0;">ログアウト</button>
+      <button onclick="logout()" class="btn-outline">ログアウト</button>
     </div>
   </div>
 
@@ -184,24 +141,22 @@
   <div id="section-2choice">
 
     <!-- 全科目進捗モニター -->
-    <div class="dashboard-monitor">
+    <div class="dashboard-monitor" style="background: white; border: 2px dashed var(--primary-color); border-radius: 15px; padding: 16px; margin-bottom: 20px; text-align: center;">
       <h3 style="font-size: 0.9rem; margin-top: 0; color: #d35400;">📊 全科目 学習進捗状況</h3>
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px;">
         <span>全問題 習得達成度</span>
         <span id="progress-text">0 / 2300問 (0%)</span>
       </div>
       <div style="width: 100%; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 12px;">
-        <div id="progress-bar-all" style="width: 0%; height: 100%; background: #fab1a0; transition: width 0.5s;"></div>
+        <div id="progress-bar-all" style="width: 0%; height: 100%; background: var(--primary-color); transition: width 0.5s;"></div>
       </div>
-      <div id="subject-list-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border-top: 1px dotted #fab1a0; padding-top: 10px;"></div>
     </div>
 
-    <!-- あなた専用『高速学習モード』 -->
+    <!-- 高速学習モード -->
     <div class="speed-training-card">
       <div class="speed-training-title">🎯 あなた専用『高速学習モード』</div>
-      
       <div class="speed-card-hero" onclick="startSpeedTraining('training')">
-        <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between;">
           <span>⚡ スピード特訓 開始</span>
           <span style="font-size: 0.7rem; background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 4px;">未経験優先！</span>
         </div>
@@ -209,14 +164,12 @@
           範囲選択なしで全科目から即出題。最短で基礎固め！
         </div>
       </div>
-
       <div class="speed-row-sub">
         <div class="speed-sub-box">
           <div class="speed-sub-title">⭐ マイ・ベスト</div>
           <div class="speed-sub-count">登録：<strong id="speed-fav-badge" style="color:#e67e22;">0</strong> 問</div>
           <button class="btn-play-orange" onclick="startSpeedTraining('bookmark')">解く</button>
         </div>
-
         <div class="speed-sub-box">
           <div class="speed-sub-title">❌ 弱点克服</div>
           <div class="speed-sub-count">苦手：<strong id="speed-wrong-badge" style="color:#ff7675;">0</strong> 問</div>
@@ -226,92 +179,99 @@
     </div>
 
     <!-- 全10科目選択ボタン -->
-    <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📚 科目を選んで学習</div>
+    <div style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📚 教科（範囲）を選んで学習</div>
     <div class="grid">
-      <a href="./quiz.html?mode=2choice&subject=regulations" class="btn-subject">01 ⚖️<br>関係法規・制度</a>
-      <a href="./quiz.html?mode=2choice&subject=management" class="btn-subject">02 🏢<br>運営管理</a>
-      <a href="./quiz.html?mode=2choice&subject=public_hygiene" class="btn-subject">03 🌍<br>公衆衛生・環境衛生</a>
-      <a href="./quiz.html?mode=2choice&subject=infection" class="btn-subject">04 😷<br>感染症</a>
-      <a href="./quiz.html?mode=2choice&subject=hygiene_tech" class="btn-subject">05 🧪<br>衛生管理技術</a>
-      <a href="./quiz.html?mode=2choice&subject=anatomy" class="btn-subject">06 🦴<br>人体の構造及び機能</a>
-      <a href="./quiz.html?mode=2choice&subject=dermatology" class="btn-subject">07 🧏‍♀️<br>皮膚科学</a>
-      <a href="./quiz.html?mode=2choice&subject=cosmetic_chem" class="btn-subject">08 ⚗️<br>香粧品化学</a>
-      <a href="./quiz.html?mode=2choice&subject=culture" class="btn-subject">09 👘<br>文化論</a>
-      <a href="./quiz.html?mode=2choice&subject=tech_theory" class="btn-subject">10 ✂️<br>美容技術理論</a>
+      <a href="./quiz.html?subject=regulations" class="btn-subject">01 ⚖️<br>関係法規・制度</a>
+      <a href="./quiz.html?subject=management" class="btn-subject">02 🏢<br>運営管理</a>
+      <a href="./quiz.html?subject=public_hygiene" class="btn-subject">03 🌍<br>公衆衛生・環境衛生</a>
+      <a href="./quiz.html?subject=infection" class="btn-subject">04 😷<br>感染症</a>
+      <a href="./quiz.html?subject=hygiene_tech" class="btn-subject">05 🧪<br>衛生管理技術</a>
+      <a href="./quiz.html?subject=anatomy" class="btn-subject">06 🦴<br>人体の構造及び機能</a>
+      <a href="./quiz.html?subject=dermatology" class="btn-subject">07 🧏‍♀️<br>皮膚科学</a>
+      <a href="./quiz.html?subject=cosmetic_chem" class="btn-subject">08 ⚗️<br>香粧品化学</a>
+      <a href="./quiz.html?subject=culture" class="btn-subject">09 👘<br>文化論</a>
+      <a href="./quiz.html?subject=tech_theory" class="btn-subject">10 ✂️<br>美容技術理論</a>
     </div>
   </div>
 
   <!-- 4択過去問記録メインエリア -->
   <div id="section-4choice" style="display: none;">
-    <div class="card">
-      <h3>📝 4択過去問モード</h3>
-      <p class="subtitle">本試験形式（55問）の過去問を解答・送信し、解説と重要復習問題を確認できます。</p>
-      
+    <div style="background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 10px;">
+      <h3 style="margin-top: 0;">📝 4択過去問モード</h3>
+      <p class="subtitle">本試験形式の過去問を選択してスタートします。</p>
       <div style="margin-top: 16px;">
         <label style="font-size: 0.85rem; font-weight: bold;">過去問の回を選択:</label>
         <select id="past-exam-select" style="width: 100%; padding: 10px; margin: 8px 0 16px 0; border-radius: 8px; border: 1px solid #cbd5e1; font-weight: bold;">
           <option value="54">第54回 国家試験過去問</option>
           <option value="53">第53回 国家試験過去問</option>
           <option value="52">第52回 国家試験過去問</option>
-          <option value="51">第51回 国家試験過去问</option>
-          <option value="50">第50回 国家試験過去問</option>
+          <option value="51">第51回 国家試験過去問</option>
         </select>
         <button onclick="startPastExam()" class="btn">選択した回の4択過去問をスタート</button>
       </div>
     </div>
   </div>
 
-  <!-- 共通スクリプト類 -->
-  <script src="../js/supabase_client.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/sync_queue.js"></script>
-  <script src="../js/questions_database.js"></script>
+</div>
 
-  <script>
-    let currentMode = '2choice';
+<script src="../js/supabase_client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/sync_queue.js"></script>
+<script src="../js/questions_database.js"></script>
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const user = getCurrentUser();
-      if (!user) {
-        window.location.href = '/master/index.html';
-        return;
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = getCurrentUser();
+  if (user) {
+    document.getElementById('user-welcome').innerText = `${user.student_name} 様`;
+  } else {
+    document.getElementById('user-welcome').innerText = 'ゲスト 様';
+  }
+  renderDashboardMonitor();
+});
+
+function switchMode(mode) {
+  document.getElementById('tab-2choice').className = (mode === '2choice' ? 'tab-btn active' : 'tab-btn');
+  document.getElementById('tab-4choice').className = (mode === '4choice' ? 'tab-btn active' : 'tab-btn');
+  document.getElementById('section-2choice').style.display = (mode === '2choice' ? 'block' : 'none');
+  document.getElementById('section-4choice').style.display = (mode === '4choice' ? 'block' : 'none');
+}
+
+function startSpeedTraining(subMode) {
+  window.location.href = `./quiz.html?subMode=${subMode}`;
+}
+
+function startPastExam() {
+  const round = document.getElementById('past-exam-select').value;
+  window.location.href = `./quiz.html?mode=4choice&round=${round}`;
+}
+
+function renderDashboardMonitor() {
+  const favIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+  document.getElementById('speed-fav-badge').innerText = favIds.length;
+
+  let totalSolved = 0;
+  let totalQuestions = 0;
+
+  if (typeof ALL_QUESTIONS_DATABASE !== 'undefined') {
+    for (let key in ALL_QUESTIONS_DATABASE) {
+      const stats = JSON.parse(localStorage.getItem('beauty_app_question_stats_' + key)) || {};
+      const pool = ALL_QUESTIONS_DATABASE[key].questionPool;
+      for (let unit in pool) {
+        pool[unit].forEach(q => {
+          totalQuestions++;
+          if (stats[q.id] && (stats[q.id].streak || 0) >= 1) {
+            totalSolved++;
+          }
+        });
       }
-      document.getElementById('user-welcome').innerText = `${user.student_name} 様`;
-      document.getElementById('user-school').innerText = `所属: ${user.school_name}`;
-
-      // 進捗状況およびバッジの描画
-      renderDashboardMonitor();
-      
-      if (typeof flushOfflineQueue === 'function') {
-        flushOfflineQueue();
-      }
-    });
-
-    // モード切替（2択 / 4択）
-    function switchMode(mode) {
-      currentMode = mode;
-      document.getElementById('tab-2choice').className = (mode === '2choice' ? 'tab-btn active' : 'tab-btn');
-      document.getElementById('tab-4choice').className = (mode === '4choice' ? 'tab-btn active' : 'tab-btn');
-      document.getElementById('section-2choice').style.display = (mode === '2choice' ? 'block' : 'none');
-      document.getElementById('section-4choice').style.display = (mode === '4choice' ? 'block' : 'none');
     }
+  }
 
-    // スピード特訓の開始
-    function startSpeedTraining(subMode) {
-      window.location.href = `./quiz.html?mode=2choice&subMode=${subMode}`;
-    }
-
-    // 4択過去問の開始
-    function startPastExam() {
-      const round = document.getElementById('past-exam-select').value;
-      window.location.href = `./quiz.html?mode=4choice&round=${round}`;
-    }
-
-    // 進捗モニターの計算・表示
-    function renderDashboardMonitor() {
-      const favIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-      document.getElementById('speed-fav-badge').innerText = favIds.length;
-    }
-  </script>
+  const percent = totalQuestions > 0 ? Math.round((totalSolved / totalQuestions) * 100) : 0;
+  document.getElementById('progress-bar-all').style.width = percent + '%';
+  document.getElementById('progress-text').innerText = `${totalSolved} / ${totalQuestions}問 (${percent}%)`;
+}
+</script>
 </body>
 </html>
