@@ -6,7 +6,6 @@
   <title>美容師国家試験Pro - クイズ解答</title>
   <link rel="stylesheet" href="../css/style.css">
   <style>
-    /* 元アプリのクイズ画面・演出・お気に入りボタン用スタイル */
     #quiz-confetti-canvas {
       position: fixed;
       top: 0;
@@ -93,7 +92,7 @@
     }
   </style>
 
-  <!-- Supabase & Canvas Confetti CDN -->
+  <!-- Supabase & Canvas Confetti SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
@@ -122,10 +121,10 @@
       <button class="btn-x" onclick="handleAnswer(1)">×</button>
     </div>
 
-    <!-- 4択入力エリア（4択モード時に自動表示） -->
+    <!-- 4択入力エリア -->
     <div id="choice4-input-area" style="display: none;"></div>
 
-    <!-- 正否判定・解説エリア（回答後に表示） -->
+    <!-- 解説エリア -->
     <div id="explanation-area" class="explanation-box" style="display: none;">
       <div id="result-status" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;"></div>
       <div id="current-streak" style="font-size: 13px; color: #e67e22; margin-bottom: 10px; font-weight: bold;"></div>
@@ -138,7 +137,7 @@
     </div>
   </div>
 
-  <!-- テスト完了・結果発表画面 -->
+  <!-- 結果発表画面 -->
   <div class="card" id="result-card" style="display: none; text-align: center;">
     <h2>🎉 テスト終了！</h2>
     <p class="subtitle">お疲れ様でした。解答結果はSupabaseへ同期保存されました。</p>
@@ -154,7 +153,7 @@
     </div>
   </div>
 
-  <!-- JavaScriptスクリプト群 -->
+  <!-- スクリプト類 -->
   <script src="../js/supabase_client.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/sync_queue.js"></script>
@@ -168,7 +167,6 @@
     let userAnswers = [];
     let bookmarkedIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
 
-    // 科目パラメータの英語キー ➔ DB用キーのマッピング
     const SUBJECT_MAP = {
       'public_hygiene': 'test_koshuese_unit_ver01_2026',
       'infection': 'test_kansensho_unit_ver01_2026',
@@ -194,67 +192,61 @@
         window.location.href = '/master/index.html';
         return;
       }
-
       loadQuestions();
     });
 
-// 問題データのロード
     function loadQuestions() {
       currentQuestions = [];
       currentIndex = 0;
       score = 0;
       userAnswers = [];
 
-      // ① マイ・ベスト（ブックマーク）モードの場合
+      // データベースオブジェクトの安全な取得 (windowプロパティ / グローバル変数)
+      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) 
+        ? window.ALL_QUESTIONS_DATABASE 
+        : ((typeof ALL_QUESTIONS_DATABASE !== 'undefined') ? ALL_QUESTIONS_DATABASE : null);
+
+      if (!dbSource) {
+        alert("問題データベース(questions_database.js)が読み込まれていません。");
+        return;
+      }
+
+      // ① マイ・ベストモード
       if (subMode === 'bookmark') {
         const favIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-        for (let key in window.ALL_QUESTIONS_DATABASE) {
-          const pool = window.ALL_QUESTIONS_DATABASE[key].questionPool;
+        for (let key in dbSource) {
+          const pool = dbSource[key].questionPool;
           for (let u in pool) {
             pool[u].forEach(q => {
-              if (favIds.includes(q.id)) currentQuestions.push({ ...q, category: u });
+              if (favIds.includes(q.id)) {
+                currentQuestions.push(formatQuestionObject(q, u));
+              }
             });
           }
         }
         shuffleArray(currentQuestions);
         currentQuestions = currentQuestions.slice(0, 3);
-      } 
-      // ② スピード特訓（全科目からランダム出題）の場合
+      }
+      // ② スピード特訓モード
       else if (subMode === 'training') {
-        for (let key in window.ALL_QUESTIONS_DATABASE) {
-          const pool = window.ALL_QUESTIONS_DATABASE[key].questionPool;
+        for (let key in dbSource) {
+          const pool = dbSource[key].questionPool;
           for (let u in pool) {
             pool[u].forEach(q => {
-              currentQuestions.push({
-                id: q.id,
-                question: q.text,
-                options: ["○ 正しい", "× 誤り"],
-                answer: q.answer ? 0 : 1,
-                explanation: q.exp,
-                source: q.source,
-                category: u
-              });
+              currentQuestions.push(formatQuestionObject(q, u));
             });
           }
         }
         shuffleArray(currentQuestions);
-        currentQuestions = currentQuestions.slice(0, 10); // 例: 特訓では10問出題
-      } 
-      // ③ 通常の科目選択の場合
+        currentQuestions = currentQuestions.slice(0, 10);
+      }
+      // ③ 通常の科目選択モード
       else {
-        const dbEntry = window.ALL_QUESTIONS_DATABASE && window.ALL_QUESTIONS_DATABASE[dbSubjectKey];
+        const dbEntry = dbSource[dbSubjectKey];
         if (dbEntry && dbEntry.questionPool) {
           for (let cat in dbEntry.questionPool) {
             dbEntry.questionPool[cat].forEach(q => {
-              currentQuestions.push({
-                id: q.id,
-                question: q.text,
-                options: ["○ 正しい", "× 誤り"],
-                answer: q.answer ? 0 : 1,
-                explanation: q.exp,
-                source: q.source,
-                category: cat
-              });
+              currentQuestions.push(formatQuestionObject(q, cat));
             });
           }
           shuffleArray(currentQuestions);
@@ -272,14 +264,34 @@
       renderQuestion();
     }
 
-    // 問題の描画
+    // 問題オブジェクト構造の統一マッピング関数
+    function formatQuestionObject(q, categoryName) {
+      // answer が boolean(true/false) の場合は 0(〇) または 1(✕) に統一
+      let correctIdx = 0;
+      if (typeof q.answer === 'boolean') {
+        correctIdx = q.answer ? 0 : 1;
+      } else if (typeof q.answer === 'number') {
+        correctIdx = q.answer;
+      }
+
+      return {
+        id: q.id,
+        question: q.text || q.question || '',
+        options: q.options || ["○ 正しい", "× 誤り"],
+        answer: correctIdx,
+        explanation: q.exp || q.explanation || "解説はありません。",
+        source: q.source || '',
+        category: categoryName || ''
+      };
+    }
+
     function renderQuestion() {
       const q = currentQuestions[currentIndex];
       document.getElementById('quiz-progress').innerText = `第 ${currentIndex + 1} / ${currentQuestions.length} 問`;
       document.getElementById('quiz-subject-label').innerText = `単元: ${q.category || ''}`;
       document.getElementById('quiz-source').innerText = q.source ? `出典: ${q.source}` : '';
       document.getElementById('question-text').innerText = q.question;
-      
+
       updateBookmarkButtonUI(q.id);
       document.getElementById('explanation-area').style.display = 'none';
 
@@ -291,7 +303,7 @@
         const choiceContainer = document.getElementById('choice4-input-area');
         choiceContainer.style.display = 'block';
         choiceContainer.innerHTML = '';
-        
+
         q.options.forEach((opt, idx) => {
           const btn = document.createElement('button');
           btn.className = 'option-btn';
@@ -302,7 +314,6 @@
       }
     }
 
-    // 回答判定処理
     function handleAnswer(selectedIdx) {
       const q = currentQuestions[currentIndex];
       const isCorrect = (selectedIdx === q.answer);
@@ -316,7 +327,6 @@
         is_correct: isCorrect
       });
 
-      // 〇✕/4択ボタンの操作不可・色付け
       if (mode === '2choice') {
         document.getElementById('ox-input-area').style.display = 'none';
       } else {
@@ -328,7 +338,6 @@
         });
       }
 
-      // 解説表示
       const expArea = document.getElementById('explanation-area');
       const statusEl = document.getElementById('result-status');
       const streakEl = document.getElementById('current-streak');
@@ -342,32 +351,27 @@
       }
 
       streakEl.innerText = `現在の正解数: ${score} / ${currentIndex + 1}`;
-      document.getElementById('explanation-text').innerText = q.explanation || "解説はありません。";
+      document.getElementById('explanation-text').innerText = q.explanation;
       expArea.style.display = 'block';
     }
 
-    // 次の問題に進む
     async function nextQuestion() {
       currentIndex++;
       if (currentIndex < currentQuestions.length) {
         renderQuestion();
       } else {
-        // 全問終了
         finishQuiz();
       }
     }
 
-    // テスト終了・Supabase自動同期
     async function finishQuiz() {
       const total = currentQuestions.length;
       const finalScore = Math.round((score / total) * 100);
 
-      // 紙吹雪演出（満点または全問正解時）
       if (score === total) {
         triggerConfetti();
       }
 
-      // 成績ログの送信 (sync_queue.js 経由)
       const logData = {
         mode: mode,
         subject_id: rawSubject,
@@ -387,7 +391,6 @@
       document.getElementById('result-card').style.display = 'block';
     }
 
-    // ブックマーク（⭐マーク）切替
     function toggleBookmark() {
       const q = currentQuestions[currentIndex];
       if (!q) return;
@@ -414,7 +417,6 @@
       }
     }
 
-    // 紙吹雪エフェクト
     function triggerConfetti() {
       const canvas = document.getElementById("quiz-confetti-canvas");
       if (canvas && typeof confetti === "function") {
