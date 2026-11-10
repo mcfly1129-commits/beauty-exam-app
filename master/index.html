@@ -34,13 +34,13 @@
   <script src="./js/supabase_client.js"></script>
   <script src="./js/auth.js"></script>
   <script>
-    // ログイン状態チェック（ログイン済みなら自動で学習画面へ）
-    document.addEventListener('DOMContentLoaded', () => {
-      const user = getCurrentUser();
-      if (user) {
-        window.location.href = './app/index.html';
-      }
-    });
+      // ログイン状態チェック
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = getCurrentUser();
+    if (user) {
+      window.location.href = '/master/app/index.html'; // 👈 '/master/app/index.html' に変更
+    }
+  });
 
     // フォーム送信処理
     document.getElementById('login-form').addEventListener('submit', async (e) => {
