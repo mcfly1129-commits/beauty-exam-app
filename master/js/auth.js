@@ -1,38 +1,76 @@
-function getCurrentUser() {
-  const userJson = localStorage.getItem('beauty_app_current_user');
-  if (userJson) {
-    try {
-      return JSON.parse(userJson);
-    } catch(e) {
-      return null;
-    }
-  }
-  return null;
-}
+// シリアルコード認証・ユーザー状態管理モジュール
+const STORAGE_KEY_USER = 'beauty_exam_user';
 
-function setCurrentUser(user) {
-  localStorage.setItem('beauty_app_current_user', JSON.stringify(user));
-  localStorage.setItem('teacher_isLoggined', 'true');
-  localStorage.setItem('teacher_userEmail', user.student_name || 'user');
-}
-
+// シリアルコードでログイン/アカウント作成
 async function loginWithSerialCode(serialCode, studentName) {
-  if (!serialCode || !studentName) {
-    return{ success: false, message: "sirial code and name required" };
+  const supabase = getSupabaseClient();
+  const cleanCode = serialCode.trim().toUpperCase();
+
+  // 1. シリアルコードの有効性を検証
+  const { data: codeData, error: codeErr } = await supabase
+    .from('serial_codes')
+    .select('*')
+    .eq('code', cleanCode)
+    .single();
+
+  if (codeErr || !codeData) {
+    return { success: false, message: '無効なシリアルコードです。確認してください。' };
   }
-  const userObj = {
-    serial_code: serialCode.trim(),
-    student_name: studentName.trim(),
-    school_name: "beauty school",
-    login_at: new Date().toISOString()
+  if (!codeData.is_active) {
+    return { success: false, message: 'このシリアルコードは無効化されています。' };
+  }
+  if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+    return { success: false, message: 'シリアルコードの有効期限が切れています。' };
+  }
+  if (codeData.used_count >= codeData.max_uses) {
+    return { success: false, message: 'このシリアルコードは利用人数上限に達しています。' };
+  }
+
+  // 2. ユーザー登録
+  const { data: userData, error: userErr } = await supabase
+    .from('users')
+    .insert([
+      {
+        serial_code: cleanCode,
+        student_name: studentName.trim(),
+        school_name: codeData.school_name,
+        role: 'student'
+      }
+    ])
+    .select()
+    .single();
+
+  if (userErr) {
+    return { success: false, message: 'ユーザー登録に失敗しました: ' + userErr.message };
+  }
+
+  // 3. シリアルコードの利用人数を+1カウントアップ
+  await supabase
+    .from('serial_codes')
+    .update({ used_count: codeData.used_count + 1 })
+    .eq('id', codeData.id);
+
+  // 4. ブラウザにログインセッションを保持
+  const sessionUser = {
+    id: userData.id,
+    serial_code: cleanCode,
+    student_name: userData.student_name,
+    school_name: userData.school_name,
+    role: userData.role
   };
-  setCurrentUser(userObj);
-  return { success: true, user: userObj };
+  localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
+
+  return { success: true, user: sessionUser };
 }
 
+// 現在のログインユーザーを取得
+function getCurrentUser() {
+  const data = localStorage.getItem(STORAGE_KEY_USER);
+  return data ? JSON.parse(data) : null;
+}
+
+// ログアウト処理 (遷移先を絶対パス /master/index.html に統一)
 function logout() {
-  localStorage.removeItem('beauty_app_current_user');
-  localStorage.removeItem('teacher_isLoggined');
-  localStorage.removeItem('teacher_userEmail');
-  window.location.href = '../index.html';
+  localStorage.removeItem(STORAGE_KEY_USER);
+  window.location.href = '/master/index.html';
 }
