@@ -111,8 +111,8 @@
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
       if (!user) {
-        window.location.href = '/master/index.html'; // 👈 '/master/index.html' に変更
-      return;
+        window.location.href = '/master/index.html';
+        return;
       }
       document.getElementById('user-welcome').innerText = `${user.student_name} 様`;
       document.getElementById('user-school').innerText = `所属: ${user.school_name}`;
