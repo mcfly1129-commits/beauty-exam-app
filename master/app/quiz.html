@@ -198,14 +198,14 @@
       loadQuestions();
     });
 
-    // 問題データのロード
+// 問題データのロード
     function loadQuestions() {
       currentQuestions = [];
       currentIndex = 0;
       score = 0;
       userAnswers = [];
 
-      // 特訓・マイベスト・弱点克服モードの場合
+      // ① マイ・ベスト（ブックマーク）モードの場合
       if (subMode === 'bookmark') {
         const favIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
         for (let key in window.ALL_QUESTIONS_DATABASE) {
@@ -218,8 +218,30 @@
         }
         shuffleArray(currentQuestions);
         currentQuestions = currentQuestions.slice(0, 3);
-      } else {
-        // 通常の科目選択の場合
+      } 
+      // ② スピード特訓（全科目からランダム出題）の場合
+      else if (subMode === 'training') {
+        for (let key in window.ALL_QUESTIONS_DATABASE) {
+          const pool = window.ALL_QUESTIONS_DATABASE[key].questionPool;
+          for (let u in pool) {
+            pool[u].forEach(q => {
+              currentQuestions.push({
+                id: q.id,
+                question: q.text,
+                options: ["○ 正しい", "× 誤り"],
+                answer: q.answer ? 0 : 1,
+                explanation: q.exp,
+                source: q.source,
+                category: u
+              });
+            });
+          }
+        }
+        shuffleArray(currentQuestions);
+        currentQuestions = currentQuestions.slice(0, 10); // 例: 特訓では10問出題
+      } 
+      // ③ 通常の科目選択の場合
+      else {
         const dbEntry = window.ALL_QUESTIONS_DATABASE && window.ALL_QUESTIONS_DATABASE[dbSubjectKey];
         if (dbEntry && dbEntry.questionPool) {
           for (let cat in dbEntry.questionPool) {
