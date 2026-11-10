@@ -1,14 +1,14 @@
 // Service Worker: オフラインキャッシュ & ネットワーク制御
 const CACHE_NAME = 'beauty-exam-pro-v1';
 const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './css/style.css',
-  './js/questions_database.js',
-  './js/supabase_client.js',
-  './js/auth.js',
-  './js/sync_queue.js'
+  '/master/',
+  '/master/index.html',
+  '/master/manifest.json',
+  '/master/css/style.css',
+  '/master/js/questions_database.js',
+  '/master/js/supabase_client.js',
+  '/master/js/auth.js',
+  '/master/js/sync_queue.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -35,8 +35,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Supabase API通信([suspicious link removed])はキャッシュせずスルー
-  if (event.request.url.includes('[suspicious link removed]')) {
+  // Supabase API通信(supabase.co)はキャッシュせずスルー
+  if (event.request.url.includes('supabase.co')) {
     return;
   }
 
