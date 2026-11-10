@@ -1,11 +1,10 @@
 // シリアルコード認証・ユーザー状態管理モジュール
 const STORAGE_KEY_USER = 'beauty_exam_user';
 
-// シリアルコードでログイン/アカウント作成
-async function loginWithSerialCode(serialCode, studentName) {
+// シリアルコードでログイン/アカウント作成（氏名なし・固有コード運用）
+async function loginWithSerialCode(serialCode) {
   const supabase = getSupabaseClient();
   const cleanCode = serialCode.trim().toUpperCase();
-  const trimmedName = studentName.trim();
 
   // 1. シリアルコードの有効性を検証
   const { data: codeData, error: codeErr } = await supabase
@@ -24,29 +23,28 @@ async function loginWithSerialCode(serialCode, studentName) {
     return { success: false, message: 'シリアルコードの有効期限が切れています。' };
   }
 
-  // 2. 既に同じコードと氏名のユーザーが登録済みかチェック（重複カウント防止）
+  // 2. 既にこの固有コードでユーザー登録（初回利用）されているかチェック
   const { data: existingUser } = await supabase
     .from('users')
     .select('*')
     .eq('serial_code', cleanCode)
-    .eq('student_name', trimmedName)
     .maybeSingle();
 
   let userData = existingUser;
 
   if (!userData) {
-    // 新規ユーザーの場合のみ、上限チェックを行う
+    // まだ未使用のコードの場合、上限チェックを行う
     if (codeData.used_count >= codeData.max_uses) {
       return { success: false, message: 'このシリアルコードは利用人数上限に達しています。' };
     }
 
-    // ユーザー登録（新規）
+    // ユーザー登録（新規：コード自体を識別子として登録）
     const { data: newUser, error: userErr } = await supabase
       .from('users')
       .insert([
         {
           serial_code: cleanCode,
-          student_name: trimmedName,
+          student_name: `受講者 (${cleanCode})`, // 個人情報を持たせずコードを識別名代わりにする
           school_name: codeData.school_name,
           role: 'student'
         }
@@ -60,7 +58,7 @@ async function loginWithSerialCode(serialCode, studentName) {
 
     userData = newUser;
 
-    // 3. 初回登録時のみ、シリアルコードの利用人数を+1カウントアップ
+    // 3. 初回利用時のみ、シリアルコードの利用人数を+1カウントアップ
     await supabase
       .from('serial_codes')
       .update({ used_count: codeData.used_count + 1 })
@@ -72,7 +70,7 @@ async function loginWithSerialCode(serialCode, studentName) {
     id: userData.id,
     serial_code: cleanCode,
     student_name: userData.student_name,
-    school_name: userData.school_name,
+    school_name: codeData.school_name,
     role: userData.role
   };
   localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
