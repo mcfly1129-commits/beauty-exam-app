@@ -1,154 +1,445 @@
-/* 美容師国家試験Pro 共通スタイル */
 :root {
-  --primary-color: #4f46e5;
-  --primary-hover: #4338ca;
-  --bg-color: #f8fafc;
+  --primary-color: #fab1a0;
+  --primary-dark: #e67e22;
+  --bg-color: #fefaf0;
+  --text-color: #2d3436;
   --card-bg: #ffffff;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --correct-color: #10b981;
-  --incorrect-color: #ef4444;
+  --accent-blue: #74b9ff;
+  --accent-orange: #e67e22;
+  --accent-green: #2ecc71;
+  --accent-red: #ff7675;
+  --border-color: #ced6e0;
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
   background-color: var(--bg-color);
-  color: var(--text-main);
-  line-height: 1.6;
-  padding: 16px;
-  max-width: 600px;
-  margin: 0 auto;
+  color: var(--text-color);
+  margin: 0;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
 }
 
-/* カード風コンテナ */
-.card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-h1, h2, h3 {
-  color: var(--text-main);
-  margin-bottom: 12px;
-}
-
-.subtitle {
-  color: var(--text-muted);
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-/* フォーム要素 */
-.form-group {
-  margin-bottom: 16px;
-}
-
-label {
-  display: block;
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-input[type="text"] {
+.container {
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 16px;
-  outline: none;
-  transition: border-color 0.2s;
+  max-width: 500px;
+  background: var(--card-bg);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-input[type="text"]:focus {
-  border-color: var(--primary-color);
+h1 {
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--primary-dark);
+  margin-top: 0;
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
-/* ボタン */
+p.subtitle {
+  font-size: 0.8rem;
+  text-align: center;
+  color: #7f8c8d;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+/* 画面切り替えクラス */
+.screen {
+  display: none;
+}
+.screen.active {
+  display: block;
+}
+
+/* ボタン共通 */
 .btn {
   display: block;
   width: 100%;
-  padding: 14px;
-  background-color: var(--primary-color);
-  color: #ffffff;
-  font-weight: bold;
-  font-size: 16px;
+  padding: 12px;
+  background: var(--primary-color);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 0.95rem;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: opacity 0.2s;
 }
 
 .btn:hover {
-  background-color: var(--primary-hover);
+  opacity: 0.9;
 }
 
-.btn-outline {
-  background-color: transparent;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+.btn-primary {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-link {
+  background-color: #f1f2f6;
+  color: #57606f;
+  font-size: 0.85rem;
+  padding: 10px;
+  border: 1px solid #ced6e0;
+  border-radius: 8px;
+  width: 100%;
+  cursor: pointer;
   margin-top: 10px;
 }
 
-/* アラート・メッセージ */
-.alert {
-  padding: 12px;
+.btn-form {
+  background-color: #ffeaa7;
+  color: #d35400;
+  font-size: 0.85rem;
+  padding: 10px;
+  border: none;
   border-radius: 8px;
-  font-size: 14px;
-  margin-top: 12px;
-  display: none;
-}
-
-.alert-danger {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-
-.alert-success {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-/* 選択肢ボタン (2択・4択) */
-.option-btn {
-  display: block;
   width: 100%;
-  padding: 16px;
-  margin-bottom: 10px;
-  background: var(--card-bg);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 16px;
-  text-align: left;
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.option-btn:hover {
-  border-color: var(--primary-color);
-}
-
-.option-btn.correct {
-  border-color: var(--correct-color);
-  background-color: #ecfdf5;
-  color: #065f46;
   font-weight: bold;
 }
 
-.option-btn.incorrect {
-  border-color: var(--incorrect-color);
-  background-color: #fef2f2;
-  color: #991b1b;
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* 称号バッジ */
+.trophy-badge {
+  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+  color: #d35400;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
   font-weight: bold;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* 履歴・弱点克服ボタン */
+.btn-all-history {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--accent-blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.btn-weakness {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+
+/* 単元リストアイテム */
+.unit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.unit-info {
+  flex: 1;
+  padding-right: 10px;
+}
+
+.unit-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-bottom: 6px;
+}
+
+.progress-bar-bg {
+  background: #e9ecef;
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: linear-gradient(90deg, #ff9f43, #ffca28);
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+.unit-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.btn-start {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* コース切替タブ・メニュー */
+.subject-menu-grid {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+  overflow-x: auto;
+}
+
+.menu-item-card {
+  flex: 1;
+  background: #f1f2f6;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  min-width: 90px;
+  border: 1px solid var(--border-color);
+}
+.menu-item-card.active {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+/* クイズヘッダー */
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  gap: 12px;
+  width: 100%;
+}
+
+.quiz-unit-title-box {
+  flex: 1;
+  font-weight: bold;
+  color: var(--text-color);
+  line-height: 1.4;
+  font-size: 0.85rem;
+}
+
+.quiz-meta-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.question-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  min-height: 90px;
+  font-weight: bold;
+  color: #2c3e50;
+  background: #faf9f6;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.ox-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.btn-o {
+  flex: 1;
+  background-color: #28a745;
+  color: white;
+  font-size: 2rem;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-x {
+  flex: 1;
+  background-color: #dc3545;
+  color: white;
+  font-size: 2rem;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.result-area {
+  display: none;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid var(--border-color);
+}
+
+.result-status {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.explanation-text {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #57606f;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #e4e7eb;
+  margin-bottom: 15px;
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: var(--primary-dark);
+  text-align: center;
+  margin-bottom: 10px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 6px;
+}
+
+.modal-score-summary {
+  font-size: 0.8rem;
+  color: #7f8c8d;
+  text-align: center;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+.sort-container {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  justify-content: center;
+}
+
+.btn-sort {
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  border: 1px solid var(--border-color);
+  background: #f1f2f6;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-sort.active-sort {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+.history-item {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+  font-size: 0.8rem;
+}
+
+.history-tag {
+  font-size: 0.68rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+.tag-done { background: #d4edda; color: #155724; }
+.tag-yet { background: #f8d7da; color: #721c24; }
+.tag-bookmark { background: #fff9db; color: #f03e3e; }
+
+.history-exp-box {
+  display: none;
+  background: #faf9f6;
+  font-size: 0.75rem;
+  padding: 6px;
+  margin-top: 4px;
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.btn-view-exp {
+  background: #e4e7eb;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  margin-top: 4px;
 }
