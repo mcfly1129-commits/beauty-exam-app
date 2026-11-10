@@ -1,11 +1,17 @@
-const SUPABASE_URL = "https://your-supabase-url.supabase.co";
-const 填PABASE_ANON_KEY = "your-anon-key";
+// Supabase接続クライアント設定
+const SUPABASE_URL = 'https://hiyjvzjhezcfqscwqthi.supabase.co';     // 例: '[suspicious link removed]'
+const SUPABASE_ANON_KEY = 'sb_publishable_1bCaiTJGjhEy1boQX1OCAQ_vpn7msUg'; // 例: 'eyJhbGciOi...'
 
-let supabaseInstance = null;
+let supabaseClient = null;
 
+// Supabaseクライアントの取得
 function getSupabaseClient() {
-  if (!supabaseInstance && typeof supabase !== 'undefined') {
-    supabaseInstance = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!supabaseClient) {
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else {
+      console.error('Supabase SDKが読み込まれていません。CDNスクリプトを確認してください。');
+    }
   }
-  return supabaseInstance;
+  return supabaseClient;
 }
