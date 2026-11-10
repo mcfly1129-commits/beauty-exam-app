@@ -12,17 +12,12 @@
 <body>
   <div class="card">
     <h2>美容師国家試験Pro</h2>
-    <p class="subtitle">シリアルコードと氏名を入力して学習を開始してください</p>
+<p class="subtitle">固有のシリアルコードを入力して学習を開始してください</p>
 
     <form id="login-form">
       <div class="form-group">
         <label for="serial-code">シリアルコード</label>
-        <input type="text" id="serial-code" placeholder="例: BEAUTY-2026-PASS" required autocomplete="off">
-      </div>
-
-      <div class="form-group">
-        <label for="student-name">お名前 / 学籍番号</label>
-        <input type="text" id="student-name" placeholder="例: 美容 太郎" required>
+        <input type="text" id="serial-code" placeholder="例: BEAUTY-2026-01" required autocomplete="off">
       </div>
 
       <button type="submit" class="btn" id="submit-btn">ログインして学習を始める</button>
@@ -46,7 +41,6 @@
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = document.getElementById('serial-code').value;
-      const name = document.getElementById('student-name').value;
       const errorDiv = document.getElementById('error-message');
       const submitBtn = document.getElementById('submit-btn');
 
@@ -54,7 +48,7 @@
       submitBtn.disabled = true;
       submitBtn.innerText = '認証中...';
 
-      const result = await loginWithSerialCode(code, name);
+      const result = await loginWithSerialCode(code);
 
       if (result.success) {
         window.location.href = '/master/app/index.html';
