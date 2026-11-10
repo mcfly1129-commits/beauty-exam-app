@@ -5,6 +5,7 @@ const STORAGE_KEY_USER = 'beauty_exam_user';
 async function loginWithSerialCode(serialCode, studentName) {
   const supabase = getSupabaseClient();
   const cleanCode = serialCode.trim().toUpperCase();
+  const trimmedName = studentName.trim();
 
   // 1. シリアルコードの有効性を検証
   const { data: codeData, error: codeErr } = await supabase
@@ -22,33 +23,49 @@ async function loginWithSerialCode(serialCode, studentName) {
   if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
     return { success: false, message: 'シリアルコードの有効期限が切れています。' };
   }
-  if (codeData.used_count >= codeData.max_uses) {
-    return { success: false, message: 'このシリアルコードは利用人数上限に達しています。' };
-  }
 
-  // 2. ユーザー登録
-  const { data: userData, error: userErr } = await supabase
+  // 2. 既に同じコードと氏名のユーザーが登録済みかチェック（重複カウント防止）
+  const { data: existingUser } = await supabase
     .from('users')
-    .insert([
-      {
-        serial_code: cleanCode,
-        student_name: studentName.trim(),
-        school_name: codeData.school_name,
-        role: 'student'
-      }
-    ])
-    .select()
-    .single();
+    .select('*')
+    .eq('serial_code', cleanCode)
+    .eq('student_name', trimmedName)
+    .maybeSingle();
 
-  if (userErr) {
-    return { success: false, message: 'ユーザー登録に失敗しました: ' + userErr.message };
+  let userData = existingUser;
+
+  if (!userData) {
+    // 新規ユーザーの場合のみ、上限チェックを行う
+    if (codeData.used_count >= codeData.max_uses) {
+      return { success: false, message: 'このシリアルコードは利用人数上限に達しています。' };
+    }
+
+    // ユーザー登録（新規）
+    const { data: newUser, error: userErr } = await supabase
+      .from('users')
+      .insert([
+        {
+          serial_code: cleanCode,
+          student_name: trimmedName,
+          school_name: codeData.school_name,
+          role: 'student'
+        }
+      ])
+      .select()
+      .single();
+
+    if (userErr) {
+      return { success: false, message: 'ユーザー登録に失敗しました: ' + userErr.message };
+    }
+
+    userData = newUser;
+
+    // 3. 初回登録時のみ、シリアルコードの利用人数を+1カウントアップ
+    await supabase
+      .from('serial_codes')
+      .update({ used_count: codeData.used_count + 1 })
+      .eq('id', codeData.id);
   }
-
-  // 3. シリアルコードの利用人数を+1カウントアップ
-  await supabase
-    .from('serial_codes')
-    .update({ used_count: codeData.used_count + 1 })
-    .eq('id', codeData.id);
 
   // 4. ブラウザにログインセッションを保持
   const sessionUser = {
