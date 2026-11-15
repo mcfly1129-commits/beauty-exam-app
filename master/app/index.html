@@ -514,7 +514,11 @@
           const subPercent = Math.round((subSolved / sub.total) * 100);
           const div = document.createElement('div');
           div.style.cssText = 'background:#faf9f6; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; font-size:0.75rem; display:flex; justify-content:space-between; align-items:center;';
-          div.innerHTML = `<span>${sub.name}</span><strong style="color:#d35400;">${subPercent}%</strong>`;
+          
+          // 🌟 修正：文字数が多い科目名の場合はフォントサイズを小さくし、勝手な折り返しを防ぐ
+          const nameFontSize = sub.name.length >= 7 ? '0.65rem' : '0.75rem';
+          
+          div.innerHTML = `<span style="font-size: ${nameFontSize}; white-space: nowrap;">${sub.name}</span><strong style="color:#d35400;">${subPercent}%</strong>`;
           container.appendChild(div);
         });
       }
