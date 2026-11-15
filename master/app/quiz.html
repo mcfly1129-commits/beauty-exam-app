@@ -724,17 +724,17 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       </div>`;
 
       if (percent === 100 && !hasEverFailed) {
-        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small>${statsMetricsHtml}`;
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく<br>全概念を完全支配した者</small>${statsMetricsHtml}`;
         rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
         rankEl.style.color = "#ffffff";
         rankEl.classList.add("master-active");
       } else if (isMasterStatus) {
-        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>${statsMetricsHtml}`;
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>${statsMetricsHtml}`;
         rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
         rankEl.style.color = "#2d3436";
         rankEl.classList.add("master-active");
       } else if (percent === 100) {
-        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small>${statsMetricsHtml}`;
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small>${statsMetricsHtml}`;
         rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
         rankEl.style.color = "#2d3436";
       } else if (percent >= 70) {
