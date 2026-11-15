@@ -938,7 +938,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         if (isSetCompleted && weaknessSessionWrongCount === 0) {
           weaknessSuccessStreak++;
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(weaknessSuccessStreak));
-          triggerConfetti();
+          // 🧹 削除しました
 
           if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
             localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
@@ -948,7 +948,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
         }
       } else {
-        if (isSetCompleted) triggerConfetti();
+        // 🧹 削除しました（3問目の解答時にすでに花吹雪が舞うため不要）
       }
 
       const logData = {
