@@ -1006,13 +1006,14 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
 // 選択中コース全体の履歴モーダルを開く
     function openCourseHistoryModal() {
-      isAllHistoryMode = false; // 👈 選択中コースの範囲に限定する
+      isAllHistoryMode = false;
+      activeModalUnit = "ALL_COURSE"; // 👈 コース全体の全単元を対象にするフラグ
       const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
       const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
       
       document.getElementById("modal-unit-title").innerText = `${courseName} - 履歴・分析`;
       document.getElementById("history-modal").style.display = "flex";
-      renderHistoryList(); // 選択中コース用のデータが描画されます
+      renderHistoryList(); // ⭕ 正しい描画関数を呼び出す
     }
 
     function closeHistoryModal() {
@@ -1052,6 +1053,18 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
             }
           }
         });
+      } else if (activeModalUnit === "ALL_COURSE") {
+        // 🆕 選択中コース内の全単元の問題をまとめて抽出
+        for (let unit in questionPool) {
+          questionPool[unit].forEach(q => {
+            targetQuestions.push({
+              ...q,
+              unitName: unit,
+              courseKey: currentCourseKey,
+              stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
+            });
+          });
+        }
       } else {
         const pool = questionPool[activeModalUnit] || [];
         targetQuestions = pool.map(q => ({
@@ -1076,6 +1089,14 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? -1 : 1));
       }
 
+      // 📊 サマリーの件数と正答率を計算・更新
+      let answeredCount = 0;
+      targetQuestions.forEach(q => {
+        if ((q.stat.total || 0) > 0) answeredCount++;
+      });
+      const summaryPct = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
+      document.getElementById("modal-score-summary").innerText = `分析: 挑戦済 ${answeredCount} / 全 ${targetQuestions.length} 問 (${summaryPct}%)`;
+
       if (targetQuestions.length === 0) {
         listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; margin:20px 0;">履歴データがありません</div>`;
         return;
@@ -1086,7 +1107,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         const stat = q.stat || { total: 0, streak: 0, correct_count: 0 };
         const isMastered = (stat.streak || 0) >= 1;
 
-        if (isAllHistoryMode && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
+        if ((isAllHistoryMode || activeModalUnit === "ALL_COURSE") && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
           lastUnitHeader = q.unitName;
           listEl.insertAdjacentHTML('beforeend', `<div style="background:#e0f2fe; color:#0369a1; padding:6px 10px; margin:10px 0 4px 0; font-weight:bold; border-radius:6px; font-size:0.8rem;">■ ${escapeHTML(q.unitName)}</div>`);
         }
