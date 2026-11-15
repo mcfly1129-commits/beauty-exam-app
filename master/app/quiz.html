@@ -708,19 +708,19 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       rankEl.classList.remove("master-active");
 
       if (percent === 100 && !hasEverFailed) {
-        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
         rankEl.classList.add("master-active");
       } else if (isMasterStatus) {
-        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
         rankEl.classList.add("master-active");
       } else if (percent === 100) {
-        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (percent >= 70) {
-        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (percent >= 40) {
-        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (totalAns > 0) {
-        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else {
         rankEl.innerHTML = `🥚 現在の称号: <strong>未受験 of 卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>`;
       }
