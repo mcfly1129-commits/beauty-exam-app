@@ -195,22 +195,33 @@
       cursor: default;
     }
 
-    /* クイズ画面 */
+    /* クイズ画面ヘッダー（上下2段レイアウトへ変更） */
     .quiz-header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column; /* 👈 上下2段の縦並びにする */
+      gap: 10px;               /* 👈 上段と下段の間に適度な隙間を持たせる */
       margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color, #cbd5e1);
     }
     .quiz-unit-badge {
       background: #e0f2fe;
       color: #0369a1;
-      padding: 4px 10px;
+      padding: 6px 12px;
       border-radius: 6px;
       font-size: 13px;
       font-weight: bold;
+      display: inline-block;
+      width: 100%;             /* 👈 横幅いっぱいに広げる */
+      box-sizing: border-box;
+      text-align: left;
+    }
+    /* 👈 下段のボタンと問題数を左右に配置するためのラッパー */
+    .quiz-header-sub {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
     }
     .btn-bookmark {
       background: #f1f2f6;
@@ -355,10 +366,13 @@
   <!-- 画面②：クイズ実行画面 (#quiz-screen) -->
   <div id="quiz-screen" class="card" style="display: none;">
     <div class="quiz-header">
+      <!-- 上段：単元名（横幅いっぱいに表示） -->
       <span id="quiz-unit-title" class="quiz-unit-badge">単元名</span>
-      <div style="display: flex; align-items: center; gap: 8px;">
+      
+      <!-- 下段：ブックマークボタンと進捗数を左右に配置 -->
+      <div class="quiz-header-sub">
         <button id="bookmark-toggle-btn" class="btn-bookmark" onclick="toggleBookmark()">☆ をつける</button>
-        <span id="quiz-progress-num" style="font-size: 13px; font-weight: bold;">第 1 / 3 問</span>
+        <span id="quiz-progress-num" style="font-size: 13px; font-weight: bold; color: #475569;">第 1 / 3 問</span>
       </div>
     </div>
 
