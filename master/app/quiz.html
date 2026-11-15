@@ -883,12 +883,12 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
-        // 3問目の場合：解説を表示しつつ、ボタンを「結果を見る」に切り替える
+        // 3問目の場合：結果画面を出さず、直接「次の3問」へ周回できるようにする
         btnContainer.innerHTML = `
-          <button class="btn" onclick="finishUnitQuizSet()" style="flex: 1; background: #0984e3;">📊 結果を見る</button>
+          <button class="btn" onclick="finishAndContinueQuizSet()" style="flex: 1; background: #0984e3;">🔄 続けて解く (次の3問)</button>
           <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
         `;
-      } else {
+      }else {
         // 1〜2問目の場合：通常のボタン
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71;">次の問題へ</button>
@@ -909,6 +909,56 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
     // 👈 🌟【変更点2】解説画面から直接ワンタップで次の3問を開始する関数
     function continueQuizSet() {
+      if (isWeaknessMode) {
+        startWeaknessQuiz();
+      } else {
+        startUnitQuiz(currentUnitName);
+      }
+    }
+
+    // 🎯【新規追加】結果画面を出さずに裏側で保存し、次の3問へダイレクトに繋げる高速周回用関数
+    async function finishAndContinueQuizSet() {
+      if (!isWeaknessMode && currentUnitName) {
+        const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
+        unitCountData[currentUnitName] = (unitCountData[currentUnitName] || 0) + 1;
+        localStorage.setItem("beauty_app_counts_" + currentCourseKey, JSON.stringify(unitCountData));
+      }
+
+      const total = currentQuestions.length;
+      const finalScore = Math.round((score / total) * 100);
+      const isSetCompleted = (score === total);
+
+      let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
+
+      if (isWeaknessMode) {
+        if (isSetCompleted && weaknessSessionWrongCount === 0) {
+          weaknessSuccessStreak++;
+          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(weaknessSuccessStreak));
+          triggerConfetti();
+
+          if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+            localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
+            alert(`👑 おめでとうございます！弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！`);
+          }
+        } else {
+          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
+        }
+      } else {
+        if (isSetCompleted) triggerConfetti();
+      }
+
+      const logData = {
+        mode: mode,
+        subject_id: rawSubject,
+        score: finalScore,
+        total_questions: total,
+        correct_count: score,
+        details: userAnswers
+      };
+      if (typeof saveExamLog === 'function') {
+        await saveExamLog(logData);
+      }
+
       if (isWeaknessMode) {
         startWeaknessQuiz();
       } else {
