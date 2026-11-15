@@ -731,18 +731,19 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       currentUnitName = unitName;
       const pool = questionPool[unitName] || [];
 
-      const unlearned = pool.filter(q => !questionStats[q.id] || (questionStats[q.id].streak || 0) < 1);
-      const learned = pool.filter(q => questionStats[q.id] && (questionStats[q.id].streak || 0) >= 1);
+      // 🌟【元仕様復元】1回以上正解した問題(streak >= 1)は出題から除外、未正解・未習得問題(streak < 1)のみを抽出
+      const availableQuestions = pool.filter(q => !questionStats[q.id] || (questionStats[q.id].streak || 0) < 1);
 
-      shuffleArray(unlearned);
-      shuffleArray(learned);
-
-      currentQuestions = [...unlearned, ...learned].slice(0, 3);
-      if (currentQuestions.length === 0) {
-        alert("出題可能な問題がありません。");
+      // 単元内の全問題が正解・習得済みの場合はアラートを表示して一覧へ戻る
+      if (availableQuestions.length === 0) {
+        alert("この単元の問題はすべて習得しました！");
+        backToUnitScreen();
         return;
       }
 
+      shuffleArray(availableQuestions);
+
+      currentQuestions = availableQuestions.slice(0, 3);
       currentIndex = 0;
       score = 0;
       userAnswers = [];
