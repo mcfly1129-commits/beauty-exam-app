@@ -881,20 +881,23 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
       const isLastQuestion = (currentIndex === currentQuestions.length - 1);
 
-      // 🌟【追加】3問目の解答かつ全問正解（セットクリア）した瞬間にその場で花吹雪を散らす
-      if (isLastQuestion && score === currentQuestions.length) {
-        triggerConfetti();
+      // 🌟【修正】3問目を回答した瞬間に即座に成績保存を実行！（中断して戻っても記録が残る）
+      if (isLastQuestion) {
+        saveSetCompleteLog();
+
+        if (score === currentQuestions.length) {
+          triggerConfetti();
+        }
       }
+
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
-        // 3問目の場合：結果画面を出さず、直接「次の3問」へ周回できるようにする（サイズを左右均等に統一）
         btnContainer.innerHTML = `
-          <button class="btn" onclick="finishAndContinueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
+          <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
           <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
         `;
-      }else {
-        // 1〜2問目の場合：通常のボタン（サイズを左右均等に統一）
+      } else {
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">次の問題へ</button>
           <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
@@ -921,8 +924,8 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       }
     }
 
-    // 🎯【新規追加】結果画面を出さずに裏側で保存し、次の3問へダイレクトに繋げる高速周回用関数
-    async function finishAndContinueQuizSet() {
+    // 🌟 3問目の解答時に即座にデータ保存を行う処理
+    async function saveSetCompleteLog() {
       if (!isWeaknessMode && currentUnitName) {
         const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
         unitCountData[currentUnitName] = (unitCountData[currentUnitName] || 0) + 1;
@@ -939,7 +942,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         if (isSetCompleted && weaknessSessionWrongCount === 0) {
           weaknessSuccessStreak++;
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(weaknessSuccessStreak));
-          // 🧹 削除しました
 
           if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
             localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
@@ -948,8 +950,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         } else {
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
         }
-      } else {
-        // 🧹 削除しました（3問目の解答時にすでに花吹雪が舞うため不要）
       }
 
       const logData = {
@@ -962,12 +962,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       };
       if (typeof saveExamLog === 'function') {
         await saveExamLog(logData);
-      }
-
-      if (isWeaknessMode) {
-        startWeaknessQuiz();
-      } else {
-        startUnitQuiz(currentUnitName);
       }
     }
 
