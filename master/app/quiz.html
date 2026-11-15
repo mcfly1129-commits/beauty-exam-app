@@ -37,28 +37,24 @@
     }
 
     .course-tab-group {
-      display: flex;
-      gap: 4px; /* 👈 タブ間の隙間を少し詰める */
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* 👈 常に2列の格子状に並べる */
+      gap: 8px; /* 👈 タブ同士に適度な隙間を持たせる */
       margin-top: 12px;
-      overflow-x: auto;
-      padding-bottom: 4px;
     }
 
     .course-tab-btn {
-      flex: 1;
-      min-width: 70px; /* 👈 最小幅を縮めて4つ並びやすくする */
       background: #f1f5f9;
       border: 2px solid #cbd5e1;
       border-radius: 10px;
-      padding: 6px 4px; /* 👈 上下の余白をコンパクトにする */
+      padding: 10px 8px; /* 👈 上下にゆとりを持たせて押しやすくする */
       text-align: center;
-      font-size: 0.72rem; /* 👈 フォントサイズを微調整して収まりを良くする */
+      font-size: 0.8rem; /* 👈 文字サイズを少し大きくして読みやすくする */
       font-weight: bold;
       color: #475569;
       cursor: pointer;
       transition: all 0.2s;
     }
-
     .course-tab-btn.active-course {
       background: #0984e3;
       color: #ffffff;
