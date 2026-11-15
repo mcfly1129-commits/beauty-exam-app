@@ -78,12 +78,17 @@
       color: #d35400;
       border: 2px solid #e67e22;
       border-radius: 12px;
-      padding: 10px;
+      padding: 12px;
       text-align: center;
       font-weight: bold;
       font-size: 0.95rem;
       margin-bottom: 14px;
       box-shadow: 0 2px 6px rgba(230, 126, 34, 0.15);
+      line-height: 1.4;
+    }
+    .trophy-badge.master-active {
+      background: linear-gradient(135deg, #a29bfe, #fd79a8) !important;
+      color: #ffffff !important;
     }
 
     /* ボタン類 */
@@ -112,6 +117,13 @@
       cursor: pointer;
       margin-bottom: 16px;
       box-shadow: 0 2px 5px rgba(214, 48, 49, 0.2);
+      white-space: pre-line;
+    }
+    .btn-weakness:disabled {
+      background: #cbd5e1;
+      color: #64748b;
+      cursor: not-allowed;
+      box-shadow: none;
     }
 
     /* 単元アイテム */
@@ -177,7 +189,7 @@
       cursor: default;
     }
 
-    /* クイズ画面ヘッダー */
+    /* クイズ画面 */
     .quiz-header {
       display: flex;
       justify-content: space-between;
@@ -209,7 +221,6 @@
       color: #e67e22;
     }
 
-    /* 〇✕入力 */
     .ox-container {
       display: flex;
       gap: 16px;
@@ -238,7 +249,6 @@
       cursor: pointer;
     }
 
-    /* モーダル */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -300,7 +310,7 @@
 </head>
 <body>
 
-  <!-- 紙吹雪用キャンバス -->
+  <!-- 紙吹雪キャンバス -->
   <canvas id="quiz-confetti-canvas"></canvas>
 
   <!-- 画面①：範囲・コース・単元選択画面 (#unit-screen) -->
@@ -318,22 +328,19 @@
       <div id="course-tab-container" class="course-tab-group"></div>
     </div>
 
-    <!-- 範囲選択後に表示されるコンテンツエリア -->
-    <div id="course-content-area" style="display: none;">
-      <!-- 称号表示バッジ -->
-      <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+    <!-- 称号表示バッジ -->
+    <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
 
-      <!-- 範囲ごとの履歴分析 & 弱点克服ボタン -->
-      <button class="btn-all-history" onclick="openCourseHistoryModal()">📊 この範囲の履歴・分析</button>
-      <button class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+    <!-- 科目全体分析 & 弱点克服ボタン -->
+    <button class="btn-all-history" onclick="openAllHistoryModal()">📊 この範囲の履歴・分析</button>
+    <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モード\n(全単元コンプリートで解放)</button>
 
-      <!-- 現在選択中コースの単元リスト描画コンテナ -->
-      <div id="unit-list"></div>
+    <!-- 現在選択中コースの単元リスト描画コンテナ -->
+    <div id="unit-list"></div>
 
-      <div style="margin-top: 20px; text-align: center;">
-        <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">(※単元名をタップすると単元別の履歴が確認できます)</p>
-        <button onclick="resetSubjectData()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.75rem; color: #e74c3c; border-color: #ff7675;">この範囲の学習データをリセット</button>
-      </div>
+    <div style="margin-top: 20px; text-align: center;">
+      <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">(※単元名をタップすると単元別の履歴が確認できます)</p>
+      <button onclick="resetSubjectData()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.75rem; color: #e74c3c; border-color: #ff7675;">この範囲の学習データをリセット</button>
     </div>
   </div>
 
@@ -371,8 +378,8 @@
 
   <!-- 画面③：結果発表画面 (#result-card) -->
   <div id="result-card" class="card" style="display: none; text-align: center;">
-    <h2>🎉 セットクリア！</h2>
-    <p class="subtitle">お疲れ様でした！解答結果が進捗に反映されました。</p>
+    <h2 id="result-title">🎉 セットクリア！</h2>
+    <p id="result-subtitle" class="subtitle">お疲れ様でした！解答結果が進捗に反映されました。</p>
 
     <div style="font-size: 44px; font-weight: bold; color: var(--primary-color); margin: 16px 0;">
       <span id="final-score">0</span> <span style="font-size: 22px;">点</span>
@@ -380,12 +387,13 @@
     <p id="final-detail" style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;"></p>
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
-      <button onclick="backToUnitScreen()" class="btn">単元一覧に戻る</button>
+      <button id="btn-continue-weakness" onclick="startWeaknessQuiz()" class="btn" style="display: none; background: #2ecc71;">👑 次の克服(3問)に連続挑戦！</button>
+      <button onclick="backToUnitScreen()" class="btn btn-outline">単元一覧に戻る</button>
     </div>
   </div>
 
   <!-- 📜 単元別 / 総合履歴 モーダル (#history-modal) -->
-  <div id="history-modal" class="modal-overlay" onclick="if(event.target === this) closeHistoryModal()">
+  <div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div id="modal-unit-title" class="modal-title">単元履歴・分析</div>
       <div id="modal-score-summary" style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 6px;">分析: 0 / 0 問 (0%)</div>
@@ -410,12 +418,14 @@
   <script src="../js/questions_database.js"></script>
 
   <script>
-    // パラメータ解読
+    const CONFIG = {
+      WEAKNESS_STREAK_GOAL: 3 // マスター獲得に必要な連続達成セット数
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const mode = urlParams.get('mode') || '2choice';
     const rawSubject = urlParams.get('subject') || 'public_hygiene';
 
-    // 全10科目のコース構成定義マップ（全範囲網羅）
     const SUBJECT_CONFIG_MAP = {
       'regulations': {
         title: '01 関係法規・制度',
@@ -501,7 +511,7 @@
     };
 
     const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['public_hygiene'];
-    let currentCourseKey = null; // 初期状態では未選択とする
+    let currentCourseKey = subjectConfig.courses.key;
 
     // 状態変数
     let questionPool = {};
@@ -515,6 +525,7 @@
     let activeModalUnit = "";
     let currentSortMode = "default";
     let isAllHistoryMode = false;
+    let weaknessSessionWrongCount = 0;
 
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
@@ -522,23 +533,17 @@
         window.location.href = '/master/index.html';
         return;
       }
-
       document.getElementById('page-title').innerText = subjectConfig.title;
-
-      // コース切替タブのレンダリング
       renderCourseTabs();
-
-      // 初期状態ではコース未選択のため、自動的なselectCourse呼び出しを行わない
+      selectCourse(currentCourseKey);
     });
 
-    // コース選択タブボタンの生成・描画
     function renderCourseTabs() {
       const container = document.getElementById('course-tab-container');
       if (!container) return;
       container.innerHTML = '';
 
       subjectConfig.courses.forEach(c => {
-        // 各コースの習得達成数を計算
         const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + c.key)) || {};
         const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
         
@@ -570,22 +575,12 @@
       });
     }
 
-    // コース選択時の切替処理
     function selectCourse(courseKey) {
       currentCourseKey = courseKey;
-
-      // タブの表示更新
       document.querySelectorAll('.course-tab-btn').forEach(b => b.classList.remove('active-course'));
       const activeTab = document.getElementById('tab-btn-' + courseKey);
       if (activeTab) activeTab.classList.add('active-course');
 
-      // 範囲（コース）が選択されたので、コンテンツエリアを表示する
-      const contentArea = document.getElementById('course-content-area');
-      if (contentArea) {
-        contentArea.style.display = 'block';
-      }
-
-      // データロード
       const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
       if (dbSource && dbSource[currentCourseKey]) {
         questionPool = dbSource[currentCourseKey].questionPool || {};
@@ -594,15 +589,15 @@
       }
 
       questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
-
-      // リスト描画
       refreshUnitScreen();
     }
 
-    // 単元一覧画面 (#unit-screen) の描画
     function refreshUnitScreen() {
       questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
       const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
+      const weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
+      const isMasterStatus = JSON.parse(localStorage.getItem("beauty_app_is_master_" + currentCourseKey)) || false;
+      const hasEverFailed = JSON.parse(localStorage.getItem("beauty_app_has_ever_failed_" + currentCourseKey)) || false;
 
       let totalQuestionsCount = 0;
       let totalMasteredCount = 0;
@@ -654,37 +649,65 @@
         listContainer.insertAdjacentHTML('beforeend', itemHtml);
       }
 
+      // 🔴【元仕様通り】弱点克服ボタンの判定・制御
+      const weaknessBtn = document.getElementById("weakness-btn");
+      const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalMasteredCount / totalQuestionsCount) * 100) : 0;
+
+      if (weaknessBtn) {
+        if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
+          // すでにマスター達成済み、またはノーミスで100%クリアした場合は非表示
+          weaknessBtn.style.display = "none";
+        } else if (currentProgressAll === 100) {
+          // 全問クリア時にボタンを解禁！
+          weaknessBtn.disabled = false;
+          weaknessBtn.style.display = "block";
+          weaknessBtn.innerText = `❌ 弱点克服モードに挑戦可能\n(現在 ${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL} セット達成中)`;
+        } else {
+          // 100%未満の時はロック状態
+          weaknessBtn.disabled = true;
+          weaknessBtn.style.display = "block";
+          weaknessBtn.innerText = `❌ 弱点克服モード\n(全単元コンプリートで解放)`;
+        }
+      }
+
       // 称号判定・表示更新
-      updateUserRankUI(totalMasteredCount, totalQuestionsCount, totalAnsCount, totalCorrectCount);
+      updateUserRankUI(totalMasteredCount, totalQuestionsCount, totalAnsCount, totalCorrectCount, isMasterStatus, weaknessSuccessStreak, hasEverFailed);
     }
 
     // 称号判定ロジック
-    function updateUserRankUI(mastered, total, totalAns, correctAns) {
+    function updateUserRankUI(mastered, total, totalAns, correctAns, isMasterStatus, weaknessStreak, hasEverFailed) {
       const rankEl = document.getElementById("user-rank");
       if (!rankEl) return;
 
       const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
       const accuracy = totalAns > 0 ? Math.round((correctAns / totalAns) * 100) : 0;
 
-      let rankTitle = "未受験 of 卵 🥚";
-      if (percent === 100 && accuracy === 100) {
-        rankTitle = "【グランドマスター】 👑";
-      } else if (percent === 100) {
-        rankTitle = "【マスター】 🏆";
-      } else if (totalAns > 0) {
-        rankTitle = "【修行中】 🌱";
-      }
+      rankEl.classList.remove("master-active");
 
-      rankEl.innerText = `現在の称号: ${rankTitle} (習得: ${percent}% / 正答率: ${accuracy}%)`;
+      if (percent === 100 && !hasEverFailed) {
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.classList.add("master-active");
+      } else if (isMasterStatus) {
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.classList.add("master-active");
+      } else if (percent === 100) {
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+      } else if (percent >= 70) {
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+      } else if (percent >= 40) {
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+      } else if (totalAns > 0) {
+        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
+      } else {
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験 of 卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>`;
+      }
     }
 
-    // 単元指定クイズのスタート (3問セット)
     function startUnitQuiz(unitName) {
       isWeaknessMode = false;
       currentUnitName = unitName;
       const pool = questionPool[unitName] || [];
 
-      // 未習得問題を優先抽出
       const unlearned = pool.filter(q => !questionStats[q.id] || (questionStats[q.id].streak || 0) < 1);
       const learned = pool.filter(q => questionStats[q.id] && (questionStats[q.id].streak || 0) >= 1);
 
@@ -708,33 +731,46 @@
       renderQuizQuestion();
     }
 
-    // 弱点克服モードのスタート (3問セット)
+    // ❌ 弱点克服モードの起動 (誤答回数の多い問題を優先出題)
     function startWeaknessQuiz() {
       isWeaknessMode = true;
       currentUnitName = "弱点克服モード";
+      weaknessSessionWrongCount = 0;
       const wrongList = [];
 
-      // 選択中コースから間違えた問題を抽出
       for (let unit in questionPool) {
         questionPool[unit].forEach(q => {
           const stat = questionStats[q.id];
           if (stat) {
-            const isMastered = (stat.streak || 0) >= 1;
             const wrongCount = (stat.total || 0) - (stat.correct_count || 0);
-            if (!isMastered && wrongCount > 0) {
+            if (wrongCount > 0) {
               wrongList.push({ ...q, wrongCount, unitName: unit });
             }
           }
         });
       }
 
-      if (wrongList.length === 0) {
-        alert("現在、このコース内に克服対象となる弱点問題はありません！素晴らしい進捗状況です。");
+      // 誤答回数が多い順にソートし、上位から3問出題
+      wrongList.sort((a, b) => b.wrongCount - a.wrongCount);
+      currentQuestions = wrongList.slice(0, 3);
+
+      // 足りない場合は未習得等を補充
+      if (currentQuestions.length < 3) {
+        for (let unit in questionPool) {
+          questionPool[unit].forEach(q => {
+            if (!currentQuestions.some(cq => cq.id === q.id) && currentQuestions.length < 3) {
+              currentQuestions.push({ ...q, wrongCount: 0, unitName: unit });
+            }
+          });
+        }
+      }
+
+      if (currentQuestions.length === 0) {
+        alert("克服対象となる問題がありません。通常の単元を進めましょう！");
         return;
       }
 
-      wrongList.sort((a, b) => b.wrongCount - a.wrongCount);
-      currentQuestions = wrongList.slice(0, 3);
+      shuffleArray(currentQuestions);
 
       currentIndex = 0;
       score = 0;
@@ -747,7 +783,6 @@
       renderQuizQuestion();
     }
 
-    // クイズ問題の表示
     function renderQuizQuestion() {
       const q = currentQuestions[currentIndex];
       document.getElementById("quiz-unit-title").innerText = isWeaknessMode ? "❌ 弱点克服" : (currentUnitName || "単元");
@@ -761,7 +796,6 @@
       document.getElementById("explanation-area").style.display = "none";
     }
 
-    // 解答判定
     function handleAnswer(userAnsBool) {
       const q = currentQuestions[currentIndex];
       let correctBool = false;
@@ -781,7 +815,6 @@
         is_correct: isCorrect
       });
 
-      // 統計更新
       if (!questionStats[q.id]) {
         questionStats[q.id] = { total: 0, streak: 0, correct_count: 0 };
       }
@@ -793,6 +826,14 @@
         questionStats[q.id].correct_count += 1;
       } else {
         questionStats[q.id].streak = 0;
+        // ❌ 間違えたフラグの保存
+        localStorage.setItem("beauty_app_has_ever_failed_" + currentCourseKey, JSON.stringify(true));
+        
+        if (isWeaknessMode) {
+          weaknessSessionWrongCount++;
+          // 弱点克服モード中にミスすると連続正解カウンターがリセット
+          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
+        }
       }
 
       if (isCorrect && !wasMastered) {
@@ -802,7 +843,6 @@
 
       localStorage.setItem("beauty_app_question_stats_" + currentCourseKey, JSON.stringify(questionStats));
 
-      // 判定画面
       const statusEl = document.getElementById("result-status");
       if (isCorrect) {
         statusEl.innerText = "⭕ 正解！";
@@ -828,7 +868,6 @@
       }
     }
 
-    // セット終了時
     async function finishUnitQuizSet() {
       if (!isWeaknessMode && currentUnitName) {
         const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
@@ -838,9 +877,37 @@
 
       const total = currentQuestions.length;
       const finalScore = Math.round((score / total) * 100);
+      const isSetCompleted = (score === total);
 
-      if (score === total) {
-        triggerConfetti();
+      let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
+
+      // 🔴【元仕様】弱点克服モードクリア判定
+      const continueBtn = document.getElementById("btn-continue-weakness");
+
+      if (isWeaknessMode) {
+        if (isSetCompleted && weaknessSessionWrongCount === 0) {
+          weaknessSuccessStreak++;
+          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(weaknessSuccessStreak));
+          triggerConfetti();
+
+          if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
+            // 祝・【マスター】称号達成！
+            localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
+            alert(`👑 おめでとうございます！弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！`);
+            continueBtn.style.display = "none";
+          } else {
+            alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま続けて挑戦できます）`);
+            continueBtn.style.display = "block";
+          }
+        } else {
+          // 途中誤答で失敗
+          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
+          alert("❌ 克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
+          continueBtn.style.display = "none";
+        }
+      } else {
+        if (isSetCompleted) triggerConfetti();
+        continueBtn.style.display = "none";
       }
 
       const logData = {
@@ -875,7 +942,6 @@
       }
     }
 
-    // ⭐ブックマーク機能
     function toggleBookmark() {
       const q = currentQuestions[currentIndex];
       if (!q) return;
@@ -904,7 +970,6 @@
       }
     }
 
-    // 📜 履歴モーダル制御
     function openHistoryModal(unitName) {
       isAllHistoryMode = false;
       activeModalUnit = unitName;
@@ -913,17 +978,13 @@
       renderHistoryList();
     }
 
-    // 選択中コース全体の履歴モーダルを開く
     function openCourseHistoryModal() {
-      const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
-      const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
-      
-      document.getElementById("modal-unit-title").innerText = `${courseName} - 履歴・分析`;
+      isAllHistoryMode = true;
+      document.getElementById("modal-unit-title").innerText = `${subjectConfig.title} - 全コース総合履歴・分析`;
       document.getElementById("history-modal").style.display = "flex";
-      renderCourseHistoryList();
+      renderHistoryList();
     }
 
-    // ▼ ここに追加します ▼
     function closeHistoryModal() {
       document.getElementById("history-modal").style.display = "none";
     }
@@ -933,35 +994,46 @@
       document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active-sort"));
       const btn = document.getElementById("sort-btn-" + sortType);
       if (btn) btn.classList.add("active-sort");
-      
-      // モーダルのタイトルを見て、個別単元かコース全体かを判断して再描画
-      const modalTitle = document.getElementById("modal-unit-title").innerText;
-      if (modalTitle.includes("履歴・分析") && !modalTitle.includes(" - ")) {
-        renderCourseHistoryList();
-      } else {
-        renderHistoryList(); // 個別単元のモーダルの場合
-      }
+      renderHistoryList();
     }
 
-    // 選択中コース全体の問題・履歴をレンダリング
-    function renderCourseHistoryList() {
+    function renderHistoryList() {
       const listEl = document.getElementById("modal-history-list");
       listEl.innerHTML = "";
 
       let targetQuestions = [];
-      for (let unit in questionPool) {
-        questionPool[unit].forEach(q => {
-          targetQuestions.push({
-            ...q,
-            unitName: unit,
-            stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
-          });
+      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+
+      if (isAllHistoryMode) {
+        subjectConfig.courses.forEach(c => {
+          if (dbSource && dbSource[c.key] && dbSource[c.key].questionPool) {
+            const p = dbSource[c.key].questionPool;
+            const cStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + c.key)) || {};
+
+            for (let unit in p) {
+              p[unit].forEach(q => {
+                targetQuestions.push({
+                  ...q,
+                  unitName: `[${c.label}] ${unit}`,
+                  courseKey: c.key,
+                  stat: cStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
+                });
+              });
+            }
+          }
         });
+      } else {
+        const pool = questionPool[activeModalUnit] || [];
+        targetQuestions = pool.map(q => ({
+          ...q,
+          unitName: activeModalUnit,
+          courseKey: currentCourseKey,
+          stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
+        }));
       }
 
       const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
 
-      // ソート処理
       if (currentSortMode === "count") {
         targetQuestions.sort((a, b) => (b.stat.total || 0) - (a.stat.total || 0));
       } else if (currentSortMode === "wrong") {
@@ -984,7 +1056,7 @@
         const stat = q.stat || { total: 0, streak: 0, correct_count: 0 };
         const isMastered = (stat.streak || 0) >= 1;
 
-        if (currentSortMode === "default" && q.unitName !== lastUnitHeader) {
+        if (isAllHistoryMode && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
           lastUnitHeader = q.unitName;
           listEl.insertAdjacentHTML('beforeend', `<div style="background:#e0f2fe; color:#0369a1; padding:6px 10px; margin:10px 0 4px 0; font-weight:bold; border-radius:6px; font-size:0.8rem;">■ ${escapeHTML(q.unitName)}</div>`);
         }
@@ -1015,7 +1087,6 @@
       if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
     }
 
-    // 選択中コースのデータリセット
     function resetSubjectData() {
       const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
       const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
@@ -1023,6 +1094,9 @@
         localStorage.removeItem("beauty_app_question_stats_" + currentCourseKey);
         localStorage.removeItem("beauty_app_counts_" + currentCourseKey);
         localStorage.removeItem('solved_' + currentCourseKey);
+        localStorage.removeItem("beauty_app_weakness_streak_" + currentCourseKey);
+        localStorage.removeItem("beauty_app_is_master_" + currentCourseKey);
+        localStorage.removeItem("beauty_app_has_ever_failed_" + currentCourseKey);
         alert("選択中の範囲の学習データをリセットしました。");
         renderCourseTabs();
         refreshUnitScreen();
