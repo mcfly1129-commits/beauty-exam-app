@@ -497,7 +497,10 @@
         totalQuestions += sub.total;
       });
 
-      const percentage = totalQuestions > 0 ? Math.round((totalSolved / totalQuestions) * 100) : 0;
+      // 修正後：Math.min(100, ...) を使って最大100%に制限する
+      const rawPercentage = totalQuestions > 0 ? Math.round((totalSolved / totalQuestions) * 100) : 0;
+      const percentage = Math.min(100, rawPercentage);
+
       const progressBar = document.getElementById('progress-bar-all');
       const progressText = document.getElementById('progress-text');
 
@@ -511,11 +514,14 @@
           sub.keys.forEach(key => {
             subSolved += parseInt(localStorage.getItem('solved_' + key) || 0);
           });
-          const subPercent = Math.round((subSolved / sub.total) * 100);
+          
+          // 修正後：科目別も Math.min(100, ...) で最大100%に制限する
+          const rawSubPercent = sub.total > 0 ? Math.round((subSolved / sub.total) * 100) : 0;
+          const subPercent = Math.min(100, rawSubPercent);
+
           const div = document.createElement('div');
           div.style.cssText = 'background:#faf9f6; border:1px solid #e2e8f0; border-radius:8px; padding:6px 8px; font-size:0.75rem; display:flex; justify-content:space-between; align-items:center;';
           
-          // 🌟 修正：文字数が多い科目名の場合はフォントサイズを小さくし、勝手な折り返しを防ぐ
           const nameFontSize = sub.name.length >= 7 ? '0.65rem' : '0.75rem';
           
           div.innerHTML = `<span style="font-size: ${nameFontSize}; white-space: nowrap;">${sub.name}</span><strong style="color:#d35400;">${subPercent}%</strong>`;
