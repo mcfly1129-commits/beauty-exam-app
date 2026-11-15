@@ -1194,7 +1194,11 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
           return wB - wA;
         });
       } else if (currentSortMode === "bookmark") {
-        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? -1 : 1));
+        targetQuestions.sort((a, b) => {
+          const aFav = bookmarkedIds.includes(a.id) ? 1 : 0;
+          const bFav = bookmarkedIds.includes(b.id) ? 1 : 0;
+          return bFav - aFav; // 🌟 ⭐マーク付きを上部にソート
+        });
       }
 
       // 📊 サマリーの件数と正答率を計算・更新
