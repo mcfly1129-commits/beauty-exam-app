@@ -628,17 +628,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       refreshUnitScreen();
     } // 👈 ここでしっかり閉じる！
 
-    // 選択中コース全体の履歴モーダルを開く（修正）
-    function openCourseHistoryModal() {
-      isAllHistoryMode = false; // 選択中コースに限定
-      const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
-      const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
-      
-      document.getElementById("modal-unit-title").innerText = `${courseName} - 履歴・分析`;
-      document.getElementById("history-modal").style.display = "flex";
-      renderCourseHistoryList(); // または適切なレンダリング関数
-    }
-
     function refreshUnitScreen() {
       questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
       const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
