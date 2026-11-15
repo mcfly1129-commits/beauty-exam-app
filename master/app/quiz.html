@@ -371,7 +371,7 @@
       <!-- 👈 動的ボタンエリア（1〜2問目: 次の問題へ / 3問目: ⚡ 続けて解く） -->
       <div id="explanation-buttons" style="display: flex; gap: 8px;">
         <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71;">次の問題へ</button>
-        <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
+        <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
       </div>
     </div>
   </div>
@@ -388,7 +388,7 @@
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
       <button id="btn-continue-weakness" onclick="startWeaknessQuiz()" class="btn" style="display: none; background: #2ecc71;">👑 次の克服(3問)に連続挑戦！</button>
-      <button onclick="backToUnitScreen()" class="btn btn-outline">単元一覧に戻る</button>
+      <button onclick="backToUnitScreen()" class="btn btn-outline">中断して戻る</button>
     </div>
   </div>
 
@@ -886,13 +886,13 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         // 3問目の場合：結果画面を出さず、直接「次の3問」へ周回できるようにする
         btnContainer.innerHTML = `
           <button class="btn" onclick="finishAndContinueQuizSet()" style="flex: 1; background: #0984e3;">🔄 続けて解く (次の3問)</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
+          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
         `;
       }else {
         // 1〜2問目の場合：通常のボタン
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71;">次の問題へ</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
+          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
         `;
       }
 
