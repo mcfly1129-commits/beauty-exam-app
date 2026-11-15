@@ -318,19 +318,22 @@
       <div id="course-tab-container" class="course-tab-group"></div>
     </div>
 
-    <!-- 称号表示バッジ -->
-    <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+    <!-- 範囲選択後に表示されるコンテンツエリア -->
+    <div id="course-content-area" style="display: none;">
+      <!-- 称号表示バッジ -->
+      <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
 
-    <!-- 科目全体分析 & 弱点克服ボタン -->
-    <button class="btn-all-history" onclick="openAllHistoryModal()">📊 この科目の総合履歴・分析</button>
-    <button class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+      <!-- 科目全体分析 & 弱点克服ボタン -->
+      <button class="btn-all-history" onclick="openAllHistoryModal()">📊 この科目の総合履歴・分析</button>
+      <button class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
 
-    <!-- 現在選択中コースの単元リスト描画コンテナ -->
-    <div id="unit-list"></div>
+      <!-- 現在選択中コースの単元リスト描画コンテナ -->
+      <div id="unit-list"></div>
 
-    <div style="margin-top: 20px; text-align: center;">
-      <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">(※単元名をタップすると単元別の履歴が確認できます)</p>
-      <button onclick="resetSubjectData()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.75rem; color: #e74c3c; border-color: #ff7675;">この範囲の学習データをリセット</button>
+      <div style="margin-top: 20px; text-align: center;">
+        <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">(※単元名をタップすると単元別の履歴が確認できます)</p>
+        <button onclick="resetSubjectData()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.75rem; color: #e74c3c; border-color: #ff7675;">この範囲の学習データをリセット</button>
+      </div>
     </div>
   </div>
 
