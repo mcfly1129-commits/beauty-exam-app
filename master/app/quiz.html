@@ -923,6 +923,11 @@
       renderCourseHistoryList();
     }
 
+    // ▼ ここに追加します ▼
+    function closeHistoryModal() {
+      document.getElementById("history-modal").style.display = "none";
+    }
+
     function toggleSort(sortType) {
       currentSortMode = sortType;
       document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active-sort"));
