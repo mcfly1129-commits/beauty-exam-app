@@ -82,9 +82,18 @@
       margin-bottom: 14px;
       box-shadow: 0 2px 6px rgba(230, 126, 34, 0.15);
       line-height: 1.4;
+      transition: all 0.5s ease;
+    }
+
+    /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
+    @keyframes master-glow {
+      0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+      50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
+      100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
     }
     .trophy-badge.master-active {
-      background: linear-gradient(135deg, #a29bfe, #fd79a8) !important;
+      animation: master-glow 2.5s infinite alternate;
+      border: 2px solid #ffd700 !important;
       color: #ffffff !important;
     }
 
@@ -707,23 +716,35 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       const accuracy = totalAns > 0 ? Math.round((correctAns / totalAns) * 100) : 0;
 
       rankEl.classList.remove("master-active");
+      rankEl.style.background = "";
+      rankEl.style.color = "";
+
+      const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
+          📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
+      </div>`;
 
       if (percent === 100 && !hasEverFailed) {
-        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small>${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
+        rankEl.style.color = "#ffffff";
         rankEl.classList.add("master-active");
       } else if (isMasterStatus) {
-        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
+        rankEl.style.color = "#2d3436";
         rankEl.classList.add("master-active");
       } else if (percent === 100) {
-        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small>${statsMetricsHtml}`;
+        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
+        rankEl.style.color = "#2d3436";
       } else if (percent >= 70) {
-        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong>${statsMetricsHtml}`;
       } else if (percent >= 40) {
-        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong>${statsMetricsHtml}`;
       } else if (totalAns > 0) {
-        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong><br><small>習得率: ${percent}% / 正答率: ${accuracy}%</small>`;
+        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong>${statsMetricsHtml}`;
       } else {
-        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験 of 卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>`;
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験 of 卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
       }
     }
 
