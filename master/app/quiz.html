@@ -385,7 +385,7 @@
   </div>
 
   <!-- 📜 単元別 / 総合履歴 モーダル (#history-modal) -->
-  <div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+  <div id="history-modal" class="modal-overlay" onclick="if(event.target === this) closeHistoryModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <div id="modal-unit-title" class="modal-title">単元履歴・分析</div>
       <div id="modal-score-summary" style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 6px;">分析: 0 / 0 問 (0%)</div>
