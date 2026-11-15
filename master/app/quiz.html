@@ -3,9 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>美容師国家試験Pro - クイズ解答</title>
+  <title>美容師国家試験Pro - 範囲・単元選択 & クイズ</title>
   <link rel="stylesheet" href="../css/style.css">
   <style>
+    body {
+      background-color: #fefaf0;
+      color: #2d3436;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+
     #quiz-confetti-canvas {
       position: fixed;
       top: 0;
@@ -15,6 +24,113 @@
       pointer-events: none;
       z-index: 9999;
     }
+
+    /* 称号バッジ */
+    .trophy-badge {
+      background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+      color: #d35400;
+      border: 2px solid #e67e22;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(230, 126, 34, 0.2);
+    }
+
+    /* ボタン類 */
+    .btn-all-history {
+      background: #74b9ff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 5px rgba(9, 132, 227, 0.2);
+    }
+    .btn-weakness {
+      background: #ff7675;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      width: 100%;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 5px rgba(214, 48, 49, 0.2);
+    }
+
+    /* 単元アイテム */
+    .unit-item {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .unit-info {
+      flex: 1;
+      padding-right: 12px;
+    }
+    .unit-name {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #2c3e50;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #2ecc71;
+      transition: width 0.4s ease;
+    }
+    .unit-action {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+    .btn-trigger-quiz {
+      background: #0984e3;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .btn-done-badge {
+      background: #95afc0;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: default;
+    }
+
+    /* クイズ画面ヘッダー */
     .quiz-header {
       display: flex;
       justify-content: space-between;
@@ -31,11 +147,6 @@
       font-size: 13px;
       font-weight: bold;
     }
-    .quiz-meta-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
     .btn-bookmark {
       background: #f1f2f6;
       border: 1px solid #cbd5e1;
@@ -44,13 +155,14 @@
       font-size: 12px;
       cursor: pointer;
       font-weight: bold;
-      transition: all 0.2s;
     }
     .btn-bookmark.is-bookmarked {
       background: #fff9db;
       border-color: #f5d0a9;
       color: #e67e22;
     }
+
+    /* 〇✕入力 */
     .ox-container {
       display: flex;
       gap: 16px;
@@ -58,7 +170,7 @@
     }
     .btn-o {
       flex: 1;
-      padding: 24px;
+      padding: 22px;
       font-size: 2.2rem;
       font-weight: bold;
       background: #fff5f5;
@@ -66,11 +178,10 @@
       color: #ff7675;
       border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.1s;
     }
     .btn-x {
       flex: 1;
-      padding: 24px;
+      padding: 22px;
       font-size: 2.2rem;
       font-weight: bold;
       background: #f0f8ff;
@@ -78,17 +189,61 @@
       color: #74b9ff;
       border-radius: 12px;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    .btn-o:active, .btn-x:active {
-      transform: scale(0.95);
+
+    /* モーダル */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 3000;
+      display: none;
+      justify-content: center;
+      align-items: center;
     }
-    .explanation-box {
-      background: #fafafa;
+    .modal-content {
+      background: white;
+      width: 92%;
+      max-width: 520px;
+      max-height: 85vh;
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #2c3e50;
+      text-align: center;
+      border-bottom: 2px solid #74b9ff;
+      padding-bottom: 8px;
+    }
+    .sort-container {
+      display: flex;
+      gap: 6px;
+      margin: 12px 0 8px 0;
+    }
+    .btn-sort {
+      flex: 1;
+      padding: 6px 4px;
+      font-size: 0.75rem;
       border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 16px;
-      margin-top: 16px;
+      background: #f8fafc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #475569;
+    }
+    .btn-sort.active-sort {
+      background: #0984e3;
+      color: white;
+      border-color: #0984e3;
     }
   </style>
 
@@ -97,59 +252,96 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
-  <!-- 最前面で舞う紙吹雪用キャンバス -->
+
+  <!-- 紙吹雪用キャンバス -->
   <canvas id="quiz-confetti-canvas"></canvas>
 
-  <!-- クイズ実行エリア -->
-  <div class="card" id="quiz-card">
+  <!-- 画面①：単元（範囲）選択画面 (#unit-screen) -->
+  <div id="unit-screen" class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 id="page-title" style="margin: 0; font-size: 1.2rem; color: #2c3e50;">単元別の問題</h2>
+      <a href="./index.html" style="font-size: 0.8rem; font-weight: bold; color: #0984e3; text-decoration: none;">⬅️ ホームへ戻る</a>
+    </div>
+
+    <!-- 称号表示バッジ -->
+    <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
+
+    <!-- 科目全体分析 & 弱点克服ボタン -->
+    <button class="btn-all-history" onclick="openAllHistoryModal()">📊 この科目の総合履歴・分析</button>
+    <button class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
+
+    <!-- 単元リスト描画コンテナ -->
+    <div id="unit-list"></div>
+
+    <div style="margin-top: 20px; text-align: center;">
+      <p style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px;">(※単元名をタップすると単元別の履歴が確認できます)</p>
+      <button onclick="resetSubjectData()" class="btn-outline" style="width: auto; padding: 6px 12px; font-size: 0.75rem; color: #e74c3c; border-color: #ff7675;">この科目の学習データをリセット</button>
+    </div>
+  </div>
+
+  <!-- 画面②：クイズ実行画面 (#quiz-screen) -->
+  <div id="quiz-screen" class="card" style="display: none;">
     <div class="quiz-header">
-      <span id="quiz-mode-title" class="quiz-unit-badge">モード</span>
-      <div class="quiz-meta-wrap">
+      <span id="quiz-unit-title" class="quiz-unit-badge">単元名</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
         <button id="bookmark-toggle-btn" class="btn-bookmark" onclick="toggleBookmark()">☆ をつける</button>
-        <span id="quiz-progress" style="font-size: 13px; font-weight: bold;">第 1 / 3 問</span>
+        <span id="quiz-progress-num" style="font-size: 13px; font-weight: bold;">第 1 / 3 問</span>
       </div>
     </div>
 
-    <div id="quiz-subject-label" style="font-size: 12px; color: var(--text-muted); font-weight: bold; margin-bottom: 4px;"></div>
-    <div id="quiz-source" style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;"></div>
+    <div id="quiz-source" style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">出典: ---</div>
+    <h3 id="question-text" style="font-size: 17px; line-height: 1.5; margin-bottom: 20px;">問題文がここに表示されます。</h3>
 
-    <h3 id="question-text" style="font-size: 17px; line-height: 1.5; margin-bottom: 20px;">問題文を読み込み中...</h3>
-
-    <!-- 2択（〇✕）入力エリア -->
+    <!-- 〇✕入力 -->
     <div id="ox-input-area" class="ox-container">
-      <button class="btn-o" onclick="handleAnswer(0)">〇</button>
-      <button class="btn-x" onclick="handleAnswer(1)">×</button>
+      <button class="btn-o" onclick="handleAnswer(true)">〇</button>
+      <button class="btn-x" onclick="handleAnswer(false)">×</button>
     </div>
 
-    <!-- 4択入力エリア -->
-    <div id="choice4-input-area" style="display: none;"></div>
-
-    <!-- 解説エリア -->
-    <div id="explanation-area" class="explanation-box" style="display: none;">
+    <!-- 正否判定・解説エリア -->
+    <div id="explanation-area" style="display: none; background: #fafafa; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 16px;">
       <div id="result-status" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;"></div>
       <div id="current-streak" style="font-size: 13px; color: #e67e22; margin-bottom: 10px; font-weight: bold;"></div>
       <div id="explanation-text" style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 16px;"></div>
       
       <div style="display: flex; gap: 8px;">
         <button class="btn" id="next-btn" onclick="nextQuestion()" style="flex: 1;">次の問題へ</button>
-        <button class="btn btn-outline" onclick="exitQuiz()" style="width: auto; padding: 12px 16px;">中断</button>
+        <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
       </div>
     </div>
   </div>
 
-  <!-- 結果発表画面 -->
-  <div class="card" id="result-card" style="display: none; text-align: center;">
-    <h2>🎉 テスト終了！</h2>
-    <p class="subtitle">お疲れ様でした。解答結果はSupabaseへ同期保存されました。</p>
+  <!-- 画面③：結果発表画面 (#result-card) -->
+  <div id="result-card" class="card" style="display: none; text-align: center;">
+    <h2>🎉 セットクリア！</h2>
+    <p class="subtitle">お疲れ様でした！解答結果が進捗に反映されました。</p>
 
-    <div style="font-size: 48px; font-weight: bold; color: var(--primary-color); margin: 20px 0;">
-      <span id="final-score">0</span> <span style="font-size: 24px;">点</span>
+    <div style="font-size: 44px; font-weight: bold; color: var(--primary-color); margin: 16px 0;">
+      <span id="final-score">0</span> <span style="font-size: 22px;">点</span>
     </div>
     <p id="final-detail" style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;"></p>
 
     <div style="display: flex; flex-direction: column; gap: 10px;">
-      <button onclick="restartCurrentQuiz()" class="btn">🔄 同じ条件で続けて解く</button>
-      <a href="./index.html" class="btn btn-outline" style="text-decoration: none;">🏠 学習ホームに戻る</a>
+      <button onclick="backToUnitScreen()" class="btn">単元一覧に戻る</button>
+    </div>
+  </div>
+
+  <!-- 📜 単元別 / 総合履歴 モーダル (#history-modal) -->
+  <div id="history-modal" class="modal-overlay" onclick="closeHistoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="modal-unit-title" class="modal-title">単元履歴・分析</div>
+      <div id="modal-score-summary" style="font-size: 0.8rem; color: #64748b; text-align: center; margin-top: 6px;">分析: 0 / 0 問 (0%)</div>
+
+      <div class="sort-container">
+        <button id="sort-btn-default" class="btn-sort active-sort" onclick="toggleSort('default')">出典順</button>
+        <button id="sort-btn-count" class="btn-sort" onclick="toggleSort('count')">回答数順</button>
+        <button id="sort-btn-wrong" class="btn-sort" onclick="toggleSort('wrong')">誤答数順</button>
+        <button id="sort-btn-bookmark" class="btn-sort" onclick="toggleSort('bookmark')">⭐マーク</button>
+      </div>
+
+      <div id="modal-history-list" style="flex: 1; overflow-y: auto; margin: 10px 0;"></div>
+
+      <button onclick="closeHistoryModal()" class="btn" style="padding: 10px;">閉じる</button>
     </div>
   </div>
 
@@ -157,34 +349,43 @@
   <script src="../js/supabase_client.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/sync_queue.js"></script>
-  <script src="../js/quiz_engine.js"></script>
   <script src="../js/questions_database.js"></script>
 
   <script>
+    // パラメータ解読
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode') || '2choice';
+    const rawSubject = urlParams.get('subject') || 'public_hygiene';
+
+    // 科目ID ➔ DBデータキー マッピング
+    const SUBJECT_MAP = {
+      'public_hygiene': { key: 'test_koshuese_unit_ver01_2026', title: '03 公衆衛生・環境衛生' },
+      'infection': { key: 'test_kansensho_unit_ver01_2026', title: '04 感染症' },
+      'hygiene_tech': { key: 'test_esekanrigijutu_unit_ver01_2026', title: '05 衛生管理技術' },
+      'anatomy': { key: 'test_jintai_unit_ver01_2026', title: '06 人体の構造及び機能' },
+      'dermatology': { key: 'test_hifukagaku_unit_ver01_2026', title: '07 皮膚科学' },
+      'cosmetic_chem': { key: 'test_koshohin_unit_ver01_2026', title: '08 香粧品化学' },
+      'regulations': { key: 'test_kankehoki_unit_ver01_2026', title: '01 関係法規・制度' },
+      'management': { key: 'test_unekanri_unit_ver01_2026', title: '02 運営管理' },
+      'culture': { key: 'test_bunkaron_unit_ver01_2026', title: '09 文化論' },
+      'tech_theory': { key: 'test_gijuturiron_unit_ver01_2026', title: '10 美容技術理論' }
+    };
+
+    const subjectInfo = SUBJECT_MAP[rawSubject] || { key: 'test_koshuese_unit_ver01_2026', title: '公衆衛生・環境衛生' };
+    const currentSubjectKey = subjectInfo.key;
+
+    // 状態変数
+    let questionPool = {};
+    let questionStats = {};
+    let currentUnitName = "";
     let currentQuestions = [];
     let currentIndex = 0;
     let score = 0;
     let userAnswers = [];
-    let bookmarkedIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-
-    const SUBJECT_MAP = {
-      'public_hygiene': 'test_koshuese_unit_ver01_2026',
-      'infection': 'test_kansensho_unit_ver01_2026',
-      'hygiene_tech': 'test_esekanrigijutu_unit_ver01_2026',
-      'anatomy': 'test_jintai_unit_ver01_2026',
-      'dermatology': 'test_hifukagaku_unit_ver01_2026',
-      'cosmetic_chem': 'test_koshohin_unit_ver01_2026',
-      'regulations': 'test_kankehoki_unit_ver01_2026',
-      'management': 'test_unekanri_unit_ver01_2026',
-      'culture': 'test_bunkaron_unit_ver01_2026',
-      'tech_theory': 'test_gijuturiron_unit_ver01_2026'
-    };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode') || '2choice';
-    const rawSubject = urlParams.get('subject') || 'public_hygiene';
-    const subMode = urlParams.get('subMode');
-    const dbSubjectKey = SUBJECT_MAP[rawSubject] || rawSubject;
+    let isWeaknessMode = false;
+    let activeModalUnit = "";
+    let currentSortMode = "default";
+    let isAllHistoryMode = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
@@ -192,156 +393,223 @@
         window.location.href = '/master/index.html';
         return;
       }
-      loadQuestions();
+
+      document.getElementById('page-title').innerText = subjectInfo.title;
+
+      // データベースから問題プール読み込み
+      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+      if (dbSource && dbSource[currentSubjectKey]) {
+        questionPool = dbSource[currentSubjectKey].questionPool || {};
+      }
+
+      // 画面表示初期化 (単元一覧表示)
+      refreshUnitScreen();
     });
 
-    function loadQuestions() {
-      currentQuestions = [];
+    // 単元一覧画面 (#unit-screen) の再描画
+    function refreshUnitScreen() {
+      questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentSubjectKey)) || {};
+      const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentSubjectKey)) || {};
+
+      let totalQuestionsCount = 0;
+      let totalMasteredCount = 0;
+      let totalAnsCount = 0;
+      let totalCorrectCount = 0;
+
+      const listContainer = document.getElementById("unit-list");
+      listContainer.innerHTML = "";
+
+      for (let unitName in questionPool) {
+        const questions = questionPool[unitName];
+        totalQuestionsCount += questions.length;
+
+        let unitMastered = 0;
+        questions.forEach(q => {
+          const stat = questionStats[q.id];
+          if (stat) {
+            if ((stat.streak || 0) >= 1) unitMastered++;
+            totalAnsCount += (stat.total || 0);
+            totalCorrectCount += (stat.correct_count || 0);
+          }
+        });
+
+        totalMasteredCount += unitMastered;
+
+        const progressPercent = Math.round((unitMastered / questions.length) * 100);
+        const playCount = unitCountData[unitName] || 0;
+        const isCompleted = (unitMastered === questions.length);
+
+        const btnHtml = isCompleted
+          ? `<button class="btn-done-badge" disabled>習得済み</button>`
+          : `<button class="btn-trigger-quiz" onclick="startUnitQuiz('${escapeQuotes(unitName)}')">開始</button>`;
+
+        const itemHtml = `
+          <div class="unit-item">
+            <div class="unit-info">
+              <div class="unit-name" onclick="openHistoryModal('${escapeQuotes(unitName)}')">${escapeHTML(unitName)}</div>
+              <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: ${progressPercent}%"></div>
+              </div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">習得済み: ${unitMastered} / ${questions.length} 問 (${progressPercent}%)</div>
+            </div>
+            <div class="unit-action">
+              ${btnHtml}
+              <span style="font-size: 0.7rem; color: #e67e22;">${playCount}セット 実施済</span>
+            </div>
+          </div>
+        `;
+        listContainer.insertAdjacentHTML('beforeend', itemHtml);
+      }
+
+      // 称号判定
+      updateUserRankUI(totalMasteredCount, totalQuestionsCount, totalAnsCount, totalCorrectCount);
+    }
+
+    // 称号判定ロジック
+    function updateUserRankUI(mastered, total, totalAns, correctAns) {
+      const rankEl = document.getElementById("user-rank");
+      if (!rankEl) return;
+
+      const percent = total > 0 ? Math.round((mastered / total) * 100) : 0;
+      const accuracy = totalAns > 0 ? Math.round((correctAns / totalAns) * 100) : 0;
+
+      let rankTitle = "未受験 of 卵 🥚";
+      if (percent === 100 && accuracy === 100) {
+        rankTitle = "【グランドマスター】 👑";
+      } else if (percent === 100) {
+        rankTitle = "【マスター】 🏆";
+      } else if (totalAns > 0) {
+        rankTitle = "【修行中】 🌱";
+      }
+
+      rankEl.innerText = `現在の称号: ${rankTitle} (習得: ${percent}% / 正答率: ${accuracy}%)`;
+    }
+
+    // 単元指定クイズのスタート (3問セット)
+    function startUnitQuiz(unitName) {
+      isWeaknessMode = false;
+      currentUnitName = unitName;
+      const pool = questionPool[unitName] || [];
+
+      // 未習得問題を優先
+      const unlearned = pool.filter(q => !questionStats[q.id] || (questionStats[q.id].streak || 0) < 1);
+      const learned = pool.filter(q => questionStats[q.id] && (questionStats[q.id].streak || 0) >= 1);
+
+      shuffleArray(unlearned);
+      shuffleArray(learned);
+
+      currentQuestions = [...unlearned, ...learned].slice(0, 3);
+      if (currentQuestions.length === 0) {
+        alert("出題可能な問題がありません。");
+        return;
+      }
+
       currentIndex = 0;
       score = 0;
       userAnswers = [];
 
-      // データベースオブジェクトの安全な取得 (windowプロパティ / グローバル変数)
-      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) 
-        ? window.ALL_QUESTIONS_DATABASE 
-        : ((typeof ALL_QUESTIONS_DATABASE !== 'undefined') ? ALL_QUESTIONS_DATABASE : null);
+      document.getElementById("unit-screen").style.display = "none";
+      document.getElementById("quiz-screen").style.display = "block";
+      document.getElementById("result-card").style.display = "none";
 
-      if (!dbSource) {
-        alert("問題データベース(questions_database.js)が読み込まれていません。");
-        return;
-      }
-
-      // ① マイ・ベストモード
-      if (subMode === 'bookmark') {
-        const favIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
-        for (let key in dbSource) {
-          const pool = dbSource[key].questionPool;
-          for (let u in pool) {
-            pool[u].forEach(q => {
-              if (favIds.includes(q.id)) {
-                currentQuestions.push(formatQuestionObject(q, u));
-              }
-            });
-          }
-        }
-        shuffleArray(currentQuestions);
-        currentQuestions = currentQuestions.slice(0, 3);
-      }
-      // ② スピード特訓モード
-      else if (subMode === 'training') {
-        for (let key in dbSource) {
-          const pool = dbSource[key].questionPool;
-          for (let u in pool) {
-            pool[u].forEach(q => {
-              currentQuestions.push(formatQuestionObject(q, u));
-            });
-          }
-        }
-        shuffleArray(currentQuestions);
-        currentQuestions = currentQuestions.slice(0, 10);
-      }
-      // ③ 通常の科目選択モード
-      else {
-        const dbEntry = dbSource[dbSubjectKey];
-        if (dbEntry && dbEntry.questionPool) {
-          for (let cat in dbEntry.questionPool) {
-            dbEntry.questionPool[cat].forEach(q => {
-              currentQuestions.push(formatQuestionObject(q, cat));
-            });
-          }
-          shuffleArray(currentQuestions);
-          currentQuestions = currentQuestions.slice(0, mode === '2choice' ? 3 : 10);
-        }
-      }
-
-      if (currentQuestions.length === 0) {
-        alert("該当する問題データがありませんでした。");
-        window.location.href = './index.html';
-        return;
-      }
-
-      document.getElementById('quiz-mode-title').innerText = (mode === '2choice' ? '⚡ 2択高速学習' : '📝 4択過去問');
-      renderQuestion();
+      renderQuizQuestion();
     }
 
-    // 問題オブジェクト構造の統一マッピング関数
-    function formatQuestionObject(q, categoryName) {
-      // answer が boolean(true/false) の場合は 0(〇) または 1(✕) に統一
-      let correctIdx = 0;
-      if (typeof q.answer === 'boolean') {
-        correctIdx = q.answer ? 0 : 1;
-      } else if (typeof q.answer === 'number') {
-        correctIdx = q.answer;
-      }
+    // 弱点克服モードのスタート (3問セット)
+    function startWeaknessQuiz() {
+      isWeaknessMode = true;
+      currentUnitName = "弱点克服モード";
+      const wrongList = [];
 
-      return {
-        id: q.id,
-        question: q.text || q.question || '',
-        options: q.options || ["○ 正しい", "× 誤り"],
-        answer: correctIdx,
-        explanation: q.exp || q.explanation || "解説はありません。",
-        source: q.source || '',
-        category: categoryName || ''
-      };
-    }
-
-    function renderQuestion() {
-      const q = currentQuestions[currentIndex];
-      document.getElementById('quiz-progress').innerText = `第 ${currentIndex + 1} / ${currentQuestions.length} 問`;
-      document.getElementById('quiz-subject-label').innerText = `単元: ${q.category || ''}`;
-      document.getElementById('quiz-source').innerText = q.source ? `出典: ${q.source}` : '';
-      document.getElementById('question-text').innerText = q.question;
-
-      updateBookmarkButtonUI(q.id);
-      document.getElementById('explanation-area').style.display = 'none';
-
-      if (mode === '2choice') {
-        document.getElementById('ox-input-area').style.display = 'flex';
-        document.getElementById('choice4-input-area').style.display = 'none';
-      } else {
-        document.getElementById('ox-input-area').style.display = 'none';
-        const choiceContainer = document.getElementById('choice4-input-area');
-        choiceContainer.style.display = 'block';
-        choiceContainer.innerHTML = '';
-
-        q.options.forEach((opt, idx) => {
-          const btn = document.createElement('button');
-          btn.className = 'option-btn';
-          btn.innerText = opt;
-          btn.onclick = () => handleAnswer(idx);
-          choiceContainer.appendChild(btn);
+      for (let unit in questionPool) {
+        questionPool[unit].forEach(q => {
+          const stat = questionStats[q.id];
+          if (stat) {
+            const isMastered = (stat.streak || 0) >= 1;
+            const wrongCount = (stat.total || 0) - (stat.correct_count || 0);
+            if (!isMastered && wrongCount > 0) {
+              wrongList.push({ ...q, wrongCount, unitName: unit });
+            }
+          }
         });
       }
+
+      if (wrongList.length === 0) {
+        alert("現在、克服対象となる弱点問題はありません！素晴らしい進捗状況です。");
+        return;
+      }
+
+      wrongList.sort((a, b) => b.wrongCount - a.wrongCount);
+      currentQuestions = wrongList.slice(0, 3);
+
+      currentIndex = 0;
+      score = 0;
+      userAnswers = [];
+
+      document.getElementById("unit-screen").style.display = "none";
+      document.getElementById("quiz-screen").style.display = "block";
+      document.getElementById("result-card").style.display = "none";
+
+      renderQuizQuestion();
     }
 
-    function handleAnswer(selectedIdx) {
+    // クイズ問題の表示
+    function renderQuizQuestion() {
       const q = currentQuestions[currentIndex];
-      const isCorrect = (selectedIdx === q.answer);
+      document.getElementById("quiz-unit-title").innerText = isWeaknessMode ? "❌ 弱点克服" : (currentUnitName || "単元");
+      document.getElementById("quiz-progress-num").innerText = `第 ${currentIndex + 1} / ${currentQuestions.length} 問`;
+      document.getElementById("quiz-source").innerText = `出典: ${q.source || "アプリオリジナル"}`;
+      document.getElementById("question-text").innerText = q.text || q.question || '';
 
+      updateBookmarkButtonUI(q.id);
+
+      document.getElementById("ox-input-area").style.display = "flex";
+      document.getElementById("explanation-area").style.display = "none";
+    }
+
+    // 解答判定
+    function handleAnswer(userAnsBool) {
+      const q = currentQuestions[currentIndex];
+      let correctBool = false;
+      if (typeof q.answer === 'boolean') {
+        correctBool = q.answer;
+      } else if (typeof q.answer === 'number') {
+        correctBool = (q.answer === 0);
+      }
+
+      const isCorrect = (userAnsBool === correctBool);
       if (isCorrect) score++;
 
       userAnswers.push({
         question_id: q.id,
-        selected: selectedIdx,
-        correct: q.answer,
+        selected: userAnsBool ? 0 : 1,
+        correct: correctBool ? 0 : 1,
         is_correct: isCorrect
       });
 
-      if (mode === '2choice') {
-        document.getElementById('ox-input-area').style.display = 'none';
+      // 統計更新
+      if (!questionStats[q.id]) {
+        questionStats[q.id] = { total: 0, streak: 0, correct_count: 0 };
+      }
+      const wasMastered = (questionStats[q.id].streak || 0) >= 1;
+
+      questionStats[q.id].total += 1;
+      if (isCorrect) {
+        questionStats[q.id].streak += 1;
+        questionStats[q.id].correct_count += 1;
       } else {
-        const btns = document.querySelectorAll('.option-btn');
-        btns.forEach((btn, idx) => {
-          btn.disabled = true;
-          if (idx === q.answer) btn.classList.add('correct');
-          else if (idx === selectedIdx && !isCorrect) btn.classList.add('incorrect');
-        });
+        questionStats[q.id].streak = 0;
       }
 
-      const expArea = document.getElementById('explanation-area');
-      const statusEl = document.getElementById('result-status');
-      const streakEl = document.getElementById('current-streak');
+      if (isCorrect && !wasMastered) {
+        let currentSolved = parseInt(localStorage.getItem('solved_' + currentSubjectKey) || 0);
+        localStorage.setItem('solved_' + currentSubjectKey, currentSolved + 1);
+      }
 
+      localStorage.setItem("beauty_app_question_stats_" + currentSubjectKey, JSON.stringify(questionStats));
+
+      // 判定画面
+      const statusEl = document.getElementById("result-status");
       if (isCorrect) {
         statusEl.innerText = "⭕ 正解！";
         statusEl.style.color = "var(--correct-color)";
@@ -350,21 +618,30 @@
         statusEl.style.color = "var(--incorrect-color)";
       }
 
-      streakEl.innerText = `現在の正解数: ${score} / ${currentIndex + 1}`;
-      document.getElementById('explanation-text').innerText = q.explanation;
-      expArea.style.display = 'block';
+      document.getElementById("current-streak").innerText = `戦績: 正解${questionStats[q.id].correct_count}回 / 連続: ${questionStats[q.id].streak}回`;
+      document.getElementById("explanation-text").innerText = q.exp || q.explanation || "解説はありません。";
+
+      document.getElementById("ox-input-area").style.display = "none";
+      document.getElementById("explanation-area").style.display = "block";
     }
 
-    async function nextQuestion() {
+    function nextQuestion() {
       currentIndex++;
       if (currentIndex < currentQuestions.length) {
-        renderQuestion();
+        renderQuizQuestion();
       } else {
-        finishQuiz();
+        finishUnitQuizSet();
       }
     }
 
-    async function finishQuiz() {
+    // セット終了時
+    async function finishUnitQuizSet() {
+      if (!isWeaknessMode && currentUnitName) {
+        const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentSubjectKey)) || {};
+        unitCountData[currentUnitName] = (unitCountData[currentUnitName] || 0) + 1;
+        localStorage.setItem("beauty_app_counts_" + currentSubjectKey, JSON.stringify(unitCountData));
+      }
+
       const total = currentQuestions.length;
       const finalScore = Math.round((score / total) * 100);
 
@@ -380,40 +657,166 @@
         correct_count: score,
         details: userAnswers
       };
-
       if (typeof saveExamLog === 'function') {
         await saveExamLog(logData);
       }
 
-      document.getElementById('quiz-card').style.display = 'none';
-      document.getElementById('final-score').innerText = finalScore;
-      document.getElementById('final-detail').innerText = `全 ${total} 問中 ${score} 問正解`;
-      document.getElementById('result-card').style.display = 'block';
+      document.getElementById("quiz-screen").style.display = "none";
+      document.getElementById("final-score").innerText = finalScore;
+      document.getElementById("final-detail").innerText = `全 ${total} 問中 ${score} 問正解`;
+      document.getElementById("result-card").style.display = "block";
     }
 
+    function backToUnitScreen() {
+      document.getElementById("result-card").style.display = "none";
+      document.getElementById("quiz-screen").style.display = "none";
+      document.getElementById("unit-screen").style.display = "block";
+      refreshUnitScreen();
+    }
+
+    function exitQuizToUnitScreen() {
+      if (confirm("途中で学習を中断して単元一覧に戻りますか？")) {
+        backToUnitScreen();
+      }
+    }
+
+    // ⭐ブックマーク機能
     function toggleBookmark() {
       const q = currentQuestions[currentIndex];
       if (!q) return;
 
+      let bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
       const idx = bookmarkedIds.indexOf(q.id);
       if (idx > -1) {
         bookmarkedIds.splice(idx, 1);
       } else {
         bookmarkedIds.push(q.id);
       }
-      localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(bookmarkedIds));
+      localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(bookmarkedIds));
       updateBookmarkButtonUI(q.id);
     }
 
     function updateBookmarkButtonUI(qId) {
-      const btn = document.getElementById('bookmark-toggle-btn');
+      const btn = document.getElementById("bookmark-toggle-btn");
       if (!btn) return;
+      const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
       if (bookmarkedIds.includes(qId)) {
-        btn.innerText = '⭐ マーク中';
-        btn.classList.add('is-bookmarked');
+        btn.innerText = "⭐ マーク中";
+        btn.classList.add("is-bookmarked");
       } else {
-        btn.innerText = '☆ をつける';
-        btn.classList.remove('is-bookmarked');
+        btn.innerText = "☆ をつける";
+        btn.classList.remove("is-bookmarked");
+      }
+    }
+
+    // 📜 履歴モーダル制御
+    function openHistoryModal(unitName) {
+      isAllHistoryMode = false;
+      activeModalUnit = unitName;
+      document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
+      document.getElementById("history-modal").style.display = "flex";
+      renderHistoryList();
+    }
+
+    function openAllHistoryModal() {
+      isAllHistoryMode = true;
+      document.getElementById("modal-unit-title").innerText = `${subjectInfo.title} - 総合履歴・分析`;
+      document.getElementById("history-modal").style.display = "flex";
+      renderHistoryList();
+    }
+
+    function closeHistoryModal() {
+      document.getElementById("history-modal").style.display = "none";
+    }
+
+    function toggleSort(sortType) {
+      currentSortMode = sortType;
+      document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active-sort"));
+      const btn = document.getElementById("sort-btn-" + sortType);
+      if (btn) btn.classList.add("active-sort");
+      renderHistoryList();
+    }
+
+    function renderHistoryList() {
+      const listEl = document.getElementById("modal-history-list");
+      listEl.innerHTML = "";
+
+      let targetQuestions = [];
+      if (isAllHistoryMode) {
+        for (let unit in questionPool) {
+          questionPool[unit].forEach(q => {
+            targetQuestions.push({ ...q, unitName: unit });
+          });
+        }
+      } else {
+        const pool = questionPool[activeModalUnit] || [];
+        targetQuestions = pool.map(q => ({ ...q, unitName: activeModalUnit }));
+      }
+
+      const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+      // ソート処理
+      if (currentSortMode === "count") {
+        targetQuestions.sort((a, b) => (questionStats[b.id]?.total || 0) - (questionStats[a.id]?.total || 0));
+      } else if (currentSortMode === "wrong") {
+        targetQuestions.sort((a, b) => {
+          let wA = (questionStats[a.id]?.total || 0) - (questionStats[a.id]?.correct_count || 0);
+          let wB = (questionStats[b.id]?.total || 0) - (questionStats[b.id]?.correct_count || 0);
+          return wB - wA;
+        });
+      } else if (currentSortMode === "bookmark") {
+        targetQuestions.sort((a, b) => (bookmarkedIds.includes(b.id) ? -1 : 1));
+      }
+
+      if (targetQuestions.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; margin:20px 0;">履歴データがありません</div>`;
+        return;
+      }
+
+      let lastUnitHeader = "";
+      targetQuestions.forEach(q => {
+        const stat = questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 };
+        const isMastered = (stat.streak || 0) >= 1;
+
+        if (isAllHistoryMode && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
+          lastUnitHeader = q.unitName;
+          listEl.insertAdjacentHTML('beforeend', `<div style="background:#e0f2fe; color:#0369a1; padding:6px 10px; margin:10px 0 4px 0; font-weight:bold; border-radius:6px; font-size:0.8rem;">■ ${escapeHTML(q.unitName)}</div>`);
+        }
+
+        const tagHtml = isMastered
+          ? `<span style="background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold;">習得済</span>`
+          : `<span style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold;">未習得</span>`;
+
+        const itemHtml = `
+          <div style="border-bottom:1px solid #e2e8f0; padding:10px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <div>${tagHtml} <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">正解:${stat.correct_count || 0} / 挑戦:${stat.total || 0}回</span></div>
+              <span style="font-size:0.7rem; color:#94a3b8;">${escapeHTML(q.source || '')}</span>
+            </div>
+            <div style="font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;">${escapeHTML(q.text || q.question || '')}</div>
+            <button onclick="toggleHistExp('${q.id}')" style="background:#f1f2f6; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">解説を見る</button>
+            <div id="hist-exp-${q.id}" style="display:none; background:#faf9f6; font-size:0.8rem; line-height:1.5; color:#475569; padding:8px; border-radius:6px; margin-top:6px; border-left:3px solid #fab1a0;">
+              ${escapeHTML(q.exp || q.explanation || '解説はありません。')}
+            </div>
+          </div>
+        `;
+        listEl.insertAdjacentHTML('beforeend', itemHtml);
+      });
+    }
+
+    function toggleHistExp(qId) {
+      const el = document.getElementById("hist-exp-" + qId);
+      if (el) el.style.display = (el.style.display === "block") ? "none" : "block";
+    }
+
+    // データリセット
+    function resetSubjectData() {
+      if (confirm(`「${subjectInfo.title}」の学習データ（解答履歴・進捗）をリセットしてもよろしいですか？（※お気に入り⭐は保持されます）`)) {
+        localStorage.removeItem("beauty_app_question_stats_" + currentSubjectKey);
+        localStorage.removeItem("beauty_app_counts_" + currentSubjectKey);
+        localStorage.removeItem('solved_' + currentSubjectKey);
+        alert("学習データをリセットしました。");
+        refreshUnitScreen();
       }
     }
 
@@ -432,16 +835,17 @@
       }
     }
 
-    function restartCurrentQuiz() {
-      document.getElementById('result-card').style.display = 'none';
-      document.getElementById('quiz-card').style.display = 'block';
-      loadQuestions();
+    function escapeHTML(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/[&<>"'`]/g, function(match) {
+        const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '`': '&#x60;' };
+        return escapeMap[match];
+      });
     }
 
-    function exitQuiz() {
-      if (confirm("途中で学習を中断してホームに戻りますか？")) {
-        window.location.href = './index.html';
-      }
+    function escapeQuotes(str) {
+      if (typeof str !== 'string') return str;
+      return str.replace(/'/g, "\\'");
     }
   </script>
 </body>
