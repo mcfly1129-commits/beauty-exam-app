@@ -883,16 +883,16 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
-        // 3問目の場合：結果画面を出さず、直接「次の3問」へ周回できるようにする
+        // 3問目の場合：結果画面を出さず、直接「次の3問」へ周回できるようにする（サイズを左右均等に統一）
         btnContainer.innerHTML = `
-          <button class="btn" onclick="finishAndContinueQuizSet()" style="flex: 1; background: #0984e3;">🔄 続けて解く (次の3問)</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
+          <button class="btn" onclick="finishAndContinueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
+          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
         `;
       }else {
-        // 1〜2問目の場合：通常のボタン
+        // 1〜2問目の場合：通常のボタン（サイズを左右均等に統一）
         btnContainer.innerHTML = `
-          <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71;">次の問題へ</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
+          <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">次の問題へ</button>
+          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
         `;
       }
 
