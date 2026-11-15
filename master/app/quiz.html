@@ -501,7 +501,7 @@
     };
 
     const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['public_hygiene'];
-    let currentCourseKey = subjectConfig.courses.key; // 初期選択コース
+    let currentCourseKey = null; // 初期状態では未選択とする
 
     // 状態変数
     let questionPool = {};
@@ -528,8 +528,7 @@
       // コース切替タブのレンダリング
       renderCourseTabs();
 
-      // 初期コースの単元一覧を表示
-      selectCourse(currentCourseKey);
+      // 初期状態ではコース未選択のため、自動的なselectCourse呼び出しを行わない
     });
 
     // コース選択タブボタンの生成・描画
@@ -579,6 +578,12 @@
       document.querySelectorAll('.course-tab-btn').forEach(b => b.classList.remove('active-course'));
       const activeTab = document.getElementById('tab-btn-' + courseKey);
       if (activeTab) activeTab.classList.add('active-course');
+
+      // 範囲（コース）が選択されたので、コンテンツエリアを表示する
+      const contentArea = document.getElementById('course-content-area');
+      if (contentArea) {
+        contentArea.style.display = 'block';
+      }
 
       // データロード
       const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
