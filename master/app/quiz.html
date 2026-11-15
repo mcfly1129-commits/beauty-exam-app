@@ -878,8 +878,12 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       document.getElementById("current-streak").innerText = `戦績: 正解${questionStats[q.id].correct_count}回 / 連続: ${questionStats[q.id].streak}回`;
       document.getElementById("explanation-text").innerText = q.exp || q.explanation || "解説はありません。";
 
-      // 👈 🌟【変更点1】回答時に「3問目（最後の問題）かどうか」を判定
       const isLastQuestion = (currentIndex === currentQuestions.length - 1);
+
+      // 🌟【追加】3問目の解答かつ全問正解（セットクリア）した瞬間にその場で花吹雪を散らす
+      if (isLastQuestion && score === currentQuestions.length) {
+        triggerConfetti();
+      }
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
