@@ -38,7 +38,7 @@
 
     .course-tab-group {
       display: flex;
-      gap: 6px;
+      gap: 4px; /* 👈 タブ間の隙間を少し詰める */
       margin-top: 12px;
       overflow-x: auto;
       padding-bottom: 4px;
@@ -46,13 +46,13 @@
 
     .course-tab-btn {
       flex: 1;
-      min-width: 100px;
+      min-width: 70px; /* 👈 最小幅を縮めて4つ並びやすくする */
       background: #f1f5f9;
       border: 2px solid #cbd5e1;
       border-radius: 10px;
-      padding: 8px 6px;
+      padding: 6px 4px; /* 👈 上下の余白をコンパクトにする */
       text-align: center;
-      font-size: 0.78rem;
+      font-size: 0.72rem; /* 👈 フォントサイズを微調整して収まりを良くする */
       font-weight: bold;
       color: #475569;
       cursor: pointer;
