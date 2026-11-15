@@ -323,8 +323,8 @@
       <!-- 称号表示バッジ -->
       <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
 
-      <!-- 科目全体分析 & 弱点克服ボタン -->
-      <button class="btn-all-history" onclick="openAllHistoryModal()">📊 この科目の総合履歴・分析</button>
+      <!-- 範囲ごとの履歴分析 & 弱点克服ボタン -->
+      <button class="btn-all-history" onclick="openCourseHistoryModal()">📊 この範囲の履歴・分析</button>
       <button class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モードをスタート</button>
 
       <!-- 現在選択中コースの単元リスト描画コンテナ -->
@@ -913,15 +913,14 @@
       renderHistoryList();
     }
 
-    function openAllHistoryModal() {
-      isAllHistoryMode = true;
-      document.getElementById("modal-unit-title").innerText = `${subjectConfig.title} - 全コース総合履歴・分析`;
+    // 選択中コース全体の履歴モーダルを開く
+    function openCourseHistoryModal() {
+      const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
+      const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
+      
+      document.getElementById("modal-unit-title").innerText = `${courseName} - 履歴・分析`;
       document.getElementById("history-modal").style.display = "flex";
-      renderHistoryList();
-    }
-
-    function closeHistoryModal() {
-      document.getElementById("history-modal").style.display = "none";
+      renderCourseHistoryList();
     }
 
     function toggleSort(sortType) {
@@ -929,43 +928,30 @@
       document.querySelectorAll(".btn-sort").forEach(b => b.classList.remove("active-sort"));
       const btn = document.getElementById("sort-btn-" + sortType);
       if (btn) btn.classList.add("active-sort");
-      renderHistoryList();
+      
+      // モーダルのタイトルを見て、個別単元かコース全体かを判断して再描画
+      const modalTitle = document.getElementById("modal-unit-title").innerText;
+      if (modalTitle.includes("履歴・分析") && !modalTitle.includes(" - ")) {
+        renderCourseHistoryList();
+      } else {
+        renderHistoryList(); // 個別単元のモーダルの場合
+      }
     }
 
-    function renderHistoryList() {
+    // 選択中コース全体の問題・履歴をレンダリング
+    function renderCourseHistoryList() {
       const listEl = document.getElementById("modal-history-list");
       listEl.innerHTML = "";
 
       let targetQuestions = [];
-      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
-
-      if (isAllHistoryMode) {
-        // 科目内のすべてのコース（単元別・過去問・追加・成分）のデータを集約
-        subjectConfig.courses.forEach(c => {
-          if (dbSource && dbSource[c.key] && dbSource[c.key].questionPool) {
-            const p = dbSource[c.key].questionPool;
-            const cStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + c.key)) || {};
-
-            for (let unit in p) {
-              p[unit].forEach(q => {
-                targetQuestions.push({
-                  ...q,
-                  unitName: `[${c.label}] ${unit}`,
-                  courseKey: c.key,
-                  stat: cStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
-                });
-              });
-            }
-          }
+      for (let unit in questionPool) {
+        questionPool[unit].forEach(q => {
+          targetQuestions.push({
+            ...q,
+            unitName: unit,
+            stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
+          });
         });
-      } else {
-        const pool = questionPool[activeModalUnit] || [];
-        targetQuestions = pool.map(q => ({
-          ...q,
-          unitName: activeModalUnit,
-          courseKey: currentCourseKey,
-          stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
-        }));
       }
 
       const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
@@ -993,7 +979,7 @@
         const stat = q.stat || { total: 0, streak: 0, correct_count: 0 };
         const isMastered = (stat.streak || 0) >= 1;
 
-        if (isAllHistoryMode && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
+        if (currentSortMode === "default" && q.unitName !== lastUnitHeader) {
           lastUnitHeader = q.unitName;
           listEl.insertAdjacentHTML('beforeend', `<div style="background:#e0f2fe; color:#0369a1; padding:6px 10px; margin:10px 0 4px 0; font-weight:bold; border-radius:6px; font-size:0.8rem;">■ ${escapeHTML(q.unitName)}</div>`);
         }
