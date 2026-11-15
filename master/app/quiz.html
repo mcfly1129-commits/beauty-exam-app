@@ -776,15 +776,26 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         });
       }
 
-      // 🌟【元仕様復元】誤答回数が多い順にソート後、上位最大15問からランダムに3問をシャッフル選出！
-      allQuestions.sort((a, b) => b.wrongCount - a.wrongCount);
-      let shuffledCandidates = [...allQuestions.slice(0, 15)];
+      // 🌟【修正】allQuestions を wrongList に変更し、誤答回数が多い順にソート後、上位候補からランダム選出
+      wrongList.sort((a, b) => b.wrongCount - a.wrongCount);
+      let shuffledCandidates = [...wrongList.slice(0, 15)];
       shuffleArray(shuffledCandidates);
 
       currentQuestions = shuffledCandidates.slice(0, 3);
 
+      // 🌟 足りない場合は未習得の問題等から補充する
+      if (currentQuestions.length < 3) {
+        for (let unit in questionPool) {
+          questionPool[unit].forEach(q => {
+            if (!currentQuestions.some(cq => cq.id === q.id) && currentQuestions.length < 3) {
+              currentQuestions.push({ ...q, wrongCount: 0, unitName: unit });
+            }
+          });
+        }
+      }
+
       if (currentQuestions.length === 0) {
-        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
+        alert("克服対象となる問題がありません。通常の単元を進めましょう！");
         return;
       }
 
