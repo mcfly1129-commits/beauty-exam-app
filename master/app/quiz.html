@@ -526,6 +526,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
     let currentSortMode = "default";
     let isAllHistoryMode = false;
     let weaknessSessionWrongCount = 0;
+    let isWeaknessGoalReached = false; // 👈 【追加】3セット達成（マスター達成）フラグ
 
     document.addEventListener('DOMContentLoaded', () => {
       const user = getCurrentUser();
@@ -760,6 +761,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       isWeaknessMode = true;
       currentUnitName = "弱点克服モード";
       weaknessSessionWrongCount = 0;
+      isWeaknessGoalReached = false; // 👈 【追加】リセット
       const wrongList = [];
 
       for (let unit in questionPool) {
@@ -893,10 +895,17 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
-        btnContainer.innerHTML = `
-          <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
-        `;
+        // 👈 【修正】弱点克服モードで3セット達成（マスター達成）した場合は「単元一覧に戻る」ボタンにする
+        if (isWeaknessMode && isWeaknessGoalReached) {
+          btnContainer.innerHTML = `
+            <button class="btn" onclick="backToUnitScreen()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">🎉 単元一覧に戻る</button>
+          `;
+        } else {
+          btnContainer.innerHTML = `
+            <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
+            <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
+          `;
+        }
       } else {
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">次の問題へ</button>
@@ -938,6 +947,8 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
       let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
 
+      isWeaknessGoalReached = false; // 👈 【追加】初期化
+
       if (isWeaknessMode) {
         if (isSetCompleted && weaknessSessionWrongCount === 0) {
           weaknessSuccessStreak++;
@@ -945,6 +956,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
           if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
             localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
+            isWeaknessGoalReached = true; // 👈 【追加】3セット達成フラグをON
             alert(`👑 おめでとうございます！弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！`);
           }
         } else {
