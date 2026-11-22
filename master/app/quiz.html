@@ -7,353 +7,127 @@
   <link rel="stylesheet" href="../css/style.css">
   <style>
     body {
-  background-color: #fefaf0;
-  color: #2d3436;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  margin: 0 auto;    /* 👈 PC表示で左右中央寄せ */
-  max-width: 600px; /* 👈 コンテナ幅をスマホ・PCで共通最適化 */
-  padding: 12px;
-  box-sizing: border-box;
-}
+      background-color: #fefaf0;
+      color: #2d3436;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0 auto;
+      max-width: 600px;
+      padding: 12px;
+      box-sizing: border-box;
+    }
 
     #quiz-confetti-canvas {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 9999;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 9999;
     }
 
-    /* 科目タイトル & コース選択タブ */
     .subject-header-box {
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 14px;
-      border: 1px solid #e2e8f0;
+      background: #ffffff; border-radius: 14px; padding: 14px;
+      margin-bottom: 14px; border: 1px solid #e2e8f0;
       box-shadow: 0 2px 4px rgba(0,0,0,0.04);
     }
-
     .course-tab-group {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 👈 常に2列の格子状に並べる */
-      gap: 8px; /* 👈 タブ同士に適度な隙間を持たせる */
-      margin-top: 12px;
+      display: flex; gap: 6px; margin-top: 12px;
+      overflow-x: auto; padding-bottom: 4px;
     }
-
     .course-tab-btn {
-      background: #f1f5f9;
-      border: 2px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px 8px; /* 👈 上下にゆとりを持たせて押しやすくする */
-      text-align: center;
-      font-size: 0.8rem; /* 👈 文字サイズを少し大きくして読みやすくする */
-      font-weight: bold;
-      color: #475569;
-      cursor: pointer;
-      transition: all 0.2s;
+      flex: 1; min-width: 100px; background: #f1f5f9;
+      border: 2px solid #cbd5e1; border-radius: 10px;
+      padding: 8px 6px; text-align: center;
+      font-size: 0.78rem; font-weight: bold; color: #475569;
+      cursor: pointer; transition: all 0.2s;
     }
     .course-tab-btn.active-course {
-      background: #0984e3;
-      color: #ffffff;
-      border-color: #0984e3;
+      background: #0984e3; color: #ffffff; border-color: #0984e3;
       box-shadow: 0 3px 8px rgba(9, 132, 227, 0.3);
     }
-
     .course-badge-sub {
-      display: block;
-      font-size: 0.68rem;
-      margin-top: 2px;
-      opacity: 0.9;
+      display: block; font-size: 0.68rem; margin-top: 2px; opacity: 0.9;
     }
 
-    /* 称号バッジ */
     .trophy-badge {
       background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
-      color: #d35400;
-      border: 2px solid #e67e22;
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 0.95rem;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 6px rgba(230, 126, 34, 0.15);
-      line-height: 1.4;
-      transition: all 0.5s ease;
-    }
-
-    /* 👑 マスター・グランドマスター達成時の超豪華CSSアニメーション */
-    @keyframes master-glow {
-      0% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
-      50% { box-shadow: 0 0 25px #ff007f, 0 0 50px #70a1ff; transform: scale(1.02); }
-      100% { box-shadow: 0 0 8px #ffd700, 0 0 15px #ff007f; transform: scale(1.0); }
+      color: #d35400; border: 2px solid #e67e22; border-radius: 12px;
+      padding: 12px; text-align: center; font-weight: bold;
+      font-size: 0.95rem; margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(230, 126, 34, 0.15); line-height: 1.4;
     }
     .trophy-badge.master-active {
-      animation: master-glow 2.5s infinite alternate;
-      border: 2px solid #ffd700 !important;
+      background: linear-gradient(135deg, #a29bfe, #fd79a8) !important;
       color: #ffffff !important;
     }
 
-    /* ボタン類 */
     .btn-all-history {
-      background: #74b9ff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 11px;
-      width: 100%;
-      font-weight: bold;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-bottom: 8px;
-      box-shadow: 0 2px 5px rgba(9, 132, 227, 0.2);
+      background: #74b9ff; color: white; border: none; border-radius: 10px;
+      padding: 11px; width: 100%; font-weight: bold; font-size: 0.9rem;
+      cursor: pointer; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(9, 132, 227, 0.2);
     }
     .btn-weakness {
-      background: #ff7675;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 11px;
-      width: 100%;
-      font-weight: bold;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 5px rgba(214, 48, 49, 0.2);
+      background: #ff7675; color: white; border: none; border-radius: 10px;
+      padding: 11px; width: 100%; font-weight: bold; font-size: 0.9rem;
+      cursor: pointer; margin-bottom: 16px; box-shadow: 0 2px 5px rgba(214, 48, 49, 0.2);
       white-space: pre-line;
     }
     .btn-weakness:disabled {
-      background: #cbd5e1;
-      color: #64748b;
-      cursor: not-allowed;
-      box-shadow: none;
+      background: #cbd5e1; color: #64748b; cursor: not-allowed; box-shadow: none;
     }
 
-    /* 単元アイテム */
     .unit-item {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 10px; display: flex;
+      justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);
     }
-    .unit-info {
-      flex: 1;
-      padding-right: 12px;
-    }
-    .unit-name {
-      font-weight: bold;
-      font-size: 0.88rem;
-      color: #2c3e50;
-      text-decoration: underline;
-      cursor: pointer;
-      margin-bottom: 6px;
-    }
-    .progress-bar-bg {
-      width: 100%;
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: #2ecc71;
-      transition: width 0.4s ease;
-    }
-    .unit-action {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-    }
-    .btn-trigger-quiz {
-      background: #0984e3;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .btn-done-badge {
-      background: #95afc0;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: default;
-    }
+    .unit-info { flex: 1; padding-right: 12px; }
+    .unit-name { font-weight: bold; font-size: 0.88rem; color: #2c3e50; text-decoration: underline; cursor: pointer; margin-bottom: 6px; }
+    .progress-bar-bg { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: #2ecc71; transition: width 0.4s ease; }
+    .unit-action { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .btn-trigger-quiz { background: #0984e3; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: pointer; }
+    .btn-done-badge { background: #95afc0; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; cursor: default; }
 
-    /* クイズ画面ヘッダー（上下2段レイアウトへ変更） */
-    .quiz-header {
-      display: flex;
-      flex-direction: column; /* 👈 上下2段の縦並びにする */
-      gap: 10px;               /* 👈 上段と下段の間に適度な隙間を持たせる */
-      margin-bottom: 12px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color, #cbd5e1);
-    }
-    .quiz-unit-badge {
-      background: #e0f2fe;
-      color: #0369a1;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: bold;
-      display: inline-block;
-      width: 100%;             /* 👈 横幅いっぱいに広げる */
-      box-sizing: border-box;
-      text-align: left;
-    }
-    /* 👈 下段のボタンと問題数を左右に配置するためのラッパー */
-    .quiz-header-sub {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-    .btn-bookmark {
-      background: #f1f2f6;
-      border: 1px solid #cbd5e1;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-bookmark.is-bookmarked {
-      background: #fff9db;
-      border-color: #f5d0a9;
-      color: #e67e22;
-    }
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+    .quiz-unit-badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: bold; }
+    .btn-bookmark { background: #f1f2f6; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; }
+    .btn-bookmark.is-bookmarked { background: #fff9db; border-color: #f5d0a9; color: #e67e22; }
 
-    .ox-container {
-      display: flex;
-      gap: 16px;
-      margin-top: 20px;
-    }
-    .btn-o {
-      flex: 1;
-      padding: 22px;
-      font-size: 2.2rem;
-      font-weight: bold;
-      background: #fff5f5;
-      border: 2px solid #ff7675;
-      color: #ff7675;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-    .btn-x {
-      flex: 1;
-      padding: 22px;
-      font-size: 2.2rem;
-      font-weight: bold;
-      background: #f0f8ff;
-      border: 2px solid #74b9ff;
-      color: #74b9ff;
-      border-radius: 12px;
-      cursor: pointer;
-    }
+    .ox-container { display: flex; gap: 16px; margin-top: 20px; }
+    .btn-o { flex: 1; padding: 22px; font-size: 2.2rem; font-weight: bold; background: #fff5f5; border: 2px solid #ff7675; color: #ff7675; border-radius: 12px; cursor: pointer; }
+    .btn-x { flex: 1; padding: 22px; font-size: 2.2rem; font-weight: bold; background: #f0f8ff; border: 2px solid #74b9ff; color: #74b9ff; border-radius: 12px; cursor: pointer; }
 
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 3000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      width: 92%;
-      max-width: 520px;
-      max-height: 85vh;
-      border-radius: 14px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    }
-    .modal-title {
-      font-size: 1.05rem;
-      font-weight: bold;
-      color: #2c3e50;
-      text-align: center;
-      border-bottom: 2px solid #74b9ff;
-      padding-bottom: 8px;
-    }
-    .sort-container {
-      display: flex;
-      gap: 6px;
-      margin: 12px 0 8px 0;
-    }
-    .btn-sort {
-      flex: 1;
-      padding: 6px 4px;
-      font-size: 0.75rem;
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #475569;
-    }
-    .btn-sort.active-sort {
-      background: #0984e3;
-      color: white;
-      border-color: #0984e3;
-    }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; display: none; justify-content: center; align-items: center; }
+    .modal-content { background: white; width: 92%; max-width: 520px; max-height: 85vh; border-radius: 14px; padding: 18px; display: flex; flex-direction: column; box-sizing: border-box; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    .modal-title { font-size: 1.05rem; font-weight: bold; color: #2c3e50; text-align: center; border-bottom: 2px solid #74b9ff; padding-bottom: 8px; }
+    .sort-container { display: flex; gap: 6px; margin: 12px 0 8px 0; }
+    .btn-sort { flex: 1; padding: 6px 4px; font-size: 0.75rem; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 6px; cursor: pointer; font-weight: bold; color: #475569; }
+    .btn-sort.active-sort { background: #0984e3; color: white; border-color: #0984e3; }
   </style>
 
-  <!-- Supabase & Canvas Confetti SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
-  <!-- 紙吹雪キャンバス -->
   <canvas id="quiz-confetti-canvas"></canvas>
 
-    <div id="unit-screen" class="card">
+  <!-- 画面①：範囲・コース・単元選択画面 (#unit-screen) -->
+  <div id="unit-screen" class="card">
     <div class="subject-header-box">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2 id="page-title" style="margin: 0; font-size: 1.15rem; color: #2c3e50;">---</h2>
         <a href="./index.html" style="font-size: 0.8rem; font-weight: bold; color: #0984e3; text-decoration: none;">⬅️ ホームへ</a>
       </div>
       <p style="font-size: 0.75rem; color: #64748b; margin: 4px 0 0 0;">学習する範囲・コースを選択してください</p>
-
-      <!-- コース選択タブボタン群 -->
       <div id="course-tab-container" class="course-tab-group"></div>
     </div>
 
-    <!-- 範囲（コース）タップ後に表示される領域 (初期状態は非表示) -->
+    <!-- 範囲（コース）タップ後に表示される領域 -->
     <div id="course-content-area" style="display: none;">
-      <!-- ① 現在の称号バッジ -->
-      <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
-
-      <!-- ② この範囲の履歴・分析ボタン -->
+      <div id="user-rank" class="trophy-badge">現在の称号: 未受験の卵 🥚</div>
       <button class="btn-all-history" onclick="openCourseHistoryModal()">📊 この範囲の履歴・分析</button>
-      
-      <!-- ③ 弱点克服モードボタン -->
-      <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モード\n(全単元コンプリートで解放)</button>
+      <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モード
+(全単元コンプリートで解放)</button>
 
-      <!-- ④ 単元リスト -->
       <div id="unit-list"></div>
 
       <div style="margin-top: 20px; text-align: center;">
@@ -366,52 +140,30 @@
   <!-- 画面②：クイズ実行画面 (#quiz-screen) -->
   <div id="quiz-screen" class="card" style="display: none;">
     <div class="quiz-header">
-      <!-- 上段：単元名（横幅いっぱいに表示） -->
       <span id="quiz-unit-title" class="quiz-unit-badge">単元名</span>
-      
-      <!-- 下段：ブックマークボタンと進捗数を左右に配置 -->
-      <div class="quiz-header-sub">
+      <div style="display: flex; align-items: center; gap: 8px;">
         <button id="bookmark-toggle-btn" class="btn-bookmark" onclick="toggleBookmark()">☆ をつける</button>
-        <span id="quiz-progress-num" style="font-size: 13px; font-weight: bold; color: #475569;">第 1 / 3 問</span>
+        <span id="quiz-progress-num" style="font-size: 13px; font-weight: bold;">第 1 / 3 問</span>
       </div>
     </div>
 
     <div id="quiz-source" style="font-size: 11px; color: #94a3b8; margin-bottom: 12px;">出典: ---</div>
     <h3 id="question-text" style="font-size: 17px; line-height: 1.5; margin-bottom: 20px;">問題文がここに表示されます。</h3>
 
-    <!-- 〇✕入力 -->
     <div id="ox-input-area" class="ox-container">
       <button class="btn-o" onclick="handleAnswer(true)">〇</button>
       <button class="btn-x" onclick="handleAnswer(false)">×</button>
     </div>
 
-    <!-- 正否判定・解説エリア -->
     <div id="explanation-area" style="display: none; background: #fafafa; border: 1px solid #cbd5e1; border-radius: 10px; padding: 16px; margin-top: 16px;">
       <div id="result-status" style="font-size: 1.2rem; font-weight: bold; margin-bottom: 8px;"></div>
       <div id="current-streak" style="font-size: 13px; color: #e67e22; margin-bottom: 10px; font-weight: bold;"></div>
       <div id="explanation-text" style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 16px;"></div>
       
-      <!-- 👈 動的ボタンエリア（1〜2問目: 次の問題へ / 3問目: ⚡ 続けて解く） -->
       <div id="explanation-buttons" style="display: flex; gap: 8px;">
         <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71;">次の問題へ</button>
-        <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">中断して戻る</button>
+        <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="width: auto; padding: 12px 16px;">単元一覧に戻る</button>
       </div>
-    </div>
-  </div>
-
-  <!-- 画面③：結果発表画面 (#result-card) -->
-  <div id="result-card" class="card" style="display: none; text-align: center;">
-    <h2 id="result-title">🎉 セットクリア！</h2>
-    <p id="result-subtitle" class="subtitle">お疲れ様でした！解答結果が進捗に反映されました。</p>
-
-    <div style="font-size: 44px; font-weight: bold; color: var(--primary-color); margin: 16px 0;">
-      <span id="final-score">0</span> <span style="font-size: 22px;">点</span>
-    </div>
-    <p id="final-detail" style="margin-bottom: 24px; color: var(--text-muted); font-size: 14px;"></p>
-
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <button id="btn-continue-weakness" onclick="startWeaknessQuiz()" class="btn" style="display: none; background: #2ecc71;">👑 次の克服(3問)に連続挑戦！</button>
-      <button onclick="backToUnitScreen()" class="btn btn-outline">中断して戻る</button>
     </div>
   </div>
 
@@ -434,7 +186,6 @@
     </div>
   </div>
 
-  <!-- スクリプト類 -->
   <script src="../js/supabase_client.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/sync_queue.js"></script>
@@ -442,7 +193,7 @@
 
   <script>
     const CONFIG = {
-      WEAKNESS_STREAK_GOAL: 3 // マスター獲得に必要な連続達成セット数
+      WEAKNESS_STREAK_GOAL: 3
     };
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -453,64 +204,64 @@
       'regulations': {
         title: '01 関係法規・制度',
         courses: [
-          { key: 'test_kankehoki_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_kankehoki_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_kankehoki_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_kankehoki_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_kankehoki_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'management': {
         title: '02 運営管理',
         courses: [
-          { key: 'test_unekanri_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_unekanri_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_unekanri_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_unekanri_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_unekanri_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'public_hygiene': {
         title: '03 公衆衛生・環境衛生',
         courses: [
-          { key: 'test_koshuese_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_koshuese_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_koshuese_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_koshuese_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_koshuese_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'infection': {
         title: '04 感染症',
         courses: [
-          { key: 'test_kansensho_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_kansensho_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_kansensho_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_kansensho_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_kansensho_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'hygiene_tech': {
         title: '05 衛生管理技術',
         courses: [
-          { key: 'test_esekanrigijutu_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_esekanrigijutu_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_esekanrigijutu_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_esekanrigijutu_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_esekanrigijutu_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'anatomy': {
         title: '06 人体の構造及び機能',
         courses: [
-          { key: 'test_jintai_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_jintai_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_jintai_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_jintai_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_jintai_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'dermatology': {
         title: '07 皮膚科学',
         courses: [
-          { key: 'test_hifukagaku_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_hifukagaku_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_hifukagaku_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_hifukagaku_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_hifukagaku_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'cosmetic_chem': {
         title: '08 香粧品化学',
         courses: [
-          { key: 'test_koshohin_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_koshohin_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_koshohin_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_koshohin_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_koshohin_extra_2026', label: '追加問題', icon: '➕' },
           { key: 'test_koshohin_ingredients_2026', label: '重要成分', icon: '⚗️' }
         ]
@@ -518,25 +269,24 @@
       'culture': {
         title: '09 文化論',
         courses: [
-          { key: 'test_bunkaron_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_bunkaron_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_bunkaron_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_bunkaron_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_bunkaron_extra_2026', label: '追加問題', icon: '➕' }
         ]
       },
       'tech_theory': {
         title: '10 美容技術理論',
         courses: [
-          { key: 'test_gijuturiron_unit_ver01_2026', label: '単元別の問題', icon: '📚' },
-          { key: 'test_gijuturiron_past_2026', label: '過去問 Essence', icon: '📝' },
+          { key: 'test_gijuturiron_unit_ver01_2026', label: '単元別の問題(抜粋)', icon: '📚' },
+          { key: 'test_gijuturiron_past_2026', label: '過去問エッセンス', icon: '📝' },
           { key: 'test_gijuturiron_extra_2026', label: '追加問題', icon: '➕' }
         ]
       }
     };
 
-const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['public_hygiene'];
-    let currentCourseKey = subjectConfig.courses[0].key; // ⭕ 配列の先頭（1番目のコース）の key を取得する
+    const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['public_hygiene'];
+    let currentCourseKey = subjectConfig.courses[0].key;
 
-    // 状態変数
     let questionPool = {};
     let questionStats = {};
     let currentUnitName = "";
@@ -549,18 +299,106 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
     let currentSortMode = "default";
     let isAllHistoryMode = false;
     let weaknessSessionWrongCount = 0;
-    let isWeaknessGoalReached = false; // 👈 【追加】3セット達成（マスター達成）フラグ
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const user = getCurrentUser();
-      if (!user) {
-        window.location.href = '/master/index.html';
+    document.addEventListener('DOMContentLoaded', async () => {
+      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+      if (!currentUser) {
+        window.location.href = '../index.html';
         return;
       }
+
       document.getElementById('page-title').innerText = subjectConfig.title;
       renderCourseTabs();
       selectCourse(currentCourseKey);
+
+      // オフラインキュー送信とSupabaseからの進捗同期
+      if (typeof flushOfflineQueue === 'function') {
+        flushOfflineQueue();
+      }
+      await syncProgressFromSupabase(currentUser);
     });
+
+    async function syncProgressFromSupabase(user) {
+      const supabase = typeof getSupabaseClient === 'function' ? getSupabaseClient() : null;
+      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+      if (!supabase || !dbSource || !user || !user.id) return;
+
+      try {
+        const { data: logs, error } = await supabase
+          .from('exam_logs')
+          .select('subject_id, details, created_at')
+          .eq('user_id', user.id)
+          .eq('mode', '2choice')
+          .order('created_at', { ascending: true });
+
+        if (error || !logs || logs.length === 0) return;
+
+        // 全コースのID→courseKey逆引きマップを作成
+        const qIdToCourseMap = {};
+        for (let cKey in dbSource) {
+          const pool = dbSource[cKey].questionPool || {};
+          for (let unit in pool) {
+            pool[unit].forEach(q => {
+              qIdToCourseMap[q.id] = cKey;
+            });
+          }
+        }
+
+        // コースごとの統計を再構築し、ローカルデータより進んでいる場合のみマージ
+        const remoteStatsByCourse = {};
+        logs.forEach(log => {
+          if (!Array.isArray(log.details)) return;
+          log.details.forEach(ans => {
+            const cKey = ans.course_key || qIdToCourseMap[ans.question_id];
+            if (!cKey) return;
+            if (!remoteStatsByCourse[cKey]) remoteStatsByCourse[cKey] = {};
+            if (!remoteStatsByCourse[cKey][ans.question_id]) {
+              remoteStatsByCourse[cKey][ans.question_id] = { total: 0, streak: 0, correct_count: 0 };
+            }
+            const st = remoteStatsByCourse[cKey][ans.question_id];
+            st.total += 1;
+            if (ans.is_correct) {
+              st.streak += 1;
+              st.correct_count += 1;
+            } else {
+              st.streak = 0;
+            }
+          });
+        });
+
+        let updated = false;
+        for (let cKey in remoteStatsByCourse) {
+          const localStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + cKey)) || {};
+          const remoteStats = remoteStatsByCourse[cKey];
+
+          for (let qId in remoteStats) {
+            const rSt = remoteStats[qId];
+            const lSt = localStats[qId];
+            if (!lSt || rSt.total > (lSt.total || 0)) {
+              localStats[qId] = rSt;
+              updated = true;
+            }
+          }
+
+          if (updated) {
+            localStorage.setItem("beauty_app_question_stats_" + cKey, JSON.stringify(localStats));
+            // solved_ カウントも再計算して整合性を保つ
+            let masteredCount = 0;
+            for (let qId in localStats) {
+              if ((localStats[qId].streak || 0) >= 1) masteredCount++;
+            }
+            localStorage.setItem('solved_' + cKey, masteredCount);
+          }
+        }
+
+        if (updated) {
+          renderCourseTabs();
+          refreshUnitScreen();
+        }
+      } catch (e) {
+        console.warn('[Sync] 進捗復元スキップ:', e.message);
+      }
+    }
 
     function renderCourseTabs() {
       const container = document.getElementById('course-tab-container');
@@ -599,22 +437,17 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       });
     }
 
-    // コース選択時の切替処理
     function selectCourse(courseKey) {
       currentCourseKey = courseKey;
-
-      // タブの表示更新
       document.querySelectorAll('.course-tab-btn').forEach(b => b.classList.remove('active-course'));
       const activeTab = document.getElementById('tab-btn-' + courseKey);
       if (activeTab) activeTab.classList.add('active-course');
 
-      // 範囲（コース）が選択されたので、コンテンツエリアを表示する
       const contentArea = document.getElementById('course-content-area');
       if (contentArea) {
         contentArea.style.display = 'block';
       }
 
-      // データロード
       const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
       if (dbSource && dbSource[currentCourseKey]) {
         questionPool = dbSource[currentCourseKey].questionPool || {};
@@ -623,10 +456,8 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       }
 
       questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
-
-      // リスト描画
       refreshUnitScreen();
-    } // 👈 ここでしっかり閉じる！
+    }
 
     function refreshUnitScreen() {
       questionStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
@@ -685,32 +516,28 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         listContainer.insertAdjacentHTML('beforeend', itemHtml);
       }
 
-      // 🔴【元仕様通り】弱点克服ボタンの判定・制御
       const weaknessBtn = document.getElementById("weakness-btn");
       const currentProgressAll = totalQuestionsCount > 0 ? Math.round((totalMasteredCount / totalQuestionsCount) * 100) : 0;
 
       if (weaknessBtn) {
         if (isMasterStatus || (currentProgressAll === 100 && !hasEverFailed)) {
-          // すでにマスター達成済み、またはノーミスで100%クリアした場合は非表示
           weaknessBtn.style.display = "none";
         } else if (currentProgressAll === 100) {
-          // 全問クリア時にボタンを解禁！
           weaknessBtn.disabled = false;
           weaknessBtn.style.display = "block";
-          weaknessBtn.innerText = `❌ 弱点克服モードに挑戦可能\n(現在 ${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL} セット達成中)`;
+          weaknessBtn.innerText = `❌ 弱点克服モードに挑戦可能
+(現在 ${weaknessSuccessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL} セット達成中)`;
         } else {
-          // 100%未満の時はロック状態
           weaknessBtn.disabled = true;
           weaknessBtn.style.display = "block";
-          weaknessBtn.innerText = `❌ 弱点克服モード\n(全単元コンプリートで解放)`;
+          weaknessBtn.innerText = `❌ 弱点克服モード
+(全単元コンプリートで解放)`;
         }
       }
 
-      // 称号判定・表示更新
       updateUserRankUI(totalMasteredCount, totalQuestionsCount, totalAnsCount, totalCorrectCount, isMasterStatus, weaknessSuccessStreak, hasEverFailed);
     }
 
-    // 称号判定ロジック
     function updateUserRankUI(mastered, total, totalAns, correctAns, isMasterStatus, weaknessStreak, hasEverFailed) {
       const rankEl = document.getElementById("user-rank");
       if (!rankEl) return;
@@ -719,35 +546,23 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       const accuracy = totalAns > 0 ? Math.round((correctAns / totalAns) * 100) : 0;
 
       rankEl.classList.remove("master-active");
-      rankEl.style.background = "";
-      rankEl.style.color = "";
-
-      const statsMetricsHtml = `<div style="margin-top: 6px; font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 4px; font-weight: bold;">
-          📊 現在の分析<br>単元進捗 ${percent}% ／ 通算正答率 ${accuracy}%
-      </div>`;
 
       if (percent === 100 && !hasEverFailed) {
-        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく<br>全概念を完全支配した者</small>${statsMetricsHtml}`;
-        rankEl.style.background = "linear-gradient(135deg, #2c3e50, #000000)";
-        rankEl.style.color = "#ffffff";
+        rankEl.innerHTML = `🌌 現在の称号: <strong>グランドマスター 👑<br>(神話の領域)</strong><br><small>一度のミスもなく全概念を完全支配した者</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
         rankEl.classList.add("master-active");
       } else if (isMasterStatus) {
-        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small>${statsMetricsHtml}`;
-        rankEl.style.background = "linear-gradient(135deg, #a29bfe, #fd79a8)";
-        rankEl.style.color = "#2d3436";
+        rankEl.innerHTML = `👑 現在の称号: <strong>マスター 👑<br>(完全克服)</strong><br><small>弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアした達人</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
         rankEl.classList.add("master-active");
       } else if (percent === 100) {
-        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで<br>${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small>${statsMetricsHtml}`;
-        rankEl.style.background = "linear-gradient(135deg, #ffeaa7, #fab1a0)";
-        rankEl.style.color = "#2d3436";
+        rankEl.innerHTML = `🏆 現在の称号: <strong>エキスパート 👑<br>(弱点克服挑戦中)</strong><br><small>弱点克服モードで${CONFIG.WEAKNESS_STREAK_GOAL}セット連続全問正解を目指せ！ (${weaknessStreak}/${CONFIG.WEAKNESS_STREAK_GOAL}セット)</small><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (percent >= 70) {
-        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong>${statsMetricsHtml}`;
+        rankEl.innerHTML = `🌟 現在の称号: <strong>アマチュア 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (percent >= 40) {
-        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong>${statsMetricsHtml}`;
+        rankEl.innerHTML = `📖 現在の称号: <strong>ルーキー 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else if (totalAns > 0) {
-        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong>${statsMetricsHtml}`;
+        rankEl.innerHTML = `🌱 現在の称号: <strong>修行中 🌱</strong><br><small>習得: ${percent}% / 正答率: ${accuracy}%</small>`;
       } else {
-        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験 of 卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>${statsMetricsHtml}`;
+        rankEl.innerHTML = `🥚 現在の称号: <strong>未受験の卵 🥚</strong><br><small>まずは最初の単元をクリアしよう！</small>`;
       }
     }
 
@@ -756,10 +571,8 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       currentUnitName = unitName;
       const pool = questionPool[unitName] || [];
 
-      // 🌟【元仕様復元】1回以上正解した問題(streak >= 1)は出題から除外、未正解・未習得問題(streak < 1)のみを抽出
       const availableQuestions = pool.filter(q => !questionStats[q.id] || (questionStats[q.id].streak || 0) < 1);
 
-      // 単元内の全問題が正解・習得済みの場合はアラートを表示して一覧へ戻る
       if (availableQuestions.length === 0) {
         alert("この単元の問題はすべて習得しました！");
         backToUnitScreen();
@@ -775,18 +588,16 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
       document.getElementById("unit-screen").style.display = "none";
       document.getElementById("quiz-screen").style.display = "block";
-      document.getElementById("result-card").style.display = "none";
 
       renderQuizQuestion();
     }
 
-    // ❌ 弱点克服モードの起動 (誤答回数の多い問題を優先出題)
     function startWeaknessQuiz() {
       isWeaknessMode = true;
       currentUnitName = "弱点克服モード";
       weaknessSessionWrongCount = 0;
-      isWeaknessGoalReached = false; // 👈 【追加】リセット
-      const wrongList = [];
+      const unmasteredWrongQuestions = [];
+      const pastWrongQuestions = [];
 
       for (let unit in questionPool) {
         questionPool[unit].forEach(q => {
@@ -794,32 +605,28 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
           if (stat) {
             const wrongCount = (stat.total || 0) - (stat.correct_count || 0);
             if (wrongCount > 0) {
-              wrongList.push({ ...q, wrongCount, unitName: unit });
+              const isMastered = (stat.streak || 0) >= 1;
+              if (!isMastered) {
+                unmasteredWrongQuestions.push({ ...q, wrongCount, unitName: unit });
+              } else {
+                pastWrongQuestions.push({ ...q, wrongCount, unitName: unit });
+              }
             }
           }
         });
       }
 
-      // 🌟【修正】allQuestions を wrongList に変更し、誤答回数が多い順にソート後、上位候補からランダム選出
-      wrongList.sort((a, b) => b.wrongCount - a.wrongCount);
-      let shuffledCandidates = [...wrongList.slice(0, 15)];
+      // 未克服（streak === 0）の弱点問題を最優先し、なければ過去の誤答履歴から出題
+      const targetPool = unmasteredWrongQuestions.length > 0 ? unmasteredWrongQuestions : pastWrongQuestions;
+      targetPool.sort((a, b) => b.wrongCount - a.wrongCount);
+
+      let shuffledCandidates = [...targetPool.slice(0, 15)];
       shuffleArray(shuffledCandidates);
 
       currentQuestions = shuffledCandidates.slice(0, 3);
 
-      // 🌟 足りない場合は未習得の問題等から補充する
-      if (currentQuestions.length < 3) {
-        for (let unit in questionPool) {
-          questionPool[unit].forEach(q => {
-            if (!currentQuestions.some(cq => cq.id === q.id) && currentQuestions.length < 3) {
-              currentQuestions.push({ ...q, wrongCount: 0, unitName: unit });
-            }
-          });
-        }
-      }
-
       if (currentQuestions.length === 0) {
-        alert("克服対象となる問題がありません。通常の単元を進めましょう！");
+        alert("弱点克服モードの対象となる問題がありません。通常の単元を進めましょう！");
         return;
       }
 
@@ -829,7 +636,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
       document.getElementById("unit-screen").style.display = "none";
       document.getElementById("quiz-screen").style.display = "block";
-      document.getElementById("result-card").style.display = "none";
 
       renderQuizQuestion();
     }
@@ -877,12 +683,10 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         questionStats[q.id].correct_count += 1;
       } else {
         questionStats[q.id].streak = 0;
-        // ❌ 間違えたフラグの保存
         localStorage.setItem("beauty_app_has_ever_failed_" + currentCourseKey, JSON.stringify(true));
         
         if (isWeaknessMode) {
           weaknessSessionWrongCount++;
-          // 弱点克服モード中にミスすると連続正解カウンターがリセット
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
         }
       }
@@ -907,30 +711,19 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       document.getElementById("explanation-text").innerText = q.exp || q.explanation || "解説はありません。";
 
       const isLastQuestion = (currentIndex === currentQuestions.length - 1);
+      const btnContainer = document.getElementById("explanation-buttons");
 
-      // 🌟【修正】3問目を回答した瞬間に即座に成績保存を実行！（中断して戻っても記録が残る）
       if (isLastQuestion) {
         saveSetCompleteLog();
 
         if (score === currentQuestions.length) {
           triggerConfetti();
         }
-      }
 
-      const btnContainer = document.getElementById("explanation-buttons");
-
-      if (isLastQuestion) {
-        // 👈 【修正】弱点克服モードで3セット達成（マスター達成）した場合は「単元一覧に戻る」ボタンにする
-        if (isWeaknessMode && isWeaknessGoalReached) {
-          btnContainer.innerHTML = `
-            <button class="btn" onclick="backToUnitScreen()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">🎉 単元一覧に戻る</button>
-          `;
-        } else {
-          btnContainer.innerHTML = `
-            <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
-            <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
-          `;
-        }
+        btnContainer.innerHTML = `
+          <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
+          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
+        `;
       } else {
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">次の問題へ</button>
@@ -949,7 +742,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       }
     }
 
-    // 👈 🌟【変更点2】解説画面から直接ワンタップで次の3問を開始する関数
     function continueQuizSet() {
       if (isWeaknessMode) {
         startWeaknessQuiz();
@@ -958,7 +750,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       }
     }
 
-    // 🌟 3問目の解答時に即座にデータ保存を行う処理
     async function saveSetCompleteLog() {
       if (!isWeaknessMode && currentUnitName) {
         const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
@@ -972,8 +763,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
       let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
 
-      isWeaknessGoalReached = false; // 👈 【追加】初期化
-
       if (isWeaknessMode) {
         if (isSetCompleted && weaknessSessionWrongCount === 0) {
           weaknessSuccessStreak++;
@@ -981,7 +770,6 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
           if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
             localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
-            isWeaknessGoalReached = true; // 👈 【追加】3セット達成フラグをON
             alert(`👑 おめでとうございます！弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！`);
           }
         } else {
@@ -989,60 +777,10 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         }
       }
 
-      const logData = {
-        mode: mode,
-        subject_id: rawSubject,
-        score: finalScore,
-        total_questions: total,
-        correct_count: score,
-        details: userAnswers
-      };
-      if (typeof saveExamLog === 'function') {
-        await saveExamLog(logData);
-      }
-    }
-
-    async function finishUnitQuizSet() {
-      if (!isWeaknessMode && currentUnitName) {
-        const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
-        unitCountData[currentUnitName] = (unitCountData[currentUnitName] || 0) + 1;
-        localStorage.setItem("beauty_app_counts_" + currentCourseKey, JSON.stringify(unitCountData));
-      }
-
-      const total = currentQuestions.length;
-      const finalScore = Math.round((score / total) * 100);
-      const isSetCompleted = (score === total);
-
-      let weaknessSuccessStreak = JSON.parse(localStorage.getItem("beauty_app_weakness_streak_" + currentCourseKey)) || 0;
-
-      // 🔴【元仕様】弱点克服モードクリア判定
-      const continueBtn = document.getElementById("btn-continue-weakness");
-
-      if (isWeaknessMode) {
-        if (isSetCompleted && weaknessSessionWrongCount === 0) {
-          weaknessSuccessStreak++;
-          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(weaknessSuccessStreak));
-          triggerConfetti();
-
-          if (weaknessSuccessStreak >= CONFIG.WEAKNESS_STREAK_GOAL) {
-            // 祝・【マスター】称号達成！
-            localStorage.setItem("beauty_app_is_master_" + currentCourseKey, JSON.stringify(true));
-            alert(`👑 おめでとうございます！弱点克服モードを${CONFIG.WEAKNESS_STREAK_GOAL}セット連続ノーミスクリアしたため、称号【マスター】を獲得しました！`);
-            continueBtn.style.display = "none";
-          } else {
-            alert(`克服クリア！現在の連続クリア回数: ${weaknessSuccessStreak} / ${CONFIG.WEAKNESS_STREAK_GOAL} セット\n（記録は保存されています。このまま続けて挑戦できます）`);
-            continueBtn.style.display = "block";
-          }
-        } else {
-          // 途中誤答で失敗
-          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
-          alert("❌ 克服失敗！間違いがあったため、連続全問正解カウンターがリセットされました。出直して再挑戦してください。");
-          continueBtn.style.display = "none";
-        }
-      } else {
-        if (isSetCompleted) triggerConfetti();
-        continueBtn.style.display = "none";
-      }
+      const enrichedDetails = userAnswers.map(ans => ({
+        ...ans,
+        course_key: currentCourseKey
+      }));
 
       const logData = {
         mode: mode,
@@ -1050,20 +788,14 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         score: finalScore,
         total_questions: total,
         correct_count: score,
-        details: userAnswers
+        details: enrichedDetails
       };
       if (typeof saveExamLog === 'function') {
         await saveExamLog(logData);
       }
-
-      document.getElementById("quiz-screen").style.display = "none";
-      document.getElementById("final-score").innerText = finalScore;
-      document.getElementById("final-detail").innerText = `全 ${total} 問中 ${score} 問正解`;
-      document.getElementById("result-card").style.display = "block";
     }
 
     function backToUnitScreen() {
-      document.getElementById("result-card").style.display = "none";
       document.getElementById("quiz-screen").style.display = "none";
       document.getElementById("unit-screen").style.display = "block";
       renderCourseTabs();
@@ -1071,9 +803,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
     }
 
     function exitQuizToUnitScreen() {
-      if (confirm("途中で学習を中断して単元一覧に戻りますか？")) {
-        backToUnitScreen();
-      }
+      backToUnitScreen();
     }
 
     function toggleBookmark() {
@@ -1112,16 +842,15 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       renderHistoryList();
     }
 
-// 選択中コース全体の履歴モーダルを開く
     function openCourseHistoryModal() {
       isAllHistoryMode = false;
-      activeModalUnit = "ALL_COURSE"; // 👈 コース全体の全単元を対象にするフラグ
+      activeModalUnit = "ALL_COURSE";
       const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
       const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
-      
+
       document.getElementById("modal-unit-title").innerText = `${courseName} - 履歴・分析`;
       document.getElementById("history-modal").style.display = "flex";
-      renderHistoryList(); // ⭕ 正しい描画関数を呼び出す
+      renderHistoryList();
     }
 
     function closeHistoryModal() {
@@ -1143,35 +872,21 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       let targetQuestions = [];
       const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
 
-      if (isAllHistoryMode) {
-        subjectConfig.courses.forEach(c => {
-          if (dbSource && dbSource[c.key] && dbSource[c.key].questionPool) {
-            const p = dbSource[c.key].questionPool;
-            const cStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + c.key)) || {};
+      if (activeModalUnit === "ALL_COURSE") {
+        if (dbSource && dbSource[currentCourseKey] && dbSource[currentCourseKey].questionPool) {
+          const p = dbSource[currentCourseKey].questionPool;
+          const cStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + currentCourseKey)) || {};
 
-            for (let unit in p) {
-              p[unit].forEach(q => {
-                targetQuestions.push({
-                  ...q,
-                  unitName: `[${c.label}] ${unit}`,
-                  courseKey: c.key,
-                  stat: cStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
-                });
+          for (let unit in p) {
+            p[unit].forEach(q => {
+              targetQuestions.push({
+                ...q,
+                unitName: unit,
+                courseKey: currentCourseKey,
+                stat: cStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
               });
-            }
-          }
-        });
-      } else if (activeModalUnit === "ALL_COURSE") {
-        // 🆕 選択中コース内の全単元の問題をまとめて抽出
-        for (let unit in questionPool) {
-          questionPool[unit].forEach(q => {
-            targetQuestions.push({
-              ...q,
-              unitName: unit,
-              courseKey: currentCourseKey,
-              stat: questionStats[q.id] || { total: 0, streak: 0, correct_count: 0 }
             });
-          });
+          }
         }
       } else {
         const pool = questionPool[activeModalUnit] || [];
@@ -1195,19 +910,11 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         });
       } else if (currentSortMode === "bookmark") {
         targetQuestions.sort((a, b) => {
-          const aFav = bookmarkedIds.includes(a.id) ? 1 : 0;
-          const bFav = bookmarkedIds.includes(b.id) ? 1 : 0;
-          return bFav - aFav; // 🌟 ⭐マーク付きを上部にソート
+          const bA = bookmarkedIds.includes(a.id) ? 1 : 0;
+          const bB = bookmarkedIds.includes(b.id) ? 1 : 0;
+          return bB - bA;
         });
       }
-
-      // 📊 サマリーの件数と正答率を計算・更新
-      let answeredCount = 0;
-      targetQuestions.forEach(q => {
-        if ((q.stat.total || 0) > 0) answeredCount++;
-      });
-      const summaryPct = targetQuestions.length > 0 ? Math.round((answeredCount / targetQuestions.length) * 100) : 0;
-      document.getElementById("modal-score-summary").innerText = `分析: 挑戦済 ${answeredCount} / 全 ${targetQuestions.length} 問 (${summaryPct}%)`;
 
       if (targetQuestions.length === 0) {
         listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; margin:20px 0;">履歴データがありません</div>`;
@@ -1218,14 +925,8 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
       targetQuestions.forEach(q => {
         const stat = q.stat || { total: 0, streak: 0, correct_count: 0 };
         const isMastered = (stat.streak || 0) >= 1;
-        
-        // 🌟 お気に入り登録されているかを判定
-        const isBookmarked = bookmarkedIds.includes(q.id);
-        const bookmarkBadge = isBookmarked
-          ? `<span style="background:#fff9db; color:#e67e22; border:1px solid #f5d0a9; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; margin-left:4px;">⭐ マーク中</span>`
-          : "";
 
-        if ((isAllHistoryMode || activeModalUnit === "ALL_COURSE") && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
+        if (activeModalUnit === "ALL_COURSE" && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
           lastUnitHeader = q.unitName;
           listEl.insertAdjacentHTML('beforeend', `<div style="background:#e0f2fe; color:#0369a1; padding:6px 10px; margin:10px 0 4px 0; font-weight:bold; border-radius:6px; font-size:0.8rem;">■ ${escapeHTML(q.unitName)}</div>`);
         }
@@ -1237,7 +938,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
         const itemHtml = `
           <div style="border-bottom:1px solid #e2e8f0; padding:10px 0;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <div>${tagHtml} ${bookmarkBadge} <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">正解:${stat.correct_count || 0} / 挑戦:${stat.total || 0}回</span></div>
+              <div>${tagHtml} <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">正解:${stat.correct_count || 0} / 挑戦:${stat.total || 0}回</span></div>
               <span style="font-size:0.7rem; color:#94a3b8;">${escapeHTML(q.source || '')}</span>
             </div>
             <div style="font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;">${escapeHTML(q.text || q.question || '')}</div>
@@ -1297,7 +998,7 @@ const subjectConfig = SUBJECT_CONFIG_MAP[rawSubject] || SUBJECT_CONFIG_MAP['publ
 
     function escapeQuotes(str) {
       if (typeof str !== 'string') return str;
-      return str.replace(/'/g, "\\'");
+      return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     }
   </script>
 </body>
