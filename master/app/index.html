@@ -110,8 +110,71 @@
       font-weight: bold;
       color: #d35400;
     }
+    /* 🎯 あなた専用 高速学習モードカード */
+    .speed-training-card {
+      background: #ffffff;
+      border: 2px solid #74b9ff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 10px rgba(116, 185, 255, 0.2);
+    }
+    .speed-training-title {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #0984e3;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .speed-card-hero {
+      background: linear-gradient(135deg, #74b9ff, #0984e3);
+      color: white;
+      padding: 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: transform 0.15s ease-in-out;
+    }
+    .speed-card-hero:active { transform: scale(0.98); }
+    .speed-row-sub {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .speed-sub-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .speed-sub-title { font-size: 0.82rem; font-weight: bold; color: #475569; }
+    .speed-sub-count { font-size: 0.75rem; color: #64748b; margin: 4px 0 8px 0; }
+    .speed-btn-group { display: flex; gap: 6px; }
+    .speed-btn-group button {
+      flex: 1; padding: 7px 4px; font-size: 0.78rem; font-weight: bold;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    .btn-play-orange { background: #ff9f43; color: white; }
+    .btn-play-red { background: #ff7675; color: white; }
+    .btn-history-gray { background: #f1f2f6; color: #2f3542; border: 1px solid #cbd5e1 !important; }
+    .speed-quiz-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; z-index: 2000; display: none; overflow-y: auto; box-sizing: border-box;
+    }
+    .speed-history-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5); z-index: 2100; display: none; justify-content: center; align-items: center;
+    }
+    .speed-history-content {
+      background: white; width: 90%; max-width: 500px; max-height: 80vh;
+      border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-sizing: border-box;
+    }
+    .speed-history-list { flex: 1; overflow-y: auto; margin: 15px 0; text-align: left; }
+    .speed-history-item { border-bottom: 1px solid #e2e8f0; padding: 12px 0; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
@@ -141,10 +204,49 @@
       <div id="subject-list-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px;"></div>
     </div>
 
-    <!-- 高速バッジサマリー -->
-    <div class="speed-badge-box">
-      <div class="speed-badge">⭐ お気に入り: <span id="speed-fav-badge">0</span>問</div>
-      <div class="speed-badge" style="background:#fff3f3; border-color:#ffccd5; color:#c0392b;">❌ 弱点克服対象: <span id="speed-wrong-badge">0</span>問</div>
+    <!-- 🎯 あなた専用『高速学習モード』UIカード -->
+    <div id="speed-training-area" class="speed-training-card">
+      <div class="speed-training-title">🎯 あなた専用『高速学習モード』</div>
+      <div class="speed-card-hero" onclick="startSpeedQuiz('training')">
+        <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
+          <span>⚡ スピード特訓 開始</span>
+          <span style="font-size: 0.7rem; background: rgba(255,255,255,0.3); padding: 2px 6px; border-radius: 4px;">未経験を最優先！</span>
+        </div>
+        <div style="font-size: 0.75rem; margin-top: 4px; opacity: 0.95;">
+          とりあえず範囲選択なしで即スタート。最短で駆け上がろう！
+        </div>
+      </div>
+
+      <div class="speed-row-sub">
+        <div class="speed-sub-box">
+          <div class="speed-sub-title">⭐ マイ・ベスト</div>
+          <div class="speed-sub-count">現在：<strong id="speed-fav-badge" style="color:#e67e22;">0</strong> 問</div>
+          <div class="speed-btn-group">
+            <button class="btn-play-orange" onclick="startSpeedQuiz('bookmark')">解く</button>
+            <button class="btn-history-gray" onclick="openSpeedHistoryModal('bookmark')">履歴</button>
+          </div>
+        </div>
+
+        <div class="speed-sub-box">
+          <div class="speed-sub-title">❌ 弱点克服</div>
+          <div class="speed-sub-count">現在：<strong id="speed-wrong-badge" style="color:#ff7675;">0</strong> 問</div>
+          <div class="speed-btn-group">
+            <button class="btn-play-red" onclick="startSpeedQuiz('wrong')">解く</button>
+            <button class="btn-history-gray" onclick="openSpeedHistoryModal('wrong')">履歴</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4択過去問記録エリア（タブ切替時に表示） -->
+    <div id="mode-4choice-area" style="display:none; background:#f0f8ff; border:1px solid #bae6fd; border-radius:12px; padding:16px; text-align:center; margin-bottom:12px;">
+      <div style="font-size:0.95rem; font-weight:bold; color:#0369a1; margin-bottom:6px;">全55問 一括マーク・自動採点システム</div>
+      <p style="font-size:0.76rem; color:#475569; margin:0 0 12px 0; line-height:1.5;">
+        第41回〜第54回の解答を入力すると、10科目別レーダーチャートや<br>全体正解率に基づく「重要復習問題」が自動生成されます。
+      </p>
+      <a href="./past_exam.html" style="display:block; width:100%; padding:12px; background:#0984e3; color:white; border-radius:10px; font-weight:bold; font-size:0.9rem; text-decoration:none; box-sizing:border-box;">
+        📝 4択過去問 記録・分析画面を開く
+      </a>
     </div>
 
     <!-- 10科目への導線ボタン群 -->
@@ -160,6 +262,46 @@
       <a href="./quiz.html?mode=2choice&subject=cosmetic_chem" class="btn-subject">08 ⚗️<br>香粧品化学</a>
       <a href="./quiz.html?mode=2choice&subject=culture" class="btn-subject">09 👘<br>文化論</a>
       <a href="./quiz.html?mode=2choice&subject=tech_theory" class="btn-subject">10 ✂️<br>美容技術理論</a>
+    </div>
+  </div>
+
+  <!-- 📥 スピードクイズ専用 全画面表示オーバーレイ -->
+  <div id="speed-quiz-screen" class="speed-quiz-overlay">
+    <canvas id="speed-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+    <div style="box-sizing: border-box; min-height: 100vh; padding: 20px 15px; max-width: 600px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+        <span id="speed-quiz-mode-title" style="background: #e1f5fe; color: #0288d1; font-weight: bold; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">スピードクイズ</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button id="speed-bookmark-btn" onclick="toggleSpeedBookmark()" style="background: #f1f2f6; border: 1px solid #ced6e0; padding: 5px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">☆ をつける</button>
+          <span id="speed-quiz-progress-num" style="font-size: 0.8rem; font-weight: bold;">1 / 3 問目</span>
+        </div>
+      </div>
+      <div id="speed-quiz-subject" style="font-size: 0.8rem; color: #7f8c8d; font-weight: bold; margin-bottom: 4px;">科目: ---</div>
+      <div id="speed-quiz-source" style="font-size: 0.72rem; color: #bdc3c7; margin-bottom: 10px;">出典: ---</div>
+      <div id="speed-quiz-text" style="font-size: 1.15rem; font-weight: bold; line-height: 1.5; color: #2c3e50; min-height: 120px; padding: 16px; background: #faf9f6; border-radius: 12px; border-left: 5px solid #fab1a0; box-sizing: border-box; margin-bottom: 20px;">問題文がここに表示されます。</div>
+      <div id="speed-input-area" style="display: flex; gap: 15px; margin-bottom: 20px;">
+        <button onclick="submitSpeedAnswer(true)" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #fff5f5; border: 2px solid #ff7675; color: #ff7675; border-radius: 12px; cursor: pointer;">〇</button>
+        <button onclick="submitSpeedAnswer(false)" style="flex: 1; padding: 25px; font-size: 2.2rem; font-weight: bold; background: #f0f8ff; border: 2px solid #74b9ff; color: #74b9ff; border-radius: 12px; cursor: pointer;">×</button>
+      </div>
+      <div id="speed-result-area" style="display: none; background: #fafafa; border-radius: 12px; padding: 16px; border: 1px solid #ced6e0;">
+        <div id="speed-result-status" style="font-size: 1.3rem; font-weight: bold; margin-bottom: 8px;">判定</div>
+        <div id="speed-current-streak" style="font-size: 0.8rem; color: #e67e22; margin-bottom: 10px;">この問題の戦績</div>
+        <div id="speed-quiz-explanation" style="font-size: 0.85rem; line-height: 1.6; color: #57606f; background: white; padding: 12px; border-radius: 8px; border: 1px solid #e4e7eb; margin-bottom: 16px;">解説</div>
+        <div style="display: flex; gap: 8px;">
+          <button id="speed-next-btn" onclick="nextSpeedQuestion()" style="flex: 1; padding: 12px; font-weight: bold; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">次の問題へ</button>
+          <button onclick="closeSpeedQuiz()" style="padding: 12px 16px; background: #e4e7eb; color: #2c3e50; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">中断して戻る</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📜 スピード復習用 履歴モーダル -->
+  <div id="speed-history-modal" class="speed-history-overlay" onclick="closeSpeedHistoryModal()">
+    <div class="speed-history-content" onclick="event.stopPropagation()">
+      <div id="speed-history-title" style="font-size: 1.05rem; font-weight: bold; color: #2c3e50; border-bottom: 2px solid #74b9ff; padding-bottom: 8px; text-align: center;">科目横断・学習履歴</div>
+      <div id="speed-history-summary" style="font-size: 0.8rem; color: #7f8c8d; margin-top: 8px; text-align: center;">登録数: 0問</div>
+      <div id="speed-history-list" class="speed-history-list"></div>
+      <button onclick="closeSpeedHistoryModal()" style="padding: 12px; font-weight: bold; background: #0984e3; color: white; border: none; border-radius: 8px; width: 100%; cursor: pointer;">閉じる</button>
     </div>
   </div>
 
@@ -193,21 +335,258 @@
     function switchMode(mode) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       const headingEl = document.getElementById('subject-select-heading');
-      const subjectLinks = document.querySelectorAll('.grid .btn-subject');
+      const subjectGrid = document.querySelector('.grid');
+      const speedArea = document.getElementById('speed-training-area');
+      const area4 = document.getElementById('mode-4choice-area');
 
       if (mode === '2choice') {
         document.getElementById('tab-2choice').classList.add('active');
         if (headingEl) headingEl.innerText = '📚 科目を選んで学習スタート（2択高速学習）';
+        if (subjectGrid) subjectGrid.style.display = 'grid';
+        if (speedArea) speedArea.style.display = 'block';
+        if (area4) area4.style.display = 'none';
       } else {
         document.getElementById('tab-4choice').classList.add('active');
-        if (headingEl) headingEl.innerText = '📝 科目を選んで4択過去問記録（準備中・2択画面へ遷移）';
+        if (headingEl) headingEl.innerText = '📝 4択過去問 本番演習・自己採点（第41回〜第54回）';
+        if (subjectGrid) subjectGrid.style.display = 'none';
+        if (speedArea) speedArea.style.display = 'none';
+        if (area4) area4.style.display = 'block';
+      }
+    }
+
+    // === 高速学習モード用 ロジック ===
+    let speedQuestions = [];
+    let speedCurrentIndex = 0;
+    let speedQuizMode = "";
+    let speedCorrectCountInSet = 0;
+
+    const SUBJECT_KEY_TO_JA = {
+      "test_kankehoki_unit_ver01_2026": "関係法規", "test_kankehoki_past_2026": "関係法規(過去)", "test_kankehoki_extra_2026": "関係法規(追加)",
+      "test_unekanri_unit_ver01_2026": "運営管理", "test_unekanri_past_2026": "運営管理(過去)", "test_unekanri_extra_2026": "運営管理(追加)",
+      "test_koshuese_unit_ver01_2026": "公衆衛生", "test_koshuese_past_2026": "公衆衛生(過去)", "test_koshuese_extra_2026": "公衆衛生(追加)",
+      "test_kansensho_unit_ver01_2026": "感染症", "test_kansensho_past_2026": "感染症(過去)", "test_kansensho_extra_2026": "感染症(追加)",
+      "test_esekanrigijutu_unit_ver01_2026": "衛生管理技術", "test_esekanrigijutu_past_2026": "衛生管理技術(過去)", "test_esekanrigijutu_extra_2026": "衛生管理技術(追加)",
+      "test_jintai_unit_ver01_2026": "人体解剖", "test_jintai_past_2026": "人体解剖(過去)", "test_jintai_extra_2026": "人体解剖(追加)",
+      "test_hifukagaku_unit_ver01_2026": "皮膚科学", "test_hifukagaku_past_2026": "皮膚科学(過去)", "test_hifukagaku_extra_2026": "皮膚科学(追加)",
+      "test_koshohin_unit_ver01_2026": "香粧品化学", "test_koshohin_past_2026": "香粧品化学(過去)", "test_koshohin_extra_2026": "香粧品化学(追加)",
+      "test_koshohin_ingredients_2026": "香粧品(成分)",
+      "test_bunkaron_unit_ver01_2026": "文化論", "test_bunkaron_past_2026": "文化論(過去)", "test_bunkaron_extra_2026": "文化論(追加)",
+      "test_gijuturiron_unit_ver01_2026": "美容技術理論", "test_gijuturiron_past_2026": "美容技術理論(過去)", "test_gijuturiron_extra_2026": "美容技術理論(追加)"
+    };
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const r = Math.floor(Math.random() * (i + 1));
+        [array[i], array[r]] = [array[r], array[i]];
+      }
+    }
+
+    function getSpeedBookmarkQuestions() {
+      const dbSource = window.ALL_QUESTIONS_DATABASE || null;
+      if (!dbSource) return [];
+      const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const results = [];
+      for (const subjectKey in dbSource) {
+        const pool = dbSource[subjectKey].questionPool;
+        for (const unitName in pool) {
+          pool[unitName].forEach(q => {
+            if (bookmarkedIds.includes(q.id)) results.push({ ...q, subjectKey, unitName });
+          });
+        }
+      }
+      return results;
+    }
+
+    function getSpeedWrongQuestions() {
+      const dbSource = window.ALL_QUESTIONS_DATABASE || null;
+      if (!dbSource) return [];
+      const results = [];
+      for (const subjectKey in dbSource) {
+        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
+        const pool = dbSource[subjectKey].questionPool;
+        for (const unitName in pool) {
+          pool[unitName].forEach(q => {
+            const stat = stats[q.id];
+            if (stat && (stat.streak || 0) < 1 && ((stat.total || 0) - (stat.correct_count || 0)) > 0) {
+              results.push({ ...q, subjectKey, unitName, wrongCount: (stat.total || 0) - (stat.correct_count || 0) });
+            }
+          });
+        }
+      }
+      return results.sort((a, b) => b.wrongCount - a.wrongCount);
+    }
+
+    function getSpeedSpecialTrainingQuestions() {
+      const dbSource = window.ALL_QUESTIONS_DATABASE || null;
+      if (!dbSource) return [];
+      const unlearnedPool = [], wrongPool = [], completedPool = [];
+      for (const subjectKey in dbSource) {
+        const pool = dbSource[subjectKey].questionPool;
+        const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + subjectKey)) || {};
+        for (const unitName in pool) {
+          pool[unitName].forEach(q => {
+            const stat = stats[q.id];
+            if (!stat || (stat.streak || 0) < 1) {
+              const wrongCount = stat ? ((stat.total || 0) - (stat.correct_count || 0)) : 0;
+              if (wrongCount > 0) wrongPool.push({ ...q, subjectKey, unitName });
+              else unlearnedPool.push({ ...q, subjectKey, unitName });
+            } else {
+              completedPool.push({ ...q, subjectKey, unitName });
+            }
+          });
+        }
+      }
+      shuffleArray(unlearnedPool); shuffleArray(wrongPool); shuffleArray(completedPool);
+      return [...unlearnedPool, ...wrongPool, ...completedPool];
+    }
+
+    function startSpeedQuiz(mode) {
+      speedQuizMode = mode;
+      let questions = [];
+      if (mode === "training") questions = getSpeedSpecialTrainingQuestions();
+      else if (mode === "bookmark") { questions = getSpeedBookmarkQuestions(); shuffleArray(questions); }
+      else if (mode === "wrong") { questions = getSpeedWrongQuestions().slice(0, 15); shuffleArray(questions); }
+
+      if (questions.length === 0) {
+        alert(mode === "bookmark" ? "現在、お気に入り⭐に登録されている問題がありません！" : (mode === "wrong" ? "現在、克服する弱点（間違えた問題）がありません！" : "問題データベースが読み込まれていません。"));
+        return;
+      }
+      speedQuestions = questions.slice(0, 3);
+      speedCurrentIndex = 0;
+      speedCorrectCountInSet = 0;
+      document.getElementById("speed-quiz-screen").style.display = "block";
+      showSpeedQuestion();
+    }
+
+    function showSpeedQuestion() {
+      const q = speedQuestions[speedCurrentIndex];
+      document.getElementById("speed-quiz-mode-title").innerText = speedQuizMode === "bookmark" ? "⭐ マイ・ベスト" : (speedQuizMode === "wrong" ? "❌ 弱点克服" : "⚡ スピード特訓");
+      document.getElementById("speed-quiz-progress-num").innerText = `${speedCurrentIndex + 1} / ${speedQuestions.length} 問目`;
+      document.getElementById("speed-quiz-subject").innerText = `科目: 【 ${SUBJECT_KEY_TO_JA[q.subjectKey] || "その他"} 】- ${q.unitName || ''}`;
+      document.getElementById("speed-quiz-source").innerText = `出典: ${q.source || "アプリオリジナル"}`;
+      document.getElementById("speed-quiz-text").innerText = q.text || q.question || '';
+      updateSpeedBookmarkButtonUI(q.id);
+      document.getElementById("speed-input-area").style.display = "flex";
+      document.getElementById("speed-result-area").style.display = "none";
+    }
+
+    function submitSpeedAnswer(userAns) {
+      const q = speedQuestions[speedCurrentIndex];
+      const correctBool = typeof q.answer === 'boolean' ? q.answer : (q.answer === 0);
+      const isCorrect = (userAns === correctBool);
+
+      let stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + q.subjectKey)) || {};
+      if (!stats[q.id]) stats[q.id] = { total: 0, streak: 0, correct_count: 0 };
+      const wasMasteredBefore = ((stats[q.id].streak || 0) >= 1);
+
+      if (speedQuizMode === "wrong") {
+        if (isCorrect) { stats[q.id].total += 1; stats[q.id].correct_count += 1; stats[q.id].streak = 1; speedCorrectCountInSet++; }
+      } else if (speedQuizMode === "bookmark") {
+        if (isCorrect) speedCorrectCountInSet++;
+      } else {
+        stats[q.id].total += 1;
+        if (isCorrect) { stats[q.id].streak += 1; stats[q.id].correct_count += 1; speedCorrectCountInSet++; }
+        else stats[q.id].streak = 0;
       }
 
-      subjectLinks.forEach(link => {
-        const url = new URL(link.getAttribute('href'), window.location.href);
-        url.searchParams.set('mode', mode);
-        link.setAttribute('href', './quiz.html' + url.search);
+      if (isCorrect && !wasMasteredBefore && speedQuizMode !== "bookmark") {
+        localStorage.setItem('solved_' + q.subjectKey, parseInt(localStorage.getItem('solved_' + q.subjectKey) || 0) + 1);
+      }
+      if (speedQuizMode !== "bookmark") {
+        localStorage.setItem("beauty_app_question_stats_" + q.subjectKey, JSON.stringify(stats));
+      }
+
+      const statusEl = document.getElementById("speed-result-status");
+      statusEl.innerText = isCorrect ? "🎉 正解！" : "❌ 不正解...";
+      statusEl.style.color = isCorrect ? "#2ecc71" : "#ff7675";
+      document.getElementById("speed-current-streak").innerText = `この問題の正解数: ${stats[q.id].correct_count}回 (連続: ${stats[q.id].streak}回)`;
+      document.getElementById("speed-quiz-explanation").innerText = q.exp || q.explanation || "解説はありません。";
+
+      const isLast = (speedCurrentIndex === speedQuestions.length - 1);
+      const nextBtn = document.getElementById("speed-next-btn");
+      if (isLast) {
+        if (speedCorrectCountInSet === speedQuestions.length && typeof confetti === "function") {
+          const canvas = document.getElementById("speed-confetti-canvas");
+          if (canvas) confetti.create(canvas, { resize: true, useWorkers: true })({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        }
+        nextBtn.innerText = "🔄 続けて解く\n(次の3問)";
+        nextBtn.style.background = "#0984e3";
+      } else {
+        nextBtn.innerText = "次の問題へ";
+        nextBtn.style.background = "#2ecc71";
+      }
+      document.getElementById("speed-input-area").style.display = "none";
+      document.getElementById("speed-result-area").style.display = "block";
+    }
+
+    function nextSpeedQuestion() {
+      if (speedCurrentIndex === speedQuestions.length - 1) startSpeedQuiz(speedQuizMode);
+      else { speedCurrentIndex++; showSpeedQuestion(); }
+    }
+
+    function closeSpeedQuiz() {
+      document.getElementById("speed-quiz-screen").style.display = "none";
+      updateSpeedDashboardBadges();
+      renderDashboardMonitor();
+    }
+
+    function toggleSpeedBookmark() {
+      const q = speedQuestions[speedCurrentIndex];
+      if (!q) return;
+      let ids = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const idx = ids.indexOf(q.id);
+      if (idx > -1) ids.splice(idx, 1); else ids.push(q.id);
+      localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(ids));
+      updateSpeedBookmarkButtonUI(q.id);
+      updateSpeedDashboardBadges();
+    }
+
+    function updateSpeedBookmarkButtonUI(qId) {
+      const btn = document.getElementById("speed-bookmark-btn");
+      if (!btn) return;
+      const ids = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      btn.innerText = ids.includes(qId) ? "⭐ マーク中" : "☆ をつける";
+      btn.style.background = ids.includes(qId) ? "#fff9db" : "#f1f2f6";
+    }
+
+    function openSpeedHistoryModal(mode) {
+      const modal = document.getElementById("speed-history-modal");
+      const listEl = document.getElementById("speed-history-list");
+      listEl.innerHTML = "";
+      modal.style.display = "flex";
+      const questions = mode === "bookmark" ? getSpeedBookmarkQuestions() : getSpeedWrongQuestions();
+      document.getElementById("speed-history-title").innerText = mode === "bookmark" ? "⭐ マイ・ベスト お気に入り一覧" : "❌ 弱点克服対象一覧";
+      document.getElementById("speed-history-summary").innerText = `登録数: 全 ${questions.length} 問`;
+
+      if (questions.length === 0) {
+        listEl.innerHTML = `<div style="color:#7f8c8d; text-align:center; margin-top:30px;">対象となる問題がありません</div>`;
+        return;
+      }
+      questions.forEach(q => {
+        const div = document.createElement('div');
+        div.className = 'speed-history-item';
+
+        const headerDiv = document.createElement('div');
+        headerDiv.style.cssText = 'font-size:0.75rem; font-weight:bold; color:#0984e3; margin-bottom:4px;';
+        headerDiv.textContent = `【${SUBJECT_KEY_TO_JA[q.subjectKey] || "その他"}】${q.unitName || ''}`;
+
+        const textDiv = document.createElement('div');
+        textDiv.style.cssText = 'font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;';
+        textDiv.textContent = q.text || q.question || '';
+
+        const expDiv = document.createElement('div');
+        expDiv.style.cssText = 'font-size:0.78rem; color:#475569; background:#faf9f6; padding:6px 8px; border-radius:6px;';
+        expDiv.textContent = q.exp || q.explanation || '';
+
+        div.appendChild(headerDiv);
+        div.appendChild(textDiv);
+        div.appendChild(expDiv);
+        listEl.appendChild(div);
       });
+    }
+
+    function closeSpeedHistoryModal() {
+      document.getElementById("speed-history-modal").style.display = "none";
     }
 
     function getDynamicSubjectTotal(sub) {
