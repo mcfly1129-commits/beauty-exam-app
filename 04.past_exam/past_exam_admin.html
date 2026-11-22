@@ -2660,24 +2660,18 @@ function renderStatisticsView() {
     { id: 10, name: "⑩ 問44～55 (技術理論)", start: 44, end: 55, maxScore: 12 }
   ];
 
-  // 生徒ごとの代表データを収集（比較基準回指定時はその回、未指定時は各生徒の最新提出データ1件）
+  // 生徒ごとの代表データを収集（比較基準回指定時はその回、未指定時は各回の最新データから生徒別中央値を算出し1人1件として集計）
   const groupScoresBySubject = {};
   const groupTotals = [];
 
   for (let i = 1; i <= 10; i++) groupScoresBySubject[i] = [];
 
-  // 比較基準回指定時はその回のレコード、未指定時は各生徒の最新レコード（送信日時優先・無効時は回番号降順）を返す
-  const getTargetRecord = (recs, roundFilter) => {
-    if (!recs || typeof recs !== "object") return null;
-    if (roundFilter) {
-      return recs[roundFilter] || null;
-    }
-    const rounds = Object.keys(recs);
-    if (rounds.length === 0) return null;
-
-    const sorted = rounds.slice().sort((a, b) => {
-      const recA = recs[a] || {};
-      const recB = recs[b] || {};
+  // 同一回に複数レコードがある場合でも最新（送信日時優先・無効時は回番号降順）のレコードを返す
+  const pickLatestRecordFromList = (recList) => {
+    if (!Array.isArray(recList) || recList.length === 0) return null;
+    const sorted = recList.slice().sort((a, b) => {
+      const recA = a || {};
+      const recB = b || {};
       const rawA = recA.submitTime || recA.timestamp || "";
       const rawB = recB.submitTime || recB.timestamp || "";
       const timeA = rawA ? new Date(rawA).getTime() : NaN;
@@ -2686,12 +2680,65 @@ function renderStatisticsView() {
       if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) {
         return timeB - timeA;
       }
-      return Number(b) - Number(a);
+      return Number(recB.round || recB.examRound || 0) - Number(recA.round || recA.examRound || 0);
     });
-    return recs[sorted[0]] || null;
+    return sorted[0] || null;
   };
 
-  // 赤線用データ：フィルター（学校・クラス等）を受けず、全校対象生徒の最新データ（または指定回データ）を集計
+  // 生徒1人分の代表値（科目別中央値10科目分＋合計中央値）を1件算出する
+  const buildStudentRepresentativeSummary = (recs, roundFilter) => {
+    if (!recs || typeof recs !== "object") return null;
+
+    let targetRecords = [];
+    if (roundFilter) {
+      const matched = recs[roundFilter];
+      if (!matched) return null;
+      const single = Array.isArray(matched) ? pickLatestRecordFromList(matched) : matched;
+      if (!single) return null;
+      targetRecords = [single];
+    } else {
+      // 実施済みの各回ごとに最新データを1件ずつ抽出
+      Object.keys(recs).forEach(r => {
+        const entry = recs[r];
+        if (!entry) return;
+        const latestInRound = Array.isArray(entry) ? pickLatestRecordFromList(entry) : entry;
+        if (latestInRound) {
+          targetRecords.push(latestInRound);
+        }
+      });
+    }
+
+    if (targetRecords.length === 0) return null;
+
+    const perSubjectRoundScores = {};
+    for (let i = 1; i <= 10; i++) perSubjectRoundScores[i] = [];
+    const roundTotals = [];
+
+    targetRecords.forEach(rec => {
+      const wrongList = parseWrongQuestions(rec.wrongQuestions);
+      let roundTotalScore = 0;
+
+      SUBJECT_RANGES.forEach(subj => {
+        let correctCount = 0;
+        for (let q = subj.start; q <= subj.end; q++) {
+          if (!wrongList.includes(q)) correctCount++;
+        }
+        perSubjectRoundScores[subj.id].push(correctCount);
+        roundTotalScore += correctCount;
+      });
+      roundTotals.push(roundTotalScore);
+    });
+
+    const subjectMedians = {};
+    for (let i = 1; i <= 10; i++) {
+      subjectMedians[i] = calculateMedian(perSubjectRoundScores[i]);
+    }
+    const totalMedian = calculateMedian(roundTotals);
+
+    return { subjectMedians, totalMedian };
+  };
+
+  // 赤線用データ：フィルター（学校・クラス等）を受けず、全校対象生徒の代表値（1人1件）を集計
   const baseCompareStudents = teacherDataStore.students.filter(s => {
     if (!s.serialCode || s.serialCode.trim() === "") return false;
     return true;
@@ -2701,16 +2748,11 @@ function renderStatisticsView() {
   for (let i = 1; i <= 10; i++) allSubValues[i] = [];
 
   baseCompareStudents.forEach(s => {
-    const rec = getTargetRecord(s.examRecords, selectedRoundFilter);
-    if (!rec) return;
+    const summary = buildStudentRepresentativeSummary(s.examRecords, selectedRoundFilter);
+    if (!summary) return;
 
-    const wrongList = parseWrongQuestions(rec.wrongQuestions);
     SUBJECT_RANGES.forEach(subj => {
-      let correctCount = 0;
-      for (let q = subj.start; q <= subj.end; q++) {
-        if (!wrongList.includes(q)) correctCount++;
-      }
-      allSubValues[subj.id].push(correctCount);
+      allSubValues[subj.id].push(summary.subjectMedians[subj.id]);
     });
   });
 
@@ -2721,23 +2763,15 @@ function renderStatisticsView() {
     overallAllSubMedians.push(Math.round((med / maxScore) * 1000) / 10);
   }
 
-  // 青線・統計テーブル用データ：絞り込み対象者（filteredStudents）の最新データ（または指定回データ）を集計
+  // 青線・統計テーブル用データ：絞り込み対象者（filteredStudents）の代表値（1人1件）を集計
   filteredStudents.forEach(s => {
-    const rec = getTargetRecord(s.examRecords, selectedRoundFilter);
-    if (!rec) return;
-
-    const wrongList = parseWrongQuestions(rec.wrongQuestions);
-    let studentTotalScore = 0;
+    const summary = buildStudentRepresentativeSummary(s.examRecords, selectedRoundFilter);
+    if (!summary) return;
 
     SUBJECT_RANGES.forEach(subj => {
-      let correctCount = 0;
-      for (let q = subj.start; q <= subj.end; q++) {
-        if (!wrongList.includes(q)) correctCount++;
-      }
-      groupScoresBySubject[subj.id].push(correctCount);
-      studentTotalScore += correctCount;
+      groupScoresBySubject[subj.id].push(summary.subjectMedians[subj.id]);
     });
-    groupTotals.push(studentTotalScore);
+    groupTotals.push(summary.totalMedian);
   });
 
   // テーブル行の生成
