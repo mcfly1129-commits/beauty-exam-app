@@ -2660,15 +2660,38 @@ function renderStatisticsView() {
     { id: 10, name: "⑩ 問44～55 (技術理論)", start: 44, end: 55, maxScore: 12 }
   ];
 
-  // 生徒ごとの代表データを収集（比較基準回が指定されていればその回、なければ最新回または平均）
-  // ここでは選択中の回、または各生徒の最新提出データを集計対象とする
+  // 生徒ごとの代表データを収集（比較基準回指定時はその回、未指定時は各生徒の最新提出データ1件）
   const groupScoresBySubject = {};
   const groupTotals = [];
-  const allStudentsTotals = [];
 
   for (let i = 1; i <= 10; i++) groupScoresBySubject[i] = [];
 
-// 🎯 修正：中央値レーダーチャート比較の赤線用データは、学校・クラスの絞り込みを受けないようにする
+  // 比較基準回指定時はその回のレコード、未指定時は各生徒の最新レコード（送信日時優先・無効時は回番号降順）を返す
+  const getTargetRecord = (recs, roundFilter) => {
+    if (!recs || typeof recs !== "object") return null;
+    if (roundFilter) {
+      return recs[roundFilter] || null;
+    }
+    const rounds = Object.keys(recs);
+    if (rounds.length === 0) return null;
+
+    const sorted = rounds.slice().sort((a, b) => {
+      const recA = recs[a] || {};
+      const recB = recs[b] || {};
+      const rawA = recA.submitTime || recA.timestamp || "";
+      const rawB = recB.submitTime || recB.timestamp || "";
+      const timeA = rawA ? new Date(rawA).getTime() : NaN;
+      const timeB = rawB ? new Date(rawB).getTime() : NaN;
+
+      if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) {
+        return timeB - timeA;
+      }
+      return Number(b) - Number(a);
+    });
+    return recs[sorted[0]] || null;
+  };
+
+  // 赤線用データ：フィルター（学校・クラス等）を受けず、全校対象生徒の最新データ（または指定回データ）を集計
   const baseCompareStudents = teacherDataStore.students.filter(s => {
     if (!s.serialCode || s.serialCode.trim() === "") return false;
     return true;
@@ -2678,40 +2701,32 @@ function renderStatisticsView() {
   for (let i = 1; i <= 10; i++) allSubValues[i] = [];
 
   baseCompareStudents.forEach(s => {
-    const recs = s.examRecords || {};
-    // 比較基準回（selectedRoundFilter）が指定されていればその回のみ、未指定なら全回を対象にする
-    const targetRounds = selectedRoundFilter ? [selectedRoundFilter] : Object.keys(recs);
-    
-    targetRounds.forEach(r => {
-      if (!recs[r]) return;
-      const rec = recs[r];
-      let wrongList = parseWrongQuestions(rec.wrongQuestions);
-      SUBJECT_RANGES.forEach(subj => {
-        let correctCount = 0;
-        for (let q = subj.start; q <= subj.end; q++) {
-          if (!wrongList.includes(q)) correctCount++;
-        }
-        allSubValues[subj.id].push(correctCount);
-      });
+    const rec = getTargetRecord(s.examRecords, selectedRoundFilter);
+    if (!rec) return;
+
+    const wrongList = parseWrongQuestions(rec.wrongQuestions);
+    SUBJECT_RANGES.forEach(subj => {
+      let correctCount = 0;
+      for (let q = subj.start; q <= subj.end; q++) {
+        if (!wrongList.includes(q)) correctCount++;
+      }
+      allSubValues[subj.id].push(correctCount);
     });
   });
 
   const overallAllSubMedians = [];
   for (let i = 1; i <= 10; i++) {
-    // 100分率（%）に換算してレーダー用にする場合、あるいは得点そのままでも可。ここでは画像2に合わせて正答率(%)ベースで計算
     const med = calculateMedian(allSubValues[i]);
-    const maxScore = SUBJECT_RANGES[i-1].maxScore;
+    const maxScore = SUBJECT_RANGES[i - 1].maxScore;
     overallAllSubMedians.push(Math.round((med / maxScore) * 1000) / 10);
   }
 
-  // フィルター後グループの集計
+  // 青線・統計テーブル用データ：絞り込み対象者（filteredStudents）の最新データ（または指定回データ）を集計
   filteredStudents.forEach(s => {
-    const recs = s.examRecords || {};
-    const targetRound = selectedRoundFilter || Object.keys(recs).sort((a,b)=>Number(b)-Number(a))[0];
-    if (!targetRound || !recs[targetRound]) return;
+    const rec = getTargetRecord(s.examRecords, selectedRoundFilter);
+    if (!rec) return;
 
-    const rec = recs[targetRound];
-    let wrongList = parseWrongQuestions(rec.wrongQuestions);
+    const wrongList = parseWrongQuestions(rec.wrongQuestions);
     let studentTotalScore = 0;
 
     SUBJECT_RANGES.forEach(subj => {
