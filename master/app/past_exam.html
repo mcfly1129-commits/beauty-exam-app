@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美容師国家試験Pro - 4択過去問 記録・分析</title>
+<link rel="stylesheet" href="../css/style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
+
+<style>
+:root {
+  --primary-color: #0984e3;
+  --primary-light: #e8f4fd;
+  --bg-color: #fefaf0;
+  --text-color: #2d3436;
+  --card-bg: #ffffff;
+  --accent-blue: #0984e3;
+  --accent-orange: #e67e22;
+  --accent-green: #2ecc71;
+  --accent-red: #e74c3c;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  background: var(--card-bg);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  box-sizing: border-box;
+}
+
+.top-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btn-back-portal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+h1 {
+  font-size: 1.25rem;
+  text-align: center;
+  color: #2c3e50;
+  margin: 4px 0 4px 0;
+}
+
+.subtitle {
+  font-size: 0.78rem;
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+/* ナビゲーションタブ */
+.tab-menu {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px 4px;
+  font-size: 0.76rem;
+  font-weight: bold;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px 8px 0 0;
+  cursor: pointer;
+  color: #475569;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.screen-section { display: none; }
+.screen-section.active { display: block; }
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 0.92rem;
+  cursor: pointer;
+  box-shadow: 0 3px 6px rgba(9, 132, 227, 0.2);
+  transition: opacity 0.2s;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-primary:disabled { background: #b2bec3; box-shadow: none; cursor: not-allowed; }
+
+/* 過去問回選択セレクター */
+.exam-select-card {
+  background: #f0f8ff;
+  border: 1px solid #bae6fd;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.select-round {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--primary-color);
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #0369a1;
+  background: white;
+}
+
+/* 10科目セクション ＆ 55問入力マトリクス */
+.subject-group {
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.subject-header {
+  background: #f8fafc;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #1e293b;
+  border-left: 4px solid var(--primary-color);
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.question-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.question-row:last-child { border-bottom: none; }
+
+.q-label {
+  font-size: 0.86rem;
+  font-weight: bold;
+  color: #334155;
+}
+
+.choice-group {
+  display: flex;
+  gap: 8px;
+}
+
+.choice-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #475569;
+  font-weight: bold;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s;
+}
+
+.choice-btn.selected {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: scale(1.06);
+  box-shadow: 0 2px 5px rgba(9, 132, 227, 0.3);
+}
+
+/* モーダル共通 */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  width: 92%;
+  max-width: 440px;
+  max-height: 85vh;
+  border-radius: 16px;
+  padding: 18px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin: 10px 0;
+}
+.summary-table td, .summary-table th {
+  border: 1px solid #e2e8f0;
+  padding: 5px;
+  text-align: center;
+}
+
+/* ダッシュボード・カード */
+.dashboard-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.card-title {
+  font-size: 0.92rem;
+  font-weight: bold;
+  color: #1e293b;
+  border-bottom: 2px solid #bae6fd;
+  padding-bottom: 6px;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.result-summary-card {
+  background: #ffffff;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.subject-wrong-block {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.subject-wrong-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.wrong-q-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.q-badge-abs {
+  background: #fff0f0;
+  border: 1px solid var(--accent-red);
+  color: #c0392b;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.q-badge-together {
+  background: #f0f7ff;
+  border: 1px solid var(--accent-blue);
+  color: #0369a1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.q-badge-normal {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: bold;
+}
+
+.filter-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select-subject-filter {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 2px solid var(--primary-color);
+  font-size: 0.86rem;
+  font-weight: bold;
+  color: #1e293b;
+  background-color: #f8fafc;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+
+<canvas id="quiz-confetti-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999;"></canvas>
+
+<div class="container">
+  <!-- トップナビゲーション -->
+  <div class="top-nav-bar">
+    <a href="./index.html" class="btn-back-portal">← ポータルへ戻る</a>
+    <span style="font-size:0.74rem; color:#64748b; font-weight:bold;">美容師国家試験Pro</span>
+  </div>
+
+  <h1>📝 4択過去問 記録・分析</h1>
+  <p class="subtitle">全55問・4択の解答を自動採点＆分析<br>自分の『伸び代』と『重要復習問題』を可視化</p>
+
+  <!-- ユーザー情報ヘッダー -->
+  <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+    <div>🔑 ログイン中: <b id="user-display-code" style="color:#0984e3;">---</b></div>
+    <div style="display:flex; gap:6px;">
+      <button id="btn-open-history-modal" style="background:#0984e3; color:white; border:none; padding:5px 9px; border-radius:6px; font-size:0.72rem; font-weight:bold; cursor:pointer;">📜 送信履歴・リセット</button>
+    </div>
+  </div>
+
+  <!-- タブメニュー -->
+  <div class="tab-menu">
+    <button class="tab-btn active" data-tab="tab-input">📝 回答<br>入力</button>
+    <button class="tab-btn" data-tab="tab-review">📋 回答<br>記録</button>
+    <button class="tab-btn" data-tab="tab-dashboard">📊 分析<br>ボード</button>
+    <button class="tab-btn" data-tab="tab-pickup">🔥 累積<br>復習</button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 1: 回答入力画面 -->
+  <!-- ========================================== -->
+  <div id="tab-input" class="screen-section active">
+    <div class="exam-select-card">
+      <span style="font-size:0.85rem; font-weight:bold; color:#0c4a6e;">過去問 実施・閲覧回</span>
+      <select id="select-exam-round" class="select-round"></select>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <span id="answered-count-badge" style="font-size:0.75rem; font-weight:bold; color:#0984e3;">入力済み: 0 / 55問</span>
+      <span style="font-size:0.72rem; color:#64748b;">💡 タップで自動下書き保存</span>
+    </div>
+
+    <div id="questions-form-container"></div>
+
+    <button id="btn-open-confirm" class="btn-primary" style="margin-top:14px; margin-bottom:16px;">
+      🔍 入力内容を再確認して採点・送信へ
+    </button>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 2: 直近の回答記録サマリー -->
+  <!-- ========================================== -->
+  <div id="tab-review" class="screen-section">
+    <div id="latest-result-summary" class="result-summary-card" style="display: none;">
+      <h3 class="card-title" style="margin-bottom: 8px;">📋 過去問回答記録サマリー</h3>
+      <div style="font-size: 0.76rem; color: #64748b; text-align: center; margin-bottom: 10px;">
+        対象: <b id="summary-exam-round" style="color: #0984e3;">第--回</b> （送信日時: <span id="summary-exam-time">--</span>）
+      </div>
+
+      <div style="background:#f0f8ff; border:1px solid #bae6fd; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-around; align-items:center; text-align:center;">
+        <div>
+          <div style="font-size:0.72rem; color:#64748b; font-weight:bold; margin-bottom:2px;">評価ランク</div>
+          <div id="summary-rank-val" style="color:#e67e22; font-size:1.1rem; font-weight:bold; line-height:1.2;">-</div>
+        </div>
+        <div style="border-left:1px solid #bae6fd; height:32px;"></div>
+        <div>
+          <div style="font-size:0.72rem; color:#64748b; font-weight:bold; margin-bottom:2px;">正答率</div>
+          <div id="summary-accuracy-num" style="color:#0984e3; font-size:1.2rem; font-weight:bold; line-height:1.2;">--%</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-around; align-items:center; background:#f8fafc; padding:10px 8px; border-radius:10px; margin-bottom:14px; border:1px solid #e2e8f0;">
+        <div style="text-align:center;">
+          <div style="font-size:0.72rem; color:#64748b; font-weight:bold;">総合得点</div>
+          <div style="font-size:1rem; font-weight:bold; color:#1e293b;"><span id="summary-score-num">--</span> <small style="font-size:0.72rem;">/ 55点</small></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:0.72rem; color:#64748b; font-weight:bold;">間違えた数</div>
+          <div style="font-size:1rem; font-weight:bold; color:#e74c3c;" id="summary-wrong-count">--問</div>
+        </div>
+      </div>
+
+      <div style="font-size: 0.82rem; font-weight: bold; color: #1e293b; margin-bottom: 4px;">
+        📋 間違えた問題番号一覧
+      </div>
+      <p style="font-size: 0.72rem; color: #64748b; margin-top: 0; margin-bottom: 8px;">
+        🔥：重要復習問題（集団正解率80%以上）<br>
+        🤝：皆で頑張ろう問題（集団正解率60%未満）
+      </p>
+
+      <div id="summary-wrong-questions-list"></div>
+    </div>
+
+    <div id="latest-result-empty-msg" class="dashboard-card" style="text-align: center; padding: 28px 15px;">
+      <div style="font-size: 2.2rem; margin-bottom: 8px;">📝</div>
+      <div style="font-size: 0.9rem; font-weight: bold; color: #1e293b; margin-bottom: 6px;">選択中の回の回答記録はありません</div>
+      <p style="font-size: 0.76rem; color: #64748b; margin: 0; line-height: 1.5;">
+        「📝 回答入力」タブから過去問の解答を入力して<br>送信すると、採点結果と復習ポイントが表示されます。
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 3: 累積・総合分析ダッシュボード -->
+  <!-- ========================================== -->
+  <div id="tab-dashboard" class="screen-section">
+    <div class="dashboard-card">
+      <h3 class="card-title" id="dashboard-radar-title">🎯 累積・総合分析（正答率 vs 全体中央値）</h3>
+      <div style="position: relative; height: 260px; width: 100%; display: flex; justify-content: center; align-items: center;">
+        <canvas id="radarChart"></canvas>
+      </div>
+      <div style="display:flex; justify-content:space-around; align-items:center; margin:12px auto 0 auto; max-width:340px; background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:10px; font-size:0.84rem; font-weight:bold; text-align:center;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:0.74rem; color:#64748b;">総合<br>ランク</span>
+          <span id="badge-total-rank" style="color:#e67e22; font-size:1.05rem; line-height:1.1;">-</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:0.74rem; color:#64748b;">総合平均<br>正答率</span>
+          <span id="badge-total-acc" style="color:#0984e3; font-size:1.1rem; line-height:1.1;">--%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <h3 class="card-title">📈 実施履歴の推移（時系列折れ線グラフ）</h3>
+      <div style="position: relative; height: 220px;">
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 4: 累計データからの重要復習ピックアップ -->
+  <!-- ========================================== -->
+  <div id="tab-pickup" class="screen-section">
+    <div class="filter-card">
+      <label for="select-subject-filter" style="font-size:0.78rem; font-weight:bold; color:#0984e3;">📚 復習する科目で絞り込み</label>
+      <select id="select-subject-filter" class="select-subject-filter">
+        <option value="all">全科目表示 (すべて)</option>
+        <option value="1">1. 関係法規・制度</option>
+        <option value="2">2. 運営管理</option>
+        <option value="3">3. 公衆衛生・環境衛生</option>
+        <option value="4">4. 感染症</option>
+        <option value="5">5. 衛生管理技術</option>
+        <option value="6">6. 人体の構造及び機能</option>
+        <option value="7">7. 皮膚科学</option>
+        <option value="8">8. 香粧品化学</option>
+        <option value="9">9. 文化論</option>
+        <option value="10">10. 美容技術理論</option>
+      </select>
+    </div>
+
+    <div class="dashboard-card">
+      <h3 class="card-title" style="border-color:#e74c3c; color:#c0392b;">
+        🔥 重要復習問題【落としてはいけない基本問】
+      </h3>
+      <p style="font-size:0.74rem; color:#64748b; margin-top:-6px;">自分が間違えており、かつ全体の正解率が80％以上の優先復習問題</p>
+      <div id="abs-review-list">
+        <div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px;">データ読み込み中...</div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <h3 class="card-title" style="border-color:#0984e3; color:#0369a1;">
+        🤝 皆で頑張ろう問題【全体の正答率60%未満】
+      </h3>
+      <p style="font-size:0.74rem; color:#64748b; margin-top:-6px;">自分が間違えており、かつ全体の正解率も60％未満の高難易度問題</p>
+      <div id="together-review-list">
+        <div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px;">データ読み込み中...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔍 入力確認モーダル -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-size:1.05rem; text-align:center; color:#0984e3; margin-top:0;">回答入力の再確認</h3>
+    <p style="font-size:0.75rem; color:#e74c3c; text-align:center; font-weight:bold;">
+      ⚠️ 全55問に入力すると採点・記録できます。<br>入力漏れがないかご確認ください。
+    </p>
+    <div id="unanswered-alert" style="display:none; background:#ffe0e0; color:#c0392b; padding:8px; border-radius:6px; font-size:0.75rem; text-align:center; font-weight:bold; margin-bottom:10px;"></div>
+
+    <div style="max-height:240px; overflow-y:auto;">
+      <table class="summary-table">
+        <thead>
+          <tr style="background:#f1f5f9;">
+            <th>問</th><th>選択</th><th>問</th><th>選択</th><th>問</th><th>選択</th>
+          </tr>
+        </thead>
+        <tbody id="summary-table-body"></tbody>
+      </table>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:14px;">
+      <button id="btn-cancel-modal" style="flex:1; padding:10px; background:#e2e8f0; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:#334155;">修正に戻る</button>
+      <button id="btn-submit-exam" class="btn-primary" style="flex:1; padding:10px; background:var(--accent-orange);">確定して採点・送信</button>
+    </div>
+  </div>
+</div>
+
+<!-- 📜 送信履歴 ＆ リセットモーダル -->
+<div id="history-reset-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-size:1.05rem; text-align:center; color:#1e293b; margin-top:0;">📜 送信履歴 ＆ データリセット</h3>
+    <p style="font-size:0.75rem; color:#64748b; text-align:center;">送信済みの過去問記録を取り消し（リセット）できます。</p>
+    <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:14px 0;"></div>
+    <button id="btn-close-history-reset" style="width:100%; padding:10px; background:#e2e8f0; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:#334155;">閉じる</button>
+  </div>
+</div>
+
+<script src="../js/supabase_client.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/past_exam_answers.js"></script>
+
+<script>
+let currentUser = null;
+let currentExamRound = "54";
+let studentAnswers = new Array(55).fill("");
+let studentDashboardData = null;
+
+let radarChartInstance = null;
+let lineChartInstance = null;
+
+// 起動時初期化
+document.addEventListener("DOMContentLoaded", async () => {
+  currentUser = getCurrentUser();
+  if (!currentUser) {
+    window.location.href = "../index.html";
+    return;
+  }
+
+  document.getElementById("user-display-code").innerText = currentUser.serial_code;
+
+  initExamRoundSelector();
+  renderQuestionsForm();
+  setupEventListeners();
+  loadDraftAnswers();
+
+  await loadSupabaseDashboardData();
+});
+
+function setupEventListeners() {
+  // タブ切り替え
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
+
+      const clickedBtn = e.currentTarget;
+      clickedBtn.classList.add("active");
+      const targetTab = clickedBtn.getAttribute("data-tab");
+      document.getElementById(targetTab).classList.add("active");
+
+      if (targetTab === "tab-dashboard") renderDashboardCharts();
+      if (targetTab === "tab-review") renderLatestResultSummary();
+      if (targetTab === "tab-pickup") renderReviewPickups();
+    });
+  });
+
+  // 実施回変更
+  document.getElementById("select-exam-round").addEventListener("change", (e) => {
+    currentExamRound = e.target.value;
+    loadDraftAnswers();
+    renderLatestResultSummary();
+  });
+
+  // 科目フィルター変更
+  document.getElementById("select-subject-filter").addEventListener("change", () => {
+    renderReviewPickups();
+  });
+
+  // 再確認モーダル開閉
+  document.getElementById("btn-open-confirm").addEventListener("click", openConfirmModal);
+  document.getElementById("btn-cancel-modal").addEventListener("click", () => {
+    document.getElementById("confirm-modal").style.display = "none";
+  });
+
+  // 回答確定送信
+  document.getElementById("btn-submit-exam").addEventListener("click", submitExamData);
+
+  // 履歴・リセットモーダル
+  document.getElementById("btn-open-history-modal").addEventListener("click", openHistoryResetModal);
+  document.getElementById("btn-close-history-reset").addEventListener("click", () => {
+    document.getElementById("history-reset-modal").style.display = "none";
+  });
+}
+
+// ==========================================
+// 1. Supabaseからの全4択ログ取得＆集団統計集計
+// ==========================================
+async function loadSupabaseDashboardData() {
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+
+  const { data: logs, error } = await supabase
+    .from("exam_logs")
+    .select("*")
+    .eq("mode", "4choice")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Supabase 4choiceデータ取得エラー:", error.message);
+    return;
+  }
+
+  studentDashboardData = buildDashboardDataFromLogs(logs || [], currentUser.id);
+  renderLatestResultSummary();
+  renderReviewPickups();
+  renderDashboardCharts();
+}
+
+/**
+ * exam_logs（mode='4choice'）から個人データと集団中央値・設問別正解率を算出
+ */
+function buildDashboardDataFromLogs(allLogs, myUserId) {
+  const latestExamRecords = {};
+  const historyLog = [];
+  const submittedRoundsSet = new Set();
+
+  // 集団統計用：ユーザーごと・回ごとの最新レコードを抽出
+  const userRoundLatestMap = {};
+
+  allLogs.forEach(log => {
+    const roundMatch = String(log.subject_id || "").match(/(\d+)/);
+    const roundStr = roundMatch ? roundMatch[1] : "";
+    if (!roundStr) return;
+
+    const uKey = `${log.user_id}_${roundStr}`;
+    userRoundLatestMap[uKey] = log; // created_at昇順のため常に最新で上書き
+
+    if (log.user_id === myUserId) {
+      const scored = reconstructScoredRecord(log, roundStr);
+      latestExamRecords[roundStr] = scored;
+      submittedRoundsSet.add(roundStr);
+
+      // historyLogも同回の最新に更新
+      const idx = historyLog.findIndex(h => h.exam_round === roundStr);
+      const item = {
+        exam_round: roundStr,
+        total_accuracy: scored.total_accuracy,
+        total_score: scored.total_score,
+        timestamp: log.created_at
+      };
+      if (idx !== -1) historyLog[idx] = item;
+      else historyLog.push(item);
+    }
+  });
+
+  // 集団の設問別正解率＆科目別中央値を算出
+  const examStats = {};
+  const allSubjectRates = {};
+  for (let s = 1; s <= 10; s++) {
+    allSubjectRates["sub_" + String(s).padStart(2, "0")] = [];
+  }
+
+  Object.values(userRoundLatestMap).forEach(log => {
+    const roundMatch = String(log.subject_id || "").match(/(\d+)/);
+    const roundStr = roundMatch ? roundMatch[1] : "";
+    if (!roundStr) return;
+
+    if (!examStats[roundStr]) {
+      examStats[roundStr] = { qCounts: {}, question_correct_rates: {} };
+    }
+
+    const scored = reconstructScoredRecord(log, roundStr);
+    for (let s = 1; s <= 10; s++) {
+      const sk = "sub_" + String(s).padStart(2, "0");
+      if (scored[sk] !== undefined) {
+        allSubjectRates[sk].push(Number(scored[sk]));
+      }
+    }
+
+    if (Array.isArray(log.details)) {
+      log.details.forEach((d, idx) => {
+        const qNum = d.question_num || (idx + 1);
+        if (!examStats[roundStr].qCounts[qNum]) {
+          examStats[roundStr].qCounts[qNum] = { total: 0, correct: 0 };
+        }
+        examStats[roundStr].qCounts[qNum].total++;
+        if (d.is_correct) examStats[roundStr].qCounts[qNum].correct++;
+      });
+    }
+  });
+
+  Object.keys(examStats).forEach(r => {
+    const qCounts = examStats[r].qCounts;
+    for (let q = 1; q <= 55; q++) {
+      if (qCounts[q] && qCounts[q].total > 0) {
+        examStats[r].question_correct_rates[q] =
+          Math.round((qCounts[q].correct / qCounts[q].total) * 1000) / 10;
+      }
+    }
+  });
+
+  const subjectMedians = {};
+  for (let s = 1; s <= 10; s++) {
+    const sk = "sub_" + String(s).padStart(2, "0");
+    const arr = allSubjectRates[sk].slice().sort((a, b) => a - b);
+    if (arr.length > 0) {
+      const mid = Math.floor(arr.length / 2);
+      subjectMedians[sk] = arr.length % 2 !== 0
+        ? arr[mid]
+        : Math.round(((arr[mid - 1] + arr[mid]) / 2) * 10) / 10;
+    }
+  }
+
+  return {
+    latest_exam_records: latestExamRecords,
+    submitted_rounds: Array.from(submittedRoundsSet),
+    history_log: historyLog,
+    group_data: {
+      medians: { subjects: subjectMedians },
+      exam_stats: examStats
+    }
+  };
+}
+
+function reconstructScoredRecord(log, roundStr) {
+  const details = Array.isArray(log.details) ? log.details : [];
+  const wrongQuestions = [];
+  const subjectStats = {};
+  for (let s = 1; s <= 10; s++) subjectStats[s] = { total: 0, correct: 0 };
+
+  details.forEach((d, idx) => {
+    const qNum = d.question_num || (idx + 1);
+    const subjId = d.subject_id || PAST_EXAM_SUBJECT_MAPPING[qNum - 1] || 1;
+    subjectStats[subjId].total++;
+    if (d.is_correct) {
+      subjectStats[subjId].correct++;
+    } else {
+      wrongQuestions.push(qNum);
+    }
+  });
+
+  const subAcc = {};
+  for (let s = 1; s <= 10; s++) {
+    const sk = "sub_" + String(s).padStart(2, "0");
+    const st = subjectStats[s];
+    subAcc[sk] = st.total > 0 ? Math.round((st.correct / st.total) * 1000) / 10 : 0;
+  }
+
+  const totalScore = log.correct_count !== undefined ? log.correct_count : 0;
+  const totalAcc = log.score !== undefined ? Number(log.score) : Math.round((totalScore / 55) * 1000) / 10;
+
+  return {
+    log_id: log.id,
+    total_score: totalScore,
+    total_accuracy: totalAcc,
+    wrong_questions: wrongQuestions,
+    correct_answers: PAST_EXAM_ANSWERS[Number(roundStr)] || [],
+    timestamp: log.created_at,
+    ...subAcc
+  };
+}
+
+// ==========================================
+// 2. 55問入力フォーム ＆ 下書き保存
+// ==========================================
+function initExamRoundSelector() {
+  const select = document.getElementById("select-exam-round");
+  select.innerHTML = "";
+  for (let r = 54; r >= 41; r--) {
+    const opt = document.createElement("option");
+    opt.value = String(r);
+    opt.textContent = `第${r}回 国家試験`;
+    select.appendChild(opt);
+  }
+}
+
+function renderQuestionsForm() {
+  const container = document.getElementById("questions-form-container");
+  container.innerHTML = "";
+
+  PAST_EXAM_SUBJECTS.forEach(subj => {
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "subject-group";
+
+    let rowsHtml = "";
+    for (let q = subj.startQ; q <= subj.endQ; q++) {
+      rowsHtml += `
+        <div class="question-row">
+          <span class="q-label">問${q}</span>
+          <div class="choice-group" data-qidx="${q - 1}">
+            <button type="button" class="choice-btn" data-val="1">1</button>
+            <button type="button" class="choice-btn" data-val="2">2</button>
+            <button type="button" class="choice-btn" data-val="3">3</button>
+            <button type="button" class="choice-btn" data-val="4">4</button>
+          </div>
+        </div>
+      `;
+    }
+
+    groupDiv.innerHTML = `
+      <div class="subject-header">
+        <span>${subj.id}. ${subj.name}</span>
+        <span style="font-size:0.75rem; color:#64748b;">問${subj.startQ}〜問${subj.endQ}</span>
+      </div>
+      ${rowsHtml}
+    `;
+    container.appendChild(groupDiv);
+  });
+
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest(".choice-btn");
+    if (!btn) return;
+
+    const group = btn.closest(".choice-group");
+    const qIdx = parseInt(group.getAttribute("data-qidx"), 10);
+    const val = btn.getAttribute("data-val");
+
+    if (btn.classList.contains("selected")) {
+      btn.classList.remove("selected");
+      studentAnswers[qIdx] = "";
+    } else {
+      group.querySelectorAll(".choice-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      studentAnswers[qIdx] = val;
+    }
+
+    saveDraftAnswers();
+    updateAnsweredCountBadge();
+  });
+}
+
+function updateAnsweredCountBadge() {
+  const filled = studentAnswers.filter(Boolean).length;
+  const badge = document.getElementById("answered-count-badge");
+  if (badge) {
+    badge.innerText = `入力済み: ${filled} / 55問`;
+    badge.style.color = filled === 55 ? "#15803d" : "#0984e3";
+  }
+}
+
+function saveDraftAnswers() {
+  const key = `beauty_4choice_draft_${currentUser.serial_code}_${currentExamRound}`;
+  localStorage.setItem(key, JSON.stringify(studentAnswers));
+}
+
+function loadDraftAnswers() {
+  const key = `beauty_4choice_draft_${currentUser.serial_code}_${currentExamRound}`;
+  const saved = localStorage.getItem(key);
+  studentAnswers = saved ? JSON.parse(saved) : new Array(55).fill("");
+
+  document.querySelectorAll(".choice-group").forEach((group, idx) => {
+    const val = studentAnswers[idx];
+    group.querySelectorAll(".choice-btn").forEach(btn => {
+      if (btn.getAttribute("data-val") === val) {
+        btn.classList.add("selected");
+      } else {
+        btn.classList.remove("selected");
+      }
+    });
+  });
+  updateAnsweredCountBadge();
+}
+
+// ==========================================
+// 3. 回答再確認 ＆ Supabase 送信処理
+// ==========================================
+function openConfirmModal() {
+  const unanswered = [];
+  studentAnswers.forEach((ans, i) => {
+    if (!ans) unanswered.push(i + 1);
+  });
+
+  const alertEl = document.getElementById("unanswered-alert");
+  const submitBtn = document.getElementById("btn-submit-exam");
+
+  if (unanswered.length > 0) {
+    alertEl.innerText = `⚠️ 未回答が ${unanswered.length} 問あります（問 ${unanswered.slice(0, 6).join(", ")}...）。\n全55問に回答すると採点・送信できます。`;
+    alertEl.style.display = "block";
+    submitBtn.disabled = true;
+  } else {
+    alertEl.style.display = "none";
+    submitBtn.disabled = false;
+  }
+
+  const tbody = document.getElementById("summary-table-body");
+  tbody.innerHTML = "";
+  for (let i = 0; i < 19; i++) {
+    const q1 = i + 1;
+    const q2 = i + 20;
+    const q3 = i + 39;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>問${q1}</td><td><b>${studentAnswers[q1-1] || "-"}</b></td>
+      <td>${q2 <= 55 ? '問'+q2 : ''}</td><td><b>${q2 <= 55 ? (studentAnswers[q2-1] || "-") : ''}</b></td>
+      <td>${q3 <= 55 ? '問'+q3 : ''}</td><td><b>${q3 <= 55 ? (studentAnswers[q3-1] || "-") : ''}</b></td>
+    `;
+    tbody.appendChild(row);
+  }
+
+  document.getElementById("confirm-modal").style.display = "flex";
+}
+
+async function submitExamData() {
+  const btn = document.getElementById("btn-submit-exam");
+  btn.disabled = true;
+  btn.innerText = "⏳ 採点・保存中...";
+
+  try {
+    const scoring = scorePastExam(currentExamRound, studentAnswers);
+    const supabase = getSupabaseClient();
+
+    const payload = {
+      user_id: currentUser.id,
+      serial_code: currentUser.serial_code,
+      mode: "4choice",
+      subject_id: `round_${currentExamRound}`,
+      score: scoring.total_accuracy,
+      total_questions: scoring.total_questions,
+      correct_count: scoring.total_score,
+      details: scoring.question_details,
+      created_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase.from("exam_logs").insert([payload]);
+    if (error) throw new Error(error.message);
+
+    document.getElementById("confirm-modal").style.display = "none";
+    triggerConfetti();
+
+    // 最新データの再取得と第2タブへの自動切替
+    await loadSupabaseDashboardData();
+
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
+    document.querySelector('.tab-btn[data-tab="tab-review"]')?.classList.add("active");
+    document.getElementById("tab-review")?.classList.add("active");
+
+    alert(`🎉 採点・記録が完了しました！\n\n・対象: 第${currentExamRound}回 過去問\n・総合得点: ${scoring.total_score} / 55 点 (${scoring.total_accuracy}%)\n・間違えた問題: ${scoring.wrong_questions.length} 問`);
+  } catch (err) {
+    console.error("送信エラー:", err);
+    alert("送信・保存に失敗しました: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "確定して採点・送信";
+  }
+}
+
+// ==========================================
+// 4. 分析ボード・回答記録・復習ピックアップ描画
+// ==========================================
+const passLinePlugin = {
+  id: 'passLine',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales: { y } } = chart;
+    if (!y || !chartArea) return;
+    const { left, right } = chartArea;
+    const yVal = y.getPixelForValue(60);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#e74c3c';
+    ctx.moveTo(left, yVal);
+    ctx.lineTo(right, yVal);
+    ctx.stroke();
+
+    ctx.fillStyle = '#e74c3c';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('60% 合格基準', left + 6, yVal - 5);
+    ctx.restore();
+  }
+};
+
+function renderDashboardCharts() {
+  if (!studentDashboardData) return;
+
+  const records = studentDashboardData.latest_exam_records || {};
+  const submittedRounds = Object.keys(records);
+  const titleEl = document.getElementById("dashboard-radar-title");
+
+  if (submittedRounds.length === 0) {
+    if (titleEl) {
+      titleEl.innerHTML = `🎯 累積・総合分析（未実施）<br><span style="font-size:0.72rem; color:#64748b; font-weight:normal;">回答を入力して送信すると分析グラフが表示されます</span>`;
+    }
+    document.getElementById("badge-total-rank").innerText = "-";
+    document.getElementById("badge-total-acc").innerText = "--%";
+  } else {
+    if (titleEl) {
+      titleEl.innerHTML = `🎯 累積・総合分析（全${submittedRounds.length}回平均 vs 全体中央値）`;
+    }
+  }
+
+  const mySubAcc = [];
+  const medianSubAcc = [];
+  const subjectLabels = PAST_EXAM_SUBJECTS.map(s => s.shortName);
+  const globalMedians = studentDashboardData.group_data?.medians?.subjects || {};
+
+  for (let i = 1; i <= 10; i++) {
+    const key = "sub_" + String(i).padStart(2, "0");
+    if (submittedRounds.length > 0) {
+      let sum = 0;
+      submittedRounds.forEach(r => { sum += Number(records[r][key] || 0); });
+      mySubAcc.push(Math.round((sum / submittedRounds.length) * 10) / 10);
+    } else {
+      mySubAcc.push(0);
+    }
+    medianSubAcc.push(globalMedians[key] !== undefined ? Number(globalMedians[key]) : 0);
+  }
+
+  if (submittedRounds.length > 0) {
+    let totalAccSum = 0;
+    submittedRounds.forEach(r => { totalAccSum += Number(records[r].total_accuracy || 0); });
+    const overallAvg = Math.round((totalAccSum / submittedRounds.length) * 10) / 10;
+    document.getElementById("badge-total-rank").innerHTML = getRankLabel(overallAvg);
+    document.getElementById("badge-total-acc").innerText = `${overallAvg}%`;
+  }
+
+  const radarDatasets = [{
+    label: 'あなたの累積平均 (%)',
+    data: mySubAcc,
+    backgroundColor: 'rgba(9, 132, 227, 0.25)',
+    borderColor: 'rgba(9, 132, 227, 1)',
+    borderWidth: 2
+  }];
+
+  if (Object.keys(globalMedians).length > 0) {
+    radarDatasets.push({
+      label: '全体集団中央値 (%)',
+      data: medianSubAcc,
+      backgroundColor: 'rgba(148, 163, 184, 0.12)',
+      borderColor: 'rgba(100, 116, 139, 0.85)',
+      borderWidth: 1.5,
+      borderDash: [4, 4]
+    });
+  }
+
+  if (radarChartInstance) radarChartInstance.destroy();
+  radarChartInstance = new Chart(document.getElementById("radarChart").getContext("2d"), {
+    type: 'radar',
+    data: { labels: subjectLabels, datasets: radarDatasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { r: { min: 0, max: 100, ticks: { stepSize: 20 } } }
+    }
+  });
+
+  const historyLog = (studentDashboardData.history_log || []).slice(-10);
+  const timeLabels = historyLog.map(h => `第${h.exam_round}回`);
+  const historyAcc = historyLog.map(h => h.total_accuracy);
+
+  if (lineChartInstance) lineChartInstance.destroy();
+  lineChartInstance = new Chart(document.getElementById("lineChart").getContext("2d"), {
+    type: 'line',
+    data: {
+      labels: timeLabels,
+      datasets: [{
+        label: '総合正答率 (%)',
+        data: historyAcc,
+        borderColor: '#0984e3',
+        backgroundColor: 'rgba(9, 132, 227, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100 } }
+    },
+    plugins: [passLinePlugin]
+  });
+}
+
+function getRankLabel(acc) {
+  if (acc >= 80) return "S (合格圏内)";
+  if (acc >= 70) return "A (順調)";
+  if (acc >= 60) return "B (基準突破)";
+  if (acc >= 54) return "C (あと一歩)";
+  return "D (要復習)";
+}
+
+function renderLatestResultSummary() {
+  const summaryCard = document.getElementById("latest-result-summary");
+  const emptyMsg = document.getElementById("latest-result-empty-msg");
+  if (!summaryCard) return;
+
+  const rec = studentDashboardData?.latest_exam_records?.[currentExamRound];
+  if (!rec) {
+    summaryCard.style.display = "none";
+    if (emptyMsg) emptyMsg.style.display = "block";
+    return;
+  }
+
+  summaryCard.style.display = "block";
+  if (emptyMsg) emptyMsg.style.display = "none";
+
+  document.getElementById("summary-exam-round").innerText = `第${currentExamRound}回`;
+  document.getElementById("summary-exam-time").innerText = formatDisplayTimestamp(rec.timestamp);
+  document.getElementById("summary-score-num").innerText = rec.total_score;
+  document.getElementById("summary-accuracy-num").innerText = `${rec.total_accuracy}%`;
+  document.getElementById("summary-rank-val").innerText = getRankLabel(rec.total_accuracy);
+
+  const wrongList = rec.wrong_questions || [];
+  document.getElementById("summary-wrong-count").innerText = `${wrongList.length}問`;
+
+  const listContainer = document.getElementById("summary-wrong-questions-list");
+  if (wrongList.length === 0) {
+    listContainer.innerHTML = '<div style="font-size:0.86rem; color:#15803d; text-align:center; padding:14px; font-weight:bold;">🎉 全問正解です！素晴らしい成果です！</div>';
+    return;
+  }
+
+  const roundGroupStats = studentDashboardData.group_data?.exam_stats?.[currentExamRound]?.question_correct_rates || {};
+  const correctAnswersList = rec.correct_answers || [];
+  const subjectGrouped = {};
+
+  wrongList.forEach(qNum => {
+    const subj = PAST_EXAM_SUBJECTS.find(s => qNum >= s.startQ && qNum <= s.endQ) || { id: 99, name: "その他" };
+    const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : null;
+    const modelAns = correctAnswersList[qNum - 1] || "";
+
+    if (!subjectGrouped[subj.name]) subjectGrouped[subj.name] = { id: subj.id, questions: [] };
+    subjectGrouped[subj.name].questions.push({ qNum, groupRate, modelAns });
+  });
+
+  let html = "";
+  Object.keys(subjectGrouped)
+    .sort((a, b) => subjectGrouped[a].id - subjectGrouped[b].id)
+    .forEach(subjName => {
+      const group = subjectGrouped[subjName];
+      const badgesHtml = group.questions.map(item => {
+        let badgeClass = "q-badge-normal";
+        let icon = "";
+        if (item.groupRate !== null && item.groupRate >= 80.0) {
+          badgeClass = "q-badge-abs";
+          icon = "🔥 ";
+        } else if (item.groupRate !== null && item.groupRate < 60.0) {
+          badgeClass = "q-badge-together";
+          icon = "🤝 ";
+        }
+        const ansLabel = item.modelAns === "0" ? "全員正解" : item.modelAns;
+        const modelAnsText = ansLabel ? `<b style="margin-left:3px; color:#d35400;">【正解:${ansLabel}】</b>` : "";
+        const rateText = item.groupRate !== null ? `全体 ${item.groupRate}%` : "集計中";
+        return `<span class="${badgeClass}">${icon}問${item.qNum} <small style="font-size:0.68rem;">(${rateText})</small>${modelAnsText}</span>`;
+      }).join("");
+
+      html += `
+        <div class="subject-wrong-block">
+          <div class="subject-wrong-title">
+            <span>${subjName}</span>
+            <span style="font-size:0.72rem; color:#64748b;">${group.questions.length}問誤答</span>
+          </div>
+          <div class="wrong-q-flex">${badgesHtml}</div>
+        </div>
+      `;
+    });
+
+  listContainer.innerHTML = html;
+}
+
+function renderReviewPickups() {
+  const absContainer = document.getElementById("abs-review-list");
+  const togetherContainer = document.getElementById("together-review-list");
+  if (!absContainer || !togetherContainer || !studentDashboardData) return;
+
+  const selectedSubjectId = document.getElementById("select-subject-filter")?.value || "all";
+  const records = studentDashboardData.latest_exam_records || {};
+  const groupStats = studentDashboardData.group_data?.exam_stats || {};
+
+  const absItems = [];
+  const togetherItems = [];
+
+  Object.keys(records).forEach(round => {
+    const rec = records[round];
+    const wrongList = rec.wrong_questions || [];
+    const roundGroupStats = groupStats[round]?.question_correct_rates || {};
+
+    wrongList.forEach(qNum => {
+      const groupRate = roundGroupStats[qNum] !== undefined ? Number(roundGroupStats[qNum]) : null;
+      const subject = PAST_EXAM_SUBJECTS.find(s => qNum >= s.startQ && qNum <= s.endQ) || { id: 99, name: "その他" };
+
+      if (selectedSubjectId !== "all" && String(subject.id) !== String(selectedSubjectId)) return;
+
+      const itemData = { round, qNum, groupRate, subjectName: subject.name, subjectId: subject.id };
+      if (groupRate !== null && groupRate >= 80.0) {
+        absItems.push(itemData);
+      } else if (groupRate !== null && groupRate < 60.0) {
+        togetherItems.push(itemData);
+      }
+    });
+  });
+
+  function renderGroupedList(items, accentColor, bgLight, emptyMsg, icon) {
+    if (items.length === 0) {
+      return `<div style="font-size:0.8rem; color:#15803d; text-align:center; padding:14px; font-weight:bold;">${emptyMsg}</div>`;
+    }
+
+    items.sort((a, b) => a.subjectId - b.subjectId || Number(b.round) - Number(a.round) || a.qNum - b.qNum);
+    const grouped = {};
+    items.forEach(item => {
+      if (!grouped[item.subjectName]) grouped[item.subjectName] = [];
+      grouped[item.subjectName].push(item);
+    });
+
+    return Object.keys(grouped).map(subjName => {
+      const list = grouped[subjName];
+      return `
+        <div style="margin-bottom:10px; background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:10px;">
+          <div style="font-size:0.82rem; font-weight:bold; color:#1e293b; border-left:4px solid ${accentColor}; padding-left:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+            <span>${subjName}</span>
+            <span style="font-size:0.7rem; background:${accentColor}; color:white; padding:2px 7px; border-radius:10px;">${list.length}問</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            ${list.map(item => `
+              <div style="background:${bgLight}; border:1px solid ${accentColor}44; border-radius:8px; padding:5px 9px; font-size:0.76rem; display:flex; align-items:center; gap:5px;">
+                <span style="font-weight:bold; color:${accentColor};">${icon}第${item.round}回 問${item.qNum}</span>
+                <span style="font-size:0.68rem; background:#fff; border:1px solid ${accentColor}; color:${accentColor}; padding:1px 5px; border-radius:4px; font-weight:bold;">全体 ${item.groupRate}%</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  absContainer.innerHTML = renderGroupedList(
+    absItems, "#e74c3c", "#fff0f0",
+    "🎉 該当科目に重要復習問題はありません！", "🔥 "
+  );
+  togetherContainer.innerHTML = renderGroupedList(
+    togetherItems, "#0984e3", "#f0f8ff",
+    "🎉 該当科目に高難易度の誤答問題はありません！", "🤝 "
+  );
+}
+
+// ==========================================
+// 5. 送信履歴モーダル ＆ リセット削除
+// ==========================================
+function openHistoryResetModal() {
+  const listContainer = document.getElementById("history-reset-list");
+  listContainer.innerHTML = "";
+
+  const submittedRounds = studentDashboardData?.submitted_rounds || [];
+  const records = studentDashboardData?.latest_exam_records || {};
+
+  if (submittedRounds.length === 0) {
+    listContainer.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:15px;">まだ送信履歴がありません。</div>';
+  } else {
+    submittedRounds.slice().sort((a, b) => Number(b) - Number(a)).forEach(round => {
+      const rec = records[round];
+      const timeStr = formatDisplayTimestamp(rec?.timestamp);
+
+      const item = document.createElement("div");
+      item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #e2e8f0; font-size:0.8rem;";
+      item.innerHTML = `
+        <div>
+          <b>第${round}回 過去問</b> <span style="font-size:0.72rem; color:#64748b;">(${timeStr})</span><br>
+          <span style="font-size:0.76rem; color:#0984e3; font-weight:bold;">得点: ${rec?.total_score || 0}点 (${rec?.total_accuracy || 0}%)</span>
+        </div>
+        <button class="btn-del-record" data-round="${round}" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.74rem; font-weight:bold; cursor:pointer;">リセット</button>
+      `;
+      listContainer.appendChild(item);
+    });
+
+    listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        const round = e.currentTarget.getAttribute("data-round");
+        if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外されます。`)) {
+          await deleteExamRecordAction(round);
+        }
+      });
+    });
+  }
+
+  document.getElementById("history-reset-modal").style.display = "flex";
+}
+
+async function deleteExamRecordAction(examRound) {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase
+    .from("exam_logs")
+    .delete()
+    .eq("user_id", currentUser.id)
+    .eq("mode", "4choice")
+    .eq("subject_id", `round_${examRound}`);
+
+  if (error) {
+    alert("リセットに失敗しました: " + error.message);
+    return;
+  }
+
+  localStorage.removeItem(`beauty_4choice_draft_${currentUser.serial_code}_${examRound}`);
+  document.getElementById("history-reset-modal").style.display = "none";
+  await loadSupabaseDashboardData();
+  alert(`🎉 第${examRound}回の記録をリセットしました。`);
+}
+
+function triggerConfetti() {
+  const canvas = document.getElementById("quiz-confetti-canvas");
+  if (canvas && typeof confetti === "function") {
+    const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
+    myConfetti({ particleCount: 110, spread: 70, origin: { y: 0.6 } });
+  }
+}
+
+function formatDisplayTimestamp(ts) {
+  if (!ts) return "送信済み";
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return ts;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+}
+</script>
+</body>
+</html>
