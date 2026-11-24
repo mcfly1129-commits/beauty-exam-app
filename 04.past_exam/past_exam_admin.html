@@ -1108,43 +1108,6 @@ const resetPageAndRender = () => {
     scrollToTableTop();
   });
 
-// タブ切り替え（学生一覧 vs 過去問・科目分析 vs 皆が苦手な問題）
-  document.getElementById("btn-tab-students").addEventListener("click", () => {
-    document.getElementById("view-students-container").style.display = "block";
-    document.getElementById("view-analysis-container").style.display = "none";
-    document.getElementById("view-together-container").style.display = "none";
-    document.getElementById("btn-tab-students").style.background = "var(--primary-color)";
-    document.getElementById("btn-tab-analysis").style.background = "#b2bec3";
-    document.getElementById("btn-tab-together").style.background = "#b2bec3";
-  });
-
-  document.getElementById("btn-tab-analysis").addEventListener("click", () => {
-    document.getElementById("view-students-container").style.display = "none";
-    document.getElementById("view-analysis-container").style.display = "block";
-    document.getElementById("view-together-container").style.display = "none";
-    document.getElementById("btn-tab-students").style.background = "#b2bec3";
-    document.getElementById("btn-tab-analysis").style.background = "var(--primary-color)";
-    document.getElementById("btn-tab-together").style.background = "#b2bec3";
-    
-    renderItemAnalysis();
-    renderSubjectAnalysis();
-  });
-
-  // 💡 【新規追加】「皆が苦手な問題」タブクリック時の処理
-  document.getElementById("btn-tab-together").addEventListener("click", () => {
-    document.getElementById("view-students-container").style.display = "none";
-    document.getElementById("view-analysis-container").style.display = "none";
-    document.getElementById("view-together-container").style.display = "block";
-    document.getElementById("btn-tab-students").style.background = "#b2bec3";
-    document.getElementById("btn-tab-analysis").style.background = "#b2bec3";
-    document.getElementById("btn-tab-together").style.background = "var(--primary-color)";
-    
-    // 💡 この関数は次のステップで定義しますが、エラーを防ぐため配置します
-    if (typeof renderTogetherProblemsView === "function") {
-      renderTogetherProblemsView();
-    }
-  });
-
 // -----------------------------------------------------------------
   // 💡 修正後：すべてのタブ切替イベントを完全に同期・排他制御する
   // -----------------------------------------------------------------
@@ -2089,12 +2052,7 @@ function renderItemAnalysis() {
         const rec = s.examRecords[r];
         targetSubmitCount++;
 
-        let wrongList = [];
-        if (Array.isArray(rec.wrongQuestions)) {
-          wrongList = rec.wrongQuestions.map(Number);
-        } else if (typeof rec.wrongQuestions === 'string' && rec.wrongQuestions.trim() !== '') {
-          wrongList = rec.wrongQuestions.split(',').map(Number);
-        }
+        const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
         for (let q = 1; q <= 55; q++) {
           totalSubmitsPerQuestion[q]++;
@@ -2109,12 +2067,7 @@ function renderItemAnalysis() {
         const rec = s.examRecords[selectedRound];
         targetSubmitCount++;
 
-        let wrongList = [];
-        if (Array.isArray(rec.wrongQuestions)) {
-          wrongList = rec.wrongQuestions.map(Number);
-        } else if (typeof rec.wrongQuestions === 'string' && rec.wrongQuestions.trim() !== '') {
-          wrongList = rec.wrongQuestions.split(',').map(Number);
-        }
+        const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
         for (let q = 1; q <= 55; q++) {
           totalSubmitsPerQuestion[q]++;
@@ -2396,12 +2349,7 @@ if (sortedRounds.length === 0) {
           submitsForRound++;
           const rec = s.examRecords[r];
 
-          let wrongList = [];
-          if (Array.isArray(rec.wrongQuestions)) {
-            wrongList = rec.wrongQuestions.map(Number);
-          } else if (typeof rec.wrongQuestions === 'string' && rec.wrongQuestions.trim() !== '') {
-            wrongList = rec.wrongQuestions.split(',').map(Number);
-          }
+          const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
           for (let q = 1; q <= 55; q++) {
             totalSubmitsPerQ[q]++;
@@ -2481,12 +2429,7 @@ ${hardInThisRound.map(item => {
       totalSubmitsAll++;
       const rec = s.examRecords[r];
 
-      let wrongList = [];
-      if (Array.isArray(rec.wrongQuestions)) {
-        wrongList = rec.wrongQuestions.map(Number);
-      } else if (typeof rec.wrongQuestions === 'string' && rec.wrongQuestions.trim() !== '') {
-        wrongList = rec.wrongQuestions.split(',').map(Number);
-      }
+      const wrongList = parseWrongQuestions(rec.wrongQuestions);
 
       for (let q = 1; q <= 55; q++) {
         totalSubmitsPerQuestion[q]++;
@@ -2819,9 +2762,20 @@ function renderStatisticsView() {
 
 // 助長用パーサ関数がない場合は安全に定義
 function parseWrongQuestions(wrongData) {
-  if (Array.isArray(wrongData)) return wrongData.map(Number).filter(q => !isNaN(q) && q > 0);
+  if (Array.isArray(wrongData)) {
+    return wrongData
+      .map(q => parseInt(String(q).trim(), 10))
+      .filter(q => !isNaN(q) && q > 0);
+  }
+  if (typeof wrongData === 'number' && Number.isFinite(wrongData)) {
+    const q = Math.trunc(wrongData);
+    return (!isNaN(q) && q > 0) ? [q] : [];
+  }
   if (typeof wrongData === 'string' && wrongData.trim() !== '') {
-    return wrongData.split(',').map(q => parseInt(q.trim(), 10)).filter(q => !isNaN(q) && q > 0);
+    return wrongData
+      .split(',')
+      .map(q => parseInt(q.trim(), 10))
+      .filter(q => !isNaN(q) && q > 0);
   }
   return [];
 }
