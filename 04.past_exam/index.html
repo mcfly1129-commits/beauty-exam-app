@@ -973,12 +973,12 @@ document.getElementById('btn-logout')?.addEventListener('click', () => {
 
 // タブ切り替え処理の更新（第3タブ: tab-review / 第4タブ: tab-pickup の個別呼び出し）
 document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", (e) => {
+  btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
 
-    e.target.classList.add("active");
-    const targetTab = e.target.getAttribute("data-tab");
+    btn.classList.add("active");
+    const targetTab = btn.getAttribute("data-tab");
     document.getElementById(targetTab).classList.add("active");
 
     if (targetTab === "tab-dashboard") renderDashboardCharts();
@@ -1602,12 +1602,22 @@ function renderLatestResultSummary() {
     rankValEl.innerHTML = rec.total_accuracy !== undefined ? getRankLabel(rec.total_accuracy) : "-";
   }
 
-  // 間違えた問題番号リストの抽出
+  // 間違えた問題番号リストの抽出（配列・数値・カンマ区切り文字列に対応）
   let wrongList = [];
   if (Array.isArray(rec.wrong_questions)) {
-    wrongList = rec.wrong_questions.map(String).filter(Boolean);
+    wrongList = rec.wrong_questions
+      .map(q => parseInt(String(q).trim(), 10))
+      .filter(q => !isNaN(q) && q >= 1 && q <= 55)
+      .map(String);
+  } else if (typeof rec.wrong_questions === "number" && Number.isFinite(rec.wrong_questions)) {
+    const q = Math.trunc(rec.wrong_questions);
+    wrongList = (q >= 1 && q <= 55) ? [String(q)] : [];
   } else if (typeof rec.wrong_questions === "string") {
-    wrongList = rec.wrong_questions.split(",").filter(Boolean);
+    wrongList = rec.wrong_questions
+      .split(",")
+      .map(q => parseInt(q.trim(), 10))
+      .filter(q => !isNaN(q) && q >= 1 && q <= 55)
+      .map(String);
   }
 
   document.getElementById("summary-wrong-count").innerText = `${wrongList.length}問`;
@@ -1667,12 +1677,12 @@ function renderLatestResultSummary() {
         let icon = "";
         
         // 🔥 重要復習問題（集団正解率80%以上）
-        if (item.groupRate >= 80.0) {
+        if (item.groupRate !== null && item.groupRate >= 80.0) {
           badgeClass = "q-badge-abs";
           icon = "🔥 ";
         } 
         // 🤝 皆で頑張ろう問題（集団正解率60%未満）
-        else if (item.groupRate < 60.0) {
+        else if (item.groupRate !== null && item.groupRate < 60.0) {
           badgeClass = "q-badge-together";
           icon = "🤝 ";
         }
@@ -1726,9 +1736,19 @@ function renderReviewPickups() {
 
     let wrongList = [];
     if (Array.isArray(rec.wrong_questions)) {
-      wrongList = rec.wrong_questions.map(String).filter(Boolean);
+      wrongList = rec.wrong_questions
+        .map(q => parseInt(String(q).trim(), 10))
+        .filter(q => !isNaN(q) && q >= 1 && q <= 55)
+        .map(String);
+    } else if (typeof rec.wrong_questions === "number" && Number.isFinite(rec.wrong_questions)) {
+      const q = Math.trunc(rec.wrong_questions);
+      wrongList = (q >= 1 && q <= 55) ? [String(q)] : [];
     } else if (typeof rec.wrong_questions === "string") {
-      wrongList = rec.wrong_questions.split(",").filter(Boolean);
+      wrongList = rec.wrong_questions
+        .split(",")
+        .map(q => parseInt(q.trim(), 10))
+        .filter(q => !isNaN(q) && q >= 1 && q <= 55)
+        .map(String);
     }
 
     const roundGroupStats = groupStats[round]?.question_correct_rates || {};
