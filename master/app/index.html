@@ -389,10 +389,10 @@ if (elMax) elMax.innerText = maxStreak;
 }
 
 function refreshHomeDashboardUI() {
-  const currentUser = getCurrentUser();
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!currentUser) {
     window.location.href = '../index.html';
-    return;
+    return null;
   }
 
   const codeEl = document.getElementById('user-display-code');
@@ -401,10 +401,139 @@ function refreshHomeDashboardUI() {
   renderDashboardMonitor();
   updateSpeedDashboardBadges();
   renderHeaderDailyStats();
+  return currentUser;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  refreshHomeDashboardUI();
+async function syncProgressFromSupabase(user) {
+  const supabase = typeof getSupabaseClient === 'function' ? getSupabaseClient() : null;
+  const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+  if (!supabase || !dbSource || !user || !user.id) return;
+
+  try {
+    const { data: logs, error } = await supabase
+      .from('exam_logs')
+      .select('mode, subject_id, details, created_at')
+      .eq('user_id', user.id)
+      .in('mode', ['2choice', 'reset'])
+      .order('created_at', { ascending: true });
+
+    if (error || !logs || logs.length === 0) return;
+
+    const qIdToCourseMap = {};
+    for (let cKey in dbSource) {
+      const pool = dbSource[cKey].questionPool || {};
+      for (let unit in pool) {
+        pool[unit].forEach(q => {
+          qIdToCourseMap[q.id] = cKey;
+        });
+      }
+    }
+
+    const remoteStatsByCourse = {};
+    const resetAtByCourse = {};
+    let latestRemoteBookmarks = null;
+
+    logs.forEach(log => {
+      const logTime = Date.parse(log.created_at || '');
+
+      const details = Array.isArray(log.details)
+        ? log.details
+        : (log.details && Array.isArray(log.details.answers) ? log.details.answers : []);
+
+      if (log.details && Array.isArray(log.details.bookmarked_ids)) {
+        latestRemoteBookmarks = log.details.bookmarked_ids;
+      }
+
+      if (log.mode === 'reset') {
+        details.forEach(item => {
+          const cKey = item && item.course_key;
+          if (!cKey) return;
+          const resetTime = Number.isFinite(Date.parse(item.reset_at || ''))
+            ? Date.parse(item.reset_at)
+            : logTime;
+          resetAtByCourse[cKey] = resetTime;
+          remoteStatsByCourse[cKey] = {};
+        });
+        return;
+      }
+
+      details.forEach(ans => {
+        const cKey = ans.course_key || qIdToCourseMap[ans.question_id];
+        if (!cKey) return;
+
+        const resetTime = resetAtByCourse[cKey];
+        if (Number.isFinite(resetTime) && Number.isFinite(logTime) && logTime <= resetTime) {
+          return;
+        }
+
+        if (!remoteStatsByCourse[cKey]) remoteStatsByCourse[cKey] = {};
+        if (!remoteStatsByCourse[cKey][ans.question_id]) {
+          remoteStatsByCourse[cKey][ans.question_id] = { total: 0, streak: 0, correct_count: 0 };
+        }
+        const st = remoteStatsByCourse[cKey][ans.question_id];
+        st.total += 1;
+        if (ans.is_correct) {
+          st.streak += 1;
+          st.correct_count += 1;
+        } else {
+          st.streak = 0;
+        }
+      });
+    });
+
+    let anyCourseUpdated = false;
+    for (let cKey in remoteStatsByCourse) {
+      const localStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + cKey)) || {};
+      const remoteStats = remoteStatsByCourse[cKey];
+      let courseChanged = false;
+
+      for (let qId in remoteStats) {
+        const rSt = remoteStats[qId];
+        const lSt = localStats[qId];
+        if (!lSt || rSt.total > (lSt.total || 0)) {
+          localStats[qId] = rSt;
+          courseChanged = true;
+        }
+      }
+
+      if (courseChanged) {
+        anyCourseUpdated = true;
+        localStorage.setItem("beauty_app_question_stats_" + cKey, JSON.stringify(localStats));
+        let masteredCount = 0;
+        for (let qId in localStats) {
+          if ((localStats[qId].streak || 0) >= 1) masteredCount++;
+        }
+        localStorage.setItem('solved_' + cKey, masteredCount);
+      }
+    }
+
+    let bookmarksUpdated = false;
+    if (Array.isArray(latestRemoteBookmarks)) {
+      const localBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const mergedBookmarks = Array.from(new Set([...localBookmarks.map(String), ...latestRemoteBookmarks.map(String)]));
+      if (mergedBookmarks.length !== localBookmarks.length) {
+        bookmarksUpdated = true;
+      }
+      localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(mergedBookmarks));
+    }
+
+    if (anyCourseUpdated || bookmarksUpdated) {
+      renderDashboardMonitor();
+      updateSpeedDashboardBadges();
+    }
+  } catch (e) {
+    console.warn('[Sync] 進捗復元スキップ:', e.message);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const currentUser = refreshHomeDashboardUI();
+  if (!currentUser) return;
+
+  if (typeof flushOfflineQueue === 'function') {
+    await flushOfflineQueue();
+  }
+  await syncProgressFromSupabase(currentUser);
 });
 
 window.addEventListener('pageshow', (event) => {
@@ -615,21 +744,27 @@ if (dashboardBanner) dashboardBanner.style.display = 'none';
       document.getElementById("speed-current-streak").innerText = `この問題の正解数: ${stats[q.id].correct_count}回 (連続: ${stats[q.id].streak}回)`;
       document.getElementById("speed-quiz-explanation").innerText = q.exp || q.explanation || "解説はありません。";
 
-      const isLast = (speedCurrentIndex === speedQuestions.length - 1);
-      const nextBtn = document.getElementById("speed-next-btn");
-      if (isLast) {
-        if (speedQuizMode !== "bookmark" && typeof saveExamLog === "function") {
-          const total = speedQuestions.length;
-          const finalScore = Math.round((speedCorrectCountInSet / total) * 100);
-          await saveExamLog({
-            mode: "2choice",
-            subject_id: "speed_" + speedQuizMode,
-            score: finalScore,
-            total_questions: total,
-            correct_count: speedCorrectCountInSet,
-            details: speedUserAnswers
-          });
+const isLast = (speedCurrentIndex === speedQuestions.length - 1);
+  const nextBtn = document.getElementById("speed-next-btn");
+  if (isLast) {
+    if (speedQuizMode !== "bookmark" && typeof saveExamLog === "function") {
+      const total = speedQuestions.length;
+      const finalScore = Math.round((speedCorrectCountInSet / total) * 100);
+      // ⭐ 現在のお気に入りID配列を取得して同梱
+      const currentBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+      await saveExamLog({
+        mode: "2choice",
+        subject_id: "speed_" + speedQuizMode,
+        score: finalScore,
+        total_questions: total,
+        correct_count: speedCorrectCountInSet,
+        details: {
+          answers: speedUserAnswers,
+          bookmarked_ids: currentBookmarks
         }
+      });
+    }
         if (speedCorrectCountInSet === speedQuestions.length && typeof confetti === "function") {
           const canvas = document.getElementById("speed-confetti-canvas");
           if (canvas) confetti.create(canvas, { resize: true, useWorkers: true })({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
