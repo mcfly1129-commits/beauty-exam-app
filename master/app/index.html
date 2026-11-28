@@ -388,19 +388,35 @@ if (elTotal) elTotal.innerText = totalSuccess;
 if (elMax) elMax.innerText = maxStreak;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-const currentUser = getCurrentUser();
-if (!currentUser) {
-window.location.href = '../index.html';
-return;
+function refreshHomeDashboardUI() {
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    window.location.href = '../index.html';
+    return;
+  }
+
+  const codeEl = document.getElementById('user-display-code');
+  if (codeEl) codeEl.innerText = currentUser.serial_code || '---';
+
+  renderDashboardMonitor();
+  updateSpeedDashboardBadges();
+  renderHeaderDailyStats();
 }
 
-const codeEl = document.getElementById('user-display-code');
-if (codeEl) codeEl.innerText = currentUser.serial_code || '---';
+document.addEventListener('DOMContentLoaded', () => {
+  refreshHomeDashboardUI();
+});
 
-renderDashboardMonitor();
-updateSpeedDashboardBadges();
-renderHeaderDailyStats();
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    refreshHomeDashboardUI();
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    refreshHomeDashboardUI();
+  }
 });
 function switchMode(mode) {
 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
