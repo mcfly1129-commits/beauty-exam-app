@@ -11,6 +11,49 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+
+/* 📊 4大マクロ統計分析グラフ：2×2均等グリッド */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 680px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Chart.jsの枠突き破り防止 */
+}
+
+.chart-card-header {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #0984e3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  flex: 1;
+}
+
     body {
       background-color: #f8fafc;
       color: #1e293b;
@@ -266,49 +309,6 @@
     <div style="font-size: 1.6rem;">🏆</div>
   </div>
 </div>
-
-  <!-- 📊 4大マクロ統計分析グラフ -->
-  <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px;">
-    <div class="card-panel" style="padding: 14px;">
-      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
-        <span>📊 クラス別：平均進捗率</span>
-        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">努力の可視化 (%)</span>
-      </h4>
-      <div style="position: relative; height: 210px; width: 100%;">
-        <canvas id="progressChart"></canvas>
-      </div>
-    </div>
-
-    <div class="card-panel" style="padding: 14px;">
-      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
-        <span>🎯 クラス別：平均正答率</span>
-        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">実力の可視化 (%)</span>
-      </h4>
-      <div style="position: relative; height: 210px; width: 100%;">
-        <canvas id="accuracyChart"></canvas>
-      </div>
-    </div>
-
-    <div class="card-panel" style="padding: 14px;">
-      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
-        <span>📖 科目別：中央値進捗率</span>
-        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">科目別の努力 (%)</span>
-      </h4>
-      <div style="position: relative; height: 210px; width: 100%;">
-        <canvas id="subjectProgressChart"></canvas>
-      </div>
-    </div>
-
-    <div class="card-panel" style="padding: 14px;">
-      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
-        <span>🎯 科目別：中央値正答率</span>
-        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">科目別の実力 (%)</span>
-      </h4>
-      <div style="position: relative; height: 210px; width: 100%;">
-        <canvas id="subjectAccuracyChart"></canvas>
-      </div>
-    </div>
-  </div>
 
   <!-- 📋 絞り込みフィルター検索パネル -->
   <div class="card-panel" style="margin-bottom: 16px; padding: 14px;">
@@ -1439,14 +1439,14 @@ function renderCharts(studentsList = aggregatedStudents) {
     }
   });
 
-  // 1. クラス別：平均進捗率比較 (ブルー / 横棒グラフ)
+// 1. クラス別：平均進捗率比較 (ブルー / 横棒グラフ)
   if (progressChartInstance) progressChartInstance.destroy();
   if (progressCanvas) {
     const ctxP = progressCanvas.getContext('2d');
     progressChartInstance = new Chart(ctxP, {
       type: 'bar',
       data: {
-        labels: classLabels.length > 0 ? classLabels : ['データなし'],
+        labels: formattedClassLabels.length > 0 ? formattedClassLabels : ['データなし'],
         datasets: [{
           label: '平均進捗率 (%)',
           data: avgProgressList.length > 0 ? avgProgressList : [],
@@ -1454,7 +1454,7 @@ function renderCharts(studentsList = aggregatedStudents) {
           borderColor: 'rgba(52, 152, 219, 1)',
           borderWidth: 1,
           borderRadius: 6,
-          barPercentage: 0.6,
+          barPercentage: 0.65,
           categoryPercentage: 0.8
         }]
       },
@@ -1463,8 +1463,13 @@ function renderCharts(studentsList = aggregatedStudents) {
         maintainAspectRatio: false,
         indexAxis: 'y',
         scales: {
-          x: { min: 0, max: 100 },
-          y: { ticks: { autoSkip: false } }
+          x: { min: 0, max: 100, ticks: { font: { size: 11 } } },
+          y: {
+            ticks: {
+              autoSkip: false,
+              font: { size: 11 }
+            }
+          }
         }
       }
     });
@@ -1477,20 +1482,31 @@ function renderCharts(studentsList = aggregatedStudents) {
     accuracyChartInstance = new Chart(ctxA, {
       type: 'bar',
       data: {
-        labels: classLabels.length > 0 ? classLabels : ['データなし'],
+        labels: formattedClassLabels.length > 0 ? formattedClassLabels : ['データなし'],
         datasets: [{
           label: '平均正答率 (%)',
           data: avgAccuracyList.length > 0 ? avgAccuracyList : [],
           backgroundColor: 'rgba(46, 204, 113, 0.7)',
           borderColor: 'rgba(46, 204, 113, 1)',
           borderWidth: 1,
-          borderRadius: 6
+          borderRadius: 6,
+          barPercentage: 0.55
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: { y: { min: 0, max: 100 } }
+        scales: {
+          x: {
+            ticks: {
+              autoSkip: false,
+              maxRotation: 25,
+              minRotation: 0,
+              font: { size: 10 }
+            }
+          },
+          y: { min: 0, max: 100, ticks: { font: { size: 11 } } }
+        }
       }
     });
   }
