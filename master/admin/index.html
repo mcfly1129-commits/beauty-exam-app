@@ -148,27 +148,26 @@
     </form>
   </div>
 
-  <!-- 🔓 メイン管理画面 -->
   <div id="admin-main-section" style="display: none;">
-    <div class="header-box">
-      <div>
-        <h2 style="margin: 0; font-size: 1.15rem; color: #1e293b;">🛠️ 統合教員・管理者ポータル</h2>
-        <span style="font-size: 0.78rem; color: #64748b;">ログイン中: <b id="teacher-name-disp" style="color:#d35400;">教員管理者</b></span>
-      </div>
-      <div>
-        <a href="../app/index.html" style="font-size: 0.8rem; color: #0984e3; font-weight: bold; text-decoration: none; margin-right: 12px;">📱 学習画面へ</a>
-        <button onclick="handleTeacherLogout()" style="background:#e2e8f0; border:none; padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">ログアウト</button>
-      </div>
+    <!-- 👈 教員認証ヘッダー ＆ ログアウト処理の紐付け -->
+  <div class="header-box">
+    <div>
+      <h2 style="margin: 0; font-size: 1.15rem; color: #1e293b;">🛠️ 統合教員・管理者ポータル</h2>
+      <span style="font-size: 0.78rem; color: #64748b;">ログイン中: <b id="teacher-name-disp" style="color:#d35400;">教員管理者</b></span>
     </div>
-
-    <!-- 管理タブナビゲーション -->
-    <div class="admin-nav-tabs">
-      <button class="tab-btn active" id="tab-btn-codes" onclick="switchAdminTab('codes')">🔑 シリアルコード管理</button>
-      <button class="tab-btn" id="tab-btn-students" onclick="switchAdminTab('students')">👥 受講生一覧 & カルテ</button>
-      <button class="tab-btn" id="tab-btn-macro" onclick="switchAdminTab('macro')">⚡ 2択マクロ分析</button>
-      <button class="tab-btn" id="tab-btn-exam" onclick="switchAdminTab('exam')">📝 4択過去問分析</button>
+    <div>
+      <a href="../app/index.html" style="font-size: 0.8rem; color: #0984e3; font-weight: bold; text-decoration: none; margin-right: 12px;">📱 学習画面へ</a>
+      <button onclick="handleTeacherLogout()" style="background:#e2e8f0; border:none; padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer; font-weight:bold;">ログアウト</button>
     </div>
+  </div>
 
+  <!-- 👈 4大統合管理タブナビゲーション -->
+  <div class="admin-nav-tabs">
+    <button class="tab-btn active" id="tab-btn-codes" onclick="switchAdminTab('codes')">🔑 シリアルコード管理</button>
+    <button class="tab-btn" id="tab-btn-students" onclick="switchAdminTab('students')">👥 受講生一覧 & カルテ</button>
+    <button class="tab-btn" id="tab-btn-macro" onclick="switchAdminTab('macro')">⚡ 2択マクロ分析</button>
+    <button class="tab-btn" id="tab-btn-exam" onclick="switchAdminTab('exam')">📝 4択過去問分析</button>
+  </div>
     <!-- Tab 1: シリアルコード発行・管理 -->
     <div id="panel-codes" class="tab-panel">
       <div class="card-panel">
@@ -362,6 +361,7 @@
       </div>
     </div>
   </div>
+  </div>
 
   <!-- 📜 受講生詳細カルテ モーダル -->
   <div id="student-detail-modal" class="modal-overlay" onclick="closeStudentModal()">
@@ -499,7 +499,8 @@
           school_name: userData.school_name || codeData.school_name,
           role: userData.role
         };
-        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(sessionUser));
+        const userStorageKey = typeof STORAGE_KEY_USER !== 'undefined' ? STORAGE_KEY_USER : 'beauty_app_current_user';
+        localStorage.setItem(userStorageKey, JSON.stringify(sessionUser));
 
         await showAdminDashboard(sessionUser);
       } catch (err) {
@@ -512,7 +513,8 @@
     }
 
     function handleTeacherLogout() {
-      localStorage.removeItem(STORAGE_KEY_USER);
+      const userStorageKey = typeof STORAGE_KEY_USER !== 'undefined' ? STORAGE_KEY_USER : 'beauty_app_current_user';
+      localStorage.removeItem(userStorageKey);
       window.location.reload();
     }
 
