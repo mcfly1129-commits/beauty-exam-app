@@ -187,11 +187,21 @@
     <p class="sub-title">○✕問題からはじめる合格への第一歩。<br>『あなたの合格』に必要な【 羅針盤 】を作ろう！</p>
 
     <!-- ログイン情報ヘッダー -->
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
-      <div>🔑 ログイン中: <b id="user-display-code" style="color:#0984e3;">---</b></div>
-    </div>
+<div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+<div>🔑 ログイン中: <b id="user-display-code" style="color:#0984e3;">---</b></div>
+<button onclick="logout()" style="background:#ff7675; color:white; border:none; border-radius:6px; padding:5px 12px; font-size:0.75rem; font-weight:bold; cursor:pointer; white-space:nowrap; min-width:70px;">ログアウト</button>
+</div>
 
-    <!-- モード切替 -->
+<!-- 🔥 デイリー実績バッジ (2択学習限定) -->
+<div id="header-daily-stats-badge" style="width: 100%; background: #ffffff; padding: 8px 12px; border-radius: 12px; font-size: 0.75rem; border: 2px solid #ffeaa7; display: flex; justify-content: space-between; align-items: center; font-weight: bold; box-sizing: border-box; white-space: nowrap; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+<span style="flex: 1; text-align: center;">🔥 デイリー<b id="stat-challenge-streak" style="color:#e67e22;">0</b>日連続</span>
+<span style="color:#ffeaa7;">｜</span>
+<span style="flex: 1; text-align: center;">🎯 成功<b id="stat-total-success" style="color:#0984e3;">0</b>回</span>
+<span style="color:#ffeaa7;">｜</span>
+<span style="flex: 1; text-align: center;">🏆 最高<b id="stat-max-streak" style="color:#2ecc71;">0</b>連勝</span>
+</div>
+
+<!-- モード切替 -->
     <div class="tab-group">
       <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択学習</button>
       <button id="tab-4choice" class="tab-btn" onclick="window.location.href='./past_exam.html'">📝 過去問記録</button>
@@ -209,41 +219,55 @@
       <div id="subject-list-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px;"></div>
     </div>
 
-    <!-- 🎯 あなた専用『高速学習モード』UIカード -->
+<!-- 🎯 あなた専用『高速学習モード』UIカード -->
 <div id="speed-training-area" class="speed-training-card">
-  <div class="speed-training-title">🎯 あなた専用『高速学習モード』</div>
-  
-  <!-- ⚡ スピード特訓 (未経験優先・全科目) -->
-  <div class="speed-card-hero" onclick="startSpeedQuiz('training')">
-    <div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
-      <span>⚡ スピード特訓 開始</span>
-    </div>
-    <div style="font-size: 0.75rem; margin-top: 4px; opacity: 0.95;">
-      とりあえず範囲選択なしで即スタート。<br>最短で駆け上がろう！
-    </div>
-  </div>
+<div class="speed-training-title">🎯 あなた専用『高速学習モード』</div>
 
-  <div class="speed-row-sub">
-    <!-- ⭐ マイ・ベスト -->
-    <div class="speed-sub-box">
-      <div class="speed-sub-title">⭐ マイ・ベスト</div>
-      <div class="speed-sub-count">現在：<strong id="speed-fav-badge" style="color:#e67e22;">0</strong> 問</div>
-      <div class="speed-btn-group">
-        <button class="btn-play-orange" onclick="startSpeedQuiz('bookmark')">解く</button>
-        <button class="btn-history-gray" onclick="openSpeedHistoryModal('bookmark')">履歴</button>
-      </div>
-    </div>
+<!-- ⚡ スピード特訓 (未経験優先・全科目) -->
+<div class="speed-card-hero" onclick="startSpeedQuiz('training')">
+<div style="font-weight: bold; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center;">
+<span>⚡ スピード特訓 開始</span>
+</div>
+<div style="font-size: 0.75rem; margin-top: 4px; opacity: 0.95;">
+とりあえず範囲選択なしで即スタート。<br>最短で駆け上がろう！
+</div>
+</div>
 
-    <!-- ❌ 弱点克服 -->
-    <div class="speed-sub-box">
-      <div class="speed-sub-title">❌ 弱点克服</div>
-      <div class="speed-sub-count">現在：<strong id="speed-wrong-badge" style="color:#ff7675;">0</strong> 問</div>
-      <div class="speed-btn-group">
-        <button class="btn-play-red" onclick="startSpeedQuiz('wrong')">解く</button>
-        <button class="btn-history-gray" onclick="openSpeedHistoryModal('wrong')">履歴</button>
-      </div>
-    </div>
-  </div>
+<div class="speed-row-sub">
+<!-- ⭐ マイ・ベスト -->
+<div class="speed-sub-box">
+<div class="speed-sub-title">⭐ マイ・ベスト</div>
+<div class="speed-sub-count">現在：<strong id="speed-fav-badge" style="color:#e67e22;">0</strong> 問</div>
+<div class="speed-btn-group">
+<button class="btn-play-orange" onclick="startSpeedQuiz('bookmark')">解く</button>
+<button class="btn-history-gray" onclick="openSpeedHistoryModal('bookmark')">履歴</button>
+</div>
+</div>
+
+<!-- ❌ 弱点克服 -->
+<div class="speed-sub-box">
+<div class="speed-sub-title">❌ 弱点克服</div>
+<div class="speed-sub-count">現在：<strong id="speed-wrong-badge" style="color:#ff7675;">0</strong> 問</div>
+<div class="speed-btn-group">
+<button class="btn-play-red" onclick="startSpeedQuiz('wrong')">解く</button>
+<button class="btn-history-gray" onclick="openSpeedHistoryModal('wrong')">履歴</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 🏆 全国統計＆順位(匿名) 『成長ダッシュボード』を開く バナー (2択学習限定) -->
+<div id="dashboard-banner" style="margin: 16px auto; text-align: center;">
+<a href="../../02.dashboard/index.html" style="display: block; padding: 14px; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; font-weight: bold; font-size: 0.95rem; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(9, 132, 227, 0.2); transition: transform 0.15s ease-in-out; line-height: 1.4;">
+🏆 全国統計＆順位(匿名)<br>『成長ダッシュボード』を開く
+</a>
+</div>
+
+<!-- ✉️ 改善の意見・要望など 連絡先 (Google フォーム) ボタン -->
+<div style="margin: 20px auto; text-align: center;">
+<button onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank', 'noopener,noreferrer')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; color: #334155; font-size: 0.85rem; font-weight: bold; padding: 10px 16px; width: 100%; max-width: 320px; cursor: pointer; text-align: center; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)
+</button>
 </div>
 
 <!-- 📥 スピードクイズ専用 全画面表示オーバーレイ -->
@@ -332,43 +356,82 @@
       { id: '10', name: '美容技術理論', total: 432, keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] }
     ];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const currentUser = getCurrentUser();
-      if (!currentUser) {
-        window.location.href = '../index.html';
-        return;
-      }
+function getTodayString() {
+const d = new Date();
+return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-      const codeEl = document.getElementById('user-display-code');
-      if (codeEl) codeEl.innerText = currentUser.serial_code || '---';
+function renderHeaderDailyStats() {
+const lastDate = localStorage.getItem('daily_last_challenge_date') || "";
+let challengeStreak = parseInt(localStorage.getItem('daily_challenge_streak') || "0");
+const totalSuccess = parseInt(localStorage.getItem('daily_total_success_count') || "0");
+const maxStreak = parseInt(localStorage.getItem('daily_max_streak') || "0");
 
-      renderDashboardMonitor();
-      updateSpeedDashboardBadges();
-    });
-    function switchMode(mode) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      const headingEl = document.getElementById('subject-select-heading');
-      const subjectGrid = document.querySelector('.grid');
-      const speedArea = document.getElementById('speed-training-area');
-      const area4 = document.getElementById('mode-4choice-area');
+if (lastDate) {
+const last = new Date(lastDate + "T00:00:00");
+const todayStr = getTodayString();
+const today = new Date(todayStr + "T00:00:00");
+const diffDays = Math.round((today - last) / (1000 * 60 * 60 * 24));
+if (diffDays > 1) {
+challengeStreak = 0;
+localStorage.setItem('daily_challenge_streak', "0");
+localStorage.setItem('daily_current_streak', "0");
+}
+}
 
-      if (mode === '2choice') {
-        document.getElementById('tab-2choice').classList.add('active');
-        if (headingEl) {
-          headingEl.innerText = '📚 科目を選んで学習スタート（2択学習）';
-          headingEl.style.display = 'block';
-        }
-        if (subjectGrid) subjectGrid.style.display = 'grid';
-        if (speedArea) speedArea.style.display = 'block';
-        if (area4) area4.style.display = 'none';
-      } else {
-        document.getElementById('tab-4choice').classList.add('active');
-        if (headingEl) headingEl.style.display = 'none';
-        if (subjectGrid) subjectGrid.style.display = 'none';
-        if (speedArea) speedArea.style.display = 'none';
-        if (area4) area4.style.display = 'block';
-      }
-    }
+const elChallenge = document.getElementById('stat-challenge-streak');
+const elTotal = document.getElementById('stat-total-success');
+const elMax = document.getElementById('stat-max-streak');
+
+if (elChallenge) elChallenge.innerText = challengeStreak;
+if (elTotal) elTotal.innerText = totalSuccess;
+if (elMax) elMax.innerText = maxStreak;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+const currentUser = getCurrentUser();
+if (!currentUser) {
+window.location.href = '../index.html';
+return;
+}
+
+const codeEl = document.getElementById('user-display-code');
+if (codeEl) codeEl.innerText = currentUser.serial_code || '---';
+
+renderDashboardMonitor();
+updateSpeedDashboardBadges();
+renderHeaderDailyStats();
+});
+function switchMode(mode) {
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+const headingEl = document.getElementById('subject-select-heading');
+const subjectGrid = document.querySelector('.grid');
+const speedArea = document.getElementById('speed-training-area');
+const area4 = document.getElementById('mode-4choice-area');
+const dailyBadge = document.getElementById('header-daily-stats-badge');
+const dashboardBanner = document.getElementById('dashboard-banner');
+
+if (mode === '2choice') {
+document.getElementById('tab-2choice').classList.add('active');
+if (headingEl) {
+headingEl.innerText = '📚 科目を選んで学習スタート（2択学習）';
+headingEl.style.display = 'block';
+}
+if (subjectGrid) subjectGrid.style.display = 'grid';
+if (speedArea) speedArea.style.display = 'block';
+if (area4) area4.style.display = 'none';
+if (dailyBadge) dailyBadge.style.display = 'flex';
+if (dashboardBanner) dashboardBanner.style.display = 'block';
+} else {
+document.getElementById('tab-4choice').classList.add('active');
+if (headingEl) headingEl.style.display = 'none';
+if (subjectGrid) subjectGrid.style.display = 'none';
+if (speedArea) speedArea.style.display = 'none';
+if (area4) area4.style.display = 'block';
+if (dailyBadge) dailyBadge.style.display = 'none';
+if (dashboardBanner) dashboardBanner.style.display = 'none';
+}
+}
 
     // === 高速学習モード用 ロジック ===
     let speedQuestions = [];
