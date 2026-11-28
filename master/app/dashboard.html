@@ -445,6 +445,8 @@ function fetchGlobalDashboardData(myData) {
   const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : {};
   const serialCode = currentUser.serial_code || localStorage.getItem('teacher_google_id_token') || "";
 
+  const fallbackMedian = Array(DASHBOARD_SUBJECTS.length).fill(0);
+
   fetch(GAS_API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
@@ -455,17 +457,18 @@ function fetchGlobalDashboardData(myData) {
   })
   .then(res => res.json())
   .then(data => {
-    if (data.status === "error") {
-      console.error("ダッシュボードデータエラー:", data.message);
+    if (!data || data.status === "error") {
+      console.warn("ダッシュボード外部データ未取得（自前データで描画）:", data && data.message ? data.message : "");
+      renderRadarCharts(myData.progress, fallbackMedian, myData.accuracy, fallbackMedian);
       return;
     }
     handleDashboardData(data);
   })
   .catch(err => {
-    console.error("通信エラー:", err);
-    renderRadarCharts(myData.progress, Array(10).fill(0), myData.accuracy, Array(10).fill(0));
+    console.warn("外部データ取得スキップ（自前データで描画）:", err);
+    renderRadarCharts(myData.progress, fallbackMedian, myData.accuracy, fallbackMedian);
   });
-}
+  }
 
 function handleDashboardData(data) {
   const gmCount = data.global_metrics ? data.global_metrics.grand_master_count : 0;
@@ -505,74 +508,78 @@ function handleDashboardData(data) {
 }
 
 function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
-  const progressLabels = [];
-  const progressRankColors = [];
-  DASHBOARD_SUBJECTS.forEach((s, idx) => {
+  const progressLabels = DASHBOARD_SUBJECTS.map((s, idx) => {
     const progVal = myProg[idx] || 0;
     const progRank = getSelfGrowthRank(progVal, 'progress');
-    progressLabels.push([s.name, `[${progRank}]`]);
-    progressRankColors.push(getRankColor(progRank));
+    return `${s.name} [${progRank}]`;
   });
 
-  const accuracyLabels = [];
-  const accuracyRankColors = [];
-  DASHBOARD_SUBJECTS.forEach((s, idx) => {
+  const accuracyLabels = DASHBOARD_SUBJECTS.map((s, idx) => {
     const progVal = myProg[idx] || 0;
     const accVal = myAcc[idx] || 0;
     const accRank = (progVal > 10) ? getSelfGrowthRank(accVal, 'accuracy') : '-';
-    accuracyLabels.push([s.name, `[${accRank}]`]);
-    accuracyRankColors.push(getRankColor(accRank));
+    return `${s.name} [${accRank}]`;
   });
 
   if (progressChartInstance) progressChartInstance.destroy();
-  progressChartInstance = new Chart(document.getElementById('progressChart').getContext('2d'), {
-    type: 'radar',
-    data: {
-      labels: progressLabels,
-      datasets: [
-        { label: '自分', data: myProg, backgroundColor: 'rgba(116, 185, 255, 0.25)', borderColor: '#74b9ff', borderWidth: 2, pointBackgroundColor: '#74b9ff' },
-        { label: '全体中央値', data: globalProg, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3] }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0, max: 100, ticks: { stepSize: 20 },
-          pointLabels: {
-            font: { size: 10, weight: 'bold' },
-            color: (ctx) => (ctx.indexLine === 1) ? progressRankColors[ctx.index] || '#7f8c8d' : '#2c3e50'
+  const progEl = document.getElementById('progressChart');
+  if (progEl) {
+    progressChartInstance = new Chart(progEl.getContext('2d'), {
+      type: 'radar',
+      data: {
+        labels: progressLabels,
+        datasets: [
+          { label: '自分', data: myProg, backgroundColor: 'rgba(116, 185, 255, 0.25)', borderColor: '#74b9ff', borderWidth: 2, pointBackgroundColor: '#74b9ff' },
+          { label: '全体中央値', data: globalProg, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3, 3] }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: { stepSize: 20 },
+            pointLabels: {
+              font: { size: 10, weight: 'bold' },
+              color: '#2c3e50'
+            }
           }
         }
       }
-    }
-  });
+    });
+  }
 
   if (accuracyChartInstance) accuracyChartInstance.destroy();
-  accuracyChartInstance = new Chart(document.getElementById('accuracyChart').getContext('2d'), {
-    type: 'radar',
-    data: {
-      labels: accuracyLabels,
-      datasets: [
-        { label: '自分', data: myAcc, backgroundColor: 'rgba(255, 159, 67, 0.25)', borderColor: '#ff9f43', borderWidth: 2, pointBackgroundColor: '#ff9f43' },
-        { label: '全体中央値', data: globalAcc, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3] }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        r: {
-          min: 0, max: 100, ticks: { stepSize: 20 },
-          pointLabels: {
-            font: { size: 10, weight: 'bold' },
-            color: (ctx) => progressRankColors[ctx.index] || '#2c3e50'
+  const accEl = document.getElementById('accuracyChart');
+  if (accEl) {
+    accuracyChartInstance = new Chart(accEl.getContext('2d'), {
+      type: 'radar',
+      data: {
+        labels: accuracyLabels,
+        datasets: [
+          { label: '自分', data: myAcc, backgroundColor: 'rgba(255, 159, 67, 0.25)', borderColor: '#ff9f43', borderWidth: 2, pointBackgroundColor: '#ff9f43' },
+          { label: '全体中央値', data: globalAcc, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3, 3] }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: { stepSize: 20 },
+            pointLabels: {
+              font: { size: 10, weight: 'bold' },
+              color: '#2c3e50'
+            }
           }
         }
       }
-    }
-  });
+    });
+  }
 }
 
 function getCourseQuestionCount(courseKey) {
