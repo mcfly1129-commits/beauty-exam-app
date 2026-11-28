@@ -123,15 +123,15 @@
 
 <!-- 範囲（コース）タップ後に表示される領域 -->
 <div id="course-content-area" style="display: none;">
+<!-- 🔥 デイリー真剣勝負ボタン -->
+<button id="daily-btn" class="btn" onclick="startDailyQuiz()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #ff9f43, #ee5253); color: white; font-weight: bold; border-radius: 10px; margin-bottom: 12px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(238, 82, 83, 0.25);">
+🔥 デイリー真剣勝負 に挑戦 (1日1回)
+</button>
+
 <div id="user-rank" class="trophy-badge">現在の称号: 未受験 of 卵 🥚</div>
 <button class="btn-all-history" onclick="openCourseHistoryModal()">📊 この範囲の履歴・分析</button>
 <button id="weakness-btn" class="btn-weakness" onclick="startWeaknessQuiz()">❌ 弱点克服モード
 (全単元コンプリートで解放)</button>
-
-<!-- 🔥 デイリー真剣勝負ボタン -->
-<button id="daily-btn" class="btn" onclick="startDailyQuiz()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #ff9f43, #ee5253); color: white; font-weight: bold; border-radius: 10px; margin-bottom: 10px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(238, 82, 83, 0.25);">
-🔥 デイリー真剣勝負 に挑戦 (1日1回)
-</button>
 
       <div id="unit-list"></div>
 
@@ -339,11 +339,15 @@ function updateDailyStreakStats(isSuccess) {
     localStorage.setItem('daily_challenge_streak', challengeStreak);
   }
 
+const alreadyCountedToday = (lastDate === todayStr) && (localStorage.getItem('daily_last_success_date') === todayStr);
   if (isSuccess) {
-    totalSuccess += 1;
-    currentStreak += 1;
-    if (currentStreak > maxStreak) {
-      maxStreak = currentStreak;
+    if (!alreadyCountedToday) {
+      totalSuccess += 1;
+      currentStreak += 1;
+      if (currentStreak > maxStreak) {
+        maxStreak = currentStreak;
+      }
+      localStorage.setItem('daily_last_success_date', todayStr);
     }
   } else {
     currentStreak = 0;
@@ -357,9 +361,9 @@ function updateDailyStreakStats(isSuccess) {
 // 🔥 デイリー真剣勝負の開始処理 (選択中範囲から3問ランダム出題)
 function startDailyQuiz() {
   const today = getTodayString();
-  const lastDaily = localStorage.getItem("beauty_app_last_daily_date_" + currentCourseKey) || "";
+  const lastDaily = localStorage.getItem("beauty_app_last_daily_date_" + rawSubject) || "";
   if (lastDaily === today) {
-    alert("今日のこの範囲のデイリースタンプは獲得済みです！");
+    alert("今日のこの科目のデイリースタンプは獲得済みです！");
     return;
   }
 
@@ -631,12 +635,12 @@ function startDailyQuiz() {
 
 updateUserRankUI(totalMasteredCount, totalQuestionsCount, totalAnsCount, totalCorrectCount, isMasterStatus, weaknessSuccessStreak, hasEverFailed);
 
-// 🎯 デイリー真剣勝負ボタンのUI状態更新
+// 🎯 デイリー真剣勝負ボタンのUI状態更新（科目 rawSubject ごとに独立管理）
 const dailyBtn = document.getElementById("daily-btn");
 if (dailyBtn) {
   const today = getTodayString();
-  const lastDaily = localStorage.getItem("beauty_app_last_daily_date_" + currentCourseKey) || "";
-  const dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + currentCourseKey) || "0", 10);
+  const lastDaily = localStorage.getItem("beauty_app_last_daily_date_" + rawSubject) || "";
+  const dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + rawSubject) || "0", 10);
   if (lastDaily === today) {
     dailyBtn.innerText = `🔥 デイリー真剣勝負 (本日達成済！ ${dailyStreak}日連続)`;
     dailyBtn.style.background = "#95afc0";
@@ -787,6 +791,8 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
       }
       const wasMastered = (questionStats[q.id].streak || 0) >= 1;
 
+      let dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + rawSubject) || "0", 10);
+
       questionStats[q.id].total += 1;
       if (isCorrect) {
         questionStats[q.id].streak += 1;
@@ -794,7 +800,14 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
       } else {
         questionStats[q.id].streak = 0;
         localStorage.setItem("beauty_app_has_ever_failed_" + currentCourseKey, JSON.stringify(true));
-        
+
+        // 🔥 デイリー真剣勝負中に間違えた瞬間、該当科目の連続達成をリセット
+        if (isDailyMode) {
+          dailyStreak = 0;
+          localStorage.setItem("beauty_app_daily_streak_" + rawSubject, "0");
+          localStorage.setItem("daily_current_streak", "0");
+        }
+
         if (isWeaknessMode) {
           weaknessSessionWrongCount++;
           localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
@@ -817,7 +830,13 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
         statusEl.style.color = "var(--incorrect-color)";
       }
 
-      document.getElementById("current-streak").innerText = `戦績: 正解${questionStats[q.id].correct_count}回 / 連続: ${questionStats[q.id].streak}回`;
+      if (isDailyMode) {
+        document.getElementById("current-streak").innerText = isCorrect
+          ? `🔥 デイリー真剣勝負 現在の連続記録: ${dailyStreak}日`
+          : `❌ 不正解のためデイリー連続記録がリセットされました（現在: 0日）`;
+      } else {
+        document.getElementById("current-streak").innerText = `戦績: 正解${questionStats[q.id].correct_count}回 / 連続: ${questionStats[q.id].streak}回`;
+      }
       document.getElementById("explanation-text").innerText = q.exp || q.explanation || "解説はありません。";
 
       const isLastQuestion = (currentIndex === currentQuestions.length - 1);
@@ -867,13 +886,14 @@ async function saveSetCompleteLog() {
 
       if (isDailyMode) {
         const today = getTodayString();
-        let dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + currentCourseKey) || "0", 10);
+        let dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + rawSubject) || "0", 10);
         if (isSetCompleted) {
-          dailyStreak++;
-          localStorage.setItem("beauty_app_daily_streak_" + currentCourseKey, dailyStreak);
-          localStorage.setItem("beauty_app_last_daily_date_" + currentCourseKey, today);
+          dailyStreak += 1;
+          localStorage.setItem("beauty_app_daily_streak_" + rawSubject, String(dailyStreak));
+          localStorage.setItem("beauty_app_last_daily_date_" + rawSubject, today);
           updateDailyStreakStats(true);
         } else {
+          localStorage.setItem("beauty_app_daily_streak_" + rawSubject, "0");
           updateDailyStreakStats(false);
         }
       } else if (!isWeaknessMode && currentUnitName) {
