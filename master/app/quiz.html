@@ -397,6 +397,24 @@ function startDailyQuiz() {
 }
 
     document.addEventListener('DOMContentLoaded', async () => {
+      const historyListEl = document.getElementById('modal-history-list');
+      if (historyListEl) {
+        historyListEl.addEventListener('click', (e) => {
+          const removeBtn = e.target.closest('.btn-history-bookmark-remove');
+          if (!removeBtn) return;
+          e.stopPropagation();
+
+          const targetId = String(removeBtn.getAttribute('data-qid') || '');
+          if (!targetId) return;
+
+          const currentIds = JSON.parse(localStorage.getItem('beauty_app_all_bookmarked_ids')) || [];
+          const updatedIds = currentIds.filter(id => String(id) !== targetId);
+          localStorage.setItem('beauty_app_all_bookmarked_ids', JSON.stringify(updatedIds));
+
+          renderHistoryList();
+        });
+      }
+
       const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
       if (!currentUser) {
         window.location.href = '../index.html';
@@ -1077,7 +1095,7 @@ async function saveSetCompleteLog() {
         }));
       }
 
-      const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const bookmarkedIds = (JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || []).map(String);
 
       if (currentSortMode === "count") {
         targetQuestions.sort((a, b) => (b.stat.total || 0) - (a.stat.total || 0));
@@ -1089,8 +1107,8 @@ async function saveSetCompleteLog() {
         });
       } else if (currentSortMode === "bookmark") {
         targetQuestions.sort((a, b) => {
-          const bA = bookmarkedIds.includes(a.id) ? 1 : 0;
-          const bB = bookmarkedIds.includes(b.id) ? 1 : 0;
+          const bA = bookmarkedIds.includes(String(a.id)) ? 1 : 0;
+          const bB = bookmarkedIds.includes(String(b.id)) ? 1 : 0;
           return bB - bA;
         });
       }
@@ -1112,6 +1130,7 @@ async function saveSetCompleteLog() {
       targetQuestions.forEach(q => {
         const stat = q.stat || { total: 0, streak: 0, correct_count: 0 };
         const isMastered = (stat.streak || 0) >= 1;
+        const isBookmarked = bookmarkedIds.includes(String(q.id));
 
         if (activeModalUnit === "ALL_COURSE" && currentSortMode === "default" && q.unitName !== lastUnitHeader) {
           lastUnitHeader = q.unitName;
@@ -1122,11 +1141,22 @@ async function saveSetCompleteLog() {
           ? `<span style="background:#dcfce7; color:#15803d; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold;">習得済</span>`
           : `<span style="background:#fee2e2; color:#b91c1c; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold;">未習得</span>`;
 
+        const starBadgeHtml = isBookmarked
+          ? `<span style="background:#fff9db; color:#d97706; border:1px solid #fcd34d; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:bold; margin-left:4px;">⭐ マーク</span>`
+          : "";
+
+        const removeBtnHtml = isBookmarked
+          ? `<button type="button" class="btn-history-bookmark-remove" data-qid="${escapeHTML(String(q.id))}" style="background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 7px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-left:6px; font-weight:bold;">⭐ 解除</button>`
+          : "";
+
         const itemHtml = `
           <div style="border-bottom:1px solid #e2e8f0; padding:10px 0;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <div>${tagHtml} <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">正解:${stat.correct_count || 0} / 挑戦:${stat.total || 0}回</span></div>
-              <span style="font-size:0.7rem; color:#94a3b8;">${escapeHTML(q.source || '')}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px; margin-bottom:4px;">
+              <div>${tagHtml}${starBadgeHtml} <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">正解:${stat.correct_count || 0} / 挑戦:${stat.total || 0}回</span></div>
+              <div style="display:flex; align-items:center;">
+                <span style="font-size:0.7rem; color:#94a3b8;">${escapeHTML(q.source || '')}</span>
+                ${removeBtnHtml}
+              </div>
             </div>
             <div style="font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;">${escapeHTML(q.text || q.question || '')}</div>
             <button onclick="toggleHistExp('${escapeQuotes(String(q.id))}')" style="background:#f1f2f6; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">解説を見る</button>
