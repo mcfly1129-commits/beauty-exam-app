@@ -464,13 +464,13 @@ if (dashboardBanner) dashboardBanner.style.display = 'none';
     function getSpeedBookmarkQuestions() {
       const dbSource = window.ALL_QUESTIONS_DATABASE || null;
       if (!dbSource) return [];
-      const bookmarkedIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const bookmarkedIds = (JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || []).map(String);
       const results = [];
       for (const subjectKey in dbSource) {
         const pool = dbSource[subjectKey].questionPool;
         for (const unitName in pool) {
           pool[unitName].forEach(q => {
-            if (bookmarkedIds.includes(q.id)) results.push({ ...q, subjectKey, unitName });
+            if (bookmarkedIds.includes(String(q.id))) results.push({ ...q, subjectKey, unitName });
           });
         }
       }
@@ -664,6 +664,8 @@ if (dashboardBanner) dashboardBanner.style.display = 'none';
   listEl.innerHTML = "";
   modal.style.display = "flex";
   const questions = mode === "bookmark" ? getSpeedBookmarkQuestions() : getSpeedWrongQuestions();
+  const bookmarkedIds = (JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || []).map(String);
+
   document.getElementById("speed-history-title").innerText = mode === "bookmark" ? "⭐ マイ・ベスト お気に入り一覧" : "❌ 弱点克服対象一覧";
   document.getElementById("speed-history-summary").innerText = `登録数: 全 ${questions.length} 問`;
 
@@ -674,12 +676,44 @@ if (dashboardBanner) dashboardBanner.style.display = 'none';
 
   // 🌟 安全なDOM生成による組み立て
   questions.forEach(q => {
+    const isBookmarked = bookmarkedIds.includes(String(q.id));
     const div = document.createElement('div');
     div.className = 'speed-history-item';
 
+    const headerRow = document.createElement('div');
+    headerRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap;';
+
     const headerDiv = document.createElement('div');
-    headerDiv.style.cssText = 'font-size:0.75rem; font-weight:bold; color:#0984e3; margin-bottom:4px;';
+    headerDiv.style.cssText = 'font-size:0.75rem; font-weight:bold; color:#0984e3;';
     headerDiv.textContent = `【${SUBJECT_KEY_TO_JA[q.subjectKey] || "その他"}】${q.unitName || ''}`;
+
+    headerRow.appendChild(headerDiv);
+
+    if (isBookmarked) {
+      const actionWrap = document.createElement('div');
+      actionWrap.style.cssText = 'display:flex; align-items:center; gap:6px;';
+
+      const starBadge = document.createElement('span');
+      starBadge.style.cssText = 'background:#fff9db; color:#d97706; border:1px solid #fcd34d; padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:bold;';
+      starBadge.textContent = '⭐ マーク';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.style.cssText = 'background:#fff5f5; color:#e03131; border:1px solid #ffc9c9; padding:2px 7px; font-size:0.68rem; border-radius:4px; cursor:pointer; font-weight:bold;';
+      removeBtn.textContent = '⭐ 解除';
+      removeBtn.onclick = (e) => {
+        e.stopPropagation();
+        const currentIds = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+        const updatedIds = currentIds.filter(id => String(id) !== String(q.id));
+        localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(updatedIds));
+        updateSpeedDashboardBadges();
+        openSpeedHistoryModal(mode);
+      };
+
+      actionWrap.appendChild(starBadge);
+      actionWrap.appendChild(removeBtn);
+      headerRow.appendChild(actionWrap);
+    }
 
     const textDiv = document.createElement('div');
     textDiv.style.cssText = 'font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;';
@@ -689,7 +723,7 @@ if (dashboardBanner) dashboardBanner.style.display = 'none';
     expDiv.style.cssText = 'font-size:0.78rem; color:#475569; background:#faf9f6; padding:6px 8px; border-radius:6px;';
     expDiv.textContent = q.exp || q.explanation || '';
 
-    div.appendChild(headerDiv);
+    div.appendChild(headerRow);
     div.appendChild(textDiv);
     div.appendChild(expDiv);
     listEl.appendChild(div);
