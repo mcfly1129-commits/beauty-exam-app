@@ -193,8 +193,8 @@
 
     <!-- モード切替 -->
     <div class="tab-group">
-      <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択高速学習</button>
-      <button id="tab-4choice" class="tab-btn" onclick="window.location.href='./past_exam.html'">📝 4択過去問記録</button>
+      <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択学習</button>
+      <button id="tab-4choice" class="tab-btn" onclick="window.location.href='./past_exam.html'">📝 過去問記録</button>
     </div>
 
     <!-- 10科目総合モニター -->
@@ -279,7 +279,7 @@
   </div>
 </div>
 
-    <!-- 4択過去問記録エリア（タブ切替時に表示） -->
+    <!-- 過去問記録エリア（タブ切替時に表示） -->
     <div id="mode-4choice-area" style="display:none; background:#f0f8ff; border:1px solid #bae6fd; border-radius:12px; padding:16px; text-align:center; margin-bottom:12px;">
       <div style="font-size:0.95rem; font-weight:bold; color:#0369a1; margin-bottom:6px;">全55問 一括マーク・自動採点システム</div>
       <p style="font-size:0.76rem; color:#475569; margin:0 0 12px 0; line-height:1.5;">
@@ -290,7 +290,7 @@
       </a>
     </div>
 
-    <div id="subject-select-heading" style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📚 科目を選んで学習スタート（2択高速学習）</div>
+    <div id="subject-select-heading" style="font-size: 0.85rem; font-weight: bold; color: #475569; margin-bottom: 8px;">📚 科目を選んで学習スタート（2択学習）</div>
     <div class="grid">
       <a href="./quiz.html?mode=2choice&subject=regulations" class="btn-subject">01 ⚖️<br>関係法規・制度</a>
       <a href="./quiz.html?mode=2choice&subject=management" class="btn-subject">02 🏢<br>運営管理</a>
@@ -356,7 +356,7 @@
       if (mode === '2choice') {
         document.getElementById('tab-2choice').classList.add('active');
         if (headingEl) {
-          headingEl.innerText = '📚 科目を選んで学習スタート（2択高速学習）';
+          headingEl.innerText = '📚 科目を選んで学習スタート（2択学習）';
           headingEl.style.display = 'block';
         }
         if (subjectGrid) subjectGrid.style.display = 'grid';
