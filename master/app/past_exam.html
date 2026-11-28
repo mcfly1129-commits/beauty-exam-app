@@ -1014,7 +1014,7 @@ async function submitExamData() {
       serial_code: currentUser.serial_code,
       mode: "4choice",
       subject_id: `round_${currentExamRound}`,
-      score: scoring.total_accuracy,
+      score: Math.round(scoring.total_accuracy),
       total_questions: scoring.total_questions,
       correct_count: scoring.total_score,
       details: scoring.question_details,
