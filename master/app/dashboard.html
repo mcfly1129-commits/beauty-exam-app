@@ -120,6 +120,7 @@ body {
   margin: 0 auto;
   width: 100%;
   max-width: 360px;
+  height: 280px;
 }
 
 /* 成長率アイテム */
@@ -566,7 +567,7 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
           min: 0, max: 100, ticks: { stepSize: 20 },
           pointLabels: {
             font: { size: 10, weight: 'bold' },
-            color: (ctx) => (ctx.indexLine === 1) ? accuracyRankColors[ctx.index] || '#7f8c8d' : '#2c3e50'
+            color: (ctx) => progressRankColors[ctx.index] || '#2c3e50'
           }
         }
       }
