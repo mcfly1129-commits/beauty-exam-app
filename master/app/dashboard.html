@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成長ダッシュボード - 美容師 筆記試験 Master</title>
+<!-- 🔒 クリックジャッキング対策（Frame-busting） -->
+<script>try { if (window.top !== window.self) window.top.location = window.self.location; } catch (e) {}</script>
+
+<!-- 📊 Chart.js & Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --primary-color: #74b9ff;
+  --primary-dark: #0984e3;
+  --bg-color: #f5f6fa;
+  --card-bg: #ffffff;
+  --text-color: #2f3542;
+  --text-muted: #7f8c8d;
+  --accent-orange: #ff9f43;
+  --accent-green: #2ecc71;
+  --accent-red: #ff7675;
+  --border-color: #e4e7eb;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 16px;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header-title {
+  font-size: 1.3rem;
+  text-align: center;
+  color: var(--primary-dark);
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-weight: bold;
+}
+
+/* ユーザー情報ヘッダー */
+.user-info {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+
+.btn-logout {
+  background: var(--accent-red);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-back {
+  display: inline-block;
+  color: var(--primary-dark);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* GMカウンターカード */
+.gm-counter {
+  background: linear-gradient(135deg, #ff9f43, #ff6b6b);
+  color: white;
+  border-radius: 16px;
+  padding: 14px 16px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(255, 159, 67, 0.25);
+}
+
+.gm-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+/* カード共通 */
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.card-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 12px;
+  border-left: 4px solid var(--primary-dark);
+  padding-left: 8px;
+}
+
+.chart-box {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 360px;
+}
+
+/* 成長率アイテム */
+.growth-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.growth-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.growth-value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.value-plus { color: var(--accent-green); }
+.value-minus { color: var(--accent-red); }
+.value-zero { color: var(--text-muted); }
+
+/* ランキングボード */
+.rank-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+}
+
+.rank-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px dashed var(--border-color);
+  font-size: 0.78rem;
+}
+
+.rank-item:last-child {
+  border-bottom: none;
+}
+
+.rank-num {
+  font-weight: bold;
+  color: var(--primary-dark);
+  width: 32px;
+}
+
+.rank-name {
+  flex: 1;
+  color: var(--text-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-val {
+  font-weight: bold;
+  color: var(--accent-orange);
+}
+
+/* 成果報告ボタン */
+.btn-submit {
+  background: linear-gradient(135deg, #74b9ff, #0984e3);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: bold;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  width: 100%;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3);
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-submit:disabled {
+  background: #cbd5e1 !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <a href="./index.html" class="btn-back">⬅️ 学習ホームへ戻る</a>
+    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: bold;">美容師 筆記試験 Master</span>
+  </div>
+
+  <h1 class="header-title">🏆 成長ダッシュボード 🏆</h1>
+
+  <!-- 🔑 ログイン情報領域 -->
+  <div class="user-info">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+      <div style="min-width: 0; flex: 1; font-size: 0.8rem; color: #2d3436;">
+        🔑 ログイン中: <b id="display-email" style="word-break: break-all; color: var(--primary-dark);">...</b>
+      </div>
+      <button class="btn-logout" onclick="logout()">ログアウト</button>
+    </div>
+  </div>
+
+  <!-- 🏆 グランドマスター達成数 -->
+  <div class="gm-counter">
+    <div style="font-size: 0.82rem; font-weight: bold; letter-spacing: 0.5px;">🏆 あなたの『グランドマスター』獲得数</div>
+    <div class="gm-number" id="my-grandmaster-count">0 / 31</div>
+    <div style="font-size: 0.65rem; opacity: 0.95;">※全31範囲中、進捗率100%かつ正答率100%を達成した現在の数</div>
+  </div>
+
+  <!-- 🌌 全校グランドマスター通算獲得数 -->
+  <div class="gm-counter" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); box-shadow: 0 4px 10px rgba(108, 92, 231, 0.25);">
+    <div style="font-size: 0.82rem; font-weight: bold; letter-spacing: 0.5px;">🌌 全校『グランドマスター』通算 獲得総数</div>
+    <div class="gm-number" id="gm-total-count">0 回</div>
+    <div style="font-size: 0.65rem; opacity: 0.95;">※全国の受講生の中でグランドマスターを獲得した通算合計数</div>
+  </div>
+
+  <!-- 👑 総合評価ランクバッジ -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+    <div style="background: #ffffff; border: 2px solid var(--primary-color); border-radius: 16px; padding: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size: 0.72rem; font-weight: bold; color: var(--text-muted);">🏃 現在の総合努力ランク</div>
+      <div id="my-overall-progress-rank" style="font-size: 2.2rem; font-weight: bold; color: var(--primary-color); margin: 2px 0; line-height: 1;">-</div>
+      <div id="my-overall-progress-percent" style="font-size: 0.7rem; color: var(--text-muted);">平均進捗: --%</div>
+    </div>
+    <div style="background: #ffffff; border: 2px solid var(--accent-orange); border-radius: 16px; padding: 12px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+      <div style="font-size: 0.72rem; font-weight: bold; color: var(--text-muted);">🎯 現在の総合実力ランク</div>
+      <div id="my-overall-accuracy-rank" style="font-size: 2.2rem; font-weight: bold; color: var(--accent-orange); margin: 2px 0; line-height: 1;">-</div>
+      <div id="my-overall-accuracy-percent" style="font-size: 0.7rem; color: var(--text-muted);">平均正答: --%</div>
+    </div>
+  </div>
+
+  <!-- 📊 グラフA：努力の可視化（進捗度） -->
+  <div class="card">
+    <h3 class="card-title">🏃 進捗度比較『努力の可視化』</h3>
+    <div class="chart-box">
+      <canvas id="progressChart"></canvas>
+    </div>
+    <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 10px; margin-bottom: 0;">
+      <span style="color: #74b9ff;">■</span> 自分 の進捗 ｜ <span style="color: #b2bec3;">■</span> 全体の中央値
+    </p>
+  </div>
+
+  <!-- 📊 グラフB：実力の可視化（正答率） -->
+  <div class="card">
+    <h3 class="card-title">🎯 正答率比較『実力の可視化』</h3>
+    <div class="chart-box">
+      <canvas id="accuracyChart"></canvas>
+    </div>
+    <p style="font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 10px; margin-bottom: 4px;">
+      <span style="color: #ff9f43;">■</span> 自分 の正答率 ｜ <span style="color: #b2bec3;">■</span> 全体の中央値
+    </p>
+    <p style="font-size: 0.65rem; color: #e67e22; text-align: center; margin: 0; line-height: 1.3;">
+      ※進捗度が10%未満の科目は、判定保留 [-] としています。
+    </p>
+  </div>
+
+  <!-- 📊 努力と成長のビフォーアフター -->
+  <div class="card">
+    <h3 class="card-title">📈 努力と成長のビフォーアフター</h3>
+    <div class="growth-grid" style="margin-bottom: 12px;">
+      <div class="growth-item">
+        <div style="font-size: 0.75rem; color: var(--text-muted);">進捗伸び率</div>
+        <div class="growth-value" id="growth-progress">--</div>
+      </div>
+      <div class="growth-item">
+        <div style="font-size: 0.75rem; color: var(--text-muted);">正答率変化</div>
+        <div class="growth-value" id="growth-accuracy">--</div>
+      </div>
+    </div>
+    <p style="font-size: 0.65rem; color: var(--text-muted); text-align: center; margin: 6px 0 10px 0;">
+      ↑前回報告時の自分との比較↑ ｜ ↓努力と実力の推移（時系列履歴）↓
+    </p>
+    <div class="chart-box" style="position: relative; height: 210px; width: 100%;">
+      <canvas id="selfHistoryChart"></canvas>
+    </div>
+  </div>
+
+  <!-- 🏆 上位ランカーボード -->
+  <div class="card">
+    <h3 class="card-title">🔥 全国トップ・優秀クラス</h3>
+    <div style="margin-bottom: 14px;">
+      <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-orange); margin-bottom: 4px;">👑 全国 正答率 トップ5</div>
+      <ol class="rank-list" id="rank-progress-list">
+        <li class="rank-item"><span style="color: var(--text-muted);">データ収集中...</span></li>
+      </ol>
+      <p style="font-size: 0.6rem; color: var(--text-muted); margin: 4px 0 0 0;">※全科目の平均進捗率が10%以上の学生が対象です。</p>
+    </div>
+    <div>
+      <div style="font-size: 0.8rem; font-weight: bold; color: var(--primary-dark); margin-bottom: 4px;">🏫 全国 優秀クラス トップ3</div>
+      <ul class="rank-list" id="rank-class-list">
+        <li class="rank-item"><span style="color: var(--text-muted);">データ収集中...</span></li>
+      </ul>
+      <p style="font-size: 0.6rem; color: var(--text-muted); margin: 4px 0 0 0;">※クラス登録人数の過半数（50%超）が報告済みのクラスのみ集計対象となります。</p>
+    </div>
+  </div>
+
+  <!-- 📤 成果報告ボタンエリア -->
+  <div class="card" style="text-align: center;">
+    <h3 class="card-title" style="border-left-color: var(--accent-orange);">📤 学習成果の報告</h3>
+    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0; margin-bottom: 12px;">
+      現在の進捗度と正答率をサーバーへ送信して、全国順位と先生からのアドバイスを確認しましょう！
+    </p>
+    <button class="btn-submit" id="btn-submit-report" onclick="executeDataTransmission()">
+      📤 最新の学習成果を報告する
+    </button>
+    <div id="transmission-result-box" style="margin-top: 12px; display: none;"></div>
+  </div>
+</div>
+
+<!-- 📜 JSスクリプト読み込み -->
+<script src="../js/supabase_client.js"></script>
+<script src="../js/auth.js"></script>
+
+<script>
+// XSS対策エスケープ
+function escapeHTML(str) {
+  if (typeof str !== 'string') return str || '';
+  return str.replace(/[&<>"'`]/g, function(match) {
+    const escapeMap = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '`': '&#x60;' };
+    return escapeMap[match];
+  });
+}
+
+// ランク判定関数
+function getSelfGrowthRank(val, type) {
+  const num = parseInt(val || 0);
+  if (type === 'progress') {
+    if (num >= 90) return 'S';
+    if (num >= 80) return 'A';
+    if (num >= 60) return 'B';
+    if (num >= 40) return 'C';
+    if (num >= 20) return 'D';
+    return 'E';
+  } else {
+    if (num >= 95) return 'S';
+    if (num >= 85) return 'A';
+    if (num >= 70) return 'B';
+    if (num >= 60) return 'C';
+    if (num >= 51) return 'D';
+    return 'E';
+  }
+}
+
+function getRankColor(rank) {
+  if (rank === 'S' || rank === 'A') return '#0984e3';
+  if (rank === 'B' || rank === 'C') return '#e67e22';
+  if (rank === 'D' || rank === 'E') return '#e74c3c';
+  return '#7f8c8d';
+}
+
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxKhhhvbIyWX2hd1jAk082HznnQw-E24RjmDEsiOm7M6IYLvMjxeQfqTbPHSUW4GVVX/exec";
+
+const DASHBOARD_SUBJECTS = [
+  { id: '01', name: '関係法規・制度', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'], total: 290 },
+  { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'], total: 122 },
+  { id: '03', name: '公衆・環境', keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'], total: 194 },
+  { id: '04', name: '感染症', keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'], total: 156 },
+  { id: '05', name: '衛生管理技術', keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'], total: 172 },
+  { id: '06', name: '人体の構造及び機能', keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'], total: 216 },
+  { id: '07', name: '皮膚科学', keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'], total: 192 },
+  { id: '08', name: '香粧品化学', keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'], total: 314 },
+  { id: '09', name: '文化論', keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'], total: 120 },
+  { id: '10', name: '美容技術理論', keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'], total: 432 }
+];
+
+let progressChartInstance = null;
+let accuracyChartInstance = null;
+let selfHistoryChartInstance = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (!currentUser) {
+    window.location.href = "../index.html";
+    return;
+  }
+
+  document.getElementById('display-email').innerText = currentUser.serial_code || currentUser.email || '学生ユーザー';
+
+  const myData = calculateMyCurrentStats();
+
+  const overallProgRank = getSelfGrowthRank(myData.totalProgress, 'progress');
+  const overallAccRank = getSelfGrowthRank(myData.totalAccuracy, 'accuracy');
+
+  document.getElementById('my-overall-progress-rank').innerText = overallProgRank;
+  document.getElementById('my-overall-progress-percent').innerText = `平均進捗: ${myData.totalProgress}%`;
+
+  document.getElementById('my-overall-accuracy-rank').innerText = overallAccRank;
+  document.getElementById('my-overall-accuracy-percent').innerText = `平均正答: ${myData.totalAccuracy}%`;
+
+  updateMyGrandMasterCount();
+  fetchGlobalDashboardData(myData);
+  drawSelfHistoryChart();
+});
+
+function calculateMyCurrentStats() {
+  let progressData = [];
+  let accuracyData = [];
+
+  DASHBOARD_SUBJECTS.forEach(sub => {
+    let totalPercentSum = 0;
+    sub.keys.forEach(key => {
+      totalPercentSum += parseInt(localStorage.getItem('solved_' + key) || 0, 10);
+    });
+    let progPercent = sub.keys.length > 0 ? Math.round(totalPercentSum / sub.keys.length) : 0;
+    if (progPercent > 100) progPercent = 100;
+    progressData.push(progPercent);
+
+    let totalAns = 0;
+    let totalCorrect = 0;
+    sub.keys.forEach(key => {
+      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      Object.keys(stats).forEach(qId => {
+        totalAns += (stats[qId].total || 0);
+        totalCorrect += (stats[qId].correct_count || 0);
+      });
+    });
+    let accPercent = totalAns > 0 ? Math.round((totalCorrect / totalAns) * 100) : 0;
+    accuracyData.push(accPercent);
+  });
+
+  const totalProgress = Math.round(progressData.reduce((a, b) => a + b, 0) / 10);
+  const totalAccuracy = Math.round(accuracyData.reduce((a, b) => a + b, 0) / 10);
+
+  return {
+    progress: progressData,
+    accuracy: accuracyData,
+    totalProgress: totalProgress,
+    totalAccuracy: totalAccuracy
+  };
+}
+
+function fetchGlobalDashboardData(myData) {
+  const myAvgProgress = myData.totalProgress;
+  const myAvgAccuracy = myData.totalAccuracy;
+
+  const lastSentProg = localStorage.getItem('dashboard_last_sent_progress');
+  const lastSentAcc = localStorage.getItem('dashboard_last_sent_accuracy');
+
+  if (lastSentProg !== null) {
+    const diff = myAvgProgress - parseInt(lastSentProg, 10);
+    document.getElementById('growth-progress').innerHTML = diff >= 0 ? `<span class="value-plus">＋${diff}%</span>` : `<span class="value-minus">${diff}%</span>`;
+  } else {
+    document.getElementById('growth-progress').innerHTML = `<span class="value-zero">未報告</span>`;
+  }
+
+  if (lastSentAcc !== null) {
+    const diff = myAvgAccuracy - parseInt(lastSentAcc, 10);
+    document.getElementById('growth-accuracy').innerHTML = diff >= 0 ? `<span class="value-plus">＋${diff}%</span>` : `<span class="value-minus">${diff}%</span>`;
+  } else {
+    document.getElementById('growth-accuracy').innerHTML = `<span class="value-zero">未報告</span>`;
+  }
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : {};
+  const serialCode = currentUser.serial_code || localStorage.getItem('teacher_google_id_token') || "";
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+      action: "getDashboardData",
+      password: serialCode
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === "error") {
+      console.error("ダッシュボードデータエラー:", data.message);
+      return;
+    }
+    handleDashboardData(data);
+  })
+  .catch(err => {
+    console.error("通信エラー:", err);
+    renderRadarCharts(myData.progress, Array(10).fill(0), myData.accuracy, Array(10).fill(0));
+  });
+}
+
+function handleDashboardData(data) {
+  const gmCount = data.global_metrics ? data.global_metrics.grand_master_count : 0;
+  document.getElementById('gm-total-count').innerText = `${gmCount} 回`;
+
+  const progList = document.getElementById('rank-progress-list');
+  if (data.ranking && data.ranking.accuracy_top5 && data.ranking.accuracy_top5.length > 0) {
+    progList.innerHTML = data.ranking.accuracy_top5.map((r, idx) => `
+      <li class="rank-item">
+        <span class="rank-num">${idx+1}位</span>
+        <span class="rank-name">${escapeHTML(r.school || '')} ${escapeHTML(r.className || '')}</span>
+        <strong class="rank-val">正答: ${escapeHTML(String(r.value || 0))}%</strong>
+      </li>
+    `).join('');
+  } else {
+    progList.innerHTML = `<li class="rank-item"><span style="color:#7f8c8d;">現在ランキング対象者がいません</span></li>`;
+  }
+
+  const classList = document.getElementById('rank-class-list');
+  if (data.class_ranking && data.class_ranking.top_classes && data.class_ranking.top_classes.length > 0) {
+    classList.innerHTML = data.class_ranking.top_classes.map((c, idx) => `
+      <li class="rank-item">
+        <span class="rank-num">${idx+1}位</span>
+        <span class="rank-name">${escapeHTML(c.name || '')}</span>
+        <strong class="rank-val">進捗: ${escapeHTML(String(c.value || 0))}%</strong>
+      </li>
+    `).join('');
+  } else {
+    classList.innerHTML = `<li class="rank-item"><span style="color:#7f8c8d;">データ収集中...</span></li>`;
+  }
+
+  const globalMedianProgress = (data.median && Array.isArray(data.median.progress)) ? data.median.progress : Array(10).fill(0);
+  const globalMedianAccuracy = (data.median && Array.isArray(data.median.accuracy)) ? data.median.accuracy : Array(10).fill(0);
+
+  const myData = calculateMyCurrentStats();
+  renderRadarCharts(myData.progress, globalMedianProgress, myData.accuracy, globalMedianAccuracy);
+}
+
+function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
+  const progressLabels = [];
+  const progressRankColors = [];
+  DASHBOARD_SUBJECTS.forEach((s, idx) => {
+    const progVal = myProg[idx] || 0;
+    const progRank = getSelfGrowthRank(progVal, 'progress');
+    progressLabels.push([s.name, `[${progRank}]`]);
+    progressRankColors.push(getRankColor(progRank));
+  });
+
+  const accuracyLabels = [];
+  const accuracyRankColors = [];
+  DASHBOARD_SUBJECTS.forEach((s, idx) => {
+    const progVal = myProg[idx] || 0;
+    const accVal = myAcc[idx] || 0;
+    const accRank = (progVal > 10) ? getSelfGrowthRank(accVal, 'accuracy') : '-';
+    accuracyLabels.push([s.name, `[${accRank}]`]);
+    accuracyRankColors.push(getRankColor(accRank));
+  });
+
+  if (progressChartInstance) progressChartInstance.destroy();
+  progressChartInstance = new Chart(document.getElementById('progressChart').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: progressLabels,
+      datasets: [
+        { label: '自分', data: myProg, backgroundColor: 'rgba(116, 185, 255, 0.25)', borderColor: '#74b9ff', borderWidth: 2, pointBackgroundColor: '#74b9ff' },
+        { label: '全体中央値', data: globalProg, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3] }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100, ticks: { stepSize: 20 },
+          pointLabels: {
+            font: { size: 10, weight: 'bold' },
+            color: (ctx) => (ctx.indexLine === 1) ? progressRankColors[ctx.index] || '#7f8c8d' : '#2c3e50'
+          }
+        }
+      }
+    }
+  });
+
+  if (accuracyChartInstance) accuracyChartInstance.destroy();
+  accuracyChartInstance = new Chart(document.getElementById('accuracyChart').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: accuracyLabels,
+      datasets: [
+        { label: '自分', data: myAcc, backgroundColor: 'rgba(255, 159, 67, 0.25)', borderColor: '#ff9f43', borderWidth: 2, pointBackgroundColor: '#ff9f43' },
+        { label: '全体中央値', data: globalAcc, backgroundColor: 'rgba(178, 190, 195, 0.1)', borderColor: 'rgba(178, 190, 195, 0.7)', borderWidth: 1, pointBackgroundColor: 'rgba(178, 190, 195, 0.7)', borderDash: [3] }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          min: 0, max: 100, ticks: { stepSize: 20 },
+          pointLabels: {
+            font: { size: 10, weight: 'bold' },
+            color: (ctx) => (ctx.indexLine === 1) ? accuracyRankColors[ctx.index] || '#7f8c8d' : '#2c3e50'
+          }
+        }
+      }
+    }
+  });
+}
+
+function updateMyGrandMasterCount() {
+  let gmAchievedCount = 0;
+  let totalTargetKeys = 0;
+
+  DASHBOARD_SUBJECTS.forEach(sub => {
+    sub.keys.forEach(key => {
+      totalTargetKeys++;
+      let progPercent = parseInt(localStorage.getItem('solved_' + key) || 0, 10);
+      let totalAns = 0, totalCorrect = 0, totalWrong = 0;
+      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      Object.keys(stats).forEach(qId => {
+        totalAns += (stats[qId].total || 0);
+        totalCorrect += (stats[qId].correct_count || 0);
+        totalWrong += (stats[qId].wrong_count || 0);
+      });
+      if (progPercent >= 100 && totalAns > 0 && totalCorrect === totalAns && totalWrong === 0) {
+        gmAchievedCount++;
+      }
+    });
+  });
+
+  const el = document.getElementById('my-grandmaster-count');
+  if (el) el.innerText = `${gmAchievedCount} / ${totalTargetKeys}`;
+}
+
+function drawSelfHistoryChart() {
+  const canvasEl = document.getElementById('selfHistoryChart');
+  if (!canvasEl) return;
+
+  if (selfHistoryChartInstance) selfHistoryChartInstance.destroy();
+
+  const storedData = JSON.parse(localStorage.getItem('beauty_app_self_growth_history')) || [];
+  let renderDataList = [...storedData];
+  if (renderDataList.length > 30) renderDataList = renderDataList.slice(-30);
+
+  if (renderDataList.length === 0) {
+    const myData = calculateMyCurrentStats();
+    renderDataList.push({ date: "現在", progress: myData.totalProgress, accuracy: myData.totalAccuracy });
+  }
+
+  selfHistoryChartInstance = new Chart(canvasEl.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: renderDataList.map(h => h.date),
+      datasets: [
+        { label: '総合進捗度 (%)', data: renderDataList.map(h => h.progress), borderColor: '#74b9ff', backgroundColor: 'rgba(116, 185, 255, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.15, fill: true },
+        { label: '平均正答率 (%)', data: renderDataList.map(h => h.accuracy), borderColor: '#ff9f43', backgroundColor: 'rgba(255, 159, 67, 0.1)', borderWidth: 2, pointRadius: 3, tension: 0.15, fill: true }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { min: 0, max: 100, ticks: { stepSize: 20 } } }
+    }
+  });
+}
+
+function executeDataTransmission() {
+  const btn = document.getElementById("btn-submit-report");
+  const resultBox = document.getElementById("transmission-result-box");
+  const myData = calculateMyCurrentStats();
+
+  btn.disabled = true;
+  btn.innerText = "⏳ 成果報告を送信中...";
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : {};
+  const serialCode = currentUser.serial_code || localStorage.getItem('teacher_google_id_token') || "";
+
+  let myGmCount = 0;
+  DASHBOARD_SUBJECTS.forEach(sub => {
+    sub.keys.forEach(key => {
+      let progPercent = parseInt(localStorage.getItem('solved_' + key) || 0, 10);
+      let totalAns = 0, totalCorrect = 0, totalWrong = 0;
+      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      Object.keys(stats).forEach(qId => {
+        totalAns += (stats[qId].total || 0);
+        totalCorrect += (stats[qId].correct_count || 0);
+        totalWrong += (stats[qId].wrong_count || 0);
+      });
+      if (progPercent >= 100 && totalAns > 0 && totalCorrect === totalAns && totalWrong === 0) myGmCount++;
+    });
+  });
+
+  const payload = {
+    action: "submitProgressData",
+    email: serialCode,
+    password: serialCode,
+    progressArray: myData.progress,
+    accuracyArray: myData.accuracy,
+    gmCount: myGmCount,
+    totalProgress: myData.totalProgress,
+    totalAccuracy: myData.totalAccuracy,
+    dailyChallengeStreak: parseInt(localStorage.getItem('daily_challenge_streak') || "0", 10),
+    dailyTotalSuccess: parseInt(localStorage.getItem('daily_total_success_count') || "0", 10),
+    dailyMaxStreak: parseInt(localStorage.getItem('daily_max_streak') || "0", 10)
+  };
+
+  fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    btn.disabled = false;
+    btn.innerText = "📤 最新の学習成果を報告する";
+
+    if (data.status === "success") {
+      const nowMs = new Date().getTime();
+      localStorage.setItem('dashboard_last_sent_progress', myData.totalProgress);
+      localStorage.setItem('dashboard_last_sent_accuracy', myData.totalAccuracy);
+      localStorage.setItem('dashboard_last_send_timestamp', nowMs);
+
+      let growthHistory = JSON.parse(localStorage.getItem('beauty_app_self_growth_history')) || [];
+      const today = new Date();
+      const formattedDate = `${today.getMonth() + 1}/${today.getDate()} ${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
+      growthHistory.push({ date: formattedDate, progress: myData.totalProgress, accuracy: myData.totalAccuracy });
+      localStorage.setItem('beauty_app_self_growth_history', JSON.stringify(growthHistory));
+
+      drawSelfHistoryChart();
+
+      resultBox.style.display = "block";
+      resultBox.innerHTML = `
+        <div style="background: #e8f5e9; border: 1px solid #81c784; color: #2e7d32; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">
+          🎉 成果報告が正常に送信されました！<br>最新の順位と成長データが更新されました。
+        </div>
+      `;
+    } else {
+      alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
+    }
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.innerText = "📤 最新の学習成果を報告する";
+    alert("❌ 通信エラーが発生しました。");
+  });
+}
+</script>
+</body>
+</html>
