@@ -301,6 +301,7 @@
     let userAnswers = [];
 let isWeaknessMode = false;
 let isDailyMode = false; // 🎯 デイリー真剣勝負モードフラグ
+let dailyHasMistake = false; // 🎯 デイリー中に1問でも間違えたかのフラグ
 let activeModalUnit = "";
 let currentSortMode = "default";
 let isAllHistoryMode = false;
@@ -340,15 +341,13 @@ function updateDailyStreakStats(isSuccess) {
   }
 
 const alreadyCountedToday = (lastDate === todayStr) && (localStorage.getItem('daily_last_success_date') === todayStr);
-  if (isSuccess) {
-    if (!alreadyCountedToday) {
-      totalSuccess += 1;
-      currentStreak += 1;
-      if (currentStreak > maxStreak) {
-        maxStreak = currentStreak;
-      }
-      localStorage.setItem('daily_last_success_date', todayStr);
+if (isSuccess) {
+    totalSuccess += 1;
+    currentStreak += 1;
+    if (currentStreak > maxStreak) {
+      maxStreak = currentStreak;
     }
+    localStorage.setItem('daily_last_success_date', todayStr);
   } else {
     currentStreak = 0;
   }
@@ -369,6 +368,7 @@ function startDailyQuiz() {
 
   isDailyMode = true;
   isWeaknessMode = false;
+  dailyHasMistake = false;
   currentUnitName = "デイリー真剣勝負";
 
   let allPoolQuestions = [];
@@ -786,40 +786,39 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
         is_correct: isCorrect
       });
 
-      if (!questionStats[q.id]) {
-        questionStats[q.id] = { total: 0, streak: 0, correct_count: 0 };
-      }
-      const wasMastered = (questionStats[q.id].streak || 0) >= 1;
-
+      const wasMastered = (questionStats[q.id]?.streak || 0) >= 1;
       let dailyStreak = parseInt(localStorage.getItem("beauty_app_daily_streak_" + rawSubject) || "0", 10);
 
-      questionStats[q.id].total += 1;
-      if (isCorrect) {
-        questionStats[q.id].streak += 1;
-        questionStats[q.id].correct_count += 1;
-      } else {
-        questionStats[q.id].streak = 0;
-        localStorage.setItem("beauty_app_has_ever_failed_" + currentCourseKey, JSON.stringify(true));
+      if (!isDailyMode) {
+        if (!questionStats[q.id]) {
+          questionStats[q.id] = { total: 0, streak: 0, correct_count: 0 };
+        }
+        questionStats[q.id].total += 1;
+        if (isCorrect) {
+          questionStats[q.id].streak += 1;
+          questionStats[q.id].correct_count += 1;
+        } else {
+          questionStats[q.id].streak = 0;
+          localStorage.setItem("beauty_app_has_ever_failed_" + currentCourseKey, JSON.stringify(true));
 
-        // 🔥 デイリー真剣勝負中に間違えた瞬間、該当科目の連続達成をリセット
-        if (isDailyMode) {
-          dailyStreak = 0;
-          localStorage.setItem("beauty_app_daily_streak_" + rawSubject, "0");
-          localStorage.setItem("daily_current_streak", "0");
+          if (isWeaknessMode) {
+            weaknessSessionWrongCount++;
+            localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
+          }
         }
 
-        if (isWeaknessMode) {
-          weaknessSessionWrongCount++;
-          localStorage.setItem("beauty_app_weakness_streak_" + currentCourseKey, JSON.stringify(0));
+        if (isCorrect && !wasMastered) {
+          let currentSolved = parseInt(localStorage.getItem('solved_' + currentCourseKey) || 0);
+          localStorage.setItem('solved_' + currentCourseKey, currentSolved + 1);
         }
-      }
 
-      if (isCorrect && !wasMastered) {
-        let currentSolved = parseInt(localStorage.getItem('solved_' + currentCourseKey) || 0);
-        localStorage.setItem('solved_' + currentCourseKey, currentSolved + 1);
+        localStorage.setItem("beauty_app_question_stats_" + currentCourseKey, JSON.stringify(questionStats));
+      } else if (!isCorrect) {
+        dailyHasMistake = true;
+        dailyStreak = 0;
+        localStorage.setItem("beauty_app_daily_streak_" + rawSubject, "0");
+        localStorage.setItem("daily_current_streak", "0");
       }
-
-      localStorage.setItem("beauty_app_question_stats_" + currentCourseKey, JSON.stringify(questionStats));
 
       const statusEl = document.getElementById("result-status");
       if (isCorrect) {
@@ -835,24 +834,36 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
           ? `🔥 デイリー真剣勝負 現在の連続記録: ${dailyStreak}日`
           : `❌ 不正解のためデイリー連続記録がリセットされました（現在: 0日）`;
       } else {
-        document.getElementById("current-streak").innerText = `戦績: 正解${questionStats[q.id].correct_count}回 / 連続: ${questionStats[q.id].streak}回`;
+        const statForDisplay = questionStats[q.id] || { correct_count: 0, streak: 0 };
+        document.getElementById("current-streak").innerText = `戦績: 正解${statForDisplay.correct_count}回 / 連続: ${statForDisplay.streak}回`;
       }
       document.getElementById("explanation-text").innerText = q.exp || q.explanation || "解説はありません。";
 
       const isLastQuestion = (currentIndex === currentQuestions.length - 1);
       const btnContainer = document.getElementById("explanation-buttons");
 
-      if (isLastQuestion) {
+      if (isDailyMode && !isCorrect) {
+        await saveSetCompleteLog();
+        btnContainer.innerHTML = `
+          <button class="btn" onclick="exitQuizToUnitScreen()" style="flex: 1; background: #dc3545; padding: 10px 8px; font-size: 0.85rem;">❌ デイリー失敗：単元一覧に戻る（記録リセット）</button>
+        `;
+      } else if (isLastQuestion) {
         await saveSetCompleteLog();
 
-        if (score === currentQuestions.length) {
+        if (score === currentQuestions.length && !dailyHasMistake) {
           triggerConfetti();
         }
 
-        btnContainer.innerHTML = `
-          <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
-          <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
-        `;
+        if (isDailyMode) {
+          btnContainer.innerHTML = `
+            <button class="btn" onclick="exitQuizToUnitScreen()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">🎉 本日のデイリー達成！単元一覧に戻る</button>
+          `;
+        } else {
+          btnContainer.innerHTML = `
+            <button class="btn" onclick="continueQuizSet()" style="flex: 1; background: #0984e3; padding: 10px 8px; font-size: 0.85rem;">🔄 続けて解く<br>(次の3問)</button>
+            <button class="btn btn-outline" onclick="exitQuizToUnitScreen()" style="flex: 1; padding: 10px 8px; font-size: 0.85rem;">中断して戻る</button>
+          `;
+        }
       } else {
         btnContainer.innerHTML = `
           <button class="btn" onclick="nextQuestion()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">次の問題へ</button>
@@ -882,7 +893,7 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
 async function saveSetCompleteLog() {
       const total = currentQuestions.length;
       const finalScore = total > 0 ? Math.round((score / total) * 100) : 0;
-      const isSetCompleted = (score === total);
+      const isSetCompleted = (score === total) && !dailyHasMistake;
 
       if (isDailyMode) {
         const today = getTodayString();
@@ -892,10 +903,14 @@ async function saveSetCompleteLog() {
           localStorage.setItem("beauty_app_daily_streak_" + rawSubject, String(dailyStreak));
           localStorage.setItem("beauty_app_last_daily_date_" + rawSubject, today);
           updateDailyStreakStats(true);
+          alert(`🔥 素晴らしい勝負でした！\nデイリースタンプを獲得し、連続正解記録が【 ${dailyStreak}日 】に伸びました！`);
         } else {
           localStorage.setItem("beauty_app_daily_streak_" + rawSubject, "0");
-          updateDailyStreakStats(false);
+          localStorage.setItem("daily_current_streak", "0");
+          alert("❌ デイリー真剣勝負に失敗！\n途中で誤答したため、連続正解記録がリセットされ【 0日 】になりました。");
         }
+        isDailyMode = false;
+        return;
       } else if (!isWeaknessMode && currentUnitName) {
         const unitCountData = JSON.parse(localStorage.getItem("beauty_app_counts_" + currentCourseKey)) || {};
         unitCountData[currentUnitName] = (unitCountData[currentUnitName] || 0) + 1;
