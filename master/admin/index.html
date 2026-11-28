@@ -481,13 +481,11 @@
         <div id="modal-review-questions" style="font-size:0.78rem; color:#334155;">該当する復習問題の分析データを抽出中...</div>
       </div>
 
-      <button onclick="closeStudentModal()" class="btn" style="width:100%; padding:10px; background:#0984e3; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">閉じる</button>
+<button onclick="closeStudentModal()" class="btn" style="width:100%; padding:10px; background:#0984e3; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">閉じる</button>
     </div>
   </div>
 
-  let modalLineChartInstance = null;
-  let modalRadarChartInstance = null;
-
+  <script>
   function openStudentModal(studentId) {
     const modal = document.getElementById('student-detail-modal');
     const student = aggregatedStudents.find(s => String(s.id) === String(studentId));
@@ -535,11 +533,12 @@
     if (reviewEl) {
       const wrongItems = [];
       (student.logs || []).forEach(l => {
-        if (Array.isArray(l.details)) {
-          l.details.forEach((d, i) => {
-            if (!d.is_correct) wrongItems.push(d.question_num || d.question_id || (i + 1));
-          });
-        }
+        const detailItems = Array.isArray(l.details)
+          ? l.details
+          : (l.details && Array.isArray(l.details.answers) ? l.details.answers : []);
+        detailItems.forEach((d, i) => {
+          if (!d.is_correct) wrongItems.push(d.question_num || d.question_id || (i + 1));
+        });
       });
       reviewEl.innerText = wrongItems.length > 0
         ? `直近の誤答対象（全${wrongItems.length}件）: ${wrongItems.slice(0, 20).map(q => `問${q}`).join(', ')}`
@@ -560,32 +559,40 @@
   <script src="../js/past_exam_answers.js"></script>
 
   <script>
+    // 1. 共通定数・状態変数（参照エラー防止のため最上部に配置）
+    const PAGE_SIZE = 30;
+    let currentPage = 1;
     let currentAdminTab = 'codes';
-    let lineChartInstance = null;
-    let radarChartInstance = null;
-    let macroClassChartInstance = null;
-    let macroSubjectChartInstance = null;
 
     let cachedUsersList = [];
     let cachedExamLogs = [];
     let cachedCodesList = [];
     let aggregatedStudents = [];
 
-    const SUBJECT_LABELS = {
-      'regulations': '関係法規',
-      'management': '運営管理',
-      'public_hygiene': '公衆衛生',
-      'infection': '感染症',
-      'hygiene_tech': '衛生技術',
-      'anatomy': '人体構造',
-      'dermatology': '皮膚科学',
-      'cosmetic_chem': '香粧品',
-      'culture': '文化論',
-      'tech_theory': '技術理論'
-    };
+    let lineChartInstance = null;
+    let radarChartInstance = null;
+    let macroClassChartInstance = null;
+    let macroSubjectChartInstance = null;
+    let subjectProgressChartInstance = null;
+    let subjectAccuracyChartInstance = null;
+    let groupComparisonRadarChartInstance = null;
+    let modalLineChartInstance = null;
+    let modalRadarChartInstance = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // フィルター入力・変更イベントの一括紐付け
+    const DASHBOARD_SUBJECTS_DEF = [
+      { id: '01', name: '関係法規', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] },
+      { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] },
+      { id: '03', name: '公衆衛生', keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'] },
+      { id: '04', name: '感染症', keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'] },
+      { id: '05', name: '衛生技術', keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'] },
+      { id: '06', name: '人体構造', keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'] },
+      { id: '07', name: '皮膚科学', keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'] },
+      { id: '08', name: '香粧品化学', keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'] },
+      { id: '09', name: '文化論', keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'] },
+      { id: '10', name: '技術理論', keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] }
+    ];
+
+    document.addEventListener('DOMContentLoaded', async () => {
   ['filter-school', 'filter-class', 'filter-status', 'sort-key'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -740,11 +747,16 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
 
     function getTotalQuestionCountFromDB() {
       const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
-      if (!dbSource) return 2295;
+      if (!dbSource || typeof dbSource !== 'object') return 2295;
       let total = 0;
       for (let key in dbSource) {
-        const pool = dbSource[key].questionPool || {};
+        if (!Object.prototype.hasOwnProperty.call(dbSource, key)) continue;
+        const subjectObj = dbSource[key];
+        const pool = (subjectObj && subjectObj.questionPool && typeof subjectObj.questionPool === 'object')
+          ? subjectObj.questionPool
+          : {};
         for (let u in pool) {
+          if (!Object.prototype.hasOwnProperty.call(pool, u)) continue;
           if (Array.isArray(pool[u])) total += pool[u].length;
         }
       }
@@ -756,7 +768,7 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
       if (!supabase) return;
 
       try {
-        const [usersRes, logsRes, codesRes] = await Promise.all([
+const [usersRes, logsRes, codesRes] = await Promise.all([
           supabase.from('users').select('id, student_name, school_name, serial_code, role, created_at').limit(2000),
           supabase.from('exam_logs').select('id, user_id, serial_code, mode, subject_id, score, total_questions, correct_count, details, created_at').order('created_at', { ascending: false }).limit(5000),
           supabase.from('serial_codes').select('id, code, school_name, max_uses, used_count, is_active').order('created_at', { ascending: false })
@@ -827,7 +839,7 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
             ? `${lastActiveDate.getFullYear()}/${String(lastActiveDate.getMonth() + 1).padStart(2, '0')}/${String(lastActiveDate.getDate()).padStart(2, '0')} ${String(lastActiveDate.getHours()).padStart(2, '0')}:${String(lastActiveDate.getMinutes()).padStart(2, '0')}`
             : '未報告';
 
-          const classNameStr = u.class_name || codeToSchoolMap[u.serial_code] || '未設定';
+          const classNameStr = codeToSchoolMap[u.serial_code] || u.school_name || '未設定';
           const subjectsStats = {};
           DASHBOARD_SUBJECTS_DEF.forEach(sub => {
             const subLogs = logs2Choice.filter(l => sub.keys.includes(l.subject_id));
@@ -896,12 +908,14 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
       tbody.innerHTML = '';
       cachedCodesList.forEach(c => {
         const tr = document.createElement('tr');
+        const safeId = escapeHTML(String(c.id ?? ''));
+        const nextState = Boolean(!c.is_active);
         tr.innerHTML = `
           <td><b>${escapeHTML(c.code)}</b></td>
           <td>${escapeHTML(c.school_name || '')}</td>
           <td>${Number(c.used_count || 0)} / ${Number(c.max_uses || 1)} 名</td>
           <td><span class="${c.is_active ? 'badge-status-ok' : 'badge-status-alert'}">${c.is_active ? '有効' : '停止'}</span></td>
-          <td><button onclick="toggleSerialCodeStatus('${c.id}', ${!c.is_active})" style="padding:4px 8px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#ffffff;">${c.is_active ? '停止にする' : '有効にする'}</button></td>
+          <td><button onclick="toggleSerialCodeStatus('${safeId}', ${nextState})" style="padding:4px 8px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#ffffff;">${c.is_active ? '停止にする' : '有効にする'}</button></td>
         `;
         tbody.appendChild(tr);
       });
@@ -931,19 +945,34 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
       const schoolInput = document.getElementById('school-name');
       const maxInput = document.getElementById('max-uses');
 
+      const submitBtn = e.target.querySelector('button[type="submit"]');
       const cleanCode = codeInput.value.trim().toUpperCase();
       const schoolName = schoolInput.value.trim();
       const maxUses = parseInt(maxInput.value, 10) || 1;
 
       if (!cleanCode || !schoolName) return;
 
-      const { error } = await supabase.from('serial_codes').insert([{
-        code: cleanCode,
-        school_name: schoolName,
-        max_uses: maxUses,
-        used_count: 0,
-        is_active: true
-      }]);
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = '登録中...';
+      }
+
+      let error = null;
+      try {
+        const res = await supabase.from('serial_codes').insert([{
+          code: cleanCode,
+          school_name: schoolName,
+          max_uses: maxUses,
+          used_count: 0,
+          is_active: true
+        }]);
+        error = res.error;
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'コードを発行・登録';
+        }
+      }
 
       msgEl.style.display = 'block';
       if (error) {
@@ -957,26 +986,6 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
       codeInput.value = '';
       await loadSerialCodesTable();
     }
-
-// 10科目定義
-const DASHBOARD_SUBJECTS_DEF = [
-  { id: '01', name: '関係法規', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] },
-  { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] },
-  { id: '03', name: '公衆衛生', keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'] },
-  { id: '04', name: '感染症', keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'] },
-  { id: '05', name: '衛生技術', keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'] },
-  { id: '06', name: '人体構造', keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'] },
-  { id: '07', name: '皮膚科学', keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'] },
-  { id: '08', name: '香粧品化学', keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'] },
-  { id: '09', name: '文化論', keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'] },
-  { id: '10', name: '技術理論', keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] }
-];
-
-let currentPage = 1;
-const PAGE_SIZE = 30;
-
-let subjectProgressChartInstance = null;
-let subjectAccuracyChartInstance = null;
 
 function getSelfGrowthRank(val, type) {
   const num = parseInt(val || 0, 10);
@@ -1013,14 +1022,15 @@ function render2ChoiceDashboard() {
   applyFilters();
 }
 
-// 🔍 学校・クラスのドロップダウン生成
 function populateFilterOptions() {
   const schoolSelect = document.getElementById('filter-school');
   const classSelect = document.getElementById('filter-class');
+  const examSchoolSelect = document.getElementById('exam-school-filter');
   if (!schoolSelect || !classSelect) return;
 
   const currentSchool = schoolSelect.value;
   const currentClass = classSelect.value;
+  const currentExamSchool = examSchoolSelect ? examSchoolSelect.value : '';
 
   const schools = new Set();
   const classes = new Set();
@@ -1038,6 +1048,17 @@ function populateFilterOptions() {
     schoolSelect.appendChild(opt);
   });
   schoolSelect.value = currentSchool;
+
+  if (examSchoolSelect) {
+    examSchoolSelect.innerHTML = '<option value="">全校・全クラス対象</option>';
+    schools.forEach(sch => {
+      const opt = document.createElement('option');
+      opt.value = sch;
+      opt.textContent = sch;
+      examSchoolSelect.appendChild(opt);
+    });
+    examSchoolSelect.value = currentExamSchool;
+  }
 
   classSelect.innerHTML = '<option value="">全てのクラス</option>';
   classes.forEach(cls => {
@@ -1300,8 +1321,6 @@ function resetFilters() {
   applyFilters();
 }
 
-    let groupComparisonRadarChartInstance = null;
-
     // 起動時に第41回〜第54回の選択肢を生成
     function init4ChoiceRoundSelector() {
       const sel = document.getElementById('exam-round-select');
@@ -1396,94 +1415,32 @@ function resetFilters() {
       return Object.values(latestMap);
     }
 
-    /**
+/**
      * 4択過去問分析タブの一括描画
      */
-    // 📝 Tab ③ 4択過去問分析の集計＆描画
-function renderAll4ChoiceAnalysis() {
-  const tbody = document.getElementById('exam-table-body');
-  if (!tbody) return;
+    function renderAll4ChoiceAnalysis() {
+      init4ChoiceRoundSelector();
+      const roundSel = document.getElementById('exam-round-select');
+      const schoolSel = document.getElementById('exam-school-filter');
+      const selectedRound = roundSel ? roundSel.value : '';
+      const selectedSchool = schoolSel ? schoolSel.value : '';
 
-  // Supabaseから取得済みの全ログの中から4択過去問のログを抽出
-  const logs4Choice = allExamLogs.filter(log => log.mode === '4choice' || log.subject_id === 'past_exam');
+      const allRecords = buildNormalized4ChoiceRecords();
+      const targetRecords = allRecords.filter(r => {
+        if (selectedRound && String(r.round) !== String(selectedRound)) return false;
+        if (selectedSchool && r.school !== selectedSchool) return false;
+        return true;
+      });
 
-  if (logs4Choice.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:16px;">📝 まだ4択過去問の送信データがありません。</td></tr>';
-    const gridEl = document.getElementById('q-accuracy-grid');
-    if (gridEl) gridEl.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8; padding:8px;">提出データが集まり次第、問別正答率が表示されます。</div>';
-    return;
-  }
-
-  // 1. 全55問の問別正誤カウント集計
-  const qStats = {};
-  for (let i = 1; i <= 55; i++) {
-    qStats[i] = { total: 0, correct: 0 };
-  }
-
-  let totalScoreSum = 0;
-
-  logs4Choice.forEach(log => {
-    totalScoreSum += (log.score || 0);
-
-    const details = Array.isArray(log.details)
-      ? log.details
-      : (log.details && Array.isArray(log.details.answers) ? log.details.answers : []);
-
-    details.forEach((ans, idx) => {
-      const qNum = ans.q_num || ans.question_id || (idx + 1);
-      if (qStats[qNum]) {
-        qStats[qNum].total += 1;
-        if (ans.is_correct || ans.isCorrect) {
-          qStats[qNum].correct += 1;
-        }
+      const badge = document.getElementById('exam-analysis-summary-badge');
+      if (badge) {
+        badge.innerText = `対象回答データ: ${targetRecords.length}件` + (selectedRound ? `（第${selectedRound}回）` : '（全回）');
       }
-    });
-  });
 
-  // 2. 全55問の正答率グリッドの描画
-  const gridEl = document.getElementById('q-accuracy-grid');
-  if (gridEl) {
-    let gridHtml = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(55px, 1fr)); gap:6px; margin-top:8px;">';
-    for (let i = 1; i <= 55; i++) {
-      const st = qStats[i];
-      const acc = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
-      let bg = '#dcfce7'; let color = '#15803d'; // 🟢 高正答率
-      if (acc < 50) { bg = '#fee2e2'; color = '#b91c1c'; } // 🔴 低正答率
-      else if (acc < 75) { bg = '#fef3c7'; color = '#b45309'; } // 🟡 中正答率
-
-      gridHtml += `
-        <div style="background:${bg}; color:${color}; border-radius:6px; padding:4px 2px; text-align:center; font-size:0.7rem; font-weight:bold;">
-          問${i}<br><span style="font-size:0.75rem;">${acc}%</span>
-        </div>
-      `;
+      renderExamAnalysisGrid(targetRecords, selectedRound);
+      renderTogetherProblemsAdmin(targetRecords, selectedRound);
+      renderStatisticsAdmin(allRecords, targetRecords, selectedRound);
     }
-    gridHtml += '</div>';
-    gridEl.innerHTML = gridHtml;
-  }
-
-  // 3. 個別受験履歴テーブルの出力
-  tbody.innerHTML = '';
-  logs4Choice.forEach(log => {
-    const student = aggregatedStudents.find(s => s.code === log.serial_code || s.id === log.user_id) || {};
-    const dateStr = log.created_at ? new Date(log.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '未記録';
-    const score = log.score || 0;
-    const correctCount = log.correct_count || 0;
-    const totalQ = log.total_questions || 55;
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td style="padding:8px; white-space:nowrap;">${escapeHTML(dateStr)}</td>
-      <td style="padding:8px;">${escapeHTML(student.school || '未設定')}</td>
-      <td style="padding:8px;">${escapeHTML(student.className || '未設定')}</td>
-      <td style="padding:8px; font-weight:bold;">${escapeHTML(student.name || '生徒')} (<code>${escapeHTML(log.serial_code || '')}</code>)</td>
-      <td style="padding:8px; text-align:center; font-weight:bold; color:${score >= 60 ? '#2ecc71' : '#e74c3c'};">${score}点 (${correctCount}/${totalQ})</td>
-      <td style="padding:8px; text-align:center;">
-        <span style="font-size:0.75rem; background:#f1f2f6; padding:3px 8px; border-radius:4px; font-weight:bold; color:#475569;">完了</span>
-      </td>
-    `;
-    tbody.appendChild(row);
-  });
-}
 
     // 1. 55問設問別正解率グリッド & ワースト5
     function renderExamAnalysisGrid(targetRecords, selectedRound) {
