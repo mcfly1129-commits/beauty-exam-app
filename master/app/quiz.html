@@ -366,21 +366,23 @@
           });
         });
 
-        let updated = false;
+        let anyCourseUpdated = false;
         for (let cKey in remoteStatsByCourse) {
           const localStats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + cKey)) || {};
           const remoteStats = remoteStatsByCourse[cKey];
+          let courseChanged = false;
 
           for (let qId in remoteStats) {
             const rSt = remoteStats[qId];
             const lSt = localStats[qId];
             if (!lSt || rSt.total > (lSt.total || 0)) {
               localStats[qId] = rSt;
-              updated = true;
+              courseChanged = true;
             }
           }
 
-          if (updated) {
+          if (courseChanged) {
+            anyCourseUpdated = true;
             localStorage.setItem("beauty_app_question_stats_" + cKey, JSON.stringify(localStats));
             // solved_ カウントも再計算して整合性を保つ
             let masteredCount = 0;
@@ -391,7 +393,7 @@
           }
         }
 
-        if (updated) {
+        if (anyCourseUpdated) {
           renderCourseTabs();
           refreshUnitScreen();
         }
@@ -653,7 +655,7 @@
       document.getElementById("explanation-area").style.display = "none";
     }
 
-    function handleAnswer(userAnsBool) {
+    async function handleAnswer(userAnsBool) {
       const q = currentQuestions[currentIndex];
       let correctBool = false;
       if (typeof q.answer === 'boolean') {
@@ -714,7 +716,7 @@
       const btnContainer = document.getElementById("explanation-buttons");
 
       if (isLastQuestion) {
-        saveSetCompleteLog();
+        await saveSetCompleteLog();
 
         if (score === currentQuestions.length) {
           triggerConfetti();
@@ -835,7 +837,6 @@
     }
 
     function openHistoryModal(unitName) {
-      isAllHistoryMode = false;
       activeModalUnit = unitName;
       document.getElementById("modal-unit-title").innerText = `${unitName} - 履歴・分析`;
       document.getElementById("history-modal").style.display = "flex";
@@ -843,7 +844,6 @@
     }
 
     function openCourseHistoryModal() {
-      isAllHistoryMode = false;
       activeModalUnit = "ALL_COURSE";
       const currentCourseObj = subjectConfig.courses.find(c => c.key === currentCourseKey);
       const courseName = currentCourseObj ? currentCourseObj.label : 'この範囲';
@@ -916,6 +916,14 @@
         });
       }
 
+      const summaryEl = document.getElementById("modal-score-summary");
+      if (summaryEl) {
+        const totalQ = targetQuestions.length;
+        const masteredQ = targetQuestions.filter(q => ((q.stat && q.stat.streak) || 0) >= 1).length;
+        const pct = totalQ > 0 ? Math.round((masteredQ / totalQ) * 100) : 0;
+        summaryEl.innerText = `習得: ${masteredQ} / ${totalQ} 問 (${pct}%)`;
+      }
+
       if (targetQuestions.length === 0) {
         listEl.innerHTML = `<div style="text-align:center; color:#94a3b8; margin:20px 0;">履歴データがありません</div>`;
         return;
@@ -942,7 +950,7 @@
               <span style="font-size:0.7rem; color:#94a3b8;">${escapeHTML(q.source || '')}</span>
             </div>
             <div style="font-size:0.85rem; font-weight:bold; color:#2d3436; margin-bottom:6px;">${escapeHTML(q.text || q.question || '')}</div>
-            <button onclick="toggleHistExp('${q.id}')" style="background:#f1f2f6; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">解説を見る</button>
+            <button onclick="toggleHistExp('${escapeQuotes(String(q.id))}')" style="background:#f1f2f6; border:none; padding:4px 8px; border-radius:4px; font-size:0.75rem; cursor:pointer; font-weight:bold;">解説を見る</button>
             <div id="hist-exp-${q.id}" style="display:none; background:#faf9f6; font-size:0.8rem; line-height:1.5; color:#475569; padding:8px; border-radius:6px; margin-top:6px; border-left:3px solid #fab1a0;">
               ${escapeHTML(q.exp || q.explanation || '解説はありません。')}
             </div>
