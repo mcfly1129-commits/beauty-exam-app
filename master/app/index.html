@@ -186,6 +186,11 @@
     <h1 class="header-title">💈 受講生ポータル</h1>
     <p class="sub-title">10科目全体の実力と進捗を管理して合格を目指そう</p>
 
+    <!-- ログイン情報ヘッダー -->
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:8px; margin-bottom:12px;">
+      <div>🔑 ログイン中: <b id="user-display-code" style="color:#0984e3;">---</b></div>
+    </div>
+
     <!-- モード切替 -->
     <div class="tab-group">
       <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択高速学習</button>
@@ -334,6 +339,9 @@
         window.location.href = '../index.html';
         return;
       }
+
+      const codeEl = document.getElementById('user-display-code');
+      if (codeEl) codeEl.innerText = currentUser.serial_code || '---';
 
       renderDashboardMonitor();
       updateSpeedDashboardBadges();
