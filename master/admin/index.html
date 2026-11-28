@@ -216,7 +216,7 @@
               </tr>
             </thead>
             <tbody id="codes-table-body">
-              <tr><td colspan="5" style="text-align:center; color:#94a3b8;">読み込み中...</td></tr>
+              <tr><td colspan="7" style="text-align:center; color:#94a3b8;">読み込み中...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1082,13 +1082,30 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
       let totalAnsAll = 0;
       let totalCorrectAll = 0;
 
+      const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+
       DASHBOARD_SUBJECTS_DEF.forEach(sub => {
         const st = subjectStats[sub.id];
         totalMasteredCount += st.masteredIds.size;
         totalAnsAll += st.totalAns;
         totalCorrectAll += st.totalCorrect;
 
-        const subProg = Math.min(100, Math.round((st.masteredIds.size / (sub.total || 150)) * 100));
+        let subQuestionTotal = 0;
+        if (dbSource && typeof dbSource === 'object') {
+          sub.keys.forEach(k => {
+            const pool = (dbSource[k] && dbSource[k].questionPool && typeof dbSource[k].questionPool === 'object')
+              ? dbSource[k].questionPool
+              : {};
+            for (let u in pool) {
+              if (Object.prototype.hasOwnProperty.call(pool, u) && Array.isArray(pool[u])) {
+                subQuestionTotal += pool[u].length;
+              }
+            }
+          });
+        }
+        const denom = subQuestionTotal > 0 ? subQuestionTotal : 150;
+
+        const subProg = Math.min(100, Math.round((st.masteredIds.size / denom) * 100));
         const subAcc = st.totalAns > 0 ? Math.round((st.totalCorrect / st.totalAns) * 100) : 0;
         
         subjectsObj[sub.id] = { progress: subProg, accuracy: subAcc };
