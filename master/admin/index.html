@@ -1148,13 +1148,13 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
         .order('created_at', { ascending: false });
 
       if (error) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#e74c3c;">取得エラー: ${escapeHTML(error.message)}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#e74c3c;">取得エラー: ${escapeHTML(error.message)}</td></tr>`;
         return;
       }
 
       cachedCodesList = data || [];
       if (cachedCodesList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">登録されたシリアルコードはありません</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">登録されたシリアルコードはありません</td></tr>`;
         return;
       }
 
