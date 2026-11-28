@@ -322,16 +322,16 @@ body {
     </div>
   </div>
 
-  <!-- 📤 成果報告ボタンエリア -->
-  <div class="card" style="text-align: center;">
-    <h3 class="card-title" style="border-left-color: var(--accent-orange);">📤 学習成果の報告</h3>
-    <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0; margin-bottom: 12px;">
-      現在の進捗度と正答率をサーバーへ送信して、全国順位と先生からのアドバイスを確認しましょう！
+  <!-- 🚨 2択学習オールリセットエリア (⭐お気に入り＆デイリー実績は保護) -->
+  <div class="card" style="text-align: center; border: 2px dashed #ff7675; background: #fff5f5; margin-top: 24px;">
+    <h3 class="card-title" style="border-left-color: #ff7675; color: #d63031;">⚠️ 2択学習データ オールリセット</h3>
+    <p style="font-size: 0.72rem; color: #636e72; margin-top: 0; margin-bottom: 12px; line-height: 1.5;">
+      全10科目の学習進捗率や正答率をリセットして最初からやり直します。<br>
+      <span style="color: #27ae60; font-weight: bold;">※「⭐お気に入りマーク」および「🔥デイリー実績（連続日数・成功数・連勝数）」は保持されます。</span>
     </p>
-    <button class="btn-submit" id="btn-submit-report" onclick="executeDataTransmission()">
-      📤 最新の学習成果を報告する
+    <button onclick="handleAllReset()" style="background: #ff7675; color: white; border: none; border-radius: 10px; padding: 12px; font-size: 0.85rem; font-weight: bold; width: 100%; cursor: pointer; box-shadow: 0 3px 6px rgba(255, 118, 117, 0.3);">
+      ⚠️ 全10科目の学習データをリセットする
     </button>
-    <div id="transmission-result-box" style="margin-top: 12px; display: none;"></div>
   </div>
 </div>
 
@@ -419,43 +419,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchGlobalDashboardData(myData);
   drawSelfHistoryChart();
 });
-
-function calculateMyCurrentStats() {
-  let progressData = [];
-  let accuracyData = [];
-
-  DASHBOARD_SUBJECTS.forEach(sub => {
-    let totalPercentSum = 0;
-    sub.keys.forEach(key => {
-      totalPercentSum += parseInt(localStorage.getItem('solved_' + key) || 0, 10);
-    });
-    let progPercent = sub.keys.length > 0 ? Math.round(totalPercentSum / sub.keys.length) : 0;
-    if (progPercent > 100) progPercent = 100;
-    progressData.push(progPercent);
-
-    let totalAns = 0;
-    let totalCorrect = 0;
-    sub.keys.forEach(key => {
-      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
-      Object.keys(stats).forEach(qId => {
-        totalAns += (stats[qId].total || 0);
-        totalCorrect += (stats[qId].correct_count || 0);
-      });
-    });
-    let accPercent = totalAns > 0 ? Math.round((totalCorrect / totalAns) * 100) : 0;
-    accuracyData.push(accPercent);
-  });
-
-  const totalProgress = Math.round(progressData.reduce((a, b) => a + b, 0) / 10);
-  const totalAccuracy = Math.round(accuracyData.reduce((a, b) => a + b, 0) / 10);
-
-  return {
-    progress: progressData,
-    accuracy: accuracyData,
-    totalProgress: totalProgress,
-    totalAccuracy: totalAccuracy
-  };
-}
 
 function fetchGlobalDashboardData(myData) {
   const myAvgProgress = myData.totalProgress;
@@ -611,6 +574,76 @@ function renderRadarCharts(myProg, globalProg, myAcc, globalAcc) {
   });
 }
 
+function getCourseQuestionCount(courseKey) {
+  const dbSource = (typeof window !== 'undefined' && window.ALL_QUESTIONS_DATABASE) ? window.ALL_QUESTIONS_DATABASE : null;
+  if (!dbSource || !dbSource[courseKey] || !dbSource[courseKey].questionPool) return 0;
+
+  let count = 0;
+  const pool = dbSource[courseKey].questionPool;
+  for (const unit in pool) {
+    if (Array.isArray(pool[unit])) {
+      count += pool[unit].length;
+    }
+  }
+  return count;
+}
+
+function calculateMyCurrentStats() {
+  let progressData = [];
+  let accuracyData = [];
+
+  DASHBOARD_SUBJECTS.forEach(sub => {
+    let subSolvedCount = 0;
+    let subTotalQuestions = 0;
+    let totalAns = 0;
+    let totalCorrect = 0;
+
+    sub.keys.forEach(key => {
+      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      const storedSolved = localStorage.getItem('solved_' + key);
+      if (storedSolved !== null) {
+        subSolvedCount += parseInt(storedSolved, 10) || 0;
+      } else {
+        Object.keys(stats).forEach(qId => {
+          if ((stats[qId].streak || 0) >= 1) subSolvedCount++;
+        });
+      }
+
+      const dbCount = getCourseQuestionCount(key);
+      if (dbCount > 0) {
+        subTotalQuestions += dbCount;
+      }
+
+      Object.keys(stats).forEach(qId => {
+        totalAns += (stats[qId].total || 0);
+        totalCorrect += (stats[qId].correct_count || 0);
+      });
+    });
+
+    if (subTotalQuestions === 0) {
+      subTotalQuestions = sub.total || 0;
+    }
+
+    const progPercent = subTotalQuestions > 0
+      ? Math.min(100, Math.round((subSolvedCount / subTotalQuestions) * 100))
+      : 0;
+    progressData.push(progPercent);
+
+    const accPercent = totalAns > 0 ? Math.round((totalCorrect / totalAns) * 100) : 0;
+    accuracyData.push(accPercent);
+  });
+
+  const totalProgress = Math.round(progressData.reduce((a, b) => a + b, 0) / DASHBOARD_SUBJECTS.length);
+  const totalAccuracy = Math.round(accuracyData.reduce((a, b) => a + b, 0) / DASHBOARD_SUBJECTS.length);
+
+  return {
+    progress: progressData,
+    accuracy: accuracyData,
+    totalProgress: totalProgress,
+    totalAccuracy: totalAccuracy
+  };
+}
+
 function updateMyGrandMasterCount() {
   let gmAchievedCount = 0;
   let totalTargetKeys = 0;
@@ -618,15 +651,30 @@ function updateMyGrandMasterCount() {
   DASHBOARD_SUBJECTS.forEach(sub => {
     sub.keys.forEach(key => {
       totalTargetKeys++;
-      let progPercent = parseInt(localStorage.getItem('solved_' + key) || 0, 10);
-      let totalAns = 0, totalCorrect = 0, totalWrong = 0;
       const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
+      const dbCount = getCourseQuestionCount(key);
+
+      let masteredInStats = 0;
+      let totalAns = 0;
+      let totalCorrect = 0;
+      let totalWrong = 0;
+
       Object.keys(stats).forEach(qId => {
-        totalAns += (stats[qId].total || 0);
-        totalCorrect += (stats[qId].correct_count || 0);
-        totalWrong += (stats[qId].wrong_count || 0);
+        const st = stats[qId] || {};
+        const qTotal = st.total || 0;
+        const qCorrect = st.correct_count || 0;
+        const qWrong = Math.max(0, qTotal - qCorrect);
+        if ((st.streak || 0) >= 1) masteredInStats++;
+        totalAns += qTotal;
+        totalCorrect += qCorrect;
+        totalWrong += qWrong;
       });
-      if (progPercent >= 100 && totalAns > 0 && totalCorrect === totalAns && totalWrong === 0) {
+
+      const storedSolved = localStorage.getItem('solved_' + key);
+      const solvedCount = storedSolved !== null ? (parseInt(storedSolved, 10) || 0) : masteredInStats;
+
+      const isCompleteByCount = dbCount > 0 ? (solvedCount >= dbCount) : (solvedCount > 0);
+      if (isCompleteByCount && totalAns > 0 && totalCorrect === totalAns && totalWrong === 0) {
         gmAchievedCount++;
       }
     });
@@ -668,86 +716,79 @@ function drawSelfHistoryChart() {
   });
 }
 
-function executeDataTransmission() {
-  const btn = document.getElementById("btn-submit-report");
-  const resultBox = document.getElementById("transmission-result-box");
-  const myData = calculateMyCurrentStats();
+// 🚨 全10科目の2択学習オールリセット関数（⭐お気に入り・デイリー実績保護＆Supabase同期対応）
+async function handleAllReset() {
+  const confirmMsg = "⚠️【ご注意】\n全10科目の学習進捗率・回答履歴を初期化して最初からやり直します。\n\n※お気に入り⭐およびデイリー連続記録は保護されます。\n\n本当に全データをリセットしますか？";
+  if (!confirm(confirmMsg)) return;
 
-  btn.disabled = true;
-  btn.innerText = "⏳ 成果報告を送信中...";
+  // 1. 保護する共通実績データ（デイリー＆⭐）を退避
+  const saveBookmarks = localStorage.getItem('beauty_app_all_bookmarked_ids');
+  const saveDailyLastDate = localStorage.getItem('daily_last_challenge_date');
+  const saveDailyStreak = localStorage.getItem('daily_challenge_streak');
+  const saveDailySuccess = localStorage.getItem('daily_total_success_count');
+  const saveDailyCurrent = localStorage.getItem('daily_current_streak');
+  const saveDailyMax = localStorage.getItem('daily_max_streak');
 
-  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : {};
-  const serialCode = currentUser.serial_code || localStorage.getItem('teacher_google_id_token') || "";
+  const nowIso = new Date().toISOString();
+  const resetDetails = [];
 
-  let myGmCount = 0;
+  // 2. 全31範囲のローカル学習データを削除
   DASHBOARD_SUBJECTS.forEach(sub => {
     sub.keys.forEach(key => {
-      let progPercent = parseInt(localStorage.getItem('solved_' + key) || 0, 10);
-      let totalAns = 0, totalCorrect = 0, totalWrong = 0;
-      const stats = JSON.parse(localStorage.getItem("beauty_app_question_stats_" + key)) || {};
-      Object.keys(stats).forEach(qId => {
-        totalAns += (stats[qId].total || 0);
-        totalCorrect += (stats[qId].correct_count || 0);
-        totalWrong += (stats[qId].wrong_count || 0);
+      localStorage.removeItem('solved_' + key);
+      localStorage.removeItem('beauty_app_question_stats_' + key);
+      localStorage.removeItem('beauty_app_counts_' + key);
+      localStorage.removeItem('beauty_app_has_ever_failed_' + key);
+      localStorage.removeItem('beauty_app_weakness_streak_' + key);
+      localStorage.removeItem('beauty_app_is_master_' + key);
+      localStorage.removeItem('beauty_app_daily_streak_' + key);
+      localStorage.removeItem('beauty_app_last_daily_date_' + key);
+      localStorage.removeItem('beauty_app_daily_corrected_ids_' + key);
+
+      resetDetails.push({
+        type: 'reset',
+        course_key: key,
+        reset_at: nowIso
       });
-      if (progPercent >= 100 && totalAns > 0 && totalCorrect === totalAns && totalWrong === 0) myGmCount++;
     });
   });
 
-  const payload = {
-    action: "submitProgressData",
-    email: serialCode,
-    password: serialCode,
-    progressArray: myData.progress,
-    accuracyArray: myData.accuracy,
-    gmCount: myGmCount,
-    totalProgress: myData.totalProgress,
-    totalAccuracy: myData.totalAccuracy,
-    dailyChallengeStreak: parseInt(localStorage.getItem('daily_challenge_streak') || "0", 10),
-    dailyTotalSuccess: parseInt(localStorage.getItem('daily_total_success_count') || "0", 10),
-    dailyMaxStreak: parseInt(localStorage.getItem('daily_max_streak') || "0", 10)
-  };
+  // 自分推移グラフの履歴も初期化
+  localStorage.removeItem('beauty_app_self_growth_history');
 
-  fetch(GAS_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(payload)
-  })
-  .then(res => res.json())
-  .then(data => {
-    btn.disabled = false;
-    btn.innerText = "📤 最新の学習成果を報告する";
+  // 3. 保護したデータを復元
+  if (saveBookmarks) localStorage.setItem('beauty_app_all_bookmarked_ids', saveBookmarks);
+  if (saveDailyLastDate) localStorage.setItem('daily_last_challenge_date', saveDailyLastDate);
+  if (saveDailyStreak) localStorage.setItem('daily_challenge_streak', saveDailyStreak);
+  if (saveDailySuccess) localStorage.setItem('daily_total_success_count', saveDailySuccess);
+  if (saveDailyCurrent) localStorage.setItem('daily_current_streak', saveDailyCurrent);
+  if (saveDailyMax) localStorage.setItem('daily_max_streak', saveDailyMax);
 
-    if (data.status === "success") {
-      const nowMs = new Date().getTime();
-      localStorage.setItem('dashboard_last_sent_progress', myData.totalProgress);
-      localStorage.setItem('dashboard_last_sent_accuracy', myData.totalAccuracy);
-      localStorage.setItem('dashboard_last_send_timestamp', nowMs);
-
-      let growthHistory = JSON.parse(localStorage.getItem('beauty_app_self_growth_history')) || [];
-      const today = new Date();
-      const formattedDate = `${today.getMonth() + 1}/${today.getDate()} ${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')}`;
-      growthHistory.push({ date: formattedDate, progress: myData.totalProgress, accuracy: myData.totalAccuracy });
-      localStorage.setItem('beauty_app_self_growth_history', JSON.stringify(growthHistory));
-
-      drawSelfHistoryChart();
-
-      resultBox.style.display = "block";
-      resultBox.innerHTML = `
-        <div style="background: #e8f5e9; border: 1px solid #81c784; color: #2e7d32; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.85rem;">
-          🎉 成果報告が正常に送信されました！<br>最新の順位と成長データが更新されました。
-        </div>
-      `;
-    } else {
-      alert("❌ 送信エラー: " + (data.message || "送信に失敗しました。"));
+  // 4. Supabaseへリセットログを送信（次回同期時の旧データ自動復元を防止）
+  const supabase = typeof getSupabaseClient === 'function' ? getSupabaseClient() : null;
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (supabase && currentUser && currentUser.id) {
+    try {
+      await supabase.from('exam_logs').insert([{
+        user_id: currentUser.id,
+        serial_code: currentUser.serial_code,
+        mode: 'reset',
+        subject_id: 'all_subjects',
+        score: 0,
+        total_questions: 0,
+        correct_count: 0,
+        details: resetDetails,
+        created_at: nowIso
+      }]);
+    } catch (e) {
+      console.warn('[Reset] Supabaseリセットログ送信スキップ:', e.message);
     }
-  })
-  .catch(err => {
-    btn.disabled = false;
-    btn.innerText = "📤 最新の学習成果を報告する";
-    alert("❌ 通信エラーが発生しました。");
-  });
+  }
+
+  alert("🎉 全10科目の学習データをリセットしました。（⭐お気に入り・デイリー実績は保持されています）");
+  location.reload();
 }
+
 </script>
 </body>
 </html>
