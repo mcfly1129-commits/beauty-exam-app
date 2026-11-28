@@ -943,16 +943,32 @@ if (tabName === '4choice') renderAll4ChoiceAnalysis();
       return total > 0 ? total : 2295;
     }
 
+function parseLogDetails(rawDetails) {
+  if (!rawDetails) return null;
+  if (typeof rawDetails === 'string') {
+    try {
+      return JSON.parse(rawDetails);
+    } catch (_) {
+      return null;
+    }
+  }
+  return rawDetails;
+}    
+
 async function loadAdminDashboardSummary() {
   const supabase = getSupabaseClient();
   if (!supabase) return;
 
   try {
-    const [usersRes, logsRes, codesRes] = await Promise.all([
-      supabase.from('users').select('id, student_name, school_name, class_name, serial_code, role, created_at').limit(2000),
+const [usersRes, logsRes, codesRes] = await Promise.all([
+      supabase.from('users').select('id, student_name, school_name, serial_code, role, created_at').limit(2000),
       supabase.from('exam_logs').select('id, user_id, serial_code, mode, subject_id, score, total_questions, correct_count, details, created_at').order('created_at', { ascending: true }).limit(10000),
-      supabase.from('serial_codes').select('id, code, school_name, class_name, max_uses, used_count, is_active').order('created_at', { ascending: false })
+      supabase.from('serial_codes').select('id, code, school_name, max_uses, used_count, is_active').order('created_at', { ascending: false })
     ]);
+
+    if (usersRes.error) throw new Error('users取得エラー: ' + usersRes.error.message);
+    if (logsRes.error) throw new Error('exam_logs取得エラー: ' + logsRes.error.message);
+    if (codesRes.error) throw new Error('serial_codes取得エラー: ' + codesRes.error.message);
 
     cachedUsersList = usersRes.data || [];
     cachedExamLogs = logsRes.data || [];
@@ -1001,8 +1017,11 @@ async function loadAdminDashboardSummary() {
           lastActiveTimestamp = logDate.getTime();
         }
 
-        // 解答詳細 details の解析
-        const rawAnswers = Array.isArray(l.details) ? l.details : (l.details && Array.isArray(l.details.answers) ? l.details.answers : []);
+// 解答詳細 details の解析
+        const parsedDetails = parseLogDetails(l.details);
+        const rawAnswers = Array.isArray(parsedDetails)
+          ? parsedDetails
+          : (parsedDetails && Array.isArray(parsedDetails.answers) ? parsedDetails.answers : []);
         
         rawAnswers.forEach(ans => {
           const qId = ans.question_id;
@@ -1100,6 +1119,11 @@ async function loadAdminDashboardSummary() {
     }
   } catch (e) {
     console.error('[AdminSummary] サマリー集計エラー:', e);
+    const tableStatus = document.getElementById('table-status');
+    if (tableStatus) {
+      tableStatus.textContent = '⚠️ データ取得・集計エラー: ' + (e && e.message ? e.message : String(e));
+      tableStatus.style.display = 'block';
+    }
   }
 }
 
@@ -1181,7 +1205,6 @@ async function loadAdminDashboardSummary() {
         const res = await supabase.from('serial_codes').insert([{
           code: cleanCode,
           school_name: schoolName,
-          class_name: schoolName,
           max_uses: maxUses,
           used_count: 0,
           is_active: true
@@ -1702,8 +1725,9 @@ function resetFilters() {
         const subjectScores = {};
         for (let s = 1; s <= 10; s++) subjectScores[s] = 0;
 
-        if (Array.isArray(l.details)) {
-          l.details.forEach((d, idx) => {
+        const parsed4Details = parseLogDetails(l.details);
+        if (Array.isArray(parsed4Details)) {
+          parsed4Details.forEach((d, idx) => {
             const qNum = d.question_num || (idx + 1);
             const subjId = d.subject_id || (typeof PAST_EXAM_SUBJECT_MAPPING !== 'undefined' ? PAST_EXAM_SUBJECT_MAPPING[qNum - 1] : 1);
             if (d.is_correct) {
