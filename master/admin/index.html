@@ -171,14 +171,22 @@
     <div id="panel-codes" class="tab-panel">
       <div class="card-panel">
         <h3 style="margin-top: 0; font-size: 1rem; color: #0984e3;">🔑 新規シリアルコードの発行</h3>
-        <form id="create-code-form" onsubmit="handleCreateCode(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; align-items: end;">
+<form id="create-code-form" onsubmit="handleCreateCode(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; align-items: end;">
           <div>
-            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">コード文字列</label>
-            <input type="text" id="new-code" placeholder="例: BEAUTY-2026-CLASS-A" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">シリアルコード</label>
+            <input type="text" id="new-code" placeholder="例: cha01-b14a39a" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
           </div>
           <div>
-            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">学校・クラス名</label>
-            <input type="text" id="school-name" placeholder="例: 千葉校 H2A" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">学校名</label>
+            <input type="text" id="school-name" placeholder="例: 千葉校" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">区分(クラス)</label>
+            <input type="text" id="class-name" placeholder="例: H2A" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+          </div>
+          <div>
+            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">識別情報（出席番号・注目メモ等）</label>
+            <input type="text" id="student-identifier" placeholder="例: 呼01注 / 02" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
           </div>
           <div>
             <label style="font-size:0.75rem; font-weight:bold; color:#475569;">利用上限人数</label>
@@ -199,7 +207,9 @@
             <thead>
               <tr>
                 <th>コード</th>
-                <th>学校・クラス名</th>
+                <th>学校名</th>
+                <th>区分(クラス)</th>
+                <th>識別情報</th>
                 <th>利用状況</th>
                 <th>ステータス</th>
                 <th>操作</th>
@@ -961,9 +971,9 @@ async function loadAdminDashboardSummary() {
 
   try {
 const [usersRes, logsRes, codesRes] = await Promise.all([
-      supabase.from('users').select('id, student_name, school_name, serial_code, role, created_at').limit(2000),
+      supabase.from('users').select('id, student_name, school_name, class_name, serial_code, role, created_at').limit(2000),
       supabase.from('exam_logs').select('id, user_id, serial_code, mode, subject_id, score, total_questions, correct_count, details, created_at').order('created_at', { ascending: true }).limit(10000),
-      supabase.from('serial_codes').select('id, code, school_name, max_uses, used_count, is_active').order('created_at', { ascending: false })
+      supabase.from('serial_codes').select('id, code, school_name, class_name, student_name, max_uses, used_count, is_active').order('created_at', { ascending: false })
     ]);
 
     if (usersRes.error) throw new Error('users取得エラー: ' + usersRes.error.message);
@@ -1156,6 +1166,8 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
         tr.innerHTML = `
           <td><b>${escapeHTML(c.code)}</b></td>
           <td>${escapeHTML(c.school_name || '')}</td>
+          <td>${escapeHTML(c.class_name || '')}</td>
+          <td>${escapeHTML(c.student_name || '')}</td>
           <td>${Number(c.used_count || 0)} / ${Number(c.max_uses || 1)} 名</td>
           <td><span class="${c.is_active ? 'badge-status-ok' : 'badge-status-alert'}">${c.is_active ? '有効' : '停止'}</span></td>
           <td><button onclick="toggleSerialCodeStatus('${safeId}', ${nextState})" style="padding:4px 8px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#ffffff;">${c.is_active ? '停止にする' : '有効にする'}</button></td>
@@ -1186,11 +1198,15 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
       const msgEl = document.getElementById('code-create-msg');
       const codeInput = document.getElementById('new-code');
       const schoolInput = document.getElementById('school-name');
+      const classInput = document.getElementById('class-name');
+      const identInput = document.getElementById('student-identifier');
       const maxInput = document.getElementById('max-uses');
 
       const submitBtn = e.target.querySelector('button[type="submit"]');
-      const cleanCode = codeInput.value.trim().toUpperCase();
+      const cleanCode = codeInput.value.trim();
       const schoolName = schoolInput.value.trim();
+      const className = (classInput?.value || '').trim();
+      const studentIdentifier = (identInput?.value || '').trim();
       const maxUses = parseInt(maxInput.value, 10) || 1;
 
       if (!cleanCode || !schoolName) return;
@@ -1205,6 +1221,8 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
         const res = await supabase.from('serial_codes').insert([{
           code: cleanCode,
           school_name: schoolName,
+          class_name: className || null,
+          student_name: studentIdentifier || null,
           max_uses: maxUses,
           used_count: 0,
           is_active: true
@@ -1227,7 +1245,25 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
       msgEl.style.color = '#15803d';
       msgEl.innerText = `シリアルコード「${cleanCode}」を発行・登録しました。`;
       codeInput.value = '';
+      if (identInput) identInput.value = '';
       await loadSerialCodesTable();
+    }
+
+    async function editStudentIdentifier(userId, currentIdentifier) {
+      const supabase = getSupabaseClient();
+      if (!supabase || !userId) return;
+      const nextVal = window.prompt('識別情報（出席番号・会議での注目メモなど）を入力してください：', currentIdentifier || '');
+      if (nextVal === null) return;
+      const trimmed = nextVal.trim();
+      const { error } = await supabase
+        .from('users')
+        .update({ student_name: trimmed || null })
+        .eq('id', userId);
+      if (error) {
+        alert('識別情報の更新エラー: ' + error.message);
+        return;
+      }
+      await loadAdminDashboardSummary();
     }
 
 function getSelfGrowthRank(val, type) {
@@ -1603,7 +1639,10 @@ function applyFilters() {
         <td style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
         <td>${escapeHTML(student.school || '未設定')}</td>
         <td>${escapeHTML(student.className || '未設定')}</td>
-        <td style="font-weight:bold;">${escapeHTML(student.studentName || '受講生')}</td>
+        <td style="font-weight:bold;">
+          <span>${escapeHTML(student.studentName || '未設定')}</span>
+          <button type="button" onclick="editStudentIdentifier('${escapeHTML(student.id)}', '${escapeHTML(student.studentName || '')}')" title="識別情報を編集" style="margin-left:6px; padding:2px 6px; font-size:0.68rem; border:1px solid #cbd5e1; border-radius:4px; background:#f8fafc; color:#334155; cursor:pointer;">編集</button>
+        </td>
         <td><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.email || student.code || '')}</code></td>
         <td style="text-align:center; font-weight:bold;"><b style="color:#0984e3;">${overallProgRank}</b> <small style="color:#7f8c8d;">(${progress}%)</small></td>
         <td style="text-align:center; font-weight:bold;"><b style="color:#2ecc71;">${overallAccRank}</b> <small style="color:#7f8c8d;">(${accuracy}%)</small></td>
