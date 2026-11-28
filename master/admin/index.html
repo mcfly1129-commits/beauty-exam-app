@@ -310,6 +310,49 @@
   </div>
 </div>
 
+<!-- 📊 4大マクロ統計分析グラフ -->
+  <div class="dashboard-grid">
+    <div class="chart-card">
+      <h4 class="chart-card-header">
+        <span>📊 クラス別：平均進捗率</span>
+        <span style="font-size: 0.72rem; font-weight: normal; color: #64748b;">努力の可視化 (%)</span>
+      </h4>
+      <div class="chart-canvas-wrap">
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4 class="chart-card-header">
+        <span>🎯 クラス別：平均正答率</span>
+        <span style="font-size: 0.72rem; font-weight: normal; color: #64748b;">実力の可視化 (%)</span>
+      </h4>
+      <div class="chart-canvas-wrap">
+        <canvas id="accuracyChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4 class="chart-card-header">
+        <span>📖 科目別：中央値進捗率</span>
+        <span style="font-size: 0.72rem; font-weight: normal; color: #64748b;">科目別の努力 (%)</span>
+      </h4>
+      <div class="chart-canvas-wrap">
+        <canvas id="subjectProgressChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h4 class="chart-card-header">
+        <span>🎯 科目別：中央値正答率</span>
+        <span style="font-size: 0.72rem; font-weight: normal; color: #64748b;">科目別の実力 (%)</span>
+      </h4>
+      <div class="chart-canvas-wrap">
+        <canvas id="subjectAccuracyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- 📋 絞り込みフィルター検索パネル -->
   <div class="card-panel" style="margin-bottom: 16px; padding: 14px;">
     <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #1e293b; border-left: 4px solid #0984e3; padding-left: 8px;">
@@ -1427,7 +1470,17 @@ function renderCharts(studentsList = aggregatedStudents) {
   const avgProgressList = classList.map(item => item.avgProgress);
   const avgAccuracyList = classList.map(item => item.avgAccuracy);
 
-  // 📐 チャートカードの高さを固定値(320px)に揃える
+  const formatAxisLabel = (label) => {
+    if (!label || label.length <= 12) return label;
+    const parts = label.split(' ');
+    if (parts.length >= 2) {
+      return [parts[0], parts.slice(1).join(' ')];
+    }
+    return [label.slice(0, 11), label.slice(11)];
+  };
+  const formattedClassLabels = classLabels.map(formatAxisLabel);
+
+  // 📐 チャートカードの高さを固定値(300px)に揃える
   const progressCanvas = document.getElementById('progressChart');
   const accuracyCanvas = document.getElementById('accuracyChart');
   const subjectProgressCanvas = document.getElementById('subjectProgressChart');
@@ -1435,7 +1488,7 @@ function renderCharts(studentsList = aggregatedStudents) {
 
   [progressCanvas, accuracyCanvas, subjectProgressCanvas, subjectAccuracyCanvas].forEach(canvas => {
     if (canvas && canvas.parentElement) {
-      canvas.parentElement.style.height = `320px`;
+      canvas.parentElement.style.height = '300px';
     }
   });
 
