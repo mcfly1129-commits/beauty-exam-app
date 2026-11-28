@@ -461,48 +461,57 @@ function startDailyQuiz() {
         // コースごとの統計を再構築（リセットログ以降はリセット前の履歴を除外）
         const remoteStatsByCourse = {};
         const resetAtByCourse = {};
-        logs.forEach(log => {
-          const logTime = Date.parse(log.created_at || '');
-          const details = Array.isArray(log.details) ? log.details : [];
+        let latestRemoteBookmarks = null;
 
-          if (log.mode === 'reset') {
-            details.forEach(item => {
-              const cKey = item && item.course_key;
-              if (!cKey) return;
-              const resetTime = Number.isFinite(Date.parse(item.reset_at || ''))
-                ? Date.parse(item.reset_at)
-                : logTime;
-              resetAtByCourse[cKey] = resetTime;
-              remoteStatsByCourse[cKey] = {};
-            });
-            return;
-          }
+    logs.forEach(log => {
+      const logTime = Date.parse(log.created_at || '');
 
-          if (log.mode !== '2choice' || details.length === 0) return;
+      // 💡 details が配列（旧仕様）かオブジェクト（新仕様）かを自動判別
+      const details = Array.isArray(log.details)
+        ? log.details
+        : (log.details && Array.isArray(log.details.answers) ? log.details.answers : []);
 
-          details.forEach(ans => {
-            const cKey = ans.course_key || qIdToCourseMap[ans.question_id];
-            if (!cKey) return;
+      // ⭐ Supabase上の最新お気に入りデータを抽出
+      if (log.details && Array.isArray(log.details.bookmarked_ids)) {
+        latestRemoteBookmarks = log.details.bookmarked_ids;
+      }
 
-            const resetTime = resetAtByCourse[cKey];
-            if (Number.isFinite(resetTime) && Number.isFinite(logTime) && logTime <= resetTime) {
-              return;
-            }
-
-            if (!remoteStatsByCourse[cKey]) remoteStatsByCourse[cKey] = {};
-            if (!remoteStatsByCourse[cKey][ans.question_id]) {
-              remoteStatsByCourse[cKey][ans.question_id] = { total: 0, streak: 0, correct_count: 0 };
-            }
-            const st = remoteStatsByCourse[cKey][ans.question_id];
-            st.total += 1;
-            if (ans.is_correct) {
-              st.streak += 1;
-              st.correct_count += 1;
-            } else {
-              st.streak = 0;
-            }
-          });
+      if (log.mode === 'reset') {
+        details.forEach(item => {
+          const cKey = item && item.course_key;
+          if (!cKey) return;
+          const resetTime = Number.isFinite(Date.parse(item.reset_at || ''))
+            ? Date.parse(item.reset_at)
+            : logTime;
+          resetAtByCourse[cKey] = resetTime;
+          remoteStatsByCourse[cKey] = {};
         });
+        return;
+      }
+
+      details.forEach(ans => {
+        const cKey = ans.course_key || qIdToCourseMap[ans.question_id];
+        if (!cKey) return;
+
+        const resetTime = resetAtByCourse[cKey];
+        if (Number.isFinite(resetTime) && Number.isFinite(logTime) && logTime <= resetTime) {
+          return;
+        }
+
+        if (!remoteStatsByCourse[cKey]) remoteStatsByCourse[cKey] = {};
+        if (!remoteStatsByCourse[cKey][ans.question_id]) {
+          remoteStatsByCourse[cKey][ans.question_id] = { total: 0, streak: 0, correct_count: 0 };
+        }
+        const st = remoteStatsByCourse[cKey][ans.question_id];
+        st.total += 1;
+        if (ans.is_correct) {
+          st.streak += 1;
+          st.correct_count += 1;
+        } else {
+          st.streak = 0;
+        }
+      });
+    });
 
         let anyCourseUpdated = false;
         for (let cKey in remoteStatsByCourse) {
@@ -531,14 +540,21 @@ function startDailyQuiz() {
           }
         }
 
-        if (anyCourseUpdated) {
-          renderCourseTabs();
-          refreshUnitScreen();
-        }
-      } catch (e) {
-        console.warn('[Sync] 進捗復元スキップ:', e.message);
-      }
+        // ⭐ リモートにお気に入りデータが存在する場合、ローカルへ統合・保存
+    if (Array.isArray(latestRemoteBookmarks)) {
+      const localBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+      const mergedBookmarks = Array.from(new Set([...localBookmarks, ...latestRemoteBookmarks.map(String)]));
+      localStorage.setItem("beauty_app_all_bookmarked_ids", JSON.stringify(mergedBookmarks));
     }
+
+    if (anyCourseUpdated) {
+      renderCourseTabs();
+      refreshUnitScreen();
+    }
+  } catch (e) {
+    console.warn('[Sync] 進捗復元スキップ:', e.message);
+  }
+}
 
     function renderCourseTabs() {
       const container = document.getElementById('course-tab-container');
@@ -977,22 +993,28 @@ async function saveSetCompleteLog() {
       }
 
       const enrichedDetails = userAnswers.map(ans => ({
-        ...ans,
-        course_key: currentCourseKey
-      }));
+    ...ans,
+    course_key: currentCourseKey
+  }));
 
-      const logData = {
-        mode: mode,
-        subject_id: rawSubject,
-        score: finalScore,
-        total_questions: total,
-        correct_count: score,
-        details: enrichedDetails
-      };
-      if (typeof saveExamLog === 'function') {
-        await saveExamLog(logData);
-      }
+  // ⭐ 現在のお気に入りID配列を取得して同梱
+  const currentBookmarks = JSON.parse(localStorage.getItem("beauty_app_all_bookmarked_ids")) || [];
+
+  const logData = {
+    mode: mode,
+    subject_id: rawSubject,
+    score: finalScore,
+    total_questions: total,
+    correct_count: score,
+    details: {
+      answers: enrichedDetails,
+      bookmarked_ids: currentBookmarks
     }
+  };
+  if (typeof saveExamLog === 'function') {
+    await saveExamLog(logData);
+  }
+}
 
     function backToUnitScreen() {
       document.getElementById("quiz-screen").style.display = "none";
