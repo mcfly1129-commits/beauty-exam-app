@@ -856,7 +856,7 @@ document.getElementById("quiz-unit-title").innerText = isDailyMode ? "🔥 デ�
 
         if (isDailyMode) {
           btnContainer.innerHTML = `
-            <button class="btn" onclick="exitQuizToUnitScreen()" style="flex: 1; background: #2ecc71; padding: 10px 8px; font-size: 0.85rem;">🎉 本日のデイリー達成！単元一覧に戻る</button>
+            <button class="btn" onclick="window.location.href='./index.html'" style="flex: 1; background: #2ecc71; padding: 12px 10px; font-size: 0.9rem; font-weight: bold;">🎉 本日のスタンプ獲得！ホームへ</button>
           `;
         } else {
           btnContainer.innerHTML = `
