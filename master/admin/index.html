@@ -231,10 +231,6 @@
             <label style="font-size:0.75rem; font-weight:bold; color:#475569;">識別情報（出席番号・注目メモ等）</label>
             <input type="text" id="student-identifier" placeholder="例: 呼01注 / 02" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
           </div>
-          <div>
-            <label style="font-size:0.75rem; font-weight:bold; color:#475569;">利用上限人数</label>
-            <input type="number" id="max-uses" value="1" min="1" required style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
-          </div>
           <button type="submit" class="btn" style="padding:9px 16px; background:#0984e3; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">コードを発行・登録</button>
         </form>
         <div id="code-create-msg" style="font-size:0.8rem; margin-top:8px; display:none;"></div>
@@ -1223,12 +1219,16 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
         const tr = document.createElement('tr');
         const safeId = escapeHTML(String(c.id ?? ''));
         const nextState = Boolean(!c.is_active);
+        const usedCount = Number(c.used_count || 0);
+        const usageLabel = usedCount > 0
+          ? (usedCount === 1 ? '利用済み' : `利用済み (${usedCount}名)`)
+          : '未利用';
         tr.innerHTML = `
           <td><b>${escapeHTML(c.code)}</b></td>
           <td>${escapeHTML(c.school_name || '')}</td>
           <td>${escapeHTML(c.class_name || '')}</td>
           <td>${escapeHTML(c.student_name || '')}</td>
-          <td>${Number(c.used_count || 0)} / ${Number(c.max_uses || 1)} 名</td>
+          <td>${escapeHTML(usageLabel)}</td>
           <td><span class="${c.is_active ? 'badge-status-ok' : 'badge-status-alert'}">${c.is_active ? '有効' : '停止'}</span></td>
           <td><button onclick="toggleSerialCodeStatus('${safeId}', ${nextState})" style="padding:4px 8px; font-size:0.75rem; border:1px solid #cbd5e1; border-radius:4px; cursor:pointer; background:#ffffff;">${c.is_active ? '停止にする' : '有効にする'}</button></td>
         `;
@@ -1260,14 +1260,12 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
       const schoolInput = document.getElementById('school-name');
       const classInput = document.getElementById('class-name');
       const identInput = document.getElementById('student-identifier');
-      const maxInput = document.getElementById('max-uses');
 
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const cleanCode = codeInput.value.trim();
       const schoolName = schoolInput.value.trim();
       const className = (classInput?.value || '').trim();
       const studentIdentifier = (identInput?.value || '').trim();
-      const maxUses = parseInt(maxInput.value, 10) || 1;
 
       if (!cleanCode || !schoolName) return;
 
@@ -1283,7 +1281,7 @@ const [usersRes, logsRes, codesRes] = await Promise.all([
           school_name: schoolName,
           class_name: className || null,
           student_name: studentIdentifier || null,
-          max_uses: maxUses,
+          max_uses: 1,
           used_count: 0,
           is_active: true
         }]);
