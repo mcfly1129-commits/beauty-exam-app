@@ -161,13 +161,12 @@
     </div>
   </div>
 
-  <!-- 👈 4大統合管理タブナビゲーション -->
-  <div class="admin-nav-tabs">
-    <button class="tab-btn active" id="tab-btn-codes" onclick="switchAdminTab('codes')">🔑 シリアルコード管理</button>
-    <button class="tab-btn" id="tab-btn-students" onclick="switchAdminTab('students')">👥 受講生一覧 & カルテ</button>
-    <button class="tab-btn" id="tab-btn-macro" onclick="switchAdminTab('macro')">⚡ 2択マクロ分析</button>
-    <button class="tab-btn" id="tab-btn-exam" onclick="switchAdminTab('exam')">📝 4択過去問分析</button>
-  </div>
+<!-- 👈 3大統合管理タブナビゲーション -->
+<div class="admin-nav-tabs">
+<button class="tab-btn active" id="tab-btn-codes" onclick="switchAdminTab('codes')">① 🔑 シリアルコード管理</button>
+<button class="tab-btn" id="tab-btn-2choice" onclick="switchAdminTab('2choice')">② ⚡ 2択学習</button>
+<button class="tab-btn" id="tab-btn-4choice" onclick="switchAdminTab('4choice')">③ 📝 過去問記録</button>
+</div>
     <!-- Tab 1: シリアルコード発行・管理 -->
     <div id="panel-codes" class="tab-panel">
       <div class="card-panel">
@@ -214,77 +213,172 @@
       </div>
     </div>
 
-    <!-- Tab 2: 受講生一覧 & 詳細カルテ -->
-    <div id="panel-students" class="tab-panel" style="display: none;">
-      <div class="grid-4">
-        <div class="stat-card">
-          <div style="font-size:0.75rem; color:#64748b;">登録受講生数</div>
-          <div id="stat-total-students" class="stat-card-num stat-num">--</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size:0.75rem; color:#64748b;">14日以内アクティブ</div>
-          <div id="stat-active-students" class="stat-card-num stat-num" style="color:#2ecc71;">--</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size:0.75rem; color:#64748b;">🚨 指導対象者 (未報告)</div>
-          <div id="stat-alert-students" class="stat-card-num stat-num" style="color:#e74c3c;">--</div>
-        </div>
-        <div class="stat-card">
-          <div style="font-size:0.75rem; color:#64748b;">👑 GM達成総数</div>
-          <div id="stat-gm-students" class="stat-card-num stat-num" style="color:#f39c12;">--</div>
-        </div>
+<!-- Tab ②: 2択学習 統合管理ダッシュボード -->
+<div id="panel-2choice" class="tab-panel" style="display: none;">
+  
+  <!-- 📊 クイックサマリー指標 (4カード) -->
+  <div class="quick-metrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+    <div class="metric-card" style="background: white; border-radius: 10px; padding: 12px 16px; border-left: 4px solid #0984e3; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: bold;">登録学生総数</div>
+        <div id="metric-total-students" style="font-size: 1.3rem; font-weight: bold; color: #1e293b; margin-top: 2px;">-- 名</div>
       </div>
+      <div style="font-size: 1.6rem;">👥</div>
+    </div>
 
-      <div class="card-panel">
-        <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-          <select id="filter-school-select" onchange="filterStudentList()" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.8rem;">
-            <option value="">全校表示</option>
-            <option value="千葉校">千葉校</option>
-            <option value="立川校">立川校</option>
-            <option value="東京校">東京校</option>
-          </select>
-          <input type="text" id="filter-search-input" onkeyup="filterStudentList()" placeholder="氏名・コードで検索..." style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; font-size:0.8rem; flex:1; min-width:180px;">
-        </div>
+    <div class="metric-card" style="background: white; border-radius: 10px; padding: 12px 16px; border-left: 4px solid #2ecc71; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: bold;">14日以内アクティブ</div>
+        <div id="metric-active-students" style="font-size: 1.3rem; font-weight: bold; color: #2ecc71; margin-top: 2px;">-- 名</div>
+      </div>
+      <div style="font-size: 1.6rem;">🔥</div>
+    </div>
 
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>学校・クラス</th>
-                <th>識別名 / コード</th>
-                <th>2択総合進捗</th>
-                <th>4択平均正答率</th>
-                <th>最終報告日時</th>
-                <th>ステータス</th>
-                <th>操作</th>
-              </tr>
-            </thead>
-            <tbody id="student-table-body">
-              <tr><td colspan="7" style="text-align:center; color:#94a3b8;">受講生データを集計中...</td></tr>
-            </tbody>
-          </table>
-        </div>
+    <div class="metric-card" style="background: white; border-radius: 10px; padding: 12px 16px; border-left: 4px solid #ff7675; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: bold;">🚨 指導対象 (進捗10%未満・未報告)</div>
+        <div id="metric-warning-students" style="font-size: 1.3rem; font-weight: bold; color: #e74c3c; margin-top: 2px;">-- 名</div>
+      </div>
+      <div style="font-size: 1.6rem;">🚨</div>
+    </div>
+
+    <div class="metric-card" style="background: white; border-radius: 10px; padding: 12px 16px; border-left: 4px solid #9b59b6; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: bold;">🏆 全校GM 獲得総数</div>
+        <div id="metric-total-gm" style="font-size: 1.3rem; font-weight: bold; color: #9b59b6; margin-top: 2px;">-- 回</div>
+      </div>
+      <div style="font-size: 1.6rem;">🏆</div>
+    </div>
+  </div>
+
+  <!-- 📊 4大マクロ統計分析グラフ -->
+  <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 16px;">
+    <div class="card-panel" style="padding: 14px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
+        <span>📊 クラス別：平均進捗率</span>
+        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">努力の可視化 (%)</span>
+      </h4>
+      <div style="position: relative; height: 210px; width: 100%;">
+        <canvas id="progressChart"></canvas>
       </div>
     </div>
 
-    <!-- Tab 3: 2択マクロ分析 -->
-    <div id="panel-macro" class="tab-panel" style="display: none;">
-      <div class="card-panel">
-        <h3 style="margin-top:0; font-size:1rem; color:#0984e3;">📊 クラス別 平均進捗率・平均正答率 比較</h3>
-        <div style="max-height:300px;">
-          <canvas id="macroClassChart"></canvas>
-        </div>
-      </div>
-      <div class="card-panel">
-        <h3 style="margin-top:0; font-size:1rem; color:#0984e3;">🎯 10科目別 全体中央値 vs 目標ライン</h3>
-        <div style="max-height:320px;">
-          <canvas id="macroSubjectChart"></canvas>
-        </div>
+    <div class="card-panel" style="padding: 14px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
+        <span>🎯 クラス別：平均正答率</span>
+        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">実力の可視化 (%)</span>
+      </h4>
+      <div style="position: relative; height: 210px; width: 100%;">
+        <canvas id="accuracyChart"></canvas>
       </div>
     </div>
 
-    <!-- Tab 4: 4択過去問本番分析 -->
-    <div id="panel-exam" class="tab-panel" style="display: none;">
+    <div class="card-panel" style="padding: 14px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
+        <span>📖 科目別：中央値進捗率</span>
+        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">科目別の努力 (%)</span>
+      </h4>
+      <div style="position: relative; height: 210px; width: 100%;">
+        <canvas id="subjectProgressChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card-panel" style="padding: 14px;">
+      <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #0984e3; display: flex; justify-content: space-between;">
+        <span>🎯 科目別：中央値正答率</span>
+        <span style="font-size: 0.7rem; font-weight: normal; color: #64748b;">科目別の実力 (%)</span>
+      </h4>
+      <div style="position: relative; height: 210px; width: 100%;">
+        <canvas id="subjectAccuracyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📋 絞り込みフィルター検索パネル -->
+  <div class="card-panel" style="margin-bottom: 16px; padding: 14px;">
+    <h4 style="margin: 0 0 10px 0; font-size: 0.88rem; color: #1e293b; border-left: 4px solid #0984e3; padding-left: 8px;">
+      🔍 フィルター検索
+    </h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; align-items: end;">
+      <div>
+        <label for="filter-school" style="font-size: 0.7rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">学校名</label>
+        <select id="filter-school" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;">
+          <option value="">全ての学校</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-class" style="font-size: 0.7rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">クラス名</label>
+        <select id="filter-class" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;">
+          <option value="">全てのクラス</option>
+        </select>
+      </div>
+      <div>
+        <label for="search-student" style="font-size: 0.7rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">検索 (識別情報/コード)</label>
+        <input type="text" id="search-student" placeholder="一部を入力" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem; box-sizing: border-box;">
+      </div>
+      <div>
+        <label for="filter-status" style="font-size: 0.7rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">指導ステータス</label>
+        <select id="filter-status" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;">
+          <option value="">全て表示</option>
+          <option value="alert-danger">🔴 要個別指導（未報告・進捗極低:10%未満）</option>
+          <option value="alert-warning">🟡 停滞（14日以上報告なし）</option>
+          <option value="alert-clear">🟢 順調</option>
+        </select>
+      </div>
+      <div>
+        <label for="sort-key" style="font-size: 0.7rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">並び替え</label>
+        <select id="sort-key" style="width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.78rem;">
+          <option value="time-desc">最終報告（新しい順）</option>
+          <option value="time-asc">最終報告（古い順）</option>
+          <option value="progress-desc">総合進捗率（高い順）</option>
+          <option value="progress-asc">総合進捗率（低い順）</option>
+          <option value="accuracy-desc">平均正答率（高い順）</option>
+          <option value="accuracy-asc">平均正答率（低い順）</option>
+          <option value="name-asc">生徒識別番号順</option>
+        </select>
+      </div>
+      <button onclick="resetFilters()" style="padding: 7px 12px; background: #e2e8f0; color: #475569; border: none; border-radius: 6px; font-weight: bold; font-size: 0.78rem; cursor: pointer; white-space: nowrap;">
+        フィルタ解除
+      </button>
+    </div>
+  </div>
+
+  <!-- 📋 学生個別進捗データ一覧テーブル -->
+  <div class="card-panel" style="padding: 14px;">
+    <div style="overflow-x: auto;">
+      <table id="student-table" style="width: 100%; border-collapse: collapse; font-size: 0.78rem;">
+        <thead>
+          <tr style="background: #f8fafc; border-bottom: 2px solid #cbd5e1; text-align: left;">
+            <th style="padding: 8px;">最終報告日時</th>
+            <th style="padding: 8px;">学校名</th>
+            <th style="padding: 8px;">クラス名</th>
+            <th style="padding: 8px;">識別情報</th>
+            <th style="padding: 8px;">シリアルコード</th>
+            <th style="padding: 8px; text-align: center;">総合進捗度</th>
+            <th style="padding: 8px; text-align: center;">平均正答率</th>
+            <th style="padding: 8px; text-align: center;">GM達成</th>
+            <th style="padding: 8px;">指導ステータス</th>
+            <th style="padding: 8px; text-align: center;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="student-table-body">
+          <tr><td colspan="10" style="text-align: center; color: #94a3b8; padding: 16px;">受講生データを計算中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 🔴 ページネーションコントロール -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid #e2e8f0; font-size: 0.78rem;">
+      <button id="btn-prev-page" style="padding: 6px 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold; color: #475569;">◀ 前へ</button>
+      <span id="display-page-info" style="font-weight: bold; color: #0984e3;">1 / 1 ページ (0名)</span>
+      <button id="btn-next-page" style="padding: 6px 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-weight: bold; color: #475569;">次へ ▶</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tab ③: 4択過去問 統合分析パネル -->
+<div id="panel-4choice" class="tab-panel" style="display: none;">
       <!-- 共通コントロールバー（対象回・学校フィルター） -->
       <div class="card-panel" style="padding: 14px 18px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -391,6 +485,75 @@
     </div>
   </div>
 
+  let modalLineChartInstance = null;
+  let modalRadarChartInstance = null;
+
+  function openStudentModal(studentId) {
+    const modal = document.getElementById('student-detail-modal');
+    const student = aggregatedStudents.find(s => String(s.id) === String(studentId));
+    if (!modal || !student) return;
+
+    const nameEl = document.getElementById('modal-student-name');
+    if (nameEl) {
+      nameEl.innerText = `${student.name}（${student.code} / ${student.school}）`;
+    }
+
+    const logsAsc = (student.logs || []).slice().reverse();
+    const labels = logsAsc.map((l, idx) => l.created_at ? new Date(l.created_at).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }) : `#${idx + 1}`);
+    const scores = logsAsc.map(l => Number(l.score || 0));
+
+    if (modalLineChartInstance) modalLineChartInstance.destroy();
+    const lineCtx = document.getElementById('modalLineChart')?.getContext('2d');
+    if (lineCtx) {
+      modalLineChartInstance = new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: labels.length > 0 ? labels : ['記録なし'],
+          datasets: [{ label: 'スコア / 正答率', data: scores.length > 0 ? scores : [0], borderColor: '#0984e3', tension: 0.2 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+      });
+    }
+
+    const subLabels = DASHBOARD_SUBJECTS_DEF.map(s => s.name);
+    const subValues = DASHBOARD_SUBJECTS_DEF.map(s => (student.subjects && student.subjects[s.id]) ? Number(student.subjects[s.id].accuracy || 0) : 0);
+
+    if (modalRadarChartInstance) modalRadarChartInstance.destroy();
+    const radarCtx = document.getElementById('modalRadarChart')?.getContext('2d');
+    if (radarCtx) {
+      modalRadarChartInstance = new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+          labels: subLabels,
+          datasets: [{ label: '科目別正答率 (%)', data: subValues, backgroundColor: 'rgba(9, 132, 227, 0.2)', borderColor: '#0984e3' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100, ticks: { stepSize: 25 } } } }
+      });
+    }
+
+    const reviewEl = document.getElementById('modal-review-questions');
+    if (reviewEl) {
+      const wrongItems = [];
+      (student.logs || []).forEach(l => {
+        if (Array.isArray(l.details)) {
+          l.details.forEach((d, i) => {
+            if (!d.is_correct) wrongItems.push(d.question_num || d.question_id || (i + 1));
+          });
+        }
+      });
+      reviewEl.innerText = wrongItems.length > 0
+        ? `直近の誤答対象（全${wrongItems.length}件）: ${wrongItems.slice(0, 20).map(q => `問${q}`).join(', ')}`
+        : '誤答データは記録されていません。';
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  function closeStudentModal() {
+    const modal = document.getElementById('student-detail-modal');
+    if (modal) modal.style.display = 'none';
+  }
+  </script>
   <script src="../js/supabase_client.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/questions_database.js"></script>
@@ -421,12 +584,49 @@
       'tech_theory': '技術理論'
     };
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
-      if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) {
-        await showAdminDashboard(currentUser);
+document.addEventListener('DOMContentLoaded', async () => {
+  // フィルター入力・変更イベントの一括紐付け
+  ['filter-school', 'filter-class', 'filter-status', 'sort-key'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        currentPage = 1;
+        applyFilters();
+      });
+    }
+  });
+
+  const searchInput = document.getElementById('search-student');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      currentPage = 1;
+      applyFilters();
+    });
+  }
+
+  const btnPrev = document.getElementById('btn-prev-page');
+  if (btnPrev) {
+    btnPrev.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        applyFilters();
       }
     });
+  }
+
+  const btnNext = document.getElementById('btn-next-page');
+  if (btnNext) {
+    btnNext.addEventListener('click', () => {
+      currentPage++;
+      applyFilters();
+    });
+  }
+
+  const currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
+  if (currentUser && (currentUser.role === 'teacher' || currentUser.role === 'admin')) {
+    await showAdminDashboard(currentUser);
+  }
+});
 
     async function showAdminDashboard(user) {
       document.getElementById('auth-section').style.display = 'none';
@@ -443,9 +643,8 @@
         loadAdminDashboardSummary(),
         loadSerialCodesTable()
       ]);
-      if (currentAdminTab === 'students') renderStudentTable();
-      if (currentAdminTab === 'macro') renderMacroCharts();
-      if (currentAdminTab === 'exam') renderAll4ChoiceAnalysis();
+      if (currentAdminTab === '2choice') render2ChoiceDashboard();
+      if (currentAdminTab === '4choice') renderAll4ChoiceAnalysis();
     }
 
     async function handleTeacherLogin(e) {
@@ -518,19 +717,18 @@
       window.location.reload();
     }
 
-    function switchAdminTab(tabName) {
-      currentAdminTab = tabName;
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+function switchAdminTab(tabName) {
+currentAdminTab = tabName;
+document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
 
-      document.getElementById('tab-btn-' + tabName).classList.add('active');
-      document.getElementById('panel-' + tabName).style.display = 'block';
+document.getElementById('tab-btn-' + tabName).classList.add('active');
+document.getElementById('panel-' + tabName).style.display = 'block';
 
-      if (tabName === 'codes') loadSerialCodesTable();
-      if (tabName === 'students') renderStudentTable();
-      if (tabName === 'macro') renderMacroCharts();
-      if (tabName === 'exam') renderAll4ChoiceAnalysis();
-    }
+if (tabName === 'codes') loadSerialCodesTable();
+if (tabName === '2choice') render2ChoiceDashboard();
+if (tabName === '4choice') renderAll4ChoiceAnalysis();
+}
 
     function escapeHTML(str) {
       if (str === null || str === undefined) return '';
@@ -629,34 +827,46 @@
             ? `${lastActiveDate.getFullYear()}/${String(lastActiveDate.getMonth() + 1).padStart(2, '0')}/${String(lastActiveDate.getDate()).padStart(2, '0')} ${String(lastActiveDate.getHours()).padStart(2, '0')}:${String(lastActiveDate.getMinutes()).padStart(2, '0')}`
             : '未報告';
 
+          const classNameStr = u.class_name || codeToSchoolMap[u.serial_code] || '未設定';
+          const subjectsStats = {};
+          DASHBOARD_SUBJECTS_DEF.forEach(sub => {
+            const subLogs = logs2Choice.filter(l => sub.keys.includes(l.subject_id));
+            const sAns = subLogs.reduce((sum, l) => sum + (l.total_questions || 0), 0);
+            const sCor = subLogs.reduce((sum, l) => sum + (l.correct_count || 0), 0);
+            subjectsStats[sub.id] = {
+              progress: Math.min(100, Math.round((sAns / 200) * 100)),
+              accuracy: sAns > 0 ? Math.round((sCor / sAns) * 100) : 0
+            };
+          });
+
           return {
             id: u.id,
             code: u.serial_code || '',
             school: u.school_name || codeToSchoolMap[u.serial_code] || '未設定',
+            className: classNameStr,
             name: u.student_name || '名称未設定',
             progress: progressPct,
             accuracy: accuracyPct,
+            gmCount: progressPct === 100 ? 1 : 0,
             has4Choice: logs4Choice.length > 0,
             lastActive: lastActiveStr,
+            lastActiveTimestamp: lastActiveDate ? lastActiveDate.getTime() : 0,
+            subjects: subjectsStats,
             isAlert,
             logs: userLogs
           };
         });
 
-        document.getElementById('stat-total-students').innerText = `${students.length} 名`;
-        document.getElementById('stat-active-students').innerText = `${activeCount} 名`;
-        document.getElementById('stat-alert-students').innerText = `${alertCount} 名`;
-        document.getElementById('stat-gm-students').innerText = `${gmCount} 名`;
+        const elTotal = document.getElementById('metric-total-students');
+        const elActive = document.getElementById('metric-active-students');
+        const elWarning = document.getElementById('metric-warning-students');
+        const elGm = document.getElementById('metric-total-gm');
+        if (elTotal) elTotal.innerText = `${students.length} 名`;
+        if (elActive) elActive.innerText = `${activeCount} 名`;
+        if (elWarning) elWarning.innerText = `${alertCount} 名`;
+        if (elGm) elGm.innerText = `${gmCount} 回`;
 
-        // 学校フィルタの選択肢を実データから動的更新
-        const schoolSelect = document.getElementById('filter-school-select');
-        if (schoolSelect) {
-          const currentVal = schoolSelect.value;
-          const uniqueSchools = [...new Set(aggregatedStudents.map(s => s.school).filter(Boolean))];
-          schoolSelect.innerHTML = '<option value="">全校・全クラス表示</option>' +
-            uniqueSchools.map(sc => `<option value="${escapeHTML(sc)}">${escapeHTML(sc)}</option>`).join('');
-          schoolSelect.value = currentVal;
-        }
+        populateFilterOptions();
       } catch (e) {
         console.error('[AdminSummary] サマリー集計エラー:', e);
       }
@@ -748,191 +958,347 @@
       await loadSerialCodesTable();
     }
 
-    function renderStudentTable() {
-      const tbody = document.getElementById('student-table-body');
-      const schoolFilter = (document.getElementById('filter-school-select')?.value || '').trim();
-      const keywordFilter = (document.getElementById('filter-search-input')?.value || '').trim().toLowerCase();
+// 10科目定義
+const DASHBOARD_SUBJECTS_DEF = [
+  { id: '01', name: '関係法規', keys: ['test_kankehoki_unit_ver01_2026', 'test_kankehoki_past_2026', 'test_kankehoki_extra_2026'] },
+  { id: '02', name: '運営管理', keys: ['test_unekanri_unit_ver01_2026', 'test_unekanri_past_2026', 'test_unekanri_extra_2026'] },
+  { id: '03', name: '公衆衛生', keys: ['test_koshuese_unit_ver01_2026', 'test_koshuese_past_2026', 'test_koshuese_extra_2026'] },
+  { id: '04', name: '感染症', keys: ['test_kansensho_unit_ver01_2026', 'test_kansensho_past_2026', 'test_kansensho_extra_2026'] },
+  { id: '05', name: '衛生技術', keys: ['test_esekanrigijutu_unit_ver01_2026', 'test_esekanrigijutu_past_2026', 'test_esekanrigijutu_extra_2026'] },
+  { id: '06', name: '人体構造', keys: ['test_jintai_unit_ver01_2026', 'test_jintai_past_2026', 'test_jintai_extra_2026'] },
+  { id: '07', name: '皮膚科学', keys: ['test_hifukagaku_unit_ver01_2026', 'test_hifukagaku_past_2026', 'test_hifukagaku_extra_2026'] },
+  { id: '08', name: '香粧品化学', keys: ['test_koshohin_unit_ver01_2026', 'test_koshohin_past_2026', 'test_koshohin_extra_2026', 'test_koshohin_ingredients_2026'] },
+  { id: '09', name: '文化論', keys: ['test_bunkaron_unit_ver01_2026', 'test_bunkaron_past_2026', 'test_bunkaron_extra_2026'] },
+  { id: '10', name: '技術理論', keys: ['test_gijuturiron_unit_ver01_2026', 'test_gijuturiron_past_2026', 'test_gijuturiron_extra_2026'] }
+];
 
-      const filtered = aggregatedStudents.filter(s => {
-        const matchSchool = !schoolFilter || s.school.includes(schoolFilter);
-        const matchKeyword = !keywordFilter || s.name.toLowerCase().includes(keywordFilter) || s.code.toLowerCase().includes(keywordFilter);
-        return matchSchool && matchKeyword;
-      });
+let currentPage = 1;
+const PAGE_SIZE = 30;
 
-      tbody.innerHTML = '';
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">該当する受講生データがありません</td></tr>`;
-        return;
+let subjectProgressChartInstance = null;
+let subjectAccuracyChartInstance = null;
+
+function getSelfGrowthRank(val, type) {
+  const num = parseInt(val || 0, 10);
+  if (type === 'progress') {
+    if (num >= 90) return 'S';
+    if (num >= 80) return 'A';
+    if (num >= 60) return 'B';
+    if (num >= 40) return 'C';
+    if (num >= 20) return 'D';
+    return 'E';
+  } else {
+    if (num >= 95) return 'S';
+    if (num >= 85) return 'A';
+    if (num >= 70) return 'B';
+    if (num >= 60) return 'C';
+    if (num >= 51) return 'D';
+    return 'E';
+  }
+}
+
+function getArrayMedian(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const sorted = arr.slice().sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return Math.round(((sorted[mid - 1] + sorted[mid]) / 2) * 10) / 10;
+  }
+  return Math.round(sorted[mid] * 10) / 10;
+}
+
+// ⚡ Tab ② 2択学習ダッシュボード全体再描画
+function render2ChoiceDashboard() {
+  populateFilterOptions();
+  applyFilters();
+}
+
+// 🔍 学校・クラスのドロップダウン生成
+function populateFilterOptions() {
+  const schoolSelect = document.getElementById('filter-school');
+  const classSelect = document.getElementById('filter-class');
+  if (!schoolSelect || !classSelect) return;
+
+  const currentSchool = schoolSelect.value;
+  const currentClass = classSelect.value;
+
+  const schools = new Set();
+  const classes = new Set();
+
+  aggregatedStudents.forEach(student => {
+    if (student.school) schools.add(student.school);
+    if (student.className) classes.add(student.className);
+  });
+
+  schoolSelect.innerHTML = '<option value="">全ての学校</option>';
+  schools.forEach(sch => {
+    const opt = document.createElement('option');
+    opt.value = sch;
+    opt.textContent = sch;
+    schoolSelect.appendChild(opt);
+  });
+  schoolSelect.value = currentSchool;
+
+  classSelect.innerHTML = '<option value="">全てのクラス</option>';
+  classes.forEach(cls => {
+    const opt = document.createElement('option');
+    opt.value = cls;
+    opt.textContent = cls;
+    classSelect.appendChild(opt);
+  });
+  classSelect.value = currentClass;
+}
+
+// 📊 クイックサマリー (4指標) の計算・反映
+function calculateQuickMetrics(studentsList = aggregatedStudents) {
+  const totalCount = studentsList.length;
+  let activeCount = 0;
+  let warningCount = 0;
+  let totalGm = 0;
+
+  const now = new Date().getTime();
+  const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
+  studentsList.forEach(student => {
+    const progress = parseInt(student.progress || 0, 10);
+    const gm = parseInt(student.gmCount || 0, 10);
+    totalGm += gm;
+
+    if (progress < 10 || !student.lastActiveTimestamp) {
+      warningCount++;
+    }
+
+    if (student.lastActiveTimestamp) {
+      if (now - student.lastActiveTimestamp < fourteenDaysMs) {
+        activeCount++;
       }
+    }
+  });
 
-      filtered.forEach(s => {
-        const tr = document.createElement('tr');
-        const accLabel = s.has4Choice ? `${s.accuracy}%` : `${s.accuracy}% <small style="color:#94a3b8;">(2択)</small>`;
-        tr.innerHTML = `
-          <td>${escapeHTML(s.school)}</td>
-          <td><b>${escapeHTML(s.name)}</b><br><small style="color:#94a3b8;">${escapeHTML(s.code)}</small></td>
-          <td><strong style="color:#0984e3;">${s.progress}%</strong></td>
-          <td><strong style="color:#2ecc71;">${accLabel}</strong></td>
-          <td><small>${escapeHTML(s.lastActive)}</small></td>
-          <td><span class="${s.isAlert ? 'badge-status-alert' : 'badge-status-ok'}">${s.isAlert ? '🔴 未報告' : '🟢 順調'}</span></td>
-          <td><button onclick="openStudentModal('${escapeHTML(s.id)}')" style="padding:5px 10px; font-size:0.75rem; background:#0984e3; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">詳細カルテ</button></td>
-        `;
-        tbody.appendChild(tr);
-      });
+  const elTotal = document.getElementById('metric-total-students');
+  const elActive = document.getElementById('metric-active-students');
+  const elWarning = document.getElementById('metric-warning-students');
+  const elGm = document.getElementById('metric-total-gm');
+
+  if (elTotal) elTotal.innerText = `${totalCount} 名`;
+  if (elActive) elActive.innerText = `${activeCount} 名`;
+  if (elWarning) elWarning.innerText = `${warningCount} 名`;
+  if (elGm) elGm.innerText = `${totalGm} 回`;
+}
+
+// 📊 4大マクロ統計分析グラフの描画
+function renderCharts(studentsList = aggregatedStudents) {
+  // 1 & 2. クラス別平均進捗率・平均正答率
+  const classGroups = {};
+  studentsList.forEach(s => {
+    const cName = s.className || s.school || '未分類';
+    if (!classGroups[cName]) classGroups[cName] = [];
+    classGroups[cName].push(s);
+  });
+
+  const classLabels = Object.keys(classGroups);
+  const classAvgProgress = classLabels.map(c => Math.round(classGroups[c].reduce((a, b) => a + (b.progress || 0), 0) / classGroups[c].length));
+  const classAvgAccuracy = classLabels.map(c => Math.round(classGroups[c].reduce((a, b) => a + (b.accuracy || 0), 0) / classGroups[c].length));
+
+  if (macroClassChartInstance) macroClassChartInstance.destroy();
+  const ctx1 = document.getElementById('progressChart')?.getContext('2d');
+  if (ctx1) {
+    macroClassChartInstance = new Chart(ctx1, {
+      type: 'bar',
+      data: {
+        labels: classLabels.length > 0 ? classLabels : ['データなし'],
+        datasets: [{ label: '平均進捗率 (%)', data: classAvgProgress.length > 0 ? classAvgProgress : [], backgroundColor: 'rgba(116, 185, 255, 0.7)', borderColor: '#74b9ff', borderWidth: 1, borderRadius: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+    });
+  }
+
+  if (accuracyChartInstance) accuracyChartInstance.destroy();
+  const ctx2 = document.getElementById('accuracyChart')?.getContext('2d');
+  if (ctx2) {
+    accuracyChartInstance = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: classLabels.length > 0 ? classLabels : ['データなし'],
+        datasets: [{ label: '平均正答率 (%)', data: classAvgAccuracy.length > 0 ? classAvgAccuracy : [], backgroundColor: 'rgba(46, 204, 113, 0.7)', borderColor: '#2ecc71', borderWidth: 1, borderRadius: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+    });
+  }
+
+  // 3 & 4. 科目別中央値進捗率・中央値正答率
+  const subjectLabels = DASHBOARD_SUBJECTS_DEF.map(s => s.name);
+  const subjectProgressMedians = [];
+  const subjectAccuracyMedians = [];
+
+  DASHBOARD_SUBJECTS_DEF.forEach(sub => {
+    const progArr = [];
+    const accArr = [];
+    studentsList.forEach(student => {
+      const stat = (student.subjects && student.subjects[sub.id]) ? student.subjects[sub.id] : { progress: 0, accuracy: 0 };
+      progArr.push(parseInt(stat.progress || 0, 10));
+      accArr.push(parseInt(stat.accuracy || 0, 10));
+    });
+    subjectProgressMedians.push(getArrayMedian(progArr));
+    subjectAccuracyMedians.push(getArrayMedian(accArr));
+  });
+
+  if (subjectProgressChartInstance) subjectProgressChartInstance.destroy();
+  const ctx3 = document.getElementById('subjectProgressChart')?.getContext('2d');
+  if (ctx3) {
+    subjectProgressChartInstance = new Chart(ctx3, {
+      type: 'bar',
+      data: {
+        labels: subjectLabels,
+        datasets: [{ label: '進捗率中央値 (%)', data: subjectProgressMedians, backgroundColor: 'rgba(155, 89, 182, 0.7)', borderColor: '#9b59b6', borderWidth: 1, borderRadius: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { min: 0, max: 100 } } }
+    });
+  }
+
+  if (subjectAccuracyChartInstance) subjectAccuracyChartInstance.destroy();
+  const ctx4 = document.getElementById('subjectAccuracyChart')?.getContext('2d');
+  if (ctx4) {
+    subjectAccuracyChartInstance = new Chart(ctx4, {
+      type: 'bar',
+      data: {
+        labels: subjectLabels,
+        datasets: [{ label: '正答率中央値 (%)', data: subjectAccuracyMedians, backgroundColor: 'rgba(230, 126, 34, 0.7)', borderColor: '#e67e22', borderWidth: 1, borderRadius: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+    });
+  }
+}
+
+// 📋 絞り込みフィルター検索 ＆ テーブル描画
+function applyFilters() {
+  const targetSchool = document.getElementById('filter-school')?.value || '';
+  const targetClass = document.getElementById('filter-class')?.value || '';
+  const searchText = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
+  const targetStatus = document.getElementById('filter-status')?.value || '';
+  const sortKey = document.getElementById('sort-key')?.value || 'time-desc';
+
+  const tableBody = document.getElementById('student-table-body');
+  if (!tableBody) return;
+  tableBody.innerHTML = '';
+
+  const now = new Date().getTime();
+  const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+
+  // 1. フィルター条件に合致する生徒を抽出
+  let filteredList = aggregatedStudents.filter(student => {
+    if (targetSchool && student.school !== targetSchool) return false;
+    if (targetClass && student.className !== targetClass) return false;
+
+    const name = (student.name || '').toLowerCase();
+    const code = (student.code || '').toLowerCase();
+    if (searchText && !name.includes(searchText) && !code.includes(searchText)) return false;
+
+    const progress = parseInt(student.progress || 0, 10);
+    let statusLabel = '';
+    if (!student.lastActiveTimestamp || progress < 10) {
+      statusLabel = 'alert-danger';
+    } else if (now - student.lastActiveTimestamp >= fourteenDaysMs) {
+      statusLabel = 'alert-warning';
+    } else {
+      statusLabel = 'alert-clear';
     }
 
-    function filterStudentList() {
-      renderStudentTable();
-    }
+    if (targetStatus && statusLabel !== targetStatus) return false;
+    return true;
+  });
 
-    function openStudentModal(studentId) {
-      const student = aggregatedStudents.find(s => s.id === studentId);
-      if (!student) return;
+  // 2. 並び替え
+  filteredList.sort((a, b) => {
+    if (sortKey === 'time-desc') return (b.lastActiveTimestamp || 0) - (a.lastActiveTimestamp || 0);
+    if (sortKey === 'time-asc') return (a.lastActiveTimestamp || 0) - (b.lastActiveTimestamp || 0);
+    if (sortKey === 'progress-desc') return (b.progress || 0) - (a.progress || 0);
+    if (sortKey === 'progress-asc') return (a.progress || 0) - (b.progress || 0);
+    if (sortKey === 'accuracy-desc') return (b.accuracy || 0) - (a.accuracy || 0);
+    if (sortKey === 'accuracy-asc') return (a.accuracy || 0) - (b.accuracy || 0);
+    if (sortKey === 'name-asc') return (a.code || '').localeCompare(b.code || '');
+    return 0;
+  });
 
-      document.getElementById('modal-student-name').innerText = `${student.school} - ${student.name} (${student.code}) の詳細カルテ`;
-      document.getElementById('student-detail-modal').style.display = 'flex';
+  // 3. ページネーション計算
+  const totalCount = filteredList.length;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  if (currentPage < 1) currentPage = 1;
 
-      renderModalCharts(student);
-    }
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const pageStudents = filteredList.slice(startIndex, startIndex + PAGE_SIZE);
 
-    function closeStudentModal() {
-      document.getElementById('student-detail-modal').style.display = 'none';
-    }
+  // 4. テーブル出力
+  if (pageStudents.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #94a3b8; padding: 16px;">🔍 条件に合致する受講生データが見つかりません。</td></tr>';
+  } else {
+    pageStudents.forEach(student => {
+      const row = document.createElement('tr');
+      const timeStr = student.lastActive || '未報告';
+      const progress = student.progress || 0;
+      const accuracy = student.accuracy || 0;
+      const overallProgRank = getSelfGrowthRank(progress, 'progress');
+      const overallAccRank = getSelfGrowthRank(accuracy, 'accuracy');
 
-    function renderModalCharts(student) {
-      if (lineChartInstance) lineChartInstance.destroy();
-      if (radarChartInstance) radarChartInstance.destroy();
-
-      // 時系列推移（直近7回分のログスコア推移）
-      const recentLogs = student.logs.slice(0, 7).reverse();
-      const lineLabels = recentLogs.length > 0
-        ? recentLogs.map(l => {
-            const d = new Date(l.created_at);
-            return `${d.getMonth() + 1}/${d.getDate()}`;
-          })
-        : ['データなし'];
-      const lineData = recentLogs.length > 0 ? recentLogs.map(l => l.score || 0) : [0];
-
-      const ctxLine = document.getElementById('modalLineChart').getContext('2d');
-      lineChartInstance = new Chart(ctxLine, {
-        type: 'line',
-        data: {
-          labels: lineLabels,
-          datasets: [{ label: 'セット正答率(%)', data: lineData, borderColor: '#0984e3', tension: 0.3, fill: false }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
-      });
-
-      // 10科目別本人正答率 vs 全体平均
-      const subjectKeys = Object.keys(SUBJECT_LABELS);
-      const studentSubAcc = subjectKeys.map(subKey => {
-        const subLogs = student.logs.filter(l => l.subject_id === subKey);
-        const tot = subLogs.reduce((a, b) => a + (b.total_questions || 0), 0);
-        const cor = subLogs.reduce((a, b) => a + (b.correct_count || 0), 0);
-        return tot > 0 ? Math.round((cor / tot) * 100) : 0;
-      });
-      const allSubAcc = subjectKeys.map(subKey => {
-        const subLogs = cachedExamLogs.filter(l => l.subject_id === subKey);
-        const tot = subLogs.reduce((a, b) => a + (b.total_questions || 0), 0);
-        const cor = subLogs.reduce((a, b) => a + (b.correct_count || 0), 0);
-        return tot > 0 ? Math.round((cor / tot) * 100) : 0;
-      });
-
-      const ctxRadar = document.getElementById('modalRadarChart').getContext('2d');
-      radarChartInstance = new Chart(ctxRadar, {
-        type: 'radar',
-        data: {
-          labels: Object.values(SUBJECT_LABELS),
-          datasets: [
-            { label: '本人正答率(%)', data: studentSubAcc, borderColor: '#0984e3', backgroundColor: 'rgba(9,132,227,0.2)' },
-            { label: '全体平均(%)', data: allSubAcc, borderColor: '#95a5a6', borderDash: [4, 4], fill: false }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 100 } } }
-      });
-
-      // 本人の4択「🔥重要復習問題（本人が誤答 ＆ 集団正解率80%以上）」および誤答履歴抽出
-      const all4ChoiceRecs = buildNormalized4ChoiceRecords();
-      const my4ChoiceRecs = all4ChoiceRecs.filter(r => r.userId === student.id);
-      const priorityReviewBadges = [];
-
-      my4ChoiceRecs.forEach(myRec => {
-        const sameRoundRecs = all4ChoiceRecs.filter(r => r.round === myRec.round);
-        if (sameRoundRecs.length === 0) return;
-
-        myRec.wrongList.forEach(qNum => {
-          let correctCnt = 0;
-          sameRoundRecs.forEach(r => { if (!r.wrongList.includes(qNum)) correctCnt++; });
-          const groupRate = Math.round((correctCnt / sameRoundRecs.length) * 1000) / 10;
-          if (groupRate >= 80.0) {
-            priorityReviewBadges.push(`🔥 <b>第${escapeHTML(myRec.round)}回 問${qNum}</b> <small>(全体正解率 ${groupRate}%)</small>`);
-          }
-        });
-      });
-
-      const reviewEl = document.getElementById('modal-review-questions');
-      if (priorityReviewBadges.length > 0) {
-        reviewEl.innerHTML = priorityReviewBadges.join(' &nbsp;/&nbsp; ');
-      } else if (my4ChoiceRecs.length > 0) {
-        reviewEl.innerHTML = '🎉 4択過去問において、集団正解率80%以上の取りこぼし問題はありません。';
+      let statusBadge = '';
+      if (!student.lastActiveTimestamp || progress < 10) {
+        statusBadge = '<span style="background:#fee2e2; color:#dc2626; padding:3px 8px; border-radius:12px; font-weight:bold; font-size:0.7rem;">🔴 要個別指導</span>';
+      } else if (now - student.lastActiveTimestamp >= fourteenDaysMs) {
+        statusBadge = '<span style="background:#fef3c7; color:#d97706; padding:3px 8px; border-radius:12px; font-weight:bold; font-size:0.7rem;">🟡 停滞</span>';
       } else {
-        reviewEl.innerHTML = '4択過去問の提出記録がまだありません（2択学習のみ実施中）。';
+        statusBadge = '<span style="background:#dcfce7; color:#16a34a; padding:3px 8px; border-radius:12px; font-weight:bold; font-size:0.7rem;">🟢 順調</span>';
       }
-    }
 
-    function renderMacroCharts() {
-      if (macroClassChartInstance) macroClassChartInstance.destroy();
-      if (macroSubjectChartInstance) macroSubjectChartInstance.destroy();
+      row.innerHTML = `
+        <td style="white-space:nowrap;">${escapeHTML(timeStr)}</td>
+        <td>${escapeHTML(student.school || '未設定')}</td>
+        <td>${escapeHTML(student.className || '未設定')}</td>
+        <td style="font-weight:bold;">${escapeHTML(student.name || '生徒')}</td>
+        <td><code style="font-size:0.8rem; background:#f1f2f6; padding:2px 6px; border-radius:4px;">${escapeHTML(student.code || '')}</code></td>
+        <td style="text-align:center; font-weight:bold;"><b style="color:#0984e3;">${overallProgRank}</b> <small style="color:#7f8c8d;">(${progress}%)</small></td>
+        <td style="text-align:center; font-weight:bold;"><b style="color:#2ecc71;">${overallAccRank}</b> <small style="color:#7f8c8d;">(${accuracy}%)</small></td>
+        <td style="text-align:center;">${parseInt(student.gmCount || 0, 10)}</td>
+        <td>${statusBadge}</td>
+        <td style="text-align:center;">
+          <button onclick="openStudentModal('${escapeHTML(student.id)}')" style="padding:4px 8px; font-size:0.75rem; background:#0984e3; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">詳細カルテ</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
 
-      // クラス(学校)別集計
-      const schoolGroups = {};
-      aggregatedStudents.forEach(s => {
-        if (!schoolGroups[s.school]) schoolGroups[s.school] = [];
-        schoolGroups[s.school].push(s);
-      });
+  // UI表示更新
+  const displayPageInfo = document.getElementById('display-page-info');
+  if (displayPageInfo) displayPageInfo.innerText = `${currentPage} / ${totalPages} ページ (${totalCount}名)`;
 
-      const schoolLabels = Object.keys(schoolGroups);
-      const schoolAvgProgress = schoolLabels.map(sc => {
-        const arr = schoolGroups[sc];
-        return Math.round(arr.reduce((a, b) => a + b.progress, 0) / arr.length);
-      });
-      const schoolAvgAcc = schoolLabels.map(sc => {
-        const arr = schoolGroups[sc];
-        return Math.round(arr.reduce((a, b) => a + b.accuracy, 0) / arr.length);
-      });
+  const btnPrev = document.getElementById('btn-prev-page');
+  const btnNext = document.getElementById('btn-next-page');
+  if (btnPrev) btnPrev.disabled = (currentPage <= 1);
+  if (btnNext) btnNext.disabled = (currentPage >= totalPages);
 
-      const ctx1 = document.getElementById('macroClassChart').getContext('2d');
-      macroClassChartInstance = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: schoolLabels.length > 0 ? schoolLabels : ['データなし'],
-          datasets: [
-            { label: '平均進捗率(%)', data: schoolAvgProgress.length > 0 ? schoolAvgProgress : [0], backgroundColor: '#74b9ff' },
-            { label: '平均正答率(%)', data: schoolAvgAcc.length > 0 ? schoolAvgAcc : [0], backgroundColor: '#2ecc71' }
-          ]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
-      });
+  // リアルタイム指標＆グラフ更新
+  calculateQuickMetrics(filteredList);
+  renderCharts(filteredList);
+}
 
-      // 10科目別全体平均正答率
-      const subjectKeys = Object.keys(SUBJECT_LABELS);
-      const subAvgData = subjectKeys.map(subKey => {
-        const subLogs = cachedExamLogs.filter(l => l.subject_id === subKey);
-        const tot = subLogs.reduce((a, b) => a + (b.total_questions || 0), 0);
-        const cor = subLogs.reduce((a, b) => a + (b.correct_count || 0), 0);
-        return tot > 0 ? Math.round((cor / tot) * 100) : 0;
-      });
+// 🔄 フィルター解除
+function resetFilters() {
+  const schoolSelect = document.getElementById('filter-school');
+  const classSelect = document.getElementById('filter-class');
+  const searchInput = document.getElementById('search-student');
+  const statusSelect = document.getElementById('filter-status');
+  const sortSelect = document.getElementById('sort-key');
 
-      const ctx2 = document.getElementById('macroSubjectChart').getContext('2d');
-      macroSubjectChartInstance = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-          labels: Object.values(SUBJECT_LABELS),
-          datasets: [{ label: '全体平均正答率(%)', data: subAvgData, backgroundColor: '#0984e3' }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
-      });
-    }
+  if (schoolSelect) schoolSelect.value = '';
+  if (classSelect) classSelect.value = '';
+  if (searchInput) searchInput.value = '';
+  if (statusSelect) statusSelect.value = '';
+  if (sortSelect) sortSelect.value = 'time-desc';
+
+  currentPage = 1;
+  applyFilters();
+}
 
     let groupComparisonRadarChartInstance = null;
 
@@ -1033,39 +1399,91 @@
     /**
      * 4択過去問分析タブの一括描画
      */
-    function renderAll4ChoiceAnalysis() {
-      init4ChoiceRoundSelector();
+    // 📝 Tab ③ 4択過去問分析の集計＆描画
+function renderAll4ChoiceAnalysis() {
+  const tbody = document.getElementById('exam-table-body');
+  if (!tbody) return;
 
-      const schoolSel = document.getElementById('exam-school-filter');
-      if (schoolSel) {
-        const prev = schoolSel.value;
-        const schools = [...new Set(aggregatedStudents.map(s => s.school).filter(Boolean))];
-        schoolSel.innerHTML = '<option value="">全校・全クラス対象</option>' +
-          schools.map(sc => `<option value="${escapeHTML(sc)}">${escapeHTML(sc)}</option>`).join('');
-        schoolSel.value = prev;
+  // Supabaseから取得済みの全ログの中から4択過去問のログを抽出
+  const logs4Choice = allExamLogs.filter(log => log.mode === '4choice' || log.subject_id === 'past_exam');
+
+  if (logs4Choice.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8; padding:16px;">📝 まだ4択過去問の送信データがありません。</td></tr>';
+    const gridEl = document.getElementById('q-accuracy-grid');
+    if (gridEl) gridEl.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8; padding:8px;">提出データが集まり次第、問別正答率が表示されます。</div>';
+    return;
+  }
+
+  // 1. 全55問の問別正誤カウント集計
+  const qStats = {};
+  for (let i = 1; i <= 55; i++) {
+    qStats[i] = { total: 0, correct: 0 };
+  }
+
+  let totalScoreSum = 0;
+
+  logs4Choice.forEach(log => {
+    totalScoreSum += (log.score || 0);
+
+    const details = Array.isArray(log.details)
+      ? log.details
+      : (log.details && Array.isArray(log.details.answers) ? log.details.answers : []);
+
+    details.forEach((ans, idx) => {
+      const qNum = ans.q_num || ans.question_id || (idx + 1);
+      if (qStats[qNum]) {
+        qStats[qNum].total += 1;
+        if (ans.is_correct || ans.isCorrect) {
+          qStats[qNum].correct += 1;
+        }
       }
+    });
+  });
 
-      const allRecords = buildNormalized4ChoiceRecords();
-      const selectedSchool = schoolSel?.value || '';
-      const selectedRound = document.getElementById('exam-round-select')?.value || '';
+  // 2. 全55問の正答率グリッドの描画
+  const gridEl = document.getElementById('q-accuracy-grid');
+  if (gridEl) {
+    let gridHtml = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(55px, 1fr)); gap:6px; margin-top:8px;">';
+    for (let i = 1; i <= 55; i++) {
+      const st = qStats[i];
+      const acc = st.total > 0 ? Math.round((st.correct / st.total) * 100) : 0;
+      let bg = '#dcfce7'; let color = '#15803d'; // 🟢 高正答率
+      if (acc < 50) { bg = '#fee2e2'; color = '#b91c1c'; } // 🔴 低正答率
+      else if (acc < 75) { bg = '#fef3c7'; color = '#b45309'; } // 🟡 中正答率
 
-      const targetRecords = allRecords.filter(rec => {
-        if (selectedSchool && rec.school !== selectedSchool) return false;
-        if (selectedRound && rec.round !== selectedRound) return false;
-        return true;
-      });
-
-      const badgeEl = document.getElementById('exam-analysis-summary-badge');
-      if (badgeEl) {
-        const roundLabel = selectedRound ? `第${selectedRound}回` : '全回（第41〜54回）';
-        const schoolLabel = selectedSchool || '全校';
-        badgeEl.innerText = `表示条件: ${schoolLabel} / ${roundLabel} （有効提出数: ${targetRecords.length}件）`;
-      }
-
-      renderExamAnalysisGrid(targetRecords, selectedRound);
-      renderTogetherProblemsAdmin(targetRecords, selectedRound);
-      renderStatisticsAdmin(allRecords, targetRecords, selectedRound);
+      gridHtml += `
+        <div style="background:${bg}; color:${color}; border-radius:6px; padding:4px 2px; text-align:center; font-size:0.7rem; font-weight:bold;">
+          問${i}<br><span style="font-size:0.75rem;">${acc}%</span>
+        </div>
+      `;
     }
+    gridHtml += '</div>';
+    gridEl.innerHTML = gridHtml;
+  }
+
+  // 3. 個別受験履歴テーブルの出力
+  tbody.innerHTML = '';
+  logs4Choice.forEach(log => {
+    const student = aggregatedStudents.find(s => s.code === log.serial_code || s.id === log.user_id) || {};
+    const dateStr = log.created_at ? new Date(log.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '未記録';
+    const score = log.score || 0;
+    const correctCount = log.correct_count || 0;
+    const totalQ = log.total_questions || 55;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td style="padding:8px; white-space:nowrap;">${escapeHTML(dateStr)}</td>
+      <td style="padding:8px;">${escapeHTML(student.school || '未設定')}</td>
+      <td style="padding:8px;">${escapeHTML(student.className || '未設定')}</td>
+      <td style="padding:8px; font-weight:bold;">${escapeHTML(student.name || '生徒')} (<code>${escapeHTML(log.serial_code || '')}</code>)</td>
+      <td style="padding:8px; text-align:center; font-weight:bold; color:${score >= 60 ? '#2ecc71' : '#e74c3c'};">${score}点 (${correctCount}/${totalQ})</td>
+      <td style="padding:8px; text-align:center;">
+        <span style="font-size:0.75rem; background:#f1f2f6; padding:3px 8px; border-radius:4px; font-weight:bold; color:#475569;">完了</span>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
 
     // 1. 55問設問別正解率グリッド & ワースト5
     function renderExamAnalysisGrid(targetRecords, selectedRound) {
