@@ -192,6 +192,12 @@
 <button onclick="logout()" style="background:#ff7675; color:white; border:none; border-radius:6px; padding:5px 12px; font-size:0.75rem; font-weight:bold; cursor:pointer; white-space:nowrap; min-width:70px;">ログアウト</button>
 </div>
 
+<!-- モード切替 -->
+    <div class="tab-group">
+      <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択学習</button>
+      <button id="tab-4choice" class="tab-btn" onclick="window.location.href='./past_exam.html'">📝 過去問記録</button>
+    </div>
+
 <!-- 🔥 デイリー実績バッジ (2択学習限定) -->
 <div id="header-daily-stats-badge" style="width: 100%; background: #ffffff; padding: 8px 12px; border-radius: 12px; font-size: 0.75rem; border: 2px solid #ffeaa7; display: flex; justify-content: space-between; align-items: center; font-weight: bold; box-sizing: border-box; white-space: nowrap; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
 <span style="flex: 1; text-align: center;">🔥 デイリー<b id="stat-challenge-streak" style="color:#e67e22;">0</b>日連続</span>
@@ -200,12 +206,6 @@
 <span style="color:#ffeaa7;">｜</span>
 <span style="flex: 1; text-align: center;">🏆 最高<b id="stat-max-streak" style="color:#2ecc71;">0</b>連勝</span>
 </div>
-
-<!-- モード切替 -->
-    <div class="tab-group">
-      <button id="tab-2choice" class="tab-btn active" onclick="switchMode('2choice')">⚡ 2択学習</button>
-      <button id="tab-4choice" class="tab-btn" onclick="window.location.href='./past_exam.html'">📝 過去問記録</button>
-    </div>
 
     <!-- 10科目総合モニター -->
     <div style="background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 12px; padding: 12px; margin-bottom: 14px;">
@@ -254,20 +254,6 @@
 </div>
 </div>
 </div>
-</div>
-
-<!-- 🏆 全国統計＆順位(匿名) 『成長ダッシュボード』を開く バナー (2択学習限定) -->
-<div id="dashboard-banner" style="margin: 16px auto; text-align: center;">
-<a href="../../02.dashboard/index.html" style="display: block; padding: 14px; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; font-weight: bold; font-size: 0.95rem; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(9, 132, 227, 0.2); transition: transform 0.15s ease-in-out; line-height: 1.4;">
-🏆 全国統計＆順位(匿名)<br>『成長ダッシュボード』を開く
-</a>
-</div>
-
-<!-- ✉️ 改善の意見・要望など 連絡先 (Google フォーム) ボタン -->
-<div style="margin: 20px auto; text-align: center;">
-<button onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank', 'noopener,noreferrer')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; color: #334155; font-size: 0.85rem; font-weight: bold; padding: 10px 16px; width: 100%; max-width: 320px; cursor: pointer; text-align: center; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)
-</button>
 </div>
 
 <!-- 📥 スピードクイズ専用 全画面表示オーバーレイ -->
@@ -325,6 +311,21 @@
       <a href="./quiz.html?mode=2choice&subject=cosmetic_chem" class="btn-subject">08 ⚗️<br>香粧品化学</a>
       <a href="./quiz.html?mode=2choice&subject=culture" class="btn-subject">09 👘<br>文化論</a>
       <a href="./quiz.html?mode=2choice&subject=tech_theory" class="btn-subject">10 ✂️<br>美容技術理論</a>
+    </div>
+  </div>
+
+  <!-- 🏆 全国統計＆順位(匿名) 『成長ダッシュボード』を開く バナー (2択学習限定) -->
+    <div id="dashboard-banner" style="margin: 16px auto 12px auto; text-align: center;">
+      <a href="../../02.dashboard/index.html" style="display: block; padding: 14px; background: linear-gradient(135deg, #74b9ff, #0984e3); color: white; font-weight: bold; font-size: 0.95rem; text-decoration: none; border-radius: 12px; box-shadow: 0 4px 10px rgba(9, 132, 227, 0.2); transition: transform 0.15s ease-in-out; line-height: 1.4;">
+        🏆 全国統計＆順位(匿名)<br>『成長ダッシュボード』を開く
+      </a>
+    </div>
+
+    <!-- ✉️ 改善の意見・要望など 連絡先 (Google フォーム) ボタン -->
+    <div style="margin: 12px auto 0 auto; text-align: center;">
+      <button onclick="window.open('https://forms.gle/KpNHUKrFQENfAbq4A', '_blank', 'noopener,noreferrer')" style="background: #ffffff; border: 2px solid #cbd5e1; border-radius: 10px; color: #334155; font-size: 0.85rem; font-weight: bold; padding: 10px 16px; width: 100%; max-width: 320px; cursor: pointer; text-align: center; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+        ✉️ 改善の意見・要望など 連絡先<br>(Google フォーム)
+      </button>
     </div>
   </div>
 
