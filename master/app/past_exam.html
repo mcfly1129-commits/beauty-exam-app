@@ -568,15 +568,15 @@ h1 {
   </div>
 </div>
 
-<!-- 📜 送信履歴 ＆ リセットモーダル -->
-<div id="history-reset-modal" class="modal-overlay">
-  <div class="modal-content">
-    <h3 style="font-size:1.05rem; text-align:center; color:#1e293b; margin-top:0;">📜 送信履歴 ＆ データリセット</h3>
-    <p style="font-size:0.75rem; color:#64748b; text-align:center;">送信済みの過去問記録を取り消し（リセット）できます。</p>
-    <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:14px 0;"></div>
-    <button id="btn-close-history-reset" style="width:100%; padding:10px; background:#e2e8f0; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:#334155;">閉じる</button>
+  <!-- 📜 送信履歴 ＆ リセットモーダル (👈 新規追加) -->
+  <div id="history-reset-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h3 style="font-size:1.05rem; text-align:center; color:#1e293b; margin-top:0;">📜 送信履歴 ＆ データリセット</h3>
+      <p style="font-size:0.75rem; color:#64748b; text-align:center;">送信済みの過去問記録を取り消し（リセット）できます。</p>
+      <div id="history-reset-list" style="max-height:300px; overflow-y:auto; margin:14px 0;"></div>
+      <button id="btn-close-history-reset" style="width:100%; padding:10px; background:#e2e8f0; border:none; border-radius:8px; font-weight:bold; cursor:pointer; color:#334155;">閉じる</button>
+    </div>
   </div>
-</div>
 
 <script src="../js/supabase_client.js"></script>
 <script src="../js/auth.js"></script>
@@ -591,9 +591,9 @@ let studentDashboardData = null;
 let radarChartInstance = null;
 let lineChartInstance = null;
 
-// 起動時初期化
 document.addEventListener("DOMContentLoaded", async () => {
-  currentUser = getCurrentUser();
+  // 🌟【商用化連携】ログインユーザー情報の自動取得＆認証ガード
+  currentUser = typeof getCurrentUser === 'function' ? getCurrentUser() : null;
   if (!currentUser) {
     window.location.href = "../index.html";
     return;
@@ -604,9 +604,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   initExamRoundSelector();
   renderQuestionsForm();
   setupEventListeners();
-  loadDraftAnswers();
-
   await loadSupabaseDashboardData();
+  loadDraftAnswers();
+  renderDashboardCharts();
+  renderLatestResultSummary();
 });
 
 function setupEventListeners() {
@@ -648,12 +649,12 @@ function setupEventListeners() {
   // 回答確定送信
   document.getElementById("btn-submit-exam").addEventListener("click", submitExamData);
 
-  // 履歴・リセットモーダル
-  document.getElementById("btn-open-history-modal").addEventListener("click", openHistoryResetModal);
-  document.getElementById("btn-close-history-reset").addEventListener("click", () => {
-    document.getElementById("history-reset-modal").style.display = "none";
-  });
-}
+  // 📜 履歴・リセットモーダルの開閉イベント (👈 追加)
+    document.getElementById("btn-open-history-modal").addEventListener("click", openHistoryResetModal);
+    document.getElementById("btn-close-history-reset").addEventListener("click", () => {
+      document.getElementById("history-reset-modal").style.display = "none";
+    });
+  }
 
 // ==========================================
 // 1. Supabaseからの全4択ログ取得＆集団統計集計
@@ -892,6 +893,7 @@ function renderQuestionsForm() {
   });
 }
 
+// 🌟 入力数バッジの動的更新関数
 function updateAnsweredCountBadge() {
   const filled = studentAnswers.filter(Boolean).length;
   const badge = document.getElementById("answered-count-badge");
@@ -970,9 +972,11 @@ async function submitExamData() {
   btn.innerText = "⏳ 採点・保存中...";
 
   try {
+    // 1. 自動採点エンジンの実行
     const scoring = scorePastExam(currentExamRound, studentAnswers);
     const supabase = getSupabaseClient();
 
+    // 2. Supabase保存用ペイロードの構築
     const payload = {
       user_id: currentUser.id,
       serial_code: currentUser.serial_code,
@@ -985,23 +989,19 @@ async function submitExamData() {
       created_at: new Date().toISOString()
     };
 
+    // 3. Supabaseの exam_logs テーブルへ挿入
     const { error } = await supabase.from("exam_logs").insert([payload]);
     if (error) throw new Error(error.message);
 
     document.getElementById("confirm-modal").style.display = "none";
     triggerConfetti();
 
-    // 最新データの再取得と第2タブへの自動切替
+    // 4. 最新データの再ロードと結果表示タブへの自動切替
     await loadSupabaseDashboardData();
-
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".screen-section").forEach(s => s.classList.remove("active"));
-    document.querySelector('.tab-btn[data-tab="tab-review"]')?.classList.add("active");
-    document.getElementById("tab-review")?.classList.add("active");
+    switchTab("tab-review");
 
     alert(`🎉 採点・記録が完了しました！\n\n・対象: 第${currentExamRound}回 過去問\n・総合得点: ${scoring.total_score} / 55 点 (${scoring.total_accuracy}%)\n・間違えた問題: ${scoring.wrong_questions.length} 問`);
   } catch (err) {
-    console.error("送信エラー:", err);
     alert("送信・保存に失敗しました: " + err.message);
   } finally {
     btn.disabled = false;
@@ -1300,86 +1300,101 @@ function renderReviewPickups() {
 }
 
 // ==========================================
-// 5. 送信履歴モーダル ＆ リセット削除
-// ==========================================
-function openHistoryResetModal() {
-  const listContainer = document.getElementById("history-reset-list");
-  listContainer.innerHTML = "";
+  // 5. 送信履歴モーダル ＆ リセット削除 (👈 新規追加)
+  // ==========================================
+  function openHistoryResetModal() {
+    const listContainer = document.getElementById("history-reset-list");
+    listContainer.innerHTML = "";
 
-  const submittedRounds = studentDashboardData?.submitted_rounds || [];
-  const records = studentDashboardData?.latest_exam_records || {};
+    const submittedRounds = studentDashboardData?.submitted_rounds || [];
+    const records = studentDashboardData?.latest_exam_records || {};
 
-  if (submittedRounds.length === 0) {
-    listContainer.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:15px;">まだ送信履歴がありません。</div>';
-  } else {
-    submittedRounds.slice().sort((a, b) => Number(b) - Number(a)).forEach(round => {
-      const rec = records[round];
-      const timeStr = formatDisplayTimestamp(rec?.timestamp);
+    if (submittedRounds.length === 0) {
+      listContainer.innerHTML = '<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:15px;">まだ送信履歴がありません。</div>';
+    } else {
+      submittedRounds.slice().sort((a, b) => Number(b) - Number(a)).forEach(round => {
+        const rec = records[round];
+        const timeStr = formatDisplayTimestamp(rec?.timestamp);
 
-      const item = document.createElement("div");
-      item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #e2e8f0; font-size:0.8rem;";
-      item.innerHTML = `
-        <div>
-          <b>第${round}回 過去問</b> <span style="font-size:0.72rem; color:#64748b;">(${timeStr})</span><br>
-          <span style="font-size:0.76rem; color:#0984e3; font-weight:bold;">得点: ${rec?.total_score || 0}点 (${rec?.total_accuracy || 0}%)</span>
-        </div>
-        <button class="btn-del-record" data-round="${round}" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.74rem; font-weight:bold; cursor:pointer;">リセット</button>
-      `;
-      listContainer.appendChild(item);
-    });
-
-    listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
-      btn.addEventListener("click", async (e) => {
-        const round = e.currentTarget.getAttribute("data-round");
-        if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外されます。`)) {
-          await deleteExamRecordAction(round);
-        }
+        const item = document.createElement("div");
+        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #e2e8f0; font-size:0.8rem;";
+        item.innerHTML = `
+          <div>
+            <b>第${round}回 過去問</b> <span style="font-size:0.72rem; color:#64748b;">(${timeStr})</span><br>
+            <span style="font-size:0.76rem; color:#0984e3; font-weight:bold;">得点: ${rec?.total_score || 0}点 (${rec?.total_accuracy || 0}%)</span>
+          </div>
+          <button class="btn-del-record" data-round="${round}" style="background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:6px; font-size:0.74rem; font-weight:bold; cursor:pointer;">リセット</button>
+        `;
+        listContainer.appendChild(item);
       });
+
+      listContainer.querySelectorAll(".btn-del-record").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          const round = e.currentTarget.getAttribute("data-round");
+          if (confirm(`第${round}回の送信記録をリセットしますか？\n※削除すると分析データから除外されます。`)) {
+            await deleteExamRecordAction(round);
+          }
+        });
+      });
+    }
+
+    document.getElementById("history-reset-modal").style.display = "flex";
+  }
+
+  async function deleteExamRecordAction(examRound) {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase
+      .from("exam_logs")
+      .delete()
+      .eq("user_id", currentUser.id)
+      .eq("mode", "4choice")
+      .eq("subject_id", `round_${examRound}`);
+
+    if (error) {
+      alert("リセットに失敗しました: " + error.message);
+      return;
+    }
+
+    localStorage.removeItem(`beauty_4choice_draft_${currentUser.serial_code}_${examRound}`);
+    document.getElementById("history-reset-modal").style.display = "none";
+    await loadSupabaseDashboardData();
+    alert(`🎉 第${examRound}回の記録をリセットしました。`);
+  }
+
+  function switchTab(targetTabId) {
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-tab") === targetTabId);
+    });
+    document.querySelectorAll(".screen-section").forEach(sec => {
+      sec.classList.toggle("active", sec.id === targetTabId);
+    });
+
+    if (targetTabId === "tab-dashboard") renderDashboardCharts();
+    if (targetTabId === "tab-review") renderLatestResultSummary();
+    if (targetTabId === "tab-pickup") renderReviewPickups();
+  }
+
+  function formatDisplayTimestamp(isoStr) {
+    if (!isoStr) return "--";
+    const d = new Date(isoStr);
+    if (Number.isNaN(d.getTime())) return String(isoStr);
+    return d.toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
     });
   }
 
-  document.getElementById("history-reset-modal").style.display = "flex";
-}
-
-async function deleteExamRecordAction(examRound) {
-  const supabase = getSupabaseClient();
-  const { error } = await supabase
-    .from("exam_logs")
-    .delete()
-    .eq("user_id", currentUser.id)
-    .eq("mode", "4choice")
-    .eq("subject_id", `round_${examRound}`);
-
-  if (error) {
-    alert("リセットに失敗しました: " + error.message);
-    return;
+  function triggerConfetti() {
+    const canvas = document.getElementById("quiz-confetti-canvas");
+    if (canvas && typeof confetti === "function") {
+      const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
+      myConfetti({ particleCount: 120, spread: 75, origin: { y: 0.6 } });
+    }
   }
-
-  localStorage.removeItem(`beauty_4choice_draft_${currentUser.serial_code}_${examRound}`);
-  document.getElementById("history-reset-modal").style.display = "none";
-  await loadSupabaseDashboardData();
-  alert(`🎉 第${examRound}回の記録をリセットしました。`);
-}
-
-function triggerConfetti() {
-  const canvas = document.getElementById("quiz-confetti-canvas");
-  if (canvas && typeof confetti === "function") {
-    const myConfetti = confetti.create(canvas, { resize: true, useWorkers: true });
-    myConfetti({ particleCount: 110, spread: 70, origin: { y: 0.6 } });
-  }
-}
-
-function formatDisplayTimestamp(ts) {
-  if (!ts) return "送信済み";
-  const d = new Date(ts);
-  if (isNaN(d.getTime())) return ts;
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const min = String(d.getMinutes()).padStart(2, '0');
-  return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
-}
 </script>
+
 </body>
 </html>
